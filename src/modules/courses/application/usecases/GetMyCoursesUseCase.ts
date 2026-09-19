@@ -7,12 +7,19 @@ import type { CourseRepository } from "../../domain/interfaces/CourseRepository"
 export class GetMyCoursesUseCase {
   constructor(private readonly courseRepository: CourseRepository) {}
 
-  public async execute(actor: CurrentActor | null): Promise<readonly CourseResponseDTO[]> {
+  public async execute(
+    actor: CurrentActor | null,
+  ): Promise<readonly CourseResponseDTO[]> {
     if (!actor) {
-      throw new UnauthorizedError("Pengguna harus masuk untuk melihat daftar kursus.");
+      throw new UnauthorizedError(
+        "Pengguna harus masuk untuk melihat daftar kursus.",
+      );
     }
 
-    const courses = await this.courseRepository.getUserCourses(actor.moodleUserId, actor.tenantId);
+    const courses = await this.courseRepository.getUserCourses(
+      actor.moodleUserId,
+      actor.tenantId,
+    );
 
     return courses.map(
       (course: Course): CourseResponseDTO => ({

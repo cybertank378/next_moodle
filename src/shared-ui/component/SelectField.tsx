@@ -1,16 +1,21 @@
-import { cn } from "@/lib/utils";
 import type React from "react";
+import { cn } from "@/lib/utils";
 
 export interface SelectOption {
   value: string;
   label: string;
 }
 
-export interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectFieldProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: readonly SelectOption[];
 }
 
-export function SelectField({ options, className, ...props }: SelectFieldProps) {
+export function SelectField({
+  options,
+  className,
+  ...props
+}: SelectFieldProps) {
   return (
     <select
       className={cn(
@@ -20,7 +25,11 @@ export function SelectField({ options, className, ...props }: SelectFieldProps) 
       {...props}
     >
       {options.map((opt) => (
-        <option key={opt.value} value={opt.value} className="bg-background text-foreground">
+        <option
+          key={opt.value}
+          value={opt.value}
+          className="bg-background text-foreground"
+        >
           {opt.label}
         </option>
       ))}

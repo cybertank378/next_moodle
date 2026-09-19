@@ -1,6 +1,6 @@
 import "server-only";
 import { InfrastructureError } from "../errors/InfrastructureError";
-import { type ILogger, createLogger } from "../logger";
+import { createLogger, type ILogger } from "../logger";
 import { MoodleErrorMapper } from "./MoodleErrorMapper";
 import { isMoodleExceptionResponse } from "./types/MoodleExceptionResponse";
 import type { MoodleRequestParameters } from "./types/MoodleRequestParameters";
@@ -17,7 +17,10 @@ export interface MoodleCallOptions {
   readonly timeoutMs?: number;
 }
 
-export function encodeMoodleParams(params: Record<string, unknown>, prefix = ""): URLSearchParams {
+export function encodeMoodleParams(
+  params: Record<string, unknown>,
+  prefix = "",
+): URLSearchParams {
   const searchParams = new URLSearchParams();
 
   function append(data: unknown, currentPrefix: string): void {
@@ -31,7 +34,9 @@ export function encodeMoodleParams(params: Record<string, unknown>, prefix = "")
           append(data[i], `${currentPrefix}[${i}]`);
         }
       } else {
-        for (const [key, val] of Object.entries(data as Record<string, unknown>)) {
+        for (const [key, val] of Object.entries(
+          data as Record<string, unknown>,
+        )) {
           const newPrefix = currentPrefix ? `${currentPrefix}[${key}]` : key;
           append(val, newPrefix);
         }
@@ -63,7 +68,8 @@ export class MoodleRestClient {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.token = options.token;
     this.defaultTimeoutMs = options.timeoutMs ?? 10000;
-    this.logger = options.logger ?? createLogger({ module: "MoodleRestClient" });
+    this.logger =
+      options.logger ?? createLogger({ module: "MoodleRestClient" });
   }
 
   public async call<T>(
@@ -129,7 +135,9 @@ export class MoodleRestClient {
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         callLogger.error("Moodle request timed out", error, { timeoutMs });
-        throw new InfrastructureError(`Moodle request timed out after ${timeoutMs}ms`);
+        throw new InfrastructureError(
+          `Moodle request timed out after ${timeoutMs}ms`,
+        );
       }
 
       if (

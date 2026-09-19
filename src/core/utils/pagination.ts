@@ -11,7 +11,11 @@ export interface PaginatedResult<T> {
   totalPages: number;
 }
 
-export function paginate<T>(items: readonly T[], page = 1, limit = 10): PaginatedResult<T> {
+export function paginate<T>(
+  items: readonly T[],
+  page = 1,
+  limit = 10,
+): PaginatedResult<T> {
   const safePage = Math.max(1, page);
   const safeLimit = Math.max(1, limit);
   const total = items.length;

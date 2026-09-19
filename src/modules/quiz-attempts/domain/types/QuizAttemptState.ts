@@ -1,1 +1,5 @@
-export type QuizAttemptState = "inprogress" | "overdue" | "finished" | "abandoned";
+export type QuizAttemptState =
+  | "inprogress"
+  | "overdue"
+  | "finished"
+  | "abandoned";

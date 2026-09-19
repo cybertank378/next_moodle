@@ -1,6 +1,6 @@
+import { describe, expect, it, vi } from "vitest";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { describe, expect, it, vi } from "vitest";
 import { GetMyCoursesUseCase } from "../../application/usecases/GetMyCoursesUseCase";
 import { Course } from "../../domain/entities/Course";
 import type { CourseRepository } from "../../domain/interfaces/CourseRepository";

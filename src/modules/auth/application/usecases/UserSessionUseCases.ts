@@ -3,7 +3,9 @@ import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import type { CurrentUserResponseDTO } from "../../domain/dto";
 
 export class GetCurrentUserUseCase {
-  public async execute(actor: CurrentActor | null): Promise<CurrentUserResponseDTO> {
+  public async execute(
+    actor: CurrentActor | null,
+  ): Promise<CurrentUserResponseDTO> {
     if (!actor) {
       throw new UnauthorizedError("Pengguna belum terautentikasi");
     }

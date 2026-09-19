@@ -8,7 +8,8 @@ export const MoodleErrorMapper = {
       case "invalidtokenexpired":
         return new MoodleError({
           code: "MOODLE_INVALID_TOKEN",
-          message: "Sesi komunikasi LMS Moodle kedaluwarsa atau token tidak valid.",
+          message:
+            "Sesi komunikasi LMS Moodle kedaluwarsa atau token tidak valid.",
           statusCode: 401,
           moodleErrorCode: exception.errorcode,
           details: { exception: exception.exception },
@@ -48,7 +49,8 @@ export const MoodleErrorMapper = {
       default:
         return new MoodleError({
           code: `MOODLE_${exception.errorcode.toUpperCase().replace(/[^A-Z0-9_]/g, "_")}`,
-          message: exception.message || "Terjadi kesalahan pada integrasi Moodle LMS.",
+          message:
+            exception.message || "Terjadi kesalahan pada integrasi Moodle LMS.",
           statusCode: 502,
           moodleErrorCode: exception.errorcode,
           details: { exception: exception.exception },

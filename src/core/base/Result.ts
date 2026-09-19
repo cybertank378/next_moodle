@@ -11,11 +11,15 @@ export const Result = {
     return { ok: false, error };
   },
 
-  isOk<T, E>(result: Result<T, E>): result is { readonly ok: true; readonly value: T } {
+  isOk<T, E>(
+    result: Result<T, E>,
+  ): result is { readonly ok: true; readonly value: T } {
     return result.ok;
   },
 
-  isFail<T, E>(result: Result<T, E>): result is { readonly ok: false; readonly error: E } {
+  isFail<T, E>(
+    result: Result<T, E>,
+  ): result is { readonly ok: false; readonly error: E } {
     return !result.ok;
   },
 };

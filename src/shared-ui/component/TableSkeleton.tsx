@@ -1,5 +1,4 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import React from "react";
 
 export interface TableSkeletonProps {
   readonly rows?: number;
@@ -7,7 +6,10 @@ export interface TableSkeletonProps {
 }
 
 export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
-  const headerKeys = Array.from({ length: columns }, (_, idx) => `col-${idx + 1}`);
+  const headerKeys = Array.from(
+    { length: columns },
+    (_, idx) => `col-${idx + 1}`,
+  );
   const rowKeys = Array.from({ length: rows }, (_, idx) => `row-${idx + 1}`);
 
   return (

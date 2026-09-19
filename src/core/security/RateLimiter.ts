@@ -8,7 +8,11 @@ export class InMemoryRateLimiter {
 
   constructor(private readonly options: RateLimiterOptions) {}
 
-  public isAllowed(key: string): { allowed: boolean; remaining: number; resetAt: number } {
+  public isAllowed(key: string): {
+    allowed: boolean;
+    remaining: number;
+    resetAt: number;
+  } {
     const now = Date.now();
     const entry = this.hits.get(key);
 

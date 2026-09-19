@@ -47,7 +47,12 @@ export class JsonLogger implements ILogger {
     return sanitized;
   }
 
-  private log(level: LogLevel, message: string, context?: LogContext, error?: unknown): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: unknown,
+  ): void {
     const entry = {
       timestamp: new Date().toISOString(),
       level,
@@ -60,7 +65,10 @@ export class JsonLogger implements ILogger {
                 ? {
                     name: error.name,
                     message: error.message,
-                    stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+                    stack:
+                      process.env.NODE_ENV === "development"
+                        ? error.stack
+                        : undefined,
                   }
                 : String(error),
           }
