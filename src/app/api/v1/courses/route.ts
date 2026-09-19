@@ -3,7 +3,10 @@ import { createCourseDependencies } from "@/modules/courses/infrastructure/facto
 
 export const GET = withApiHandler(
   async (_request, context) => {
-    const { getMyCoursesUseCase } = await createCourseDependencies(context.tenant, context.logger);
+    const { getMyCoursesUseCase } = await createCourseDependencies(
+      context.tenant,
+      context.logger,
+    );
 
     const courses = await getMyCoursesUseCase.execute(context.actor);
     return courses;

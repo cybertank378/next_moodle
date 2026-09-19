@@ -1,7 +1,7 @@
+import { useCallback, useState } from "react";
 import type { ApiErrorResponse } from "@/core/http/ApiErrorResponse";
 import type { ApiResponse } from "@/core/http/ApiResponse";
-import { useCallback, useState } from "react";
-import type { QuizAccessResponseDTO, QuizResponseDTO } from "../../domain/dto";
+import type { QuizAccessResponseDTO } from "../../domain/dto";
 
 export function useQuizApi() {
   const [loading, setLoading] = useState(false);
@@ -13,9 +13,13 @@ export function useQuizApi() {
       setError(null);
       try {
         const res = await fetch(`/api/v1/quizzes/${quizId}/access`);
-        const data: ApiResponse<QuizAccessResponseDTO> | ApiErrorResponse = await res.json();
+        const data: ApiResponse<QuizAccessResponseDTO> | ApiErrorResponse =
+          await res.json();
         if (!res.ok || !data.success) {
-          setError((data as ApiErrorResponse).error?.message || "Gagal memuat akses kuis");
+          setError(
+            (data as ApiErrorResponse).error?.message ||
+              "Gagal memuat akses kuis",
+          );
           return null;
         }
         return data.data;

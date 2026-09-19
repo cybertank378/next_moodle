@@ -1,6 +1,6 @@
+import { useCallback, useEffect, useState } from "react";
 import type { ApiErrorResponse } from "@/core/http/ApiErrorResponse";
 import type { ApiResponse } from "@/core/http/ApiResponse";
-import { useCallback, useEffect, useState } from "react";
 import type { CourseResponseDTO } from "../../domain/dto/CourseResponseDTO";
 
 export function useCourseApi() {
@@ -17,14 +17,20 @@ export function useCourseApi() {
         await response.json();
 
       if (!response.ok || !json.success) {
-        const errorMsg = (json as ApiErrorResponse).error?.message || "Gagal memuat data kursus";
+        const errorMsg =
+          (json as ApiErrorResponse).error?.message ||
+          "Gagal memuat data kursus";
         setError(errorMsg);
         return;
       }
 
       setCourses(json.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Kesalahan koneksi saat memuat kursus");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Kesalahan koneksi saat memuat kursus",
+      );
     } finally {
       setLoading(false);
     }

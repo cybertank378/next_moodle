@@ -23,12 +23,21 @@ export const MoodleCourseMapper = {
       categoryId: raw.category,
       visibility: raw.visible === 0 ? "hidden" : "visible",
       enrolledUserCount: raw.enrolledusercount,
-      startDate: raw.startdate && raw.startdate > 0 ? new Date(raw.startdate * 1000) : undefined,
-      endDate: raw.enddate && raw.enddate > 0 ? new Date(raw.enddate * 1000) : undefined,
+      startDate:
+        raw.startdate && raw.startdate > 0
+          ? new Date(raw.startdate * 1000)
+          : undefined,
+      endDate:
+        raw.enddate && raw.enddate > 0
+          ? new Date(raw.enddate * 1000)
+          : undefined,
     });
   },
 
-  toDomainList(rawList: readonly MoodleCourseRaw[], tenantId: string): readonly Course[] {
+  toDomainList(
+    rawList: readonly MoodleCourseRaw[],
+    tenantId: string,
+  ): readonly Course[] {
     return rawList.map((item) => MoodleCourseMapper.toDomain(item, tenantId));
   },
 };

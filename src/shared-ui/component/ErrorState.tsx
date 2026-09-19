@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import React from "react";
+import { Button } from "@/components/ui/button";
 
 export interface ErrorStateProps {
   readonly title?: string;
@@ -8,7 +7,11 @@ export interface ErrorStateProps {
   readonly onRetry?: () => void;
 }
 
-export function ErrorState({ title = "Terjadi Kesalahan", message, onRetry }: ErrorStateProps) {
+export function ErrorState({
+  title = "Terjadi Kesalahan",
+  message,
+  onRetry,
+}: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-destructive/20 bg-destructive/5 text-destructive">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">

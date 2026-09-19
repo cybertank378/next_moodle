@@ -1,11 +1,11 @@
 "use client";
 
+import { BookOpen } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useCourseApi } from "@/modules/courses/presentation/hooks/useCourseApi";
 import { EmptyState } from "@/shared-ui/component/EmptyState";
 import { ErrorState } from "@/shared-ui/component/ErrorState";
 import { SearchField } from "@/shared-ui/component/SearchField";
-import { BookOpen } from "lucide-react";
-import React, { useState, useMemo } from "react";
 import { CourseCard } from "../molecules/CourseCard";
 import { CourseSkeletonCard } from "../molecules/CourseSkeletonCard";
 
@@ -32,7 +32,9 @@ export function CourseListView({ onCourseClick }: CourseListViewProps) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Daftar Kursus Saya</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Daftar Kursus Saya
+          </h2>
           <p className="text-sm text-muted-foreground">
             Akses materi, jadwal ujian, dan tugas yang terdaftar pada akun Anda.
           </p>
@@ -60,7 +62,11 @@ export function CourseListView({ onCourseClick }: CourseListViewProps) {
       )}
 
       {!loading && error && (
-        <ErrorState title="Gagal Memuat Kursus" message={error} onRetry={refresh} />
+        <ErrorState
+          title="Gagal Memuat Kursus"
+          message={error}
+          onRetry={refresh}
+        />
       )}
 
       {!loading && !error && filteredCourses.length === 0 && (
@@ -80,7 +86,11 @@ export function CourseListView({ onCourseClick }: CourseListViewProps) {
       {!loading && !error && filteredCourses.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredCourses.map((course) => (
-            <CourseCard key={course.id} course={course} onSelectCourse={onCourseClick} />
+            <CourseCard
+              key={course.id}
+              course={course}
+              onSelectCourse={onCourseClick}
+            />
           ))}
         </div>
       )}

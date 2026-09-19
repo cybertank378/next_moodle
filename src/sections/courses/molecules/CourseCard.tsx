@@ -1,3 +1,4 @@
+import { ArrowRight, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,8 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { CourseResponseDTO } from "@/modules/courses/domain/dto/CourseResponseDTO";
-import { ArrowRight, BookOpen, Users } from "lucide-react";
-import React from "react";
 import { CourseStatusBadge } from "../atoms/CourseStatusBadge";
 
 export interface CourseCardProps {

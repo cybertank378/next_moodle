@@ -1,5 +1,4 @@
 import { BaseEntity } from "@/core/base/BaseEntity";
-import type { QuizAvailability } from "../types/QuizAvailability";
 
 export interface QuizProps {
   readonly id: string;

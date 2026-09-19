@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InfrastructureError } from "../../errors/InfrastructureError";
 import { MoodleError } from "../../errors/MoodleError";
 import type { ILogger } from "../../logger";
-import { MoodleRestClient, encodeMoodleParams } from "../MoodleRestClient";
+import { encodeMoodleParams, MoodleRestClient } from "../MoodleRestClient";
 
 describe("MoodleRestClient", () => {
   const dummyUrl = "https://moodle.example.com";
@@ -65,7 +65,9 @@ describe("MoodleRestClient", () => {
 
   describe("API Execution & Responses", () => {
     it("should successfully parse and return JSON response for valid call", async () => {
-      const mockCourses = [{ id: 1, fullname: "Matematika Dasar", shortname: "MATH101" }];
+      const mockCourses = [
+        { id: 1, fullname: "Matematika Dasar", shortname: "MATH101" },
+      ];
 
       vi.stubGlobal(
         "fetch",
@@ -82,7 +84,9 @@ describe("MoodleRestClient", () => {
         logger: mockLogger,
       });
 
-      const result = await client.call<typeof mockCourses>("core_course_get_courses");
+      const result = await client.call<typeof mockCourses>(
+        "core_course_get_courses",
+      );
       expect(result).toEqual(mockCourses);
     });
 
@@ -108,7 +112,9 @@ describe("MoodleRestClient", () => {
         logger: mockLogger,
       });
 
-      await expect(client.call("core_user_get_users")).rejects.toThrow(MoodleError);
+      await expect(client.call("core_user_get_users")).rejects.toThrow(
+        MoodleError,
+      );
     });
 
     it("should throw InfrastructureError when HTTP status is not ok", async () => {
@@ -127,7 +133,9 @@ describe("MoodleRestClient", () => {
         logger: mockLogger,
       });
 
-      await expect(client.call("core_course_get_courses")).rejects.toThrow(InfrastructureError);
+      await expect(client.call("core_course_get_courses")).rejects.toThrow(
+        InfrastructureError,
+      );
     });
 
     it("should handle request timeout using AbortController", async () => {
@@ -151,7 +159,9 @@ describe("MoodleRestClient", () => {
         logger: mockLogger,
       });
 
-      await expect(client.call("core_course_get_courses")).rejects.toThrow(InfrastructureError);
+      await expect(client.call("core_course_get_courses")).rejects.toThrow(
+        InfrastructureError,
+      );
     });
   });
 });

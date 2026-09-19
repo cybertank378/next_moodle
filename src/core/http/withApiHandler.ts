@@ -2,10 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { CurrentActor } from "../auth/CurrentActor";
 import { resolveCurrentActor } from "../auth/resolveCurrentActor";
 import { AppError } from "../errors/AppError";
-import { type ILogger, createLogger } from "../logger";
+import { createLogger, type ILogger } from "../logger";
 import { generateRequestId } from "../security/RequestId";
-import type { TenantContext } from "../tenant/TenantContext";
 import { resolveCurrentTenant } from "../tenant/resolveCurrentTenant";
+import type { TenantContext } from "../tenant/TenantContext";
 import { createErrorResponse } from "./ApiErrorResponse";
 import { createSuccessResponse } from "./ApiResponse";
 import { HttpStatus } from "./HttpStatus";
@@ -33,7 +33,9 @@ export function withApiHandler<T>(
 ) {
   return async (
     request: NextRequest,
-    routeSegmentContext: { params: Promise<Record<string, string | string[] | undefined>> },
+    routeSegmentContext: {
+      params: Promise<Record<string, string | string[] | undefined>>;
+    },
   ): Promise<NextResponse> => {
     const requestId = generateRequestId();
     const logger = createLogger({ requestId });
@@ -44,7 +46,10 @@ export function withApiHandler<T>(
 
       if (options.requireAuth && !actor) {
         return NextResponse.json(
-          createErrorResponse("UNAUTHORIZED", "Authentication required to access this resource"),
+          createErrorResponse(
+            "UNAUTHORIZED",
+            "Authentication required to access this resource",
+          ),
           { status: HttpStatus.UNAUTHORIZED },
         );
       }
@@ -55,7 +60,10 @@ export function withApiHandler<T>(
       });
 
       const resolvedParams = routeSegmentContext?.params
-        ? ((await routeSegmentContext.params) as Record<string, string | string[]>)
+        ? ((await routeSegmentContext.params) as Record<
+            string,
+            string | string[]
+          >)
         : {};
 
       const handlerContext: ApiHandlerContext = {

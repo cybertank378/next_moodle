@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { CourseListView } from "../organisms/CourseListView";
 
 export function CoursePageSection() {

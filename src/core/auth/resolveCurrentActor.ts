@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
 import type { CurrentActor } from "./CurrentActor";
 
-export async function resolveCurrentActor(request: NextRequest): Promise<CurrentActor | null> {
+export async function resolveCurrentActor(
+  request: NextRequest,
+): Promise<CurrentActor | null> {
   const authHeader = request.headers.get("authorization");
   const sessionCookie = request.cookies.get("session_token")?.value;
 

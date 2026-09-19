@@ -5,7 +5,9 @@ export interface MoodleExceptionResponse {
   readonly debuginfo?: string;
 }
 
-export function isMoodleExceptionResponse(data: unknown): data is MoodleExceptionResponse {
+export function isMoodleExceptionResponse(
+  data: unknown,
+): data is MoodleExceptionResponse {
   if (data === null || typeof data !== "object") {
     return false;
   }

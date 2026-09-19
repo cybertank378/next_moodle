@@ -5,7 +5,10 @@ import type { AuthRepository } from "../../domain/interfaces/AuthRepository";
 export class LoginUseCase {
   constructor(private readonly authRepository: AuthRepository) {}
 
-  public async execute(dto: LoginRequestDTO, tenantId: string): Promise<LoginResponseDTO> {
+  public async execute(
+    dto: LoginRequestDTO,
+    tenantId: string,
+  ): Promise<LoginResponseDTO> {
     if (!dto.username?.trim()) {
       throw new ValidationError("Username wajib diisi");
     }
@@ -13,7 +16,11 @@ export class LoginUseCase {
       throw new ValidationError("Password wajib diisi");
     }
 
-    const user = await this.authRepository.authenticate(dto.username, dto.password, tenantId);
+    const user = await this.authRepository.authenticate(
+      dto.username,
+      dto.password,
+      tenantId,
+    );
 
     // In full production, SessionRepository creates HttpOnly session cookie
     return {

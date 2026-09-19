@@ -1,4 +1,10 @@
-import { BookOpen, CheckCircle2, FileText, GraduationCap, User } from "lucide-react";
+import {
+  BookOpen,
+  CheckCircle2,
+  FileText,
+  GraduationCap,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import type React from "react";
 
@@ -66,7 +72,8 @@ export default function DashboardLayout({
 
       <footer className="border-t py-6 text-center text-xs text-muted-foreground bg-card/40">
         <div className="container mx-auto px-4">
-          Moodle Exam SaaS &copy; 2026. Hexagonal Architecture with Next.js & Moodle LMS.
+          Moodle Exam SaaS &copy; 2026. Hexagonal Architecture with Next.js &
+          Moodle LMS.
         </div>
       </footer>
     </div>

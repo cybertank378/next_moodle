@@ -1,6 +1,5 @@
 import type { CourseVisibility } from "@/modules/courses/domain/types/CourseVisibility";
 import { StatusBadge } from "@/shared-ui/component/StatusBadge";
-import React from "react";
 
 export interface CourseStatusBadgeProps {
   readonly visibility: CourseVisibility;

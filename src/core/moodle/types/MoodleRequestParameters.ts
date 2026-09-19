@@ -7,4 +7,6 @@ export type MoodleParameterValue =
   | readonly MoodleParameterValue[]
   | { readonly [key: string]: MoodleParameterValue };
 
-export type MoodleRequestParameters = Readonly<Record<string, MoodleParameterValue>>;
+export type MoodleRequestParameters = Readonly<
+  Record<string, MoodleParameterValue>
+>;
