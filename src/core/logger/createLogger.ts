@@ -1,5 +1,6 @@
-import { type ILogger, JsonLogger, type LogContext } from "./Logger";
+import type { LogContext } from "./LogContext";
+import { JsonLogger, type Logger } from "./Logger";
 
-export function createLogger(defaultContext: LogContext = {}): ILogger {
+export function createLogger(defaultContext: LogContext = {}): Logger {
   return new JsonLogger(defaultContext);
 }

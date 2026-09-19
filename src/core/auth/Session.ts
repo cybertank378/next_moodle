@@ -1,9 +1,7 @@
-import type { CurrentActor } from "./CurrentActor";
-
 export interface Session {
   readonly id: string;
-  readonly token: string;
-  readonly actor: CurrentActor;
+  readonly userId: string;
+  readonly tenantId: string;
   readonly expiresAt: Date;
-  readonly createdAt: Date;
+  readonly roles?: readonly string[];
 }

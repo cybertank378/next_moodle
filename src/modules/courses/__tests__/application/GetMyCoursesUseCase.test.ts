@@ -7,6 +7,7 @@ import type { CourseRepository } from "../../domain/interfaces/CourseRepository"
 
 describe("GetMyCoursesUseCase", () => {
   const mockActor: CurrentActor = {
+    userId: "usr_1",
     id: "usr_1",
     username: "student1",
     email: "student1@example.com",

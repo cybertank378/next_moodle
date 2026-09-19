@@ -1,10 +1,20 @@
-import { AppError } from "./AppError";
+import { AppError, type AppErrorOptions } from "./AppError";
 
 export class UnauthorizedError extends AppError {
-  public readonly code: string = "UNAUTHORIZED";
+  public readonly code: string;
   public readonly statusCode: number = 401;
 
-  constructor(message = "Unauthorized access", details?: unknown) {
-    super(message, details);
+  constructor(
+    message = "Unauthorized access",
+    options?: AppErrorOptions | unknown,
+  ) {
+    super(message, options);
+    this.code =
+      options &&
+      typeof options === "object" &&
+      "code" in options &&
+      typeof options.code === "string"
+        ? options.code
+        : "UNAUTHORIZED";
   }
 }

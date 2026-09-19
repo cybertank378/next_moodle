@@ -18,7 +18,7 @@ export class MoodleClientFactory {
     tenant: TenantContext,
     logger?: ILogger,
   ): Promise<MoodleRestClient> {
-    const cacheKey = `${tenant.tenantId}:${tenant.moodleUrl}`;
+    const cacheKey = tenant.tenantId;
     const existing = MoodleClientFactory.instances.get(cacheKey);
 
     if (existing) {

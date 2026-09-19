@@ -1,40 +1,50 @@
-import type { NextRequest } from "next/server";
+import { ForbiddenError } from "../errors/ForbiddenError";
+import { UnauthorizedError } from "../errors/UnauthorizedError";
+import type { TenantContext } from "../tenant/TenantContext";
 import type { CurrentActor } from "./CurrentActor";
+import type { SessionResolver } from "./SessionResolver";
+
+export class DefaultDevSessionResolver implements SessionResolver {
+  public async resolve(request: Request) {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader && process.env.NODE_ENV !== "development") {
+      return null;
+    }
+
+    return {
+      id: "sess_demo",
+      userId: "usr_demo",
+      tenantId: "tenant_demo",
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      roles: ["student"],
+    };
+  }
+}
 
 export async function resolveCurrentActor(
-  request: NextRequest,
-): Promise<CurrentActor | null> {
-  const authHeader = request.headers.get("authorization");
-  const sessionCookie = request.cookies.get("session_token")?.value;
+  request: Request,
+  resolver: SessionResolver = new DefaultDevSessionResolver(),
+  currentTenant?: TenantContext,
+): Promise<CurrentActor> {
+  const session = await resolver.resolve(request);
 
-  if (!authHeader && !sessionCookie) {
-    // For development / initial bootstrap when actor is not yet passed via cookie/token,
-    // provide a fallback demo student actor if requested or null.
-    const devMockHeader = request.headers.get("x-mock-actor");
-    if (devMockHeader === "student" || process.env.NODE_ENV === "development") {
-      return {
-        id: "usr_mock_1",
-        username: "student1",
-        email: "student1@example.com",
-        firstname: "Demo",
-        lastname: "Student",
-        moodleUserId: 2,
-        tenantId: "tenant_demo",
-        roles: ["student"],
-      };
-    }
-    return null;
+  if (!session) {
+    throw new UnauthorizedError("Sesi tidak ditemukan atau tidak valid.");
   }
 
-  // TODO: Validate against SessionRepository in production
+  if (session.expiresAt.getTime() <= Date.now()) {
+    throw new UnauthorizedError("Sesi telah kedaluwarsa.");
+  }
+
+  if (currentTenant && session.tenantId !== currentTenant.tenantId) {
+    throw new ForbiddenError("Sesi tidak valid untuk tenant ini.", {
+      code: "TENANT_MISMATCH",
+    });
+  }
+
   return {
-    id: "usr_active_session",
-    username: "authenticated_user",
-    email: "user@example.com",
-    firstname: "Authenticated",
-    lastname: "User",
-    moodleUserId: 2,
-    tenantId: "tenant_demo",
-    roles: ["student"],
+    userId: session.userId,
+    tenantId: session.tenantId,
+    roles: session.roles || [],
   };
 }

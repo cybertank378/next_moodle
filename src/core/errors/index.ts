@@ -1,4 +1,5 @@
 export * from "./AppError";
+export * from "./ConflictError";
 export * from "./DomainError";
 export * from "./ForbiddenError";
 export * from "./InfrastructureError";

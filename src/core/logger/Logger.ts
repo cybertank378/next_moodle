@@ -1,51 +1,20 @@
+import { SensitiveData } from "../security/SensitiveData";
+import type { LogContext } from "./LogContext";
+
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
-export interface LogContext {
-  requestId?: string;
-  tenantId?: string;
-  actorId?: string;
-  module?: string;
-  [key: string]: unknown;
-}
-
-export interface ILogger {
+export interface Logger {
   debug(message: string, context?: LogContext): void;
   info(message: string, context?: LogContext): void;
   warn(message: string, context?: LogContext): void;
   error(message: string, error?: unknown, context?: LogContext): void;
-  child(defaultContext: LogContext): ILogger;
+  child(defaultContext: LogContext): Logger;
 }
 
-export class JsonLogger implements ILogger {
+export type ILogger = Logger;
+
+export class JsonLogger implements Logger {
   constructor(private readonly defaultContext: LogContext = {}) {}
-
-  private sanitize(obj: unknown): unknown {
-    if (obj === null || obj === undefined) return obj;
-    if (typeof obj !== "object") return obj;
-
-    if (Array.isArray(obj)) {
-      return obj.map((item) => this.sanitize(item));
-    }
-
-    const sanitized: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-      const lower = key.toLowerCase();
-      if (
-        lower.includes("token") ||
-        lower.includes("password") ||
-        lower.includes("secret") ||
-        lower.includes("authorization") ||
-        lower.includes("cookie")
-      ) {
-        sanitized[key] = "[REDACTED]";
-      } else if (typeof value === "object" && value !== null) {
-        sanitized[key] = this.sanitize(value);
-      } else {
-        sanitized[key] = value;
-      }
-    }
-    return sanitized;
-  }
 
   private log(
     level: LogLevel,
@@ -53,11 +22,14 @@ export class JsonLogger implements ILogger {
     context?: LogContext,
     error?: unknown,
   ): void {
+    const mergedContext = { ...this.defaultContext, ...context };
+    const sanitizedContext = SensitiveData.redact(mergedContext) as LogContext;
+
     const entry = {
       timestamp: new Date().toISOString(),
       level,
       message,
-      context: this.sanitize({ ...this.defaultContext, ...context }),
+      context: sanitizedContext,
       ...(error
         ? {
             error:
@@ -101,7 +73,7 @@ export class JsonLogger implements ILogger {
     this.log("error", message, context, error);
   }
 
-  public child(defaultContext: LogContext): ILogger {
+  public child(defaultContext: LogContext): Logger {
     return new JsonLogger({ ...this.defaultContext, ...defaultContext });
   }
 }

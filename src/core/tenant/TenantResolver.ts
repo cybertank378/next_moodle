@@ -1,5 +1,11 @@
 import type { TenantContext } from "./TenantContext";
 
+export interface TenantResolutionInput {
+  readonly identifier: string;
+  readonly host?: string;
+  readonly headers?: Headers;
+}
+
 export interface TenantResolver {
-  resolveFromIdentifier(identifier: string): Promise<TenantContext | null>;
+  resolve(input: TenantResolutionInput): Promise<TenantContext | null>;
 }

@@ -16,8 +16,11 @@ export class GetMyCoursesUseCase {
       );
     }
 
+    const moodleUserId =
+      actor.moodleUserId ?? (parseInt(actor.userId, 10) || 0);
+
     const courses = await this.courseRepository.getUserCourses(
-      actor.moodleUserId,
+      moodleUserId,
       actor.tenantId,
     );
 

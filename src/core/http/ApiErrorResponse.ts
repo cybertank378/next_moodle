@@ -1,25 +1,9 @@
-export interface ApiErrorDetail {
-  readonly code: string;
-  readonly message: string;
-  readonly details?: unknown;
-}
+import {
+  type ApiErrorDetail,
+  type ApiFailureResponse,
+  createErrorResponse,
+} from "./ApiResponse";
 
-export interface ApiErrorResponse {
-  readonly success: false;
-  readonly error: ApiErrorDetail;
-}
-
-export function createErrorResponse(
-  code: string,
-  message: string,
-  details?: unknown,
-): ApiErrorResponse {
-  return {
-    success: false,
-    error: {
-      code,
-      message,
-      ...(details !== undefined ? { details } : {}),
-    },
-  };
-}
+export type { ApiErrorDetail, ApiFailureResponse };
+export type ApiErrorResponse = ApiFailureResponse;
+export { createErrorResponse };
