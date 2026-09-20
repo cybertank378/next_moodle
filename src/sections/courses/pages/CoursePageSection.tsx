@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseListView } from "../organisms/CourseListView";
+import { CourseListView } from "@/sections/courses/organisms/CourseListView";
 
 export function CoursePageSection() {
   const handleCourseClick = (courseId: string) => {

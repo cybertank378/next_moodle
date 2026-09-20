@@ -1,4 +1,4 @@
-import type { AuthenticatedUser } from "../entities/AuthenticatedUser";
+import type { AuthenticatedUser } from "@/modules/auth/domain/entities/AuthenticatedUser";
 
 export interface AuthRepository {
   authenticate(

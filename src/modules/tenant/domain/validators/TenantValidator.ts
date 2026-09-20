@@ -1,6 +1,6 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { TenantStatus } from "../types/TenantStatus";
-import { TenantSlug } from "../value-objects/TenantSlug";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
+import { TenantSlug } from "@/modules/tenant/domain/value-objects/TenantSlug";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: domain validator utility
 export class TenantValidator {

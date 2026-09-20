@@ -1,4 +1,4 @@
-import type { TenantStatus } from "../types/TenantStatus";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
 
 export interface CreateTenantRequestDTO {
   readonly slug: string;

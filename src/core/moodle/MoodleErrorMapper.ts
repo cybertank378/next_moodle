@@ -1,4 +1,4 @@
-import { MoodleError } from "../errors/MoodleError";
+import { MoodleError } from "@/core/errors/MoodleError";
 import type { MoodleExceptionResponse } from "./types/MoodleExceptionResponse";
 
 export interface MoodleErrorContext {

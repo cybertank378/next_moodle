@@ -5,7 +5,7 @@ import type {
 import {
   type AesGcmEncryptionProvider,
   defaultEncryptionProvider,
-} from "../providers/AesGcmEncryptionProvider";
+} from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
 
 export class DatabaseTenantCredentialRepository
   implements TenantCredentialRepository

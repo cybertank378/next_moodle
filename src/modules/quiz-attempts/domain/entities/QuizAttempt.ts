@@ -1,5 +1,5 @@
 import { BaseEntity } from "@/core/base/BaseEntity";
-import type { QuizAttemptState } from "../types/QuizAttemptState";
+import type { QuizAttemptState } from "@/modules/quiz-attempts/domain/types/QuizAttemptState";
 
 export interface QuizAttemptProps {
   readonly id: string;

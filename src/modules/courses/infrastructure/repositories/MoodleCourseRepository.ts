@@ -5,7 +5,7 @@ import type { CourseRepository } from "@/modules/courses/domain/interfaces/Cours
 import {
   MoodleCourseMapper,
   type MoodleCourseRaw,
-} from "../mappers/MoodleCourseMapper";
+} from "@/modules/courses/infrastructure/mappers/MoodleCourseMapper";
 
 export class MoodleCourseRepository implements CourseRepository {
   constructor(private readonly moodleClient: MoodleRestClient) {}

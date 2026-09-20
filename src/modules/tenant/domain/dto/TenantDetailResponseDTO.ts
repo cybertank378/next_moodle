@@ -1,5 +1,5 @@
-import type { TenantMoodleConfiguration } from "../types/TenantMoodleConfiguration";
-import type { TenantStatus } from "../types/TenantStatus";
+import type { TenantMoodleConfiguration } from "@/modules/tenant/domain/types/TenantMoodleConfiguration";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
 
 export interface TenantDetailResponseDTO {
   readonly id: string;

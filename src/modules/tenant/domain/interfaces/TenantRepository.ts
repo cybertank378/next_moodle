@@ -1,4 +1,4 @@
-import type { Tenant } from "../entities/Tenant";
+import type { Tenant } from "@/modules/tenant/domain/entities/Tenant";
 
 export interface TenantRepository {
   findById(tenantId: string): Promise<Tenant | null>;

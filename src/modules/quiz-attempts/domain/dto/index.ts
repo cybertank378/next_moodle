@@ -1,4 +1,4 @@
-import type { QuizAttemptState } from "../types/QuizAttemptState";
+import type { QuizAttemptState } from "@/modules/quiz-attempts/domain/types/QuizAttemptState";
 
 export interface QuizAttemptResponseDTO {
   readonly id: string;

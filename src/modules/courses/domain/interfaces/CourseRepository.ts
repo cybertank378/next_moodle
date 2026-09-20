@@ -1,4 +1,4 @@
-import type { Course } from "../entities/Course";
+import type { Course } from "@/modules/courses/domain/entities/Course";
 
 export interface CourseRepository {
   getUserCourses(

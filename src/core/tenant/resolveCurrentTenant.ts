@@ -1,6 +1,6 @@
-import { ForbiddenError } from "../errors/ForbiddenError";
-import { NotFoundError } from "../errors/NotFoundError";
-import { ValidationError } from "../errors/ValidationError";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { NotFoundError } from "@/core/errors/NotFoundError";
+import { ValidationError } from "@/core/errors/ValidationError";
 import type { TenantContext } from "./TenantContext";
 import type { TenantResolver } from "./TenantResolver";
 

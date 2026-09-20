@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import type { CurrentActor } from "../auth/CurrentActor";
-import { resolveCurrentActor } from "../auth/resolveCurrentActor";
-import { createLogger, type Logger } from "../logger";
-import { getOrGenerateRequestId } from "../security/RequestId";
-import { resolveCurrentTenant } from "../tenant/resolveCurrentTenant";
-import type { TenantContext } from "../tenant/TenantContext";
+import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
+import { createLogger, type Logger } from "@/core/logger";
+import { getOrGenerateRequestId } from "@/core/security/RequestId";
+import { resolveCurrentTenant } from "@/core/tenant/resolveCurrentTenant";
+import type { TenantContext } from "@/core/tenant/TenantContext";
 import { ApiResponse } from "./ApiResponse";
 import { HttpStatus } from "./HttpStatus";
 import { mapErrorToHttpResponse } from "./mapErrorToHttpResponse";

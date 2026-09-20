@@ -1,6 +1,6 @@
-import { ForbiddenError } from "../errors/ForbiddenError";
-import { UnauthorizedError } from "../errors/UnauthorizedError";
-import type { TenantContext } from "../tenant/TenantContext";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+import type { TenantContext } from "@/core/tenant/TenantContext";
 import type { CurrentActor } from "./CurrentActor";
 import type { SessionResolver } from "./SessionResolver";
 

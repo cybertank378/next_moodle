@@ -5,7 +5,7 @@ import type { TenantRepository } from "@/modules/tenant/domain/interfaces/Tenant
 import {
   TenantPersistenceMapper,
   type TenantPersistenceModel,
-} from "../mappers/TenantPersistenceMapper";
+} from "@/modules/tenant/infrastructure/mappers/TenantPersistenceMapper";
 
 export class DatabaseTenantRepository implements TenantRepository {
   private readonly recordsById = new Map<string, TenantPersistenceModel>();

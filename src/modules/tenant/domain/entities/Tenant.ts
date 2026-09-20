@@ -1,6 +1,6 @@
 import { BaseEntity } from "@/core/base/BaseEntity";
-import { TenantRules } from "../rules/TenantRules";
-import type { TenantStatus } from "../types/TenantStatus";
+import { TenantRules } from "@/modules/tenant/domain/rules/TenantRules";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
 
 export interface TenantProps {
   readonly id: string;

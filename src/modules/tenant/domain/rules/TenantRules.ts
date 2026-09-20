@@ -1,5 +1,5 @@
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
-import type { TenantStatus } from "../types/TenantStatus";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: domain rules collection
 export class TenantRules {

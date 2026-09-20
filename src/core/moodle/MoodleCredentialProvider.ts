@@ -1,5 +1,5 @@
 import "server-only";
-import type { TenantContext } from "../tenant/TenantContext";
+import type { TenantContext } from "@/core/tenant/TenantContext";
 import type { MoodleCredential } from "./MoodleCredential";
 
 export interface MoodleCredentialProvider {

@@ -3,7 +3,7 @@ import type { ILogger } from "@/core/logger";
 import { moodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { TenantContext } from "@/core/tenant/TenantContext";
 import { GetMyCoursesUseCase } from "@/modules/courses/application/usecases/GetMyCoursesUseCase";
-import { MoodleCourseRepository } from "../repositories/MoodleCourseRepository";
+import { MoodleCourseRepository } from "@/modules/courses/infrastructure/repositories/MoodleCourseRepository";
 
 export async function createCourseDependencies(
   tenant: TenantContext,

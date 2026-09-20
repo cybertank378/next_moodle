@@ -1,4 +1,4 @@
-import type { TenantStatus } from "../types/TenantStatus";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
 import type { TenantMoodleConfigDTO } from "./TenantMoodleConfigDTO";
 
 export interface TenantResponseDTO {

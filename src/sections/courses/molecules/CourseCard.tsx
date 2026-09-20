@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { CourseResponseDTO } from "@/modules/courses/domain/dto/CourseResponseDTO";
-import { CourseStatusBadge } from "../atoms/CourseStatusBadge";
+import { CourseStatusBadge } from "@/sections/courses/atoms/CourseStatusBadge";
 
 export interface CourseCardProps {
   readonly course: CourseResponseDTO;
