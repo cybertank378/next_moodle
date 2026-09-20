@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createLogger } from "../../logger/createLogger";
+import { createLogger } from "@/core/logger/createLogger";
 
 describe("Structured Logger & Sensitive Data Redaction", () => {
   let loggedOutput: string[] = [];

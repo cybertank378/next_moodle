@@ -1,5 +1,5 @@
-import { Tenant } from "../../domain/entities/Tenant";
-import type { TenantRepository } from "../../domain/interfaces/TenantRepository";
+import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
 
 export class InMemoryTenantRepository implements TenantRepository {
   private readonly tenants = new Map<string, Tenant>();

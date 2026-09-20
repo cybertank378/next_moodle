@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import type { ApiErrorResponse } from "@/core/http/ApiErrorResponse";
 import type { ApiResponse } from "@/core/http/ApiResponse";
-import type { SaveQuizAnswerRequestDTO } from "../../domain/dto";
+import type { SaveQuizAnswerRequestDTO } from "@/modules/quiz-attempts/domain/dto";
 
 export function useQuizAttemptApi() {
   const [saving, setSaving] = useState(false);

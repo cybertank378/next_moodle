@@ -5,7 +5,7 @@ import type {
   CurrentUserResponseDTO,
   LoginRequestDTO,
   LoginResponseDTO,
-} from "../../domain/dto";
+} from "@/modules/auth/domain/dto";
 
 export function useAuthApi() {
   const [loading, setLoading] = useState(false);

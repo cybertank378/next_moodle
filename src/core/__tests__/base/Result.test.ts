@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Result } from "../../base/Result";
+import { Result } from "@/core/base/Result";
 
 describe("Result", () => {
   describe("Success", () => {

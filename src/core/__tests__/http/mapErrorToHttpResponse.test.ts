@@ -6,8 +6,8 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-} from "../../errors";
-import { mapErrorToHttpResponse } from "../../http/mapErrorToHttpResponse";
+} from "@/core/errors";
+import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 
 describe("mapErrorToHttpResponse", () => {
   const requestId = "test-req-id";

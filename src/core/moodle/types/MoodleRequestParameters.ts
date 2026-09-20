@@ -1,9 +1,7 @@
+export type MoodlePrimitive = string | number | boolean | null | undefined;
+
 export type MoodleParameterValue =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
+  | MoodlePrimitive
   | readonly MoodleParameterValue[]
   | { readonly [key: string]: MoodleParameterValue };
 

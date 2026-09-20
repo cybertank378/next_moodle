@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   generateRequestId,
   getOrGenerateRequestId,
-} from "../../security/RequestId";
+} from "@/core/security/RequestId";
 
 describe("RequestId", () => {
   it("generateRequestId should return valid UUIDv4 string", () => {

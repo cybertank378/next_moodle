@@ -1,24 +1,30 @@
 import "server-only";
 import type { TenantContext } from "../tenant/TenantContext";
+import type { MoodleCredential } from "./MoodleCredential";
 
-export interface MoodleCredentials {
-  readonly url: string;
-  readonly token: string;
+export interface MoodleCredentialProvider {
+  getCredential(tenant: TenantContext): Promise<MoodleCredential>;
 }
 
-export interface IMoodleCredentialProvider {
-  getCredentialsForTenant(tenant: TenantContext): Promise<MoodleCredentials>;
-}
+// Aliases for backward compatibility
+export type IMoodleCredentialProvider = MoodleCredentialProvider;
+export type MoodleCredentials = MoodleCredential;
 
 export class DefaultMoodleCredentialProvider
-  implements IMoodleCredentialProvider
+  implements MoodleCredentialProvider
 {
-  public async getCredentialsForTenant(
+  public async getCredential(
     _tenant: TenantContext,
-  ): Promise<MoodleCredentials> {
+  ): Promise<MoodleCredential> {
     return {
-      url: process.env.DEFAULT_MOODLE_URL || "https://moodle.example.com",
+      baseUrl: process.env.DEFAULT_MOODLE_URL || "https://moodle.example.com",
       token: process.env.DEFAULT_MOODLE_TOKEN || "mock_token",
     };
+  }
+
+  public async getCredentialsForTenant(
+    tenant: TenantContext,
+  ): Promise<MoodleCredential> {
+    return this.getCredential(tenant);
   }
 }

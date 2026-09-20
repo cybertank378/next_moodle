@@ -1,6 +1,9 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { LoginRequestDTO, LoginResponseDTO } from "../../domain/dto";
-import type { AuthRepository } from "../../domain/interfaces/AuthRepository";
+import type {
+  LoginRequestDTO,
+  LoginResponseDTO,
+} from "@/modules/auth/domain/dto";
+import type { AuthRepository } from "@/modules/auth/domain/interfaces/AuthRepository";
 
 export class LoginUseCase {
   constructor(private readonly authRepository: AuthRepository) {}

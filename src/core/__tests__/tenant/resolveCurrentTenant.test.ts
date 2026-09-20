@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { ForbiddenError } from "../../errors/ForbiddenError";
-import { NotFoundError } from "../../errors/NotFoundError";
-import { resolveCurrentTenant } from "../../tenant/resolveCurrentTenant";
-import type { TenantContext } from "../../tenant/TenantContext";
-import type { TenantResolver } from "../../tenant/TenantResolver";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { NotFoundError } from "@/core/errors/NotFoundError";
+import { resolveCurrentTenant } from "@/core/tenant/resolveCurrentTenant";
+import type { TenantContext } from "@/core/tenant/TenantContext";
+import type { TenantResolver } from "@/core/tenant/TenantResolver";
 
 describe("resolveCurrentTenant", () => {
   const activeTenant: TenantContext = {

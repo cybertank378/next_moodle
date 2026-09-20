@@ -1,6 +1,6 @@
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import type { CurrentUserResponseDTO } from "../../domain/dto";
+import type { CurrentUserResponseDTO } from "@/modules/auth/domain/dto";
 
 export class GetCurrentUserUseCase {
   public async execute(

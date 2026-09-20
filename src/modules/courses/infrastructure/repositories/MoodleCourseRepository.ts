@@ -1,7 +1,7 @@
 import "server-only";
 import type { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
-import type { Course } from "../../domain/entities/Course";
-import type { CourseRepository } from "../../domain/interfaces/CourseRepository";
+import type { Course } from "@/modules/courses/domain/entities/Course";
+import type { CourseRepository } from "@/modules/courses/domain/interfaces/CourseRepository";
 import {
   MoodleCourseMapper,
   type MoodleCourseRaw,
