@@ -5,10 +5,16 @@ import type { TenantRepository } from "@/modules/tenant/domain/interfaces/Tenant
 export class GetTenantUseCase {
   constructor(private readonly tenantRepository: TenantRepository) {}
 
-  public async execute(slug: string): Promise<TenantResponseDTO> {
-    const tenant = await this.tenantRepository.findBySlug(slug);
+  public async execute(idOrSlug: string): Promise<TenantResponseDTO> {
+    let tenant = await this.tenantRepository.findById(idOrSlug);
     if (!tenant) {
-      throw new NotFoundError(`Tenant with slug '${slug}' not found`);
+      tenant = await this.tenantRepository.findBySlug(idOrSlug);
+    }
+
+    if (!tenant) {
+      throw new NotFoundError(`Tenant '${idOrSlug}' tidak ditemukan.`, {
+        code: "TENANT_NOT_FOUND",
+      });
     }
 
     return {
@@ -16,7 +22,13 @@ export class GetTenantUseCase {
       slug: tenant.slug,
       name: tenant.name,
       status: tenant.status,
+      moodle: {
+        baseUrl: tenant.moodleBaseUrl,
+        serviceShortname: tenant.moodleServiceShortname,
+        configured: true,
+      },
       createdAt: tenant.createdAt.toISOString(),
+      updatedAt: tenant.updatedAt.toISOString(),
     };
   }
 }

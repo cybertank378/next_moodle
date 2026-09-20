@@ -3,11 +3,11 @@
 import { BookOpen } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useCourseApi } from "@/modules/courses/presentation/hooks/useCourseApi";
+import { CourseCard } from "@/sections/courses/molecules/CourseCard";
+import { CourseSkeletonCard } from "@/sections/courses/molecules/CourseSkeletonCard";
 import { EmptyState } from "@/shared-ui/component/EmptyState";
 import { ErrorState } from "@/shared-ui/component/ErrorState";
 import { SearchField } from "@/shared-ui/component/SearchField";
-import { CourseCard } from "../molecules/CourseCard";
-import { CourseSkeletonCard } from "../molecules/CourseSkeletonCard";
 
 export interface CourseListViewProps {
   readonly onCourseClick?: (courseId: string) => void;

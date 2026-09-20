@@ -1,64 +1,56 @@
-# ISSUE: Phase 2 — Moodle REST Adapter
+# ISSUE: Phase 3 — Tenant
 
 ## Objective
 
-Implementasikan **Phase 2 — Moodle REST Adapter** sebagai satu-satunya gateway komunikasi antara aplikasi Next.js dan Moodle REST Web Service.
+Implementasikan **Phase 3 — Tenant** sebagai fondasi multi-tenant sebelum authentication dan seluruh feature Moodle lainnya.
 
-Phase ini bertujuan membangun outbound adapter yang:
+Tujuan utama phase ini adalah memastikan setiap request:
 
-- type-safe;
-- server-only;
-- reusable lintas module;
-- mendukung parameter Moodle yang nested;
-- memiliki timeout;
-- memiliki error normalization;
-- tidak membocorkan secret;
-- dapat digunakan oleh seluruh repository infrastructure berikutnya.
+1. menentukan tenant berdasarkan hostname/subdomain;
+2. mengambil konfigurasi tenant dari repository;
+3. tidak mengekspos credential Moodle ke layer luar;
+4. hanya menggunakan Moodle credential milik tenant yang benar;
+5. menolak tenant yang tidak aktif;
+6. membangun `TenantContext`;
+7. menghubungkan `TenantContext` ke `MoodleClientFactory`.
 
-Phase ini **tidak** mengimplementasikan feature bisnis seperti login, course, quiz, attempt, question, grade, atau tenant persistence.
+Semua Moodle access setelah phase ini harus tenant-aware.
 
 ---
 
 # 1. Architectural Context
 
-Project menggunakan Hexagonal Architecture:
-
 ```text
-Presentation
-    ↓
-Next.js API Route
-    ↓
-Application Use Case
-    ↓
-Domain Port
-    ↑
-Infrastructure Repository
-    ↓
+Incoming Request
+      ↓
+hostname
+      ↓
+TenantResolver
+      ↓
+tenant slug
+      ↓
+TenantRepository
+      ↓
+Tenant Entity
+      ↓
+TenantContext
+      ↓
+MoodleCredentialProvider
+      ↓
+MoodleClientFactory
+      ↓
 MoodleRestClient
-    ↓
-Moodle REST API
 ```
 
-`MoodleRestClient` adalah infrastructure concern.
+Tenant resolution terjadi sebelum authentication, course, quiz, attempt, question bank, grade, dan exam monitoring.
 
-Business module tidak boleh mengetahui detail:
-
-```text
-wstoken
-wsfunction
-moodlewsrestformat
-/webservice/rest/server.php
-Moodle exception payload
-URLSearchParams Moodle
-```
-
-Semua detail tersebut harus berhenti di Core Moodle Adapter.
+Tidak boleh ada Moodle request tanpa `TenantContext` yang valid.
 
 ---
 
-# 2. Dependency on Phase 1
+# 2. Dependency on Previous Phases
 
-Phase 2 mengasumsikan Phase 1 sudah tersedia:
+Phase ini mengasumsikan sudah tersedia dari Phase 1:
 
 ```text
 core/base
@@ -70,65 +62,881 @@ core/tenant
 core/auth
 ```
 
-Gunakan foundation yang sudah dibuat, terutama:
+dan dari Phase 2:
 
 ```text
-AppError
-InfrastructureError
-Logger
-RequestId
-TenantContext
-```
-
-Jangan membuat duplikat abstraction yang sudah tersedia dari Phase 1.
-
-Jika ditemukan kekurangan kecil pada Core Foundation yang menghalangi Phase 2:
-
-1. tambahkan test;
-2. lakukan perubahan minimal;
-3. dokumentasikan perubahan;
-4. jangan melakukan refactor besar yang tidak terkait.
-
----
-
-# 3. Target Structure
-
-Buat atau lengkapi:
-
-```text
-src/core/moodle/
+core/moodle/
 ├── MoodleRestClient.ts
-├── MoodleErrorMapper.ts
 ├── MoodleClientFactory.ts
 ├── MoodleCredentialProvider.ts
 ├── MoodleCredential.ts
-├── MoodleClientConfig.ts
-├── MoodleRequestEncoder.ts
-└── types/
-    ├── MoodleExceptionResponse.ts
-    ├── MoodleWarning.ts
-    ├── MoodleRequestParameters.ts
-    └── MoodleResponse.ts
+├── MoodleErrorMapper.ts
+└── MoodleRequestEncoder.ts
 ```
 
-Test:
-
-```text
-src/core/__tests__/moodle/
-├── MoodleRequestEncoder.test.ts
-├── MoodleErrorMapper.test.ts
-├── MoodleRestClient.test.ts
-├── MoodleClientFactory.test.ts
-└── MoodleCredentialProvider.test.ts
-```
-
-Boleh menyesuaikan struktur jika repository existing memiliki convention lain, tetapi boundary dan tanggung jawab harus tetap sama.
+Gunakan abstraction existing. Jangan menduplikasi abstraction yang sudah tersedia.
 
 ---
 
-# 4. Mandatory Workflow
+# 3. Scope
 
-Gunakan:
+Implement:
+
+- [ ] Tenant entity.
+- [ ] Tenant repository port.
+- [ ] Tenant persistence adapter.
+- [ ] Tenant lookup by subdomain.
+- [ ] Tenant status.
+- [ ] Moodle configuration.
+- [ ] encrypted Moodle credential/configuration.
+- [ ] TenantContext mapping.
+- [ ] Tenant resolver.
+- [ ] Moodle connection test.
+- [ ] integration ke `MoodleClientFactory`.
+- [ ] tests.
+
+Do not implement yet:
+
+```text
+student login
+teacher login
+Moodle user token flow
+course
+quiz
+quiz attempt
+question bank
+grade
+exam monitor
+```
+
+---
+
+# 4. Target Module Structure
+
+```text
+src/modules/tenant/
+├── domain/
+│   ├── dto/
+│   │   ├── CreateTenantRequestDTO.ts
+│   │   ├── UpdateTenantRequestDTO.ts
+│   │   ├── TenantResponseDTO.ts
+│   │   ├── TenantDetailResponseDTO.ts
+│   │   ├── TenantMoodleConfigDTO.ts
+│   │   └── TestTenantConnectionResponseDTO.ts
+│   ├── entities/
+│   │   └── Tenant.ts
+│   ├── interfaces/
+│   │   ├── TenantRepository.ts
+│   │   ├── TenantCredentialRepository.ts
+│   │   └── TenantConnectionTester.ts
+│   ├── rules/
+│   │   └── TenantRules.ts
+│   ├── types/
+│   │   ├── TenantStatus.ts
+│   │   └── TenantMoodleConfiguration.ts
+│   ├── validators/
+│   │   └── TenantValidator.ts
+│   └── value-objects/
+│       └── TenantSlug.ts
+│
+├── application/
+│   └── usecases/
+│       ├── CreateTenantUseCase.ts
+│       ├── UpdateTenantUseCase.ts
+│       ├── GetTenantUseCase.ts
+│       ├── GetTenantBySlugUseCase.ts
+│       ├── ChangeTenantStatusUseCase.ts
+│       └── TestTenantMoodleConnectionUseCase.ts
+│
+├── infrastructure/
+│   ├── mappers/
+│   │   └── TenantPersistenceMapper.ts
+│   ├── providers/
+│   │   ├── EncryptedTenantCredentialProvider.ts
+│   │   └── MoodleTenantConnectionTester.ts
+│   ├── repositories/
+│   │   ├── DatabaseTenantRepository.ts
+│   │   └── DatabaseTenantCredentialRepository.ts
+│   └── factories/
+│       └── createTenantDependencies.ts
+│
+├── presentation/
+│   └── hooks/
+│       └── useTenantApi.ts
+│
+└── __tests__/
+    ├── domain/
+    ├── application/
+    ├── infrastructure/
+    └── helpers/
+```
+
+---
+
+# 5. Core Tenant Integration
+
+Lengkapi bila Phase 1 baru menyediakan contract:
+
+```text
+src/core/tenant/
+├── TenantContext.ts
+├── TenantResolver.ts
+├── TenantResolutionInput.ts
+└── resolveCurrentTenant.ts
+```
+
+`core/tenant` hanya berisi abstraction/runtime resolution generic.
+
+Business entity `Tenant` tetap berada di:
+
+```text
+modules/tenant/domain/
+```
+
+---
+
+# 6. Tenant Entity
+
+Tenant entity minimal:
+
+```ts
+interface TenantProps {
+  readonly id: string;
+  readonly slug: string;
+  readonly name: string;
+  readonly status: TenantStatus;
+  readonly moodleBaseUrl: string;
+  readonly moodleServiceShortname: string | null;
+}
+```
+
+Credential/token Moodle tidak boleh menjadi public property entity.
+
+Preferred split:
+
+```text
+Tenant
+→ non-sensitive tenant metadata
+
+TenantCredential
+→ encrypted infrastructure concern
+```
+
+---
+
+# 7. Tenant Status
+
+Recommended:
+
+```ts
+export type TenantStatus =
+  | "ACTIVE"
+  | "INACTIVE"
+  | "SUSPENDED";
+```
+
+Behavior:
+
+```text
+ACTIVE
+→ request allowed
+
+INACTIVE
+→ tenant exists but application access blocked
+
+SUSPENDED
+→ blocked due to administrative restriction
+```
+
+---
+
+# 8. TenantSlug Value Object
+
+Recommended format:
+
+```regex
+^[a-z0-9]+(?:-[a-z0-9]+)*$
+```
+
+Valid:
+
+```text
+smpn29
+hangtuah2
+school-a
+school-2026
+```
+
+Invalid:
+
+```text
+SMPN29
+school_a
+school a
+.school
+school.
+```
+
+Gunakan satu canonical policy untuk create, lookup, dan hostname resolution.
+
+---
+
+# 9. Tenant Repository Port
+
+```ts
+export interface TenantRepository {
+  findById(
+    tenantId: string,
+  ): Promise<Tenant | null>;
+
+  findBySlug(
+    slug: string,
+  ): Promise<Tenant | null>;
+
+  create(
+    tenant: Tenant,
+  ): Promise<Tenant>;
+
+  update(
+    tenant: Tenant,
+  ): Promise<Tenant>;
+
+  existsBySlug(
+    slug: string,
+  ): Promise<boolean>;
+}
+```
+
+Jangan membuat generic CRUD base repository hanya karena terlihat serupa.
+
+---
+
+# 10. Tenant Credential Repository
+
+```ts
+export interface TenantCredentialRepository {
+  getByTenantId(
+    tenantId: string,
+  ): Promise<TenantMoodleCredential | null>;
+
+  save(
+    credential: TenantMoodleCredential,
+  ): Promise<void>;
+
+  deleteByTenantId(
+    tenantId: string,
+  ): Promise<void>;
+}
+```
+
+Sensitive credential persistence dipisahkan dari tenant metadata.
+
+---
+
+# 11. Moodle Configuration
+
+Tenant Moodle configuration minimal:
+
+```text
+baseUrl
+serviceShortname
+encryptedToken
+```
+
+Optional operational metadata:
+
+```text
+connectionStatus
+lastConnectionTestAt
+Moodle version
+```
+
+Do not store username/password unless later architecture explicitly requires it.
+
+---
+
+# 12. Encrypted Moodle Configuration
+
+Sensitive fields wajib encrypted at rest.
+
+Minimum:
+
+```text
+Moodle token
+service credential
+future client secret
+```
+
+Conceptual storage:
+
+```text
+tenantId
+encryptedValue
+iv / nonce
+authTag
+keyVersion
+createdAt
+updatedAt
+```
+
+Never store plaintext Moodle token.
+
+---
+
+# 13. Encryption Boundary
+
+Encryption/decryption adalah Infrastructure concern.
+
+```text
+Application
+   ↓
+TenantCredentialRepository
+   ↓
+EncryptedTenantCredentialProvider
+   ↓
+EncryptionProvider
+   ↓
+Database
+```
+
+Domain tidak boleh import crypto implementation.
+
+---
+
+# 14. Encryption Requirements
+
+Jika project menggunakan local encryption, gunakan authenticated encryption seperti:
+
+```text
+AES-256-GCM
+```
+
+Do not use:
+
+```text
+Base64 as encryption
+MD5
+SHA as encryption
+AES-ECB
+static IV
+hard-coded key
+```
+
+Encryption key harus server-only.
+
+Contoh:
+
+```text
+TENANT_CREDENTIAL_ENCRYPTION_KEY
+```
+
+Never use `NEXT_PUBLIC_*` untuk secret.
+
+---
+
+# 15. Hostname Resolution
+
+Example:
+
+```text
+smpn29.exam.example.com
+```
+
+must resolve to:
+
+```text
+smpn29
+```
+
+Flow:
+
+```text
+Request
+ ↓
+Host
+ ↓
+normalized hostname
+ ↓
+subdomain extraction
+ ↓
+TenantSlug
+ ↓
+TenantRepository.findBySlug()
+```
+
+---
+
+# 16. Root Domain
+
+Configure:
+
+```text
+APP_ROOT_DOMAIN=exam.example.com
+```
+
+Then:
+
+```text
+smpn29.exam.example.com
+→ smpn29
+```
+
+Do not hard-code root domain inside resolver.
+
+---
+
+# 17. Hostname Normalization
+
+Handle:
+
+```text
+smpn29.exam.example.com
+smpn29.exam.example.com:3000
+SMPN29.EXAM.EXAMPLE.COM
+```
+
+Normalize:
+
+```text
+lowercase
+remove port
+trim whitespace
+```
+
+Reject malformed hostname.
+
+---
+
+# 18. Forwarded Host Security
+
+Possible inputs:
+
+```text
+host
+x-forwarded-host
+```
+
+If deployment is behind a trusted reverse proxy, forwarded host may be used according to deployment configuration.
+
+Do not blindly trust arbitrary forwarded headers.
+
+---
+
+# 19. Local Development
+
+Recommended:
+
+```text
+smpn29.localhost:3000
+school-a.localhost:3000
+```
+
+Do not silently map all localhost traffic to one tenant.
+
+---
+
+# 20. TenantResolver Contract
+
+```ts
+export interface TenantResolver {
+  resolve(
+    input: TenantResolutionInput,
+  ): Promise<TenantContext | null>;
+}
+```
+
+Suggested:
+
+```ts
+interface TenantResolutionInput {
+  readonly hostname: string;
+}
+```
+
+Keep this abstraction framework-neutral where possible.
+
+---
+
+# 21. resolveCurrentTenant
+
+Expected:
+
+```text
+request
+ ↓
+hostname extraction
+ ↓
+TenantResolver
+ ↓
+TenantContext
+```
+
+Suggested codes:
+
+```text
+TENANT_NOT_FOUND
+TENANT_INACTIVE
+TENANT_SUSPENDED
+TENANT_HOST_INVALID
+```
+
+---
+
+# 22. TenantContext
+
+```ts
+export interface TenantContext {
+  readonly tenantId: string;
+  readonly slug: string;
+  readonly name: string;
+  readonly status: TenantStatus;
+}
+```
+
+Must not contain:
+
+```text
+Moodle token
+encrypted credential
+encryption key
+auth tag
+```
+
+---
+
+# 23. Tenant → MoodleClientFactory
+
+Target:
+
+```ts
+const tenant =
+  await resolveCurrentTenant(
+    request,
+    tenantResolver,
+  );
+
+const moodleClient =
+  await moodleClientFactory.create({
+    tenant,
+    requestId,
+  });
+```
+
+Factory flow:
+
+```text
+TenantContext
+ ↓
+MoodleCredentialProvider
+ ↓
+server-side decrypted credential
+ ↓
+MoodleRestClient
+```
+
+---
+
+# 24. EncryptedTenantCredentialProvider
+
+Responsibilities:
+
+```text
+tenantId
+ ↓
+TenantCredentialRepository
+ ↓
+encrypted credential
+ ↓
+EncryptionProvider.decrypt()
+ ↓
+MoodleCredential
+```
+
+Plain token tidak boleh keluar dari provider/factory infrastructure path selain untuk instantiate `MoodleRestClient`.
+
+---
+
+# 25. Moodle Connection Test
+
+Implement:
+
+```text
+TestTenantMoodleConnectionUseCase
+```
+
+Use:
+
+```text
+core_webservice_get_site_info
+```
+
+through:
+
+```text
+MoodleClientFactory
+→ MoodleRestClient
+```
+
+No direct fetch.
+
+---
+
+# 26. Connection Test Flow
+
+```text
+tenantId
+ ↓
+TenantRepository
+ ↓
+Tenant exists
+ ↓
+MoodleClientFactory
+ ↓
+MoodleRestClient
+ ↓
+core_webservice_get_site_info
+ ↓
+safe connection result DTO
+```
+
+Example:
+
+```ts
+interface TestTenantConnectionResponseDTO {
+  readonly success: boolean;
+  readonly moodleVersion?: string;
+  readonly siteName?: string;
+  readonly message: string;
+}
+```
+
+Never return token or raw Moodle response.
+
+---
+
+# 27. Connection Error Mapping
+
+Suggested:
+
+```text
+invalid token
+→ TENANT_MOODLE_INVALID_CREDENTIAL
+
+timeout
+→ TENANT_MOODLE_TIMEOUT
+
+network
+→ TENANT_MOODLE_UNREACHABLE
+
+invalid response
+→ TENANT_MOODLE_INVALID_RESPONSE
+```
+
+---
+
+# 28. Administrative Status vs Moodle Health
+
+Do not equate temporary Moodle outage with tenant deactivation.
+
+Keep separate:
+
+```text
+Tenant.status
+```
+
+and:
+
+```text
+Moodle connectivity status
+```
+
+A failed connection test must not automatically change `ACTIVE → INACTIVE`.
+
+---
+
+# 29. Tenant Creation
+
+`CreateTenantUseCase` validates:
+
+- [ ] slug.
+- [ ] name.
+- [ ] Moodle base URL.
+- [ ] service shortname.
+- [ ] slug uniqueness.
+- [ ] credential presence when required.
+
+Flow:
+
+```text
+request
+ ↓
+validation
+ ↓
+TenantRules
+ ↓
+slug uniqueness
+ ↓
+create Tenant
+ ↓
+encrypt/store Moodle credential
+```
+
+---
+
+# 30. Tenant Creation Atomicity
+
+Tenant metadata + credential must not silently leave a half-configured tenant.
+
+Prefer transaction where supported.
+
+Otherwise document compensation strategy.
+
+---
+
+# 31. Tenant Update
+
+Separate:
+
+```text
+metadata
+Moodle configuration
+status
+```
+
+If token omitted during metadata update:
+
+```text
+preserve current credential
+```
+
+unless explicit replacement/removal requested.
+
+---
+
+# 32. Secret API Response Rule
+
+Never return:
+
+```text
+moodleToken
+encryptedMoodleToken
+iv
+authTag
+encryption key
+```
+
+Safe response:
+
+```json
+{
+  "id": "tenant-1",
+  "slug": "smpn29",
+  "name": "SMPN 29 Jakarta",
+  "status": "ACTIVE",
+  "moodle": {
+    "baseUrl": "https://moodle.example.com",
+    "serviceShortname": "exam_frontend",
+    "configured": true
+  }
+}
+```
+
+---
+
+# 33. Persistence Mapper
+
+Use:
+
+```text
+TenantPersistenceMapper
+```
+
+Flow:
+
+```text
+ORM/database row
+ ↓
+TenantPersistenceMapper
+ ↓
+Tenant entity
+```
+
+Persistence model must not leak into domain.
+
+---
+
+# 34. Database Rules
+
+Use database/ORM already selected by project.
+
+If Prisma exists, infrastructure may use Prisma.
+
+Do not introduce a second ORM.
+
+---
+
+# 35. Suggested Persistence Model
+
+```text
+Tenant
+------
+id
+slug
+name
+status
+moodleBaseUrl
+moodleServiceShortname
+createdAt
+updatedAt
+
+TenantCredential
+----------------
+id
+tenantId
+encryptedToken
+iv
+authTag
+keyVersion
+createdAt
+updatedAt
+```
+
+Require unique constraint:
+
+```text
+Tenant.slug
+```
+
+---
+
+# 36. ChangeTenantStatusUseCase
+
+Implement:
+
+```text
+ChangeTenantStatusUseCase
+```
+
+Input:
+
+```ts
+{
+  tenantId,
+  status,
+}
+```
+
+Rules:
+
+- [ ] valid status.
+- [ ] tenant exists.
+- [ ] update status.
+- [ ] safe response.
+- [ ] no credential leakage.
+
+---
+
+# 37. Mandatory Workflow
 
 ```text
 RED
@@ -138,876 +946,392 @@ GREEN
 REFACTOR
 ```
 
-Urutan kerja:
-
-1. audit Core Foundation existing;
-2. audit test convention existing;
-3. tulis test encoding terlebih dahulu;
-4. pastikan test gagal karena implementation belum tersedia;
-5. implement encoder minimum;
-6. tulis test error handling;
-7. implement error mapper;
-8. tulis test MoodleRestClient;
-9. implement client;
-10. implement factory dan credential provider;
-11. refactor;
-12. jalankan seluruh verification.
-
-Jangan langsung menulis implementation penuh sebelum RED test tersedia.
+Do not implement production code before RED tests establish expected behavior.
 
 ---
 
-# 5. Moodle REST Contract
+# 38. RED — Domain Tests
 
-Endpoint utama:
+## TenantSlug
+
+- [ ] valid lowercase slug.
+- [ ] hyphen allowed.
+- [ ] whitespace rejected.
+- [ ] underscore rejected.
+- [ ] empty rejected.
+- [ ] normalization policy tested.
+- [ ] max length tested if defined.
+
+## Tenant
+
+- [ ] valid entity creation.
+- [ ] valid status.
+- [ ] invalid state rejected.
+- [ ] credentials not exposed.
+
+## TenantRules
+
+- [ ] ACTIVE usable.
+- [ ] INACTIVE rejected.
+- [ ] SUSPENDED rejected.
+
+---
+
+# 39. RED — Application Tests
+
+## CreateTenantUseCase
+
+- [ ] creates tenant.
+- [ ] duplicate slug rejected.
+- [ ] credential saved through credential port.
+- [ ] credential failure does not silently succeed.
+- [ ] response contains no token.
+
+## UpdateTenantUseCase
+
+- [ ] metadata update.
+- [ ] Moodle config update.
+- [ ] missing new token preserves existing token.
+- [ ] tenant not found.
+
+## GetTenantUseCase
+
+- [ ] tenant exists.
+- [ ] not found.
+- [ ] safe DTO.
+
+## GetTenantBySlugUseCase
+
+- [ ] slug lookup.
+- [ ] unknown slug.
+- [ ] canonical slug handling.
+
+## ChangeTenantStatusUseCase
+
+- [ ] ACTIVE.
+- [ ] INACTIVE.
+- [ ] SUSPENDED.
+- [ ] tenant not found.
+
+## TestTenantMoodleConnectionUseCase
+
+- [ ] success.
+- [ ] invalid credential.
+- [ ] timeout.
+- [ ] unreachable.
+- [ ] no credential configured.
+- [ ] no secret returned.
+
+---
+
+# 40. RED — Tenant Resolution Tests
 
 ```text
-POST {MOODLE_BASE_URL}/webservice/rest/server.php
+smpn29.exam.example.com
+→ smpn29
 ```
-
-Request minimal:
 
 ```text
-wstoken=<TOKEN>
-wsfunction=<FUNCTION_NAME>
-moodlewsrestformat=json
+smpn29.exam.example.com:443
+→ smpn29
 ```
 
-Semua request Moodle REST harus menggunakan `POST`.
+```text
+SMPN29.EXAM.EXAMPLE.COM
+→ smpn29
+```
 
-Jangan melakukan GET dengan token pada query URL.
+Root domain:
+
+```text
+exam.example.com
+→ no tenant
+```
+
+Unrelated domain:
+
+```text
+attacker.example.net
+→ rejected
+```
+
+Unknown tenant:
+
+```text
+unknown.exam.example.com
+→ TENANT_NOT_FOUND
+```
+
+Status:
+
+```text
+INACTIVE
+→ TENANT_INACTIVE
+
+SUSPENDED
+→ TENANT_SUSPENDED
+```
 
 ---
 
-# 6. MoodleRestClient Responsibility
+# 41. RED — Encryption Tests
 
-`MoodleRestClient` bertanggung jawab atas:
-
-- membangun endpoint REST Moodle;
-- menambahkan `wstoken`;
-- menambahkan `wsfunction`;
-- menambahkan `moodlewsrestformat=json`;
-- encode parameter scalar;
-- encode parameter array;
-- encode nested array/object;
-- melakukan HTTP request;
-- timeout;
-- membaca JSON response;
-- mendeteksi Moodle exception response;
-- mendeteksi non-200 HTTP response;
-- normalize error melalui `MoodleErrorMapper`;
-- structured logging yang aman;
-- correlation dengan `requestId`.
-
-`MoodleRestClient` tidak bertanggung jawab atas:
-
-- login flow;
-- tenant lookup;
-- authorization domain;
-- quiz rule;
-- course rule;
-- question mapping;
-- DTO feature;
-- persistence credential.
+- [ ] encrypted value differs from plaintext.
+- [ ] decrypt restores credential.
+- [ ] random IV/nonce produces different ciphertext.
+- [ ] corrupted ciphertext fails.
+- [ ] invalid auth tag fails.
+- [ ] wrong key fails.
+- [ ] safe error does not contain token.
+- [ ] key is not logged.
 
 ---
 
-# 7. Public Client API
+# 42. RED — Credential Isolation Tests
 
-Target penggunaan:
+Scenario:
 
-```ts
-const response = await moodleClient.call<MoodleResponseType>(
-  "core_webservice_get_site_info",
-);
-```
-
-Dengan parameter:
-
-```ts
-const response = await moodleClient.call<MoodleQuizResponse>(
-  "mod_quiz_get_quizzes_by_courses",
-  {
-    courseids: [10, 20, 30],
-  },
-);
-```
-
-Nested:
-
-```ts
-await moodleClient.call(
-  "some_function",
-  {
-    users: [
-      { id: 1, role: "student" },
-      { id: 2, role: "teacher" },
-    ],
-  },
-);
-```
-
-API public tidak boleh meminta caller membangun `URLSearchParams`, `wstoken`, atau `moodlewsrestformat` secara manual.
-
----
-
-# 8. MoodleRequestParameters Type
-
-Gunakan type yang cukup kuat untuk Moodle payload.
-
-```ts
-type MoodlePrimitive =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
-
-type MoodleParameterValue =
-  | MoodlePrimitive
-  | readonly MoodleParameterValue[]
-  | Readonly<Record<string, MoodleParameterValue>>;
-
-export type MoodleRequestParameters =
-  Readonly<Record<string, MoodleParameterValue>>;
-```
-
-Jangan menggunakan `Record<string, any>`.
-
----
-
-# 9. Parameter Encoding — Scalar
-
-## RED
-
-Buat test untuk string, number, boolean, `0`, `false`, dan empty string.
-
-Contoh input:
-
-```ts
-{
-  quizid: 10,
-  password: "abc",
-  finishattempt: true,
-}
-```
-
-Expected encoding harus eksplisit dan konsisten dengan form encoding Moodle/PHP.
-
-`0`, `false`, dan `""` tidak boleh salah dianggap sebagai missing value.
-
----
-
-# 10. Parameter Encoding — Arrays
-
-## RED
-
-Input:
-
-```ts
-{
-  courseids: [10, 20, 30],
-}
+```text
+Tenant A → TOKEN_A
+Tenant B → TOKEN_B
 ```
 
 Expected:
 
 ```text
-courseids[0]=10
-courseids[1]=20
-courseids[2]=30
+Tenant A → TOKEN_A
+Tenant B → TOKEN_B
 ```
 
-Test juga:
+Never cross-bind credentials.
 
-- empty array;
-- array of strings;
-- array of numbers;
-- readonly array.
+Also test:
 
-Tidak boleh menghasilkan `courseids=10,20,30`.
+- [ ] missing credential.
+- [ ] repository failure.
+- [ ] decryption failure.
+- [ ] token absent from logger.
 
 ---
 
-# 11. Parameter Encoding — Nested Objects
+# 43. RED — Connection Tester Tests
 
-## RED
+Use mocked `MoodleRestClient`.
 
-Input:
-
-```ts
-{
-  users: [
-    { id: 10, role: "student" },
-    { id: 20, role: "teacher" },
-  ],
-}
-```
-
-Expected:
-
-```text
-users[0][id]=10
-users[0][role]=student
-users[1][id]=20
-users[1][role]=teacher
-```
-
-Nested object juga harus didukung.
-
----
-
-# 12. Null and Undefined Rules
-
-Tentukan melalui test.
-
-Recommended:
-
-```text
-undefined → omitted
-null      → omitted unless explicit null semantics are required
-```
-
-Jangan encode string literal `undefined` atau `null` tanpa kebutuhan endpoint yang jelas.
-
----
-
-# 13. Moodle Exception Response
-
-Moodle dapat mengembalikan HTTP `200` tetapi body berupa exception.
-
-Contoh:
-
-```json
-{
-  "exception": "moodle_exception",
-  "errorcode": "invalidparameter",
-  "message": "Invalid parameter value detected",
-  "debuginfo": "..."
-}
-```
-
-Client wajib mendeteksi ini sebagai error.
-
-HTTP `200` tidak otomatis berarti success.
-
----
-
-# 14. MoodleExceptionResponse
-
-Buat type guard untuk external JSON yang awalnya diperlakukan sebagai `unknown`.
-
-```ts
-interface MoodleExceptionResponse {
-  readonly exception: string;
-  readonly errorcode: string;
-  readonly message: string;
-  readonly debuginfo?: string;
-}
-```
-
----
-
-# 15. MoodleErrorMapper
-
-Implementasikan:
-
-```text
-Moodle response / transport error
-        ↓
-MoodleErrorMapper
-        ↓
-InfrastructureError / MoodleError
-```
-
-Jika Phase 1 sudah memiliki `MoodleError`, gunakan itu.
-
-Minimal internal metadata:
-
-```text
-code
-message
-statusCode
-moodleErrorCode?
-moodleException?
-requestId?
-cause?
-```
-
-Jangan expose `debuginfo`, stack, atau token ke client.
-
----
-
-# 16. Moodle Error Mapping
-
-Minimal categories:
-
-```text
-invalidtoken / invalid_token
-→ authentication/infrastructure failure
-
-invalidparameter / invalid_parameter_exception
-→ upstream request failure
-
-accesscontrol / nopermissions
-→ upstream permission failure
-
-dmlreadexception / dmlwriteexception
-→ Moodle infrastructure failure
-
-unknown exception
-→ generic Moodle upstream error
-```
-
-Feature-specific mapping dilakukan nanti di repository/application.
-
----
-
-# 17. HTTP Non-200 Handling
-
-## RED
-
-Test minimal:
-
-```text
-400
-401
-403
-404
-429
-500
-502
-503
-```
-
-Client harus menghasilkan normalized infrastructure error.
-
-Suggested stable codes:
-
-```text
-MOODLE_REQUEST_FAILED
-MOODLE_RATE_LIMITED
-MOODLE_BAD_GATEWAY
-MOODLE_UNAVAILABLE
-```
-
----
-
-# 18. Timeout
-
-Semua Moodle request wajib memiliki timeout configurable.
-
-Contoh:
-
-```ts
-const DEFAULT_MOODLE_TIMEOUT_MS = 10_000;
-```
-
-Gunakan `AbortController` atau runtime-compatible equivalent.
-
-Jangan hard-code timeout tersebar.
-
----
-
-# 19. Timeout Test
-
-## RED
-
-```text
-request exceeds timeout
-→ request aborted
-→ normalized MOODLE_TIMEOUT error
-```
-
-Native `AbortError` tidak boleh keluar dari adapter.
-
----
-
-# 20. Network Error Handling
-
-Test `fetch` rejection, connection failure, atau error transport setara.
-
-Semua menjadi normalized infrastructure error, misalnya:
-
-```text
-MOODLE_NETWORK_ERROR
-```
-
-Original error boleh disimpan sebagai `cause` secara internal.
-
----
-
-# 21. Invalid JSON Response
+Do not connect to live Moodle in unit tests.
 
 Test:
 
-```text
-HTTP 200
-body invalid JSON
-→ MOODLE_INVALID_RESPONSE
-```
-
-Raw `SyntaxError` tidak boleh keluar dari adapter.
-
----
-
-# 22. Secret-Safe Logging
-
-## RED
-
-Pastikan logger tidak menerima raw:
-
-```text
-wstoken
-password
-authorization
-cookie
-secret
-clientSecret
-apiKey
-```
-
-Logger boleh menerima:
-
-```text
-requestId
-tenantId
-wsfunction
-durationMs
-httpStatus
-errorCode
-```
-
-Jangan log parameter request lengkap secara default karena dapat berisi jawaban siswa atau PII.
-
----
-
-# 23. Logging Events
-
-Suggested events:
-
-```text
-moodle_request_started
-moodle_request_completed
-moodle_request_failed
-moodle_request_timeout
-```
-
-Catat duration request, tetapi jangan menambah observability framework besar pada Phase 2.
-
----
-
-# 24. Server-Only Boundary
-
-Tambahkan `import "server-only";` pada implementation yang relevan:
-
-```text
-MoodleRestClient
-MoodleClientFactory
-MoodleCredentialProvider concrete server implementation
-```
-
-Pure type tidak perlu dipaksa server-only jika aman untuk type import.
-
----
-
-# 25. MoodleCredential
-
-Representation internal:
-
-```ts
-interface MoodleCredential {
-  readonly baseUrl: string;
-  readonly token: string;
-}
-```
-
-Rules:
-
-- immutable;
-- tidak menjadi API DTO;
-- tidak di-log;
-- tidak tersedia ke Client Component.
-
----
-
-# 26. MoodleCredentialProvider
-
-Buat abstraction:
-
-```ts
-interface MoodleCredentialProvider {
-  getCredential(
-    tenant: TenantContext,
-  ): Promise<MoodleCredential>;
-}
-```
-
-Pada Phase 2 jangan implementasikan Prisma, secret manager, atau persistence nyata.
-
-Gunakan abstraction dan fake provider pada test.
-
----
-
-# 27. MoodleClientFactory
-
-Target:
-
-```ts
-const client = await moodleClientFactory.create({
-  tenant,
-  requestId,
-});
-```
-
-Flow:
-
-```text
-TenantContext
-    ↓
-CredentialProvider
-    ↓
-MoodleCredential
-    ↓
-MoodleRestClient
-```
-
-Factory tidak boleh melakukan login Moodle, resolve hostname, atau menyimpan client global mutable lintas tenant.
-
----
-
-# 28. Multi-Tenant Safety
-
-Test minimal:
-
-```text
-tenant A → credential A
-tenant B → credential B
-```
-
-Dilarang menggunakan mutable global seperti:
-
-```ts
-let currentToken = "...";
-```
-
----
-
-# 29. Base URL Normalization
-
-Kedua input:
-
-```text
-https://moodle.example.com
-https://moodle.example.com/
-```
-
-harus menghasilkan:
-
-```text
-https://moodle.example.com/webservice/rest/server.php
-```
-
-Bukan double slash.
-
----
-
-# 30. URL Security
-
-Base URL hanya menerima scheme yang relevan (`http`/`https`), dengan `https` diwajibkan atau diprioritaskan untuk production.
-
-Jangan menerima arbitrary scheme seperti:
-
-```text
-file:
-ftp:
-javascript:
-data:
-```
-
----
-
-# 31. No Direct Moodle Fetch
-
-Setelah Phase 2 selesai, seluruh komunikasi Moodle harus melalui:
-
-```text
-MoodleRestClient
-```
-
-Feature repository tidak boleh membuat direct `fetch` ke Moodle.
-
----
-
-# 32. No Moodle Response Leakage
-
-Future flow:
-
-```text
-MoodleRestClient
-    ↓
-MoodleFeatureRepository
-    ↓
-MoodleFeatureMapper
-    ↓
-Internal DTO
-```
-
-Phase 2 belum membuat feature mapper.
-
----
-
-# 33. Fetch Dependency for Testing
-
-Design agar client dapat diuji tanpa network nyata.
-
-Gunakan dependency injection terhadap fetcher atau mocking convention existing.
-
-Unit test tidak boleh memanggil server Moodle nyata.
-
----
-
-# 34. MoodleRestClient Constructor
-
-Prefer config object:
-
-```ts
-new MoodleRestClient({
-  baseUrl,
-  token,
-  timeoutMs,
-  logger,
-  requestId,
-  tenantId,
-});
-```
-
-Hindari banyak positional arguments.
-
----
-
-# 35. Generic Response Type
-
-Target:
-
-```ts
-async call<TResponse>(
-  wsfunction: string,
-  parameters?: MoodleRequestParameters,
-): Promise<TResponse>
-```
-
-Dilarang `Promise<any>`.
-
----
-
-# 36. Response Warnings
-
-Presence `warnings` pada response Moodle bukan otomatis exception.
-
-Business interpretation warning dilakukan oleh feature repository kemudian.
-
----
-
-# 37. Retry Scope
-
-Jangan implementasikan broad automatic retry pada Phase 2.
-
-Mutation seperti:
-
-```text
-mod_quiz_start_attempt
-mod_quiz_process_attempt
-core_user_create_users
-```
-
-bisa memiliki side effect dan tidak boleh blind retry.
-
----
-
-# 38. Cache Scope
-
-Jangan implementasikan caching di `MoodleRestClient`.
-
-Caching adalah concern repository/application/cache adapter.
-
----
-
-# 39. Authentication Scope Guard
-
-Jangan implementasikan `/login/token.php` di generic `MoodleRestClient.call()`.
-
-Token endpoint memiliki contract berbeda dari standard `wsfunction` REST endpoint.
-
-Authentication implementation dilakukan di phase berikutnya.
-
----
-
-# 40. File API Scope Guard
-
-Jangan implementasikan:
-
-```text
-/webservice/upload.php
-/webservice/pluginfile.php
-```
-
-pada Phase 2 kecuali fondasi minimal memang dibutuhkan.
-
-File transfer akan ditangani module/infrastructure terpisah.
-
----
-
-# 41. Import Boundary
-
-Allowed:
-
-```text
-modules/*/infrastructure
-→ core/moodle
-```
-
-Not allowed:
-
-```text
-modules/*/domain
-→ core/moodle
-
-modules/*/application
-→ core/moodle
-
-sections/*
-→ core/moodle
-
-presentation/hooks
-→ core/moodle
-```
-
----
-
-# 42. Required RED Tests
-
-## MoodleRequestEncoder
-
-- [ ] scalar string encoding;
-- [ ] scalar integer encoding;
-- [ ] scalar boolean encoding;
-- [ ] zero preserved;
-- [ ] false preserved appropriately;
-- [ ] empty string preserved;
-- [ ] undefined omitted;
-- [ ] null handling documented/tested;
-- [ ] numeric array;
-- [ ] string array;
-- [ ] nested object;
-- [ ] array of objects;
-- [ ] deeply nested supported structure.
-
-## MoodleErrorMapper
-
-- [ ] Moodle exception maps correctly;
-- [ ] `invalidtoken`;
-- [ ] `invalidparameter`;
-- [ ] unknown Moodle exception;
-- [ ] network error;
-- [ ] timeout error;
-- [ ] HTTP 5xx;
-- [ ] `debuginfo` not exposed.
-
-## MoodleRestClient
-
-- [ ] correct REST endpoint;
-- [ ] POST method;
-- [ ] correct content type;
-- [ ] token included internally in body;
-- [ ] `wsfunction` included;
-- [ ] `moodlewsrestformat=json`;
-- [ ] parameters encoded correctly;
-- [ ] HTTP 200 success;
-- [ ] Moodle exception with HTTP 200 becomes failure;
-- [ ] non-200 normalized;
-- [ ] timeout aborts;
-- [ ] invalid JSON normalized;
-- [ ] logger never receives raw token.
-
-## MoodleClientFactory
-
-- [ ] resolves credentials for tenant;
-- [ ] creates client with correct tenant config;
-- [ ] tenant A/B isolation;
-- [ ] provider failure becomes safe infrastructure error.
-
----
-
-# 43. Suggested Test Fixtures
-
-Gunakan fake data:
-
-```text
-https://moodle-a.example.test
-https://moodle-b.example.test
-TOKEN_A
-TOKEN_B
-```
-
-Jangan gunakan credential production.
+- [ ] `core_webservice_get_site_info` success.
+- [ ] invalid credential mapping.
+- [ ] timeout mapping.
+- [ ] network mapping.
+- [ ] malformed Moodle response.
+- [ ] safe response.
 
 ---
 
 # 44. GREEN Implementation Order
 
-Implementasikan dalam urutan:
-
 ```text
-1. MoodleRequestParameters
-2. MoodleRequestEncoder
-3. MoodleExceptionResponse type guard
-4. MoodleErrorMapper
-5. MoodleRestClient
-6. MoodleCredential
-7. MoodleCredentialProvider
-8. MoodleClientFactory
+1. TenantStatus
+2. TenantSlug
+3. Tenant entity
+4. TenantRules
+5. Tenant DTOs
+6. TenantRepository
+7. TenantCredentialRepository
+8. TenantPersistenceMapper
+9. DatabaseTenantRepository
+10. DatabaseTenantCredentialRepository
+11. encryption provider integration
+12. EncryptedTenantCredentialProvider
+13. Tenant resolver
+14. resolveCurrentTenant
+15. tenant use cases
+16. MoodleTenantConnectionTester
+17. TestTenantMoodleConnectionUseCase
+18. MoodleClientFactory integration
 ```
 
 ---
 
-# 45. Suggested Infrastructure Error Codes
+# 45. No Mutable Global Tenant State
 
-```text
-MOODLE_REQUEST_FAILED
-MOODLE_TIMEOUT
-MOODLE_NETWORK_ERROR
-MOODLE_INVALID_RESPONSE
-MOODLE_EXCEPTION
-MOODLE_INVALID_TOKEN
-MOODLE_INVALID_PARAMETER
-MOODLE_FORBIDDEN
-MOODLE_RATE_LIMITED
-MOODLE_BAD_GATEWAY
-MOODLE_UNAVAILABLE
+Forbidden:
+
+```ts
+let currentTenant;
+let activeTenant;
+let activeMoodleToken;
 ```
 
-Jangan menambahkan business codes seperti `ATTEMPT_EXPIRED` atau `COURSE_NOT_FOUND` ke Core Moodle Adapter.
+Tenant context must be request-scoped.
 
 ---
 
-# 46. Biome / TypeScript Quality
+# 46. API Routes
 
-Requirements:
+If tenant administration API is included:
 
-- [ ] TypeScript strict;
-- [ ] no unexplained `any`;
-- [ ] `import type` untuk type-only imports;
-- [ ] readonly config/type bila sesuai;
-- [ ] no unused code;
-- [ ] no disabled lint rule tanpa alasan;
-- [ ] no cyclic dependency.
+```text
+GET    /api/v1/tenants
+POST   /api/v1/tenants
+
+GET    /api/v1/tenants/:tenantId
+PATCH  /api/v1/tenants/:tenantId
+
+PATCH  /api/v1/tenants/:tenantId/status
+
+POST   /api/v1/tenants/:tenantId/test-connection
+```
+
+If admin authorization is not ready, do not expose unsafe management routes publicly merely to satisfy this issue.
 
 ---
 
-# 47. Verification Commands
+# 47. Presentation Hook
 
-Jalankan minimal:
+If required:
+
+```text
+modules/tenant/presentation/hooks/useTenantApi.ts
+```
+
+It may only call internal `/api/v1/tenants/*`.
+
+---
+
+# 48. Logging
+
+Safe:
+
+```text
+tenantId
+tenantSlug
+requestId
+event
+```
+
+Forbidden:
+
+```text
+Moodle token
+encrypted token
+IV
+authTag
+encryption key
+```
+
+Suggested events:
+
+```text
+tenant_resolved
+tenant_resolution_failed
+tenant_created
+tenant_updated
+tenant_status_changed
+tenant_moodle_connection_tested
+tenant_moodle_connection_failed
+```
+
+---
+
+# 49. Error Codes
+
+Suggested:
+
+```text
+TENANT_NOT_FOUND
+TENANT_SLUG_INVALID
+TENANT_SLUG_EXISTS
+TENANT_INACTIVE
+TENANT_SUSPENDED
+TENANT_HOST_INVALID
+TENANT_CONFIGURATION_INVALID
+TENANT_CREDENTIAL_NOT_CONFIGURED
+TENANT_CREDENTIAL_DECRYPTION_FAILED
+TENANT_MOODLE_INVALID_CREDENTIAL
+TENANT_MOODLE_TIMEOUT
+TENANT_MOODLE_UNREACHABLE
+TENANT_MOODLE_INVALID_RESPONSE
+```
+
+---
+
+# 50. Layer Boundaries
+
+## Domain may know
+
+```text
+Tenant
+TenantStatus
+TenantSlug
+TenantRepository
+TenantRules
+```
+
+## Domain must not know
+
+```text
+Prisma
+PostgreSQL
+crypto implementation
+MoodleRestClient
+NextRequest
+headers
+cookies
+```
+
+## Application may orchestrate
+
+```text
+TenantRepository
+TenantCredentialRepository
+TenantConnectionTester
+```
+
+## Application must not directly use
+
+```text
+Prisma
+fetch
+crypto
+Moodle REST
+```
+
+## Infrastructure may implement/use
+
+```text
+DatabaseTenantRepository
+DatabaseTenantCredentialRepository
+EncryptedTenantCredentialProvider
+MoodleTenantConnectionTester
+database client
+EncryptionProvider
+MoodleRestClient
+```
+
+---
+
+# 51. Security Requirements
+
+- [ ] Moodle token encrypted at rest.
+- [ ] encryption key server-only.
+- [ ] no token in API response.
+- [ ] no token in logs.
+- [ ] no cross-tenant credential access.
+- [ ] root domain configurable.
+- [ ] hostname validation implemented.
+- [ ] forwarded host trust documented.
+- [ ] tenant status enforced before Moodle usage.
+- [ ] inactive/suspended tenant cannot obtain normal Moodle client.
+
+---
+
+# 52. Verification Commands
+
+Run:
 
 ```bash
 npm run typecheck
@@ -1016,145 +1340,114 @@ npm run test
 npm run build
 ```
 
-Gunakan package manager yang sudah dipakai repository. Jangan mengganti package manager.
-
-Selama development jalankan focused tests sesuai script yang tersedia.
+Use the package manager/scripts already configured.
 
 ---
 
-# 48. Security Verification
+# 53. Security Scan Before Completion
 
-Sebelum selesai, audit repository untuk:
-
-```text
-/webservice/rest/server.php
-wstoken
-moodlewsrestformat
-```
-
-Expected: hanya muncul pada Core Moodle Adapter, test, atau dokumentasi yang memang relevan.
-
-Audit juga:
+Search for:
 
 ```text
-console.log(token)
-logger.info({ token })
-logger.debug({ wstoken })
+moodleToken
+encryptedToken
+TENANT_CREDENTIAL_ENCRYPTION_KEY
 ```
 
-Semua harus tidak ada.
+Verify:
+
+- [ ] token never returned.
+- [ ] token never logged.
+- [ ] encryption key is server-only.
+- [ ] no secret uses `NEXT_PUBLIC_*`.
+
+Search for mutable global tenant state:
+
+```text
+activeTenant
+currentTenant
+activeMoodleToken
+```
+
+Must not exist.
 
 ---
 
-# 49. Required Final Report
+# 54. Acceptance Criteria
 
-Setelah implementasi, report:
+## Tenant Domain
 
-```text
-1. Files created
-2. Files modified
-3. RED tests implemented
-4. GREEN implementation completed
-5. Moodle parameter encoding decisions
-6. Error mapping decisions
-7. Timeout configuration
-8. Secret logging protections
-9. Verification results
-10. Remaining Phase 2 risks / TODO
-```
+- [ ] Tenant entity implemented.
+- [ ] explicit TenantStatus.
+- [ ] canonical TenantSlug.
+- [ ] no credentials exposed by entity.
+- [ ] rules tested.
 
-Tambahkan:
+## Repository
 
-```text
-Moodle direct communication audit: PASS / FAIL
-Browser secret exposure audit: PASS / FAIL
-```
+- [ ] TenantRepository implemented.
+- [ ] infrastructure repository implemented.
+- [ ] lookup by slug.
+- [ ] lookup by ID.
+- [ ] unique slug enforced.
+- [ ] persistence errors normalized.
 
----
+## Resolution
 
-# 50. Acceptance Criteria
+- [ ] hostname normalized.
+- [ ] tenant slug extracted from subdomain.
+- [ ] root domain configurable.
+- [ ] invalid host rejected.
+- [ ] unknown tenant handled.
+- [ ] inactive tenant rejected.
+- [ ] suspended tenant rejected.
+- [ ] `resolveCurrentTenant` returns safe context.
 
-## Request Encoding
+## Credential Security
 
-- [ ] scalar parameter encoding passes;
-- [ ] numeric array encoding passes;
-- [ ] string array encoding passes;
-- [ ] nested object encoding passes;
-- [ ] array-of-object encoding passes;
-- [ ] zero preserved;
-- [ ] false behavior tested;
-- [ ] undefined behavior tested;
-- [ ] null behavior documented/tested.
+- [ ] Moodle token encrypted at rest.
+- [ ] authenticated encryption.
+- [ ] key server-only.
+- [ ] token absent from API.
+- [ ] token absent from logs.
+- [ ] A/B credential isolation tested.
+- [ ] decryption only on server infrastructure path.
 
-## Moodle Error Handling
+## Moodle Integration
 
-- [ ] HTTP 200 Moodle exception detected;
-- [ ] non-200 normalized;
-- [ ] timeout normalized;
-- [ ] network error normalized;
-- [ ] invalid JSON normalized;
-- [ ] Moodle debug info not client-visible.
-
-## MoodleRestClient
-
-- [ ] uses POST;
-- [ ] uses standard REST endpoint;
-- [ ] injects token internally;
-- [ ] injects `wsfunction`;
-- [ ] injects `moodlewsrestformat=json`;
-- [ ] configurable timeout;
-- [ ] structured logging;
-- [ ] request duration logging;
-- [ ] no automatic mutation retry;
-- [ ] no caching responsibility.
-
-## Factory
-
-- [ ] `MoodleClientFactory` implemented;
-- [ ] credential provider injected;
-- [ ] tenant A/B isolation tested;
-- [ ] no global mutable credential state.
-
-## Credential
-
-- [ ] `MoodleCredentialProvider` abstraction implemented;
-- [ ] credential immutable;
-- [ ] credential not exposed to client;
-- [ ] no database persistence in this phase.
-
-## Security
-
-- [ ] client implementation server-only;
-- [ ] token never appears in returned API data;
-- [ ] token never appears in logs;
-- [ ] sensitive parameters not logged by default;
-- [ ] no real credential in tests.
-
-## Architecture
-
-- [ ] domain does not import Core Moodle adapter;
-- [ ] application does not import Core Moodle adapter;
-- [ ] presentation does not import Core Moodle adapter;
-- [ ] future infrastructure repositories can use `MoodleRestClient`;
-- [ ] no feature-specific business rule added.
+- [ ] `MoodleCredentialProvider` integrated with tenant storage.
+- [ ] `MoodleClientFactory` builds client from TenantContext.
+- [ ] Moodle connection test implemented.
+- [ ] uses `core_webservice_get_site_info`.
+- [ ] failures normalized.
+- [ ] no direct Moodle fetch.
 
 ## Quality
 
-- [ ] TypeScript passes;
-- [ ] Biome passes;
-- [ ] tests pass;
-- [ ] build passes;
-- [ ] no unexplained `any`;
-- [ ] no dead code;
-- [ ] no cyclic dependencies.
+- [ ] RED tests created.
+- [ ] GREEN implementation passes.
+- [ ] REFACTOR completed.
+- [ ] TypeScript passes.
+- [ ] Biome passes.
+- [ ] tests pass.
+- [ ] build passes.
+- [ ] no unexplained `any`.
+- [ ] no dead code.
+- [ ] no circular dependencies.
 
 ---
 
-# 51. Definition of Done
+# 55. Definition of Done
 
-Phase 2 selesai ketika infrastructure adapter dapat melakukan:
+Phase 3 selesai ketika request dapat melakukan:
 
 ```ts
+const tenant =
+  await resolveCurrentTenant(
+    request,
+    tenantResolver,
+  );
+
 const moodleClient =
   await moodleClientFactory.create({
     tenant,
@@ -1167,65 +1460,136 @@ const siteInfo =
   );
 ```
 
-tanpa caller mengetahui:
+dengan jaminan:
 
 ```text
-Moodle token
-REST endpoint
-URLSearchParams
-parameter nesting syntax
-timeout implementation
-Moodle exception shape
-network error mapping
-secret sanitization
+hostname menentukan tenant
+tenant menentukan credential
+credential encrypted at rest
+credential tenant tidak bocor lintas tenant
+inactive/suspended tenant ditolak
+Moodle token tidak keluar ke browser
 ```
 
-Seluruh external failure harus berubah menjadi application-safe infrastructure error.
-
 ---
 
-# 52. Explicit Non-Goals
-
-Phase 2 tidak mencakup:
-
-- [ ] Moodle login implementation;
-- [ ] auth session implementation;
-- [ ] course repository;
-- [ ] quiz repository;
-- [ ] quiz attempt repository;
-- [ ] question repository;
-- [ ] grade repository;
-- [ ] file upload/download;
-- [ ] custom Moodle plugin;
-- [ ] Prisma tenant storage;
-- [ ] Redis;
-- [ ] caching;
-- [ ] generic retry framework;
-- [ ] UI;
-- [ ] feature API routes.
-
-Jangan memperluas scope tanpa requirement baru.
-
----
-
-# 53. Next Phase Readiness
-
-Setelah issue ini selesai, dependency chain menjadi:
+# 56. Expected Final Flow
 
 ```text
-Core Foundation
-    ↓
-Moodle REST Adapter
-    ↓
-Tenant Persistence / Configuration
-    ↓
+https://smpn29.exam.example.com
+        ↓
+smpn29.exam.example.com
+        ↓
+smpn29
+        ↓
+TenantRepository.findBySlug("smpn29")
+        ↓
+Tenant
+        ↓
+status check
+        ↓
+TenantContext
+        ↓
+MoodleCredentialProvider
+        ↓
+decrypt credential server-side
+        ↓
+MoodleClientFactory
+        ↓
+MoodleRestClient
+        ↓
+Moodle milik tenant SMPN29
+```
+
+Another tenant:
+
+```text
+school-b.exam.example.com
+→ Tenant B
+→ Credential B
+→ Moodle B
+```
+
+must resolve independently.
+
+---
+
+# 57. Explicit Non-Goals
+
+Do not implement during Phase 3:
+
+- [ ] user login.
+- [ ] student authentication.
+- [ ] teacher authentication.
+- [ ] Moodle `/login/token.php` user flow.
+- [ ] courses.
+- [ ] quizzes.
+- [ ] quiz attempts.
+- [ ] questions.
+- [ ] grades.
+- [ ] files.
+- [ ] notifications.
+- [ ] exam monitoring.
+- [ ] billing/subscription.
+- [ ] complex tenant cache.
+- [ ] unrelated UI.
+
+---
+
+# 58. Required Final Report
+
+After implementation report:
+
+```text
+1. Files created
+2. Files modified
+3. RED tests added
+4. GREEN implementation completed
+5. Tenant slug policy
+6. Hostname resolution strategy
+7. Credential encryption strategy
+8. MoodleClientFactory integration
+9. Connection test behavior
+10. Multi-tenant isolation verification
+11. TypeScript/Biome/test/build results
+12. Remaining Phase 3 TODO / risks
+```
+
+Also include:
+
+```text
+Tenant isolation audit: PASS / FAIL
+Credential exposure audit: PASS / FAIL
+Hostname resolution audit: PASS / FAIL
+Moodle client tenant-binding audit: PASS / FAIL
+```
+
+---
+
+# 59. Next Phase Readiness
+
+After Phase 3:
+
+```text
+Request
+ ↓
+resolveCurrentTenant
+ ↓
+TenantContext
+ ↓
+Moodle tenant configuration
+ ↓
 Authentication
-    ↓
-Courses
-    ↓
-Quizzes
-    ↓
-Quiz Attempts
+ ↓
+CurrentActor
 ```
 
-Phase 2 dinyatakan berhasil hanya jika Moodle telah menjadi **implementation detail di sisi server**, bukan dependency yang tersebar di seluruh codebase.
+Authentication must not occur before tenant resolution for normal tenant-scoped requests.
+
+Recommended next issue:
+
+```text
+Phase 4 — Authentication
+```
+
+Phase 3 berhasil hanya ketika **tenant identity dan Moodle credential selection deterministic, isolated, encrypted, server-only, dan tersedia sebelum authentication dimulai**.

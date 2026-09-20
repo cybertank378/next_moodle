@@ -1,4 +1,4 @@
-import { SensitiveData } from "../security/SensitiveData";
+import { SensitiveData } from "@/core/security/SensitiveData";
 import type { LogContext } from "./LogContext";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";

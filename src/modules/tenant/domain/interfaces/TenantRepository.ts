@@ -1,7 +1,9 @@
-import type { Tenant } from "../entities/Tenant";
+import type { Tenant } from "@/modules/tenant/domain/entities/Tenant";
 
 export interface TenantRepository {
-  findById(id: string): Promise<Tenant | null>;
+  findById(tenantId: string): Promise<Tenant | null>;
   findBySlug(slug: string): Promise<Tenant | null>;
-  save(tenant: Tenant): Promise<void>;
+  create(tenant: Tenant): Promise<Tenant>;
+  update(tenant: Tenant): Promise<Tenant>;
+  existsBySlug(slug: string): Promise<boolean>;
 }

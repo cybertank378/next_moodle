@@ -1,6 +1,6 @@
 import "server-only";
-import { MoodleError } from "../errors/MoodleError";
-import { createLogger, type ILogger } from "../logger";
+import { MoodleError } from "@/core/errors/MoodleError";
+import { createLogger, type ILogger } from "@/core/logger";
 import type { MoodleClientConfig } from "./MoodleClientConfig";
 import { MoodleErrorMapper } from "./MoodleErrorMapper";
 import {

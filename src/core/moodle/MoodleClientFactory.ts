@@ -1,7 +1,7 @@
 import "server-only";
-import { InfrastructureError } from "../errors/InfrastructureError";
-import type { ILogger } from "../logger";
-import type { TenantContext } from "../tenant/TenantContext";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import type { ILogger } from "@/core/logger";
+import type { TenantContext } from "@/core/tenant/TenantContext";
 import {
   DefaultMoodleCredentialProvider,
   type MoodleCredentialProvider,

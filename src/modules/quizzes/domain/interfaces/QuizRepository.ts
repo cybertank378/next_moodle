@@ -1,5 +1,5 @@
-import type { QuizAccessResponseDTO } from "../dto";
-import type { Quiz } from "../entities/Quiz";
+import type { QuizAccessResponseDTO } from "@/modules/quizzes/domain/dto";
+import type { Quiz } from "@/modules/quizzes/domain/entities/Quiz";
 
 export interface QuizRepository {
   getQuizzesByCourse(

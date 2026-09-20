@@ -1,8 +1,8 @@
 import type {
   AttemptSummaryResponseDTO,
   SaveQuizAnswerRequestDTO,
-} from "../dto";
-import type { QuizAttempt } from "../entities/QuizAttempt";
+} from "@/modules/quiz-attempts/domain/dto";
+import type { QuizAttempt } from "@/modules/quiz-attempts/domain/entities/QuizAttempt";
 
 export interface QuizAttemptRepository {
   getAttemptById(

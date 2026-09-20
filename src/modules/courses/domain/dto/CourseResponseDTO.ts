@@ -1,4 +1,4 @@
-import type { CourseVisibility } from "../types/CourseVisibility";
+import type { CourseVisibility } from "@/modules/courses/domain/types/CourseVisibility";
 
 export interface CourseResponseDTO {
   readonly id: string;

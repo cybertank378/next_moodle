@@ -1,4 +1,4 @@
-import { AppError } from "../errors/AppError";
+import { AppError } from "@/core/errors/AppError";
 import { type ApiFailureResponse, ApiResponse } from "./ApiResponse";
 import { HttpStatus } from "./HttpStatus";
 

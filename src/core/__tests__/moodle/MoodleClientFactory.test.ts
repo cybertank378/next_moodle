@@ -8,12 +8,14 @@ describe("MoodleClientFactory", () => {
   const tenantA: TenantContext = {
     tenantId: "tenant_a",
     slug: "tenant-a",
+    name: "Tenant A",
     status: "ACTIVE",
   };
 
   const tenantB: TenantContext = {
     tenantId: "tenant_b",
     slug: "tenant-b",
+    name: "Tenant B",
     status: "ACTIVE",
   };
 

@@ -11,6 +11,7 @@ describe("resolveCurrentActor", () => {
   const currentTenant: TenantContext = {
     tenantId: "tenant-a",
     slug: "tenant-a-slug",
+    name: "Tenant A",
     status: "ACTIVE",
   };
 
