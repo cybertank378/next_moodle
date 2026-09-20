@@ -1,949 +1,347 @@
-# ISSUE: Initial Architecture, Planning & Scaffolding — Moodle Exam SaaS
+# ISSUE: Phase 1 — Core Foundation
 
-## 1. Objective
+## Objective
 
-Membangun fondasi aplikasi SaaS ujian berbasis:
+Implementasikan **Phase 1 — Core Foundation** untuk project SaaS ujian berbasis **Next.js + TypeScript + Hexagonal Architecture**.
 
-- **Next.js** sebagai frontend + BFF/API server.
-- **Moodle 5.x** sebagai LMS backend, Quiz Engine, Question Engine, Gradebook, enrolment, dan source of truth untuk attempt.
-- **Hexagonal Architecture** untuk setiap module.
-- **Multi-tenant** sebagai requirement inti.
-- **TypeScript strict**.
-- **Vitest + TDD (RED → GREEN → REFACTOR)**.
-- **shadcn/ui** sebagai primitive UI.
-- **Atomic UI** pada `sections/*`.
-- Moodle hanya boleh dipanggil melalui **Infrastructure Adapter**.
-- Browser tidak pernah berkomunikasi langsung dengan Moodle.
+Fokus fase ini adalah membangun fondasi reusable yang akan digunakan seluruh module berikutnya.
+
+Jangan mengimplementasikan Moodle integration, tenant persistence/database, authentication provider, atau feature business lain pada fase ini.
 
 ---
 
-# 2. Architectural Direction
+# 1. Architectural Context
 
-## 2.1 Request Flow
-
-```text
-Browser
-  ↓
-sections/*
-  ↓
-modules/*/presentation/hooks
-  ↓
-app/api/v1/*
-  ↓
-Application Use Case
-  ↓
-Domain Port
-  ↓
-Infrastructure Adapter
-  ↓
-Moodle REST / Database / Cache
-```
-
-## 2.2 Dependency Direction
+Project menggunakan Hexagonal Architecture dengan dependency direction:
 
 ```text
-Domain
-  ↑
-Application
-  ↑
-Infrastructure
-  ↑
+Presentation
+    ↓
 API Route
-
-Presentation Hook
-  ↓
-Next.js API
+    ↓
+Application
+    ↓
+Domain
+    ↑
+Infrastructure
 ```
 
-Rules:
+Core Foundation berada di:
 
-- `domain` tidak import React, Next.js, Moodle, Prisma, `fetch`, atau infrastructure.
-- `application` hanya bergantung pada domain/core abstraction.
-- `infrastructure` mengimplementasikan port dari domain.
-- `presentation/hooks` hanya memanggil `/api/v1/*`.
-- `sections/atoms` dan `sections/molecules` tidak memanggil API.
-- API hanya dipanggil dari hook yang digunakan organism.
-- `route.ts` harus tipis dan tidak memuat business rules.
+```text
+src/core/
+```
+
+dan boleh digunakan lintas module.
+
+Core tidak boleh mengetahui detail bisnis spesifik seperti:
+
+```text
+Quiz
+Course
+Question
+Exam
+Grade
+Moodle
+```
+
+Core harus generic dan reusable.
 
 ---
 
-# 3. Repository Scaffolding
+# 2. Target Structure
+
+Buat atau lengkapi struktur berikut:
 
 ```text
-/
-├── public/
-│   ├── favicon.svg
-│   └── images/
-│       ├── brand/
-│       ├── empty-state/
-│       └── exam/
+src/core/
+├── base/
+│   ├── BaseEntity.ts
+│   ├── BaseService.ts
+│   └── Result.ts
 │
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   │
-│   │   ├── (auth)/
-│   │   │   ├── layout.tsx
-│   │   │   ├── login/
-│   │   │   │   └── page.tsx
-│   │   │   └── forgot-password/
-│   │   │       └── page.tsx
-│   │   │
-│   │   ├── (dashboard)/
-│   │   │   ├── layout.tsx
-│   │   │   ├── dashboard/
-│   │   │   │   └── page.tsx
-│   │   │   ├── courses/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [courseId]/
-│   │   │   │       └── page.tsx
-│   │   │   ├── exams/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [quizId]/
-│   │   │   │       ├── page.tsx
-│   │   │   │       └── attempt/
-│   │   │   │           └── [attemptId]/
-│   │   │   │               └── page.tsx
-│   │   │   ├── results/
-│   │   │   │   └── page.tsx
-│   │   │   └── administration/
-│   │   │       ├── users/
-│   │   │       ├── courses/
-│   │   │       ├── exams/
-│   │   │       ├── questions/
-│   │   │       ├── monitoring/
-│   │   │       └── tenants/
-│   │   │
-│   │   └── api/
-│   │       └── v1/
-│   │           ├── auth/
-│   │           │   ├── login/route.ts
-│   │           │   ├── logout/route.ts
-│   │           │   └── me/route.ts
-│   │           ├── users/
-│   │           │   ├── route.ts
-│   │           │   └── [userId]/route.ts
-│   │           ├── courses/
-│   │           │   ├── route.ts
-│   │           │   └── [courseId]/
-│   │           │       ├── route.ts
-│   │           │       ├── contents/route.ts
-│   │           │       └── quizzes/route.ts
-│   │           ├── quizzes/
-│   │           │   └── [quizId]/
-│   │           │       ├── route.ts
-│   │           │       ├── access/route.ts
-│   │           │       ├── grade/route.ts
-│   │           │       └── attempts/route.ts
-│   │           ├── attempts/
-│   │           │   └── [attemptId]/
-│   │           │       ├── route.ts
-│   │           │       ├── answers/route.ts
-│   │           │       ├── summary/route.ts
-│   │           │       ├── submit/route.ts
-│   │           │       └── review/route.ts
-│   │           ├── questions/
-│   │           ├── grades/
-│   │           ├── enrolments/
-│   │           ├── groups/
-│   │           ├── notifications/
-│   │           ├── exam-monitor/
-│   │           └── tenants/
-│   │
-│   ├── components/
-│   │   └── ui/
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── checkbox.tsx
-│   │       ├── dialog.tsx
-│   │       ├── dropdown-menu.tsx
-│   │       ├── input.tsx
-│   │       ├── label.tsx
-│   │       ├── select.tsx
-│   │       ├── skeleton.tsx
-│   │       ├── table.tsx
-│   │       ├── tabs.tsx
-│   │       ├── textarea.tsx
-│   │       └── tooltip.tsx
-│   │
-│   ├── core/
-│   │   ├── auth/
-│   │   │   ├── CurrentActor.ts
-│   │   │   ├── Session.ts
-│   │   │   ├── SessionRepository.ts
-│   │   │   └── resolveCurrentActor.ts
-│   │   ├── base/
-│   │   │   ├── BaseEntity.ts
-│   │   │   ├── BaseService.ts
-│   │   │   └── Result.ts
-│   │   ├── config/
-│   │   │   ├── env.ts
-│   │   │   └── serverEnv.ts
-│   │   ├── errors/
-│   │   │   ├── AppError.ts
-│   │   │   ├── DomainError.ts
-│   │   │   ├── ForbiddenError.ts
-│   │   │   ├── InfrastructureError.ts
-│   │   │   ├── MoodleError.ts
-│   │   │   ├── NotFoundError.ts
-│   │   │   ├── UnauthorizedError.ts
-│   │   │   └── ValidationError.ts
-│   │   ├── http/
-│   │   │   ├── ApiErrorResponse.ts
-│   │   │   ├── ApiResponse.ts
-│   │   │   ├── HttpStatus.ts
-│   │   │   └── withApiHandler.ts
-│   │   ├── logger/
-│   │   │   ├── Logger.ts
-│   │   │   └── createLogger.ts
-│   │   ├── moodle/
-│   │   │   ├── MoodleClientFactory.ts
-│   │   │   ├── MoodleCredentialProvider.ts
-│   │   │   ├── MoodleErrorMapper.ts
-│   │   │   ├── MoodleRestClient.ts
-│   │   │   └── types/
-│   │   │       ├── MoodleExceptionResponse.ts
-│   │   │       └── MoodleRequestParameters.ts
-│   │   ├── security/
-│   │   │   ├── EncryptionProvider.ts
-│   │   │   ├── RateLimiter.ts
-│   │   │   └── RequestId.ts
-│   │   ├── tenant/
-│   │   │   ├── TenantContext.ts
-│   │   │   ├── TenantResolver.ts
-│   │   │   └── resolveCurrentTenant.ts
-│   │   └── utils/
-│   │       ├── assertNever.ts
-│   │       ├── date.ts
-│   │       └── pagination.ts
-│   │
-│   ├── modules/
-│   │   ├── auth/
-│   │   ├── tenant/
-│   │   ├── users/
-│   │   ├── courses/
-│   │   ├── enrolments/
-│   │   ├── groups/
-│   │   ├── quizzes/
-│   │   ├── quiz-attempts/
-│   │   ├── questions/
-│   │   ├── grades/
-│   │   ├── files/
-│   │   ├── notifications/
-│   │   ├── exam-monitor/
-│   │   └── exam-administration/
-│   │
-│   ├── sections/
-│   │   ├── auth/
-│   │   ├── dashboard/
-│   │   ├── courses/
-│   │   ├── quizzes/
-│   │   ├── quiz-attempts/
-│   │   ├── questions/
-│   │   ├── grades/
-│   │   ├── exam-monitor/
-│   │   └── administration/
-│   │
-│   ├── shared-ui/
-│   │   ├── component/
-│   │   │   ├── EmptyState.tsx
-│   │   │   ├── ErrorState.tsx
-│   │   │   ├── Pagination.tsx
-│   │   │   ├── SearchField.tsx
-│   │   │   ├── SelectField.tsx
-│   │   │   ├── StatusBadge.tsx
-│   │   │   └── TableSkeleton.tsx
-│   │   ├── feedback/
-│   │   │   └── toast.ts
-│   │   ├── layout/
-│   │   └── navigation/
-│   │
-│   ├── styles/
-│   │   └── globals.css
-│   │
-│   └── e2e/
-│       └── tests/
-│           ├── auth.cy.ts
-│           ├── student-exam.cy.ts
-│           └── admin-exam.cy.ts
+├── errors/
+│   ├── AppError.ts
+│   ├── DomainError.ts
+│   ├── ValidationError.ts
+│   ├── UnauthorizedError.ts
+│   ├── ForbiddenError.ts
+│   ├── NotFoundError.ts
+│   ├── ConflictError.ts
+│   └── InfrastructureError.ts
 │
-├── .env.example
-├── biome.json
-├── components.json
-├── issue.md
-├── next.config.ts
-├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-└── vitest.config.ts
-```
-
----
-
-# 4. Standard Module Scaffolding
-
-Semua module menggunakan struktur berikut.
-
-```text
-src/modules/{feature}/
-├── domain/
-│   ├── dto/
-│   ├── entities/
-│   ├── interfaces/
-│   ├── rules/
-│   ├── types/
-│   └── validators/
+├── http/
+│   ├── ApiResponse.ts
+│   ├── ApiErrorResponse.ts
+│   ├── HttpStatus.ts
+│   ├── mapErrorToHttpResponse.ts
+│   └── withApiHandler.ts
 │
-├── application/
-│   ├── services/
-│   └── usecases/
+├── logger/
+│   ├── Logger.ts
+│   ├── LogContext.ts
+│   └── createLogger.ts
 │
-├── infrastructure/
-│   ├── clients/
-│   ├── factories/
-│   ├── mappers/
-│   ├── providers/
-│   └── repositories/
+├── security/
+│   ├── RequestId.ts
+│   └── SensitiveData.ts
 │
-├── presentation/
-│   └── hooks/
+├── tenant/
+│   ├── TenantContext.ts
+│   ├── TenantResolver.ts
+│   └── resolveCurrentTenant.ts
 │
-└── __tests__/
-    ├── domain/
-    ├── application/
-    ├── infrastructure/
-    └── helpers/
+└── auth/
+    ├── CurrentActor.ts
+    ├── Session.ts
+    ├── SessionResolver.ts
+    └── resolveCurrentActor.ts
 ```
 
-Tidak semua folder harus berisi file. Jangan membuat abstraction kosong hanya untuk memenuhi struktur.
+Boleh menambah file helper jika memang diperlukan, tetapi jangan membuat abstraction kosong atau over-engineering.
 
 ---
 
-# 5. Standard Section Scaffolding
+# 3. Mandatory Workflow
+
+Gunakan:
 
 ```text
-src/sections/{feature}/
-├── atoms/
-├── molecules/
-├── organisms/
-└── pages/
+RED
+↓
+GREEN
+↓
+REFACTOR
 ```
 
-Rules:
+Jangan langsung membuat implementation.
 
-```text
-atoms
-  → props only
-  → no API
+Urutan kerja wajib:
 
-molecules
-  → props + callback
-  → no API
+1. audit struktur project existing;
+2. identifikasi shared conventions yang sudah digunakan;
+3. buat test untuk behavior yang dibutuhkan;
+4. pastikan test gagal dengan alasan yang benar;
+5. implementasikan kode minimal;
+6. jalankan test;
+7. refactor;
+8. jalankan seluruh verification;
+9. perbaiki seluruh error TypeScript, lint, dan test terkait.
 
-organisms
-  → state coordinator
-  → boleh memakai presentation hook
-
-pages
-  → page composition
-  → minimal orchestration
-```
+Jangan menghapus test hanya agar implementation lulus.
 
 ---
 
-# 6. Initial Module Map
+# 4. Result
 
-## 6.1 `auth`
+Buat generic `Result` untuk merepresentasikan operasi sukses atau gagal tanpa menggunakan exception untuk seluruh flow bisnis.
 
-### Domain
-
-```text
-modules/auth/domain/
-├── dto/
-│   ├── LoginRequestDTO.ts
-│   ├── LoginResponseDTO.ts
-│   └── CurrentUserResponseDTO.ts
-├── entities/
-│   └── AuthenticatedUser.ts
-├── interfaces/
-│   ├── AuthRepository.ts
-│   └── SessionRepository.ts
-└── validators/
-    └── AuthValidator.ts
-```
-
-### Application
-
-```text
-application/usecases/
-├── LoginUseCase.ts
-├── LogoutUseCase.ts
-└── GetCurrentUserUseCase.ts
-```
-
-### Infrastructure
-
-```text
-infrastructure/
-├── mappers/
-│   └── MoodleUserMapper.ts
-├── repositories/
-│   ├── MoodleAuthRepository.ts
-│   └── CookieSessionRepository.ts
-└── factories/
-    └── createAuthDependencies.ts
-```
-
-### Presentation
-
-```text
-presentation/hooks/
-└── useAuthApi.ts
-```
-
-### Moodle Integration
-
-```text
-/login/token.php
-core_webservice_get_site_info
-```
-
----
-
-# 7. `tenant`
-
-```text
-modules/tenant/
-├── domain/
-│   ├── dto/
-│   │   ├── TenantResponseDTO.ts
-│   │   └── TenantConfigurationDTO.ts
-│   ├── entities/
-│   │   └── Tenant.ts
-│   ├── interfaces/
-│   │   ├── TenantRepository.ts
-│   │   └── TenantCredentialRepository.ts
-│   └── types/
-│   │   └── TenantStatus.ts
-│   ├── validators/
-│   │   └── TenantValidator.ts
-│   ├── rules/
-│   │   └── TenantRules.ts
-│   └── value-objects/
-│       └── TenantSlug.ts
-├── application/
-│   └── usecases/
-│       ├── GetTenantUseCase.ts
-│       ├── CreateTenantUseCase.ts
-│       ├── UpdateTenantUseCase.ts
-│       └── TestMoodleConnectionUseCase.ts
-├── infrastructure/
-│   ├── repositories/
-│   │   └── DatabaseTenantRepository.ts
-│   ├── providers/
-│   │   └── EncryptedTenantCredentialProvider.ts
-│   └── factories/
-│       └── createTenantDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useTenantApi.ts
-```
-
-Tenant wajib resolved sebelum request tenant-specific diproses.
-
----
-
-# 8. `courses`
-
-```text
-modules/courses/
-├── domain/
-│   ├── dto/
-│   │   ├── CourseResponseDTO.ts
-│   │   ├── CourseDetailResponseDTO.ts
-│   │   └── CourseContentResponseDTO.ts
-│   ├── entities/
-│   │   └── Course.ts
-│   ├── interfaces/
-│   │   └── CourseRepository.ts
-│   └── types/
-│       └── CourseVisibility.ts
-├── application/
-│   └── usecases/
-│       ├── GetMyCoursesUseCase.ts
-│       ├── GetCourseDetailUseCase.ts
-│       └── GetCourseContentsUseCase.ts
-├── infrastructure/
-│   ├── mappers/
-│   │   └── MoodleCourseMapper.ts
-│   ├── repositories/
-│   │   └── MoodleCourseRepository.ts
-│   └── factories/
-│       └── createCourseDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useCourseApi.ts
-```
-
-Moodle functions:
-
-```text
-core_enrol_get_users_courses
-core_course_get_courses_by_field
-core_course_get_contents
-```
-
----
-
-# 9. `quizzes`
-
-`quizzes` hanya menangani definisi ujian, metadata, access, dan listing.
-
-```text
-modules/quizzes/
-├── domain/
-│   ├── dto/
-│   │   ├── QuizResponseDTO.ts
-│   │   ├── QuizDetailResponseDTO.ts
-│   │   └── QuizAccessResponseDTO.ts
-│   ├── entities/
-│   │   └── Quiz.ts
-│   ├── interfaces/
-│   │   └── QuizRepository.ts
-│   ├── rules/
-│   │   └── QuizRules.ts
-│   └── types/
-│       └── QuizAvailability.ts
-├── application/
-│   └── usecases/
-│       ├── GetCourseQuizzesUseCase.ts
-│       ├── GetQuizDetailUseCase.ts
-│       └── GetQuizAccessUseCase.ts
-├── infrastructure/
-│   ├── mappers/
-│   │   └── MoodleQuizMapper.ts
-│   ├── repositories/
-│   │   └── MoodleQuizRepository.ts
-│   └── factories/
-│       └── createQuizDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useQuizApi.ts
-```
-
-Moodle functions:
-
-```text
-mod_quiz_get_quizzes_by_courses
-mod_quiz_get_quiz_access_information
-mod_quiz_get_quiz_required_qtypes
-```
-
----
-
-# 10. `quiz-attempts`
-
-Attempt harus menjadi module terpisah dari `quizzes`.
-
-```text
-modules/quiz-attempts/
-├── domain/
-│   ├── dto/
-│   │   ├── StartQuizAttemptRequestDTO.ts
-│   │   ├── QuizAttemptResponseDTO.ts
-│   │   ├── QuizAttemptPageResponseDTO.ts
-│   │   ├── SaveQuizAnswerRequestDTO.ts
-│   │   ├── AttemptSummaryResponseDTO.ts
-│   │   └── AttemptReviewResponseDTO.ts
-│   ├── entities/
-│   │   └── QuizAttempt.ts
-│   ├── interfaces/
-│   │   └── QuizAttemptRepository.ts
-│   ├── rules/
-│   │   └── QuizAttemptRules.ts
-│   ├── types/
-│   │   ├── QuizAttemptState.ts
-│   │   ├── QuizAnswer.ts
-│   │   └── AutosaveState.ts
-│   └── validators/
-│       └── QuizAttemptValidator.ts
-├── application/
-│   ├── services/
-│   │   └── QuizAttemptService.ts
-│   └── usecases/
-│       ├── GetUserQuizAttemptsUseCase.ts
-│       ├── StartQuizAttemptUseCase.ts
-│       ├── GetQuizAttemptUseCase.ts
-│       ├── SaveQuizAnswerUseCase.ts
-│       ├── GetQuizAttemptSummaryUseCase.ts
-│       ├── SubmitQuizAttemptUseCase.ts
-│       └── GetQuizAttemptReviewUseCase.ts
-├── infrastructure/
-│   ├── mappers/
-│   │   └── MoodleQuizAttemptMapper.ts
-│   ├── repositories/
-│   │   └── MoodleQuizAttemptRepository.ts
-│   └── factories/
-│       └── createQuizAttemptDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useQuizAttemptApi.ts
-```
-
-Moodle functions:
-
-```text
-mod_quiz_get_user_quiz_attempts
-mod_quiz_get_attempt_access_information
-mod_quiz_start_attempt
-mod_quiz_get_attempt_data
-mod_quiz_save_attempt
-mod_quiz_get_attempt_summary
-mod_quiz_process_attempt
-mod_quiz_get_attempt_review
-```
-
----
-
-# 11. `grades`
-
-```text
-modules/grades/
-├── domain/
-│   ├── dto/
-│   │   ├── GradeResponseDTO.ts
-│   │   └── QuizGradeResponseDTO.ts
-│   ├── entities/
-│   │   └── Grade.ts
-│   └── interfaces/
-│       └── GradeRepository.ts
-├── application/
-│   └── usecases/
-│       ├── GetQuizGradeUseCase.ts
-│       └── GetCourseGradesUseCase.ts
-├── infrastructure/
-│   ├── mappers/
-│   │   └── MoodleGradeMapper.ts
-│   ├── repositories/
-│   │   └── MoodleGradeRepository.ts
-│   └── factories/
-│       └── createGradeDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useGradeApi.ts
-```
-
----
-
-# 12. Admin Modules
-
-## 12.1 `users`
-
-Responsible for:
-
-- user list;
-- create;
-- update;
-- deactivate;
-- bulk import;
-- user detail.
-
-Moodle:
-
-```text
-core_user_create_users
-core_user_update_users
-core_user_get_users
-core_user_get_users_by_field
-```
-
-## 12.2 `enrolments`
-
-Responsible for:
-
-- participant list;
-- manual enrol;
-- unenrol;
-- enrolment status.
-
-Moodle:
-
-```text
-core_enrol_get_enrolled_users
-enrol_manual_enrol_users
-enrol_manual_unenrol_users
-```
-
-## 12.3 `groups`
-
-Responsible for:
-
-- classes;
-- exam groups;
-- group members.
-
-Moodle:
-
-```text
-core_group_*
-core_cohort_*
-```
-
----
-
-# 13. `questions`
-
-Question bank administration must not be tightly coupled to Moodle form internals.
-
-```text
-modules/questions/
-├── domain/
-│   ├── dto/
-│   │   ├── QuestionRequestDTO.ts
-│   │   ├── QuestionResponseDTO.ts
-│   │   ├── QuestionQueryRequestDTO.ts
-│   │   └── QuestionListResponseDTO.ts
-│   ├── entities/
-│   │   └── Question.ts
-│   ├── interfaces/
-│   │   └── QuestionRepository.ts
-│   ├── types/
-│   │   ├── QuestionType.ts
-│   │   ├── QuestionStatus.ts
-│   │   └── QuestionDifficulty.ts
-│   └── validators/
-│       └── QuestionValidator.ts
-├── application/
-│   └── usecases/
-│       ├── GetQuestionsUseCase.ts
-│       ├── GetQuestionDetailUseCase.ts
-│       ├── CreateQuestionUseCase.ts
-│       ├── UpdateQuestionUseCase.ts
-│       └── DeleteQuestionUseCase.ts
-├── infrastructure/
-│   ├── mappers/
-│   │   └── MoodleQuestionMapper.ts
-│   ├── repositories/
-│   │   └── MoodleQuestionRepository.ts
-│   └── factories/
-│       └── createQuestionDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useQuestionApi.ts
-```
-
-Expected custom Moodle API:
-
-```text
-local_exam_get_question_bank
-local_exam_create_question
-local_exam_update_question
-local_exam_delete_question
-local_exam_import_questions
-```
-
----
-
-# 14. `exam-administration`
-
-Responsible for exam creation/configuration.
-
-```text
-modules/exam-administration/
-├── domain/
-│   ├── dto/
-│   ├── entities/
-│   ├── interfaces/
-│   │   └── ExamAdministrationRepository.ts
-│   ├── rules/
-│   └── validators/
-├── application/
-│   └── usecases/
-│       ├── CreateExamUseCase.ts
-│       ├── UpdateExamUseCase.ts
-│       ├── DeleteExamUseCase.ts
-│       ├── DuplicateExamUseCase.ts
-│       ├── AddQuestionToExamUseCase.ts
-│       ├── RemoveQuestionFromExamUseCase.ts
-│       ├── ReorderExamQuestionsUseCase.ts
-│       └── AddRandomQuestionUseCase.ts
-├── infrastructure/
-│   ├── repositories/
-│   │   └── MoodleExamAdministrationRepository.ts
-│   └── factories/
-│       └── createExamAdministrationDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useExamAdministrationApi.ts
-```
-
-Custom Moodle API:
-
-```text
-local_exam_create_quiz
-local_exam_update_quiz
-local_exam_delete_quiz
-local_exam_duplicate_quiz
-local_exam_add_question_to_quiz
-local_exam_remove_question_from_quiz
-local_exam_reorder_quiz_questions
-local_exam_add_random_questions
-```
-
----
-
-# 15. `exam-monitor`
-
-Responsible for monitoring exam runtime.
-
-```text
-modules/exam-monitor/
-├── domain/
-│   ├── dto/
-│   │   ├── ExamMonitorResponseDTO.ts
-│   │   ├── ActiveAttemptResponseDTO.ts
-│   │   └── ExamParticipantStatusDTO.ts
-│   ├── entities/
-│   │   └── ExamParticipantSession.ts
-│   ├── interfaces/
-│   │   └── ExamMonitorRepository.ts
-│   └── types/
-│       └── ExamParticipantStatus.ts
-├── application/
-│   └── usecases/
-│       ├── GetExamMonitorUseCase.ts
-│       ├── GetActiveAttemptsUseCase.ts
-│       ├── ForceFinishAttemptUseCase.ts
-│       ├── ResetAttemptUseCase.ts
-│       ├── ExtendAttemptTimeUseCase.ts
-│       └── ForceLogoutUserUseCase.ts
-├── infrastructure/
-│   ├── repositories/
-│   │   └── MoodleExamMonitorRepository.ts
-│   └── factories/
-│       └── createExamMonitorDependencies.ts
-└── presentation/
-    └── hooks/
-        └── useExamMonitorApi.ts
-```
-
-Custom Moodle API:
-
-```text
-local_exam_get_exam_monitor
-local_exam_get_active_attempts
-local_exam_force_finish_attempt
-local_exam_reset_attempt
-local_exam_extend_attempt_time
-local_exam_force_logout_user
-```
-
----
-
-# 16. Core Moodle Adapter
-
-Create first:
-
-```text
-src/core/moodle/
-├── MoodleRestClient.ts
-├── MoodleClientFactory.ts
-├── MoodleCredentialProvider.ts
-├── MoodleErrorMapper.ts
-└── types/
-    ├── MoodleExceptionResponse.ts
-    └── MoodleRequestParameters.ts
-```
-
-`MoodleRestClient` responsibilities:
-
-- REST POST request;
-- encode Moodle nested parameters;
-- timeout;
-- response parsing;
-- Moodle exception detection;
-- normalize errors;
-- attach request ID;
-- never log secrets.
-
-It must be server-only.
+Target usage:
 
 ```ts
-import "server-only";
+const result = Result.ok(data);
+
+const result = Result.fail(
+  new ValidationError("Invalid input"),
+);
 ```
+
+Result harus mendukung minimal:
+
+```ts
+Result.ok()
+Result.fail()
+
+result.isSuccess
+result.isFailure
+
+result.value
+result.error
+
+result.getValue()
+result.getError()
+```
+
+Rules:
+
+- immutable;
+- strongly typed;
+- tidak menggunakan `any`;
+- failure tidak boleh memiliki success value;
+- success tidak boleh memiliki error.
+
+Contoh type:
+
+```ts
+Result<T, E extends Error = Error>
+```
+
+Tentukan API terbaik yang konsisten dengan codebase existing.
 
 ---
 
-# 17. Internal API Contract
+# 5. BaseEntity
 
-## Authentication
+Buat abstraction entity yang minimal.
 
-```text
-POST /api/v1/auth/login
-POST /api/v1/auth/logout
-GET  /api/v1/auth/me
+Tujuannya hanya menyediakan fondasi identity jika memang dibutuhkan oleh module berikutnya.
+
+Contoh konsep:
+
+```ts
+abstract class BaseEntity<TId> {
+  protected constructor(
+    public readonly id: TId,
+  ) {}
+}
 ```
 
-## Course
+Jangan memasukkan:
 
 ```text
-GET /api/v1/courses
-GET /api/v1/courses/:courseId
-GET /api/v1/courses/:courseId/contents
-GET /api/v1/courses/:courseId/quizzes
+createdAt
+updatedAt
+tenantId
+serialization
+database mapping
 ```
 
-## Quiz
-
-```text
-GET /api/v1/quizzes/:quizId
-GET /api/v1/quizzes/:quizId/access
-GET /api/v1/quizzes/:quizId/grade
-POST /api/v1/quizzes/:quizId/attempts
-```
-
-## Attempt
-
-```text
-GET   /api/v1/attempts/:attemptId
-PATCH /api/v1/attempts/:attemptId/answers
-GET   /api/v1/attempts/:attemptId/summary
-POST  /api/v1/attempts/:attemptId/submit
-GET   /api/v1/attempts/:attemptId/review
-```
-
-## Administration
-
-```text
-GET    /api/v1/questions
-POST   /api/v1/questions
-GET    /api/v1/questions/:questionId
-PATCH  /api/v1/questions/:questionId
-DELETE /api/v1/questions/:questionId
-
-GET    /api/v1/admin/exams
-POST   /api/v1/admin/exams
-GET    /api/v1/admin/exams/:examId
-PATCH  /api/v1/admin/exams/:examId
-DELETE /api/v1/admin/exams/:examId
-```
-
-## Monitor
-
-```text
-GET  /api/v1/exam-monitor/:quizId
-GET  /api/v1/exam-monitor/:quizId/attempts
-
-POST /api/v1/exam-monitor/attempts/:attemptId/force-finish
-POST /api/v1/exam-monitor/attempts/:attemptId/reset
-POST /api/v1/exam-monitor/attempts/:attemptId/extend-time
-POST /api/v1/exam-monitor/users/:userId/force-logout
-```
+secara paksa ke semua entity.
 
 ---
 
-# 18. Standard API Response
+# 6. BaseService
+
+Jika codebase existing memang sudah menggunakan `BaseService`, pertahankan convention tersebut.
+
+`BaseService` harus tetap tipis.
+
+Jangan menjadikan `BaseService` sebagai:
+
+- service locator;
+- dependency container;
+- HTTP abstraction;
+- global mutable state.
+
+Jika keberadaannya tidak memberikan behavior reusable yang jelas, pertahankan API seminimal mungkin.
+
+---
+
+# 7. Application Error Hierarchy
+
+Buat error hierarchy berikut:
+
+```text
+Error
+└── AppError
+    ├── DomainError
+    ├── ValidationError
+    ├── UnauthorizedError
+    ├── ForbiddenError
+    ├── NotFoundError
+    ├── ConflictError
+    └── InfrastructureError
+```
+
+`AppError` minimal memiliki:
+
+```ts
+message
+code
+statusCode
+details?
+cause?
+```
+
+Contoh:
+
+```ts
+new NotFoundError(
+  "COURSE_NOT_FOUND",
+  "Course tidak ditemukan.",
+);
+```
+
+atau API lain yang lebih konsisten dengan project existing.
+
+Requirements:
+
+- setiap error memiliki stable error code;
+- `statusCode` tidak ditentukan ulang tersebar di route;
+- support `cause`;
+- support optional structured metadata/details;
+- tidak menggunakan raw stack trace sebagai API output;
+- tidak expose internal error detail ke client.
+
+---
+
+# 8. Error Codes
+
+Error code menggunakan:
+
+```text
+UPPER_SNAKE_CASE
+```
+
+Contoh:
+
+```text
+VALIDATION_ERROR
+UNAUTHORIZED
+FORBIDDEN
+NOT_FOUND
+CONFLICT
+INFRASTRUCTURE_ERROR
+INTERNAL_SERVER_ERROR
+```
+
+Error spesifik feature nanti boleh menggunakan:
+
+```text
+QUIZ_NOT_FOUND
+ATTEMPT_NOT_ALLOWED
+TENANT_INACTIVE
+```
+
+Core jangan mendefinisikan error business spesifik feature.
+
+---
+
+# 9. HttpStatus
+
+Buat central HTTP status constants atau type-safe helper.
+
+Minimal support:
+
+```text
+200 OK
+201 CREATED
+204 NO_CONTENT
+400 BAD_REQUEST
+401 UNAUTHORIZED
+403 FORBIDDEN
+404 NOT_FOUND
+409 CONFLICT
+422 UNPROCESSABLE_ENTITY
+429 TOO_MANY_REQUESTS
+500 INTERNAL_SERVER_ERROR
+502 BAD_GATEWAY
+503 SERVICE_UNAVAILABLE
+```
+
+Jangan menggunakan magic number tersebar seperti:
+
+```ts
+return Response.json(data, { status: 403 });
+```
+
+jika central abstraction tersedia.
+
+---
+
+# 10. Standard API Response
+
+Semua API internal nantinya menggunakan format konsisten.
 
 Success:
 
@@ -961,972 +359,885 @@ Error:
 {
   "success": false,
   "error": {
-    "code": "QUIZ_ATTEMPT_NOT_ALLOWED",
-    "message": "Ujian belum dapat dimulai."
-  }
+    "code": "NOT_FOUND",
+    "message": "Data tidak ditemukan."
+  },
+  "requestId": "..."
 }
 ```
 
-Never expose Moodle stack trace, debugging information, token, or raw exception.
-
----
-
-# 19. UI Design Scaffolding
-
-## Shared primitives
-
-Use `components/ui/*` for shadcn primitives.
-
-Use `shared-ui/*` for project-level abstractions.
-
-```text
-shared-ui/component/
-├── EmptyState.tsx
-├── ErrorState.tsx
-├── Pagination.tsx
-├── SearchField.tsx
-├── SelectField.tsx
-├── StatusBadge.tsx
-└── TableSkeleton.tsx
-```
-
----
-
-# 20. Student Exam Section
-
-```text
-sections/quiz-attempts/
-├── atoms/
-│   ├── AnswerStatusBadge.tsx
-│   ├── AttemptTimer.tsx
-│   ├── ConnectionIndicator.tsx
-│   └── QuestionNumberBadge.tsx
-├── molecules/
-│   ├── AnswerOption.tsx
-│   ├── AttemptHeader.tsx
-│   ├── QuestionCard.tsx
-│   ├── QuestionNavigatorItem.tsx
-│   └── SubmitConfirmation.tsx
-├── organisms/
-│   ├── QuizAttemptView.tsx
-│   ├── QuizNavigator.tsx
-│   ├── QuizQuestionPanel.tsx
-│   └── QuizSubmissionPanel.tsx
-└── pages/
-    └── QuizAttemptPageSection.tsx
-```
-
-Primary layout:
-
-```text
-Desktop:
-
-┌────────────────────────────────────────────┐
-│ Exam / Timer / Connection / Save Status    │
-├──────────────────────────────┬─────────────┤
-│ Question                     │ Navigator   │
-│                              │             │
-│ Answer                       │             │
-├──────────────────────────────┴─────────────┤
-│ Previous         Next               Submit │
-└────────────────────────────────────────────┘
-```
-
----
-
-# 21. Admin Data Table Pattern
-
-Every management table:
-
-```text
-Page Header
-↓
-Statistics (if useful)
-↓
-Filter / Search
-↓
-Table
-↓
-Pagination
-```
-
-Loading:
-
-```text
-Header remains
-Filter remains
-TableSkeleton inside content
-```
-
-Empty:
-
-```text
-Header remains
-Filter remains
-Table header remains where appropriate
-EmptyState only replaces table body
-```
-
-Molecule table receives data and callbacks only.
-
-Example props:
+Buat type generic seperti:
 
 ```ts
-interface QuestionTableProps {
-  readonly questions: readonly QuestionResponseDTO[];
-  readonly loading: boolean;
-  readonly page: number;
-  readonly limit: number;
-  readonly total: number;
-  readonly onPageChange: (page: number) => void;
-  readonly onView: (id: string) => void;
-  readonly onEdit: (id: string) => void;
-  readonly onDelete: (id: string) => void;
-}
+ApiSuccessResponse<T, M>
+ApiFailureResponse
+ApiResponse<T, M>
+```
+
+`meta` optional.
+
+Tidak boleh mengembalikan:
+
+```text
+stack
+debugInfo
+raw exception
+secret
+token
+password
 ```
 
 ---
 
-# 22. Development Phases
+# 11. Error → HTTP Mapping
 
-## Phase 0 — Bootstrap
+Implementasikan:
 
-### Tasks
+```text
+mapErrorToHttpResponse
+```
 
-- [ ] Create Next.js project.
-- [ ] Configure TypeScript strict.
-- [ ] Configure Tailwind CSS.
-- [ ] Configure shadcn/ui.
-- [ ] Configure Biome.
-- [ ] Configure Vitest.
-- [ ] Configure path aliases.
-- [ ] Create `.env.example`.
-- [ ] Create initial folder scaffolding.
-- [ ] Add CI commands.
-- [ ] Add `issue.md`.
+Mapping minimal:
 
-### Required scripts
+```text
+ValidationError
+→ 422
+
+UnauthorizedError
+→ 401
+
+ForbiddenError
+→ 403
+
+NotFoundError
+→ 404
+
+ConflictError
+→ 409
+
+InfrastructureError
+→ 502 atau status yang ditentukan error
+
+Unknown Error
+→ 500
+```
+
+Unknown error tidak boleh mengekspos:
+
+```ts
+error.message
+```
+
+secara langsung ke client jika message tersebut bersifat internal.
+
+Gunakan generic message:
+
+```text
+Terjadi kesalahan pada server.
+```
+
+---
+
+# 12. API Route Wrapper
+
+Implementasikan helper seperti:
+
+```ts
+withApiHandler(...)
+```
+
+atau API setara yang sesuai codebase.
+
+Target penggunaan:
+
+```ts
+export const GET = withApiHandler(
+  async (request, context) => {
+    return ApiResponse.success(data);
+  },
+);
+```
+
+Wrapper bertanggung jawab atas:
+
+- request ID;
+- centralized try/catch;
+- error mapping;
+- structured logging;
+- standardized API response;
+- unexpected error handling.
+
+Wrapper tidak boleh menangani:
+
+- domain logic;
+- tenant business rule;
+- authorization business rule;
+- feature-specific validation.
+
+---
+
+# 13. Request ID
+
+Buat utility:
+
+```text
+RequestId
+```
+
+Behavior:
+
+1. jika incoming request memiliki valid request ID header, gunakan bila aman;
+2. jika tidak ada, generate UUID;
+3. request ID harus tersedia untuk logger;
+4. request ID dikembalikan pada response header;
+5. error response menyertakan request ID.
+
+Header convention:
+
+```text
+x-request-id
+```
+
+Gunakan `crypto.randomUUID()` jika tersedia.
+
+Jangan menggunakan random implementation yang lemah jika platform sudah menyediakan UUID.
+
+---
+
+# 14. Structured Logger
+
+Buat logger abstraction yang menghasilkan structured data.
+
+Interface minimal:
+
+```ts
+interface Logger {
+  debug(...)
+  info(...)
+  warn(...)
+  error(...)
+}
+```
+
+Log context:
+
+```ts
+interface LogContext {
+  readonly requestId?: string;
+  readonly tenantId?: string;
+  readonly actorId?: string;
+  readonly event?: string;
+  readonly [key: string]: unknown;
+}
+```
+
+Expected output:
 
 ```json
 {
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "verify": "npm run typecheck && npm run lint && npm run test"
-  }
+  "level": "info",
+  "message": "Request completed",
+  "requestId": "...",
+  "tenantId": "...",
+  "actorId": "...",
+  "event": "api_request_completed"
 }
 ```
 
-### Definition of Done
-
-- [ ] `npm run typecheck`
-- [ ] `npm run lint`
-- [ ] `npm run test`
-- [ ] `npm run build`
-
-all pass.
+Jangan membuat logger bergantung pada business feature.
 
 ---
 
-# 23. Phase 1 — Core Foundation
+# 15. Sensitive Logging
 
-Create:
+Logger tidak boleh mencatat field sensitif.
+
+Minimal redaction terhadap key:
 
 ```text
-core/base
-core/errors
-core/http
-core/logger
-core/security
-core/tenant
-core/auth
+password
+token
+accessToken
+refreshToken
+wstoken
+authorization
+cookie
+secret
+clientSecret
+apiKey
 ```
 
-Tasks:
+Implementasikan helper redaction sederhana jika diperlukan.
 
-- [ ] `Result`.
-- [ ] application error hierarchy.
-- [ ] standard API response.
-- [ ] API route wrapper.
-- [ ] request ID.
-- [ ] structured logger.
-- [ ] tenant context abstraction.
-- [ ] actor/session abstraction.
+Contoh:
 
-Tests:
+```json
+{
+  "password": "[REDACTED]"
+}
+```
 
-- [ ] API error mapping.
-- [ ] standard response.
-- [ ] tenant resolution.
-- [ ] session resolution.
+Nested object harus dipertimbangkan.
+
+Jangan over-engineer recursive sanitizer jika tidak diperlukan, tetapi data sensitif umum harus terlindungi.
 
 ---
 
-# 24. Phase 2 — Moodle REST Adapter
+# 16. Tenant Context Abstraction
 
-## RED
+Pada fase ini jangan implementasikan database tenant.
 
-Write tests for:
+Buat abstraction reusable.
 
-- [ ] scalar parameter encoding;
-- [ ] array parameter encoding;
-- [ ] nested parameter encoding;
-- [ ] Moodle exception handling;
-- [ ] timeout;
-- [ ] non-200 response;
-- [ ] secret-safe logging.
+Contoh model:
 
-## GREEN
+```ts
+interface TenantContext {
+  readonly tenantId: string;
+  readonly slug: string;
+  readonly status: "ACTIVE" | "INACTIVE";
+}
+```
 
-Implement:
+atau bentuk minimal lain yang sesuai architecture.
+
+Jangan masukkan Moodle credentials ke public tenant context.
+
+---
+
+# 17. TenantResolver
+
+Buat interface:
+
+```ts
+interface TenantResolver {
+  resolve(input: TenantResolutionInput):
+    Promise<TenantContext | null>;
+}
+```
+
+`TenantResolver` adalah port.
+
+Jangan implementasikan database lookup nyata pada fase ini.
+
+Boleh membuat:
+
+```text
+resolveCurrentTenant
+```
+
+sebagai orchestration helper yang menggunakan resolver abstraction.
+
+---
+
+# 18. Tenant Resolution Strategy
+
+Untuk saat ini siapkan abstraction agar nantinya dapat resolve berdasarkan:
+
+```text
+hostname
+subdomain
+header internal
+```
+
+Jangan hard-code:
+
+```text
+smpn29
+hangtuah2
+localhost tenant
+```
+
+di Core.
+
+Jangan gunakan Moodle URL sebagai identifier tenant.
+
+---
+
+# 19. Actor Abstraction
+
+Buat:
+
+```text
+CurrentActor
+```
+
+Minimal:
+
+```ts
+interface CurrentActor {
+  readonly userId: string;
+  readonly tenantId: string;
+  readonly roles: readonly string[];
+}
+```
+
+Jika architecture existing menggunakan numeric Moodle user ID, jangan paksa domain actor memakai numeric ID untuk semua provider.
+
+Gunakan ID internal aplikasi jika tersedia.
+
+---
+
+# 20. Session Abstraction
+
+Buat session model generic:
+
+```ts
+interface Session {
+  readonly id: string;
+  readonly userId: string;
+  readonly tenantId: string;
+  readonly expiresAt: Date;
+}
+```
+
+Tambahkan data minimal jika diperlukan.
+
+Jangan simpan:
+
+```text
+raw password
+Moodle privileged token
+plaintext credential
+```
+
+dalam session object publik.
+
+---
+
+# 21. SessionResolver
+
+Buat port:
+
+```ts
+interface SessionResolver {
+  resolve(request: Request):
+    Promise<Session | null>;
+}
+```
+
+Kemudian buat helper:
+
+```text
+resolveCurrentActor
+```
+
+yang mengubah valid session menjadi actor.
+
+Pada Phase 1 tidak perlu implementasi cookie persistence final.
+
+Gunakan test fake/mock resolver.
+
+---
+
+# 22. Tenant Resolution Tests
+
+Buat test untuk minimal:
+
+### success
+
+```text
+tenant ditemukan
+→ return TenantContext
+```
+
+### missing tenant
+
+```text
+tenant tidak ditemukan
+→ NotFoundError / suitable error
+```
+
+### inactive tenant
+
+Jika inactive behavior sudah menjadi tanggung jawab resolver/core abstraction:
+
+```text
+INACTIVE
+→ Forbidden / appropriate error
+```
+
+Jika inactive rule akan menjadi application concern, jangan paksa rule ke Core.
+
+Pilih satu boundary dan dokumentasikan.
+
+---
+
+# 23. Session Resolution Tests
+
+Minimal:
+
+```text
+valid session
+→ CurrentActor
+
+missing session
+→ UnauthorizedError
+
+expired session
+→ UnauthorizedError
+
+tenant mismatch
+→ ForbiddenError
+```
+
+Jangan membuat network request nyata dalam unit test.
+
+---
+
+# 24. Required Test Structure
+
+Buat test di lokasi yang konsisten dengan project.
+
+Disarankan:
+
+```text
+src/core/__tests__/
+├── base/
+│   └── Result.test.ts
+├── errors/
+│   └── AppError.test.ts
+├── http/
+│   ├── ApiResponse.test.ts
+│   ├── mapErrorToHttpResponse.test.ts
+│   └── withApiHandler.test.ts
+├── logger/
+│   └── createLogger.test.ts
+├── security/
+│   └── RequestId.test.ts
+├── tenant/
+│   └── resolveCurrentTenant.test.ts
+└── auth/
+    └── resolveCurrentActor.test.ts
+```
+
+Jika repository existing memiliki pattern test lain, ikuti pattern existing.
+
+---
+
+# 25. Mandatory Test Cases
+
+## `Result`
+
+- success contains value;
+- failure contains error;
+- `isSuccess`;
+- `isFailure`;
+- invalid access behavior jika API menggunakan getter yang melempar.
+
+## Errors
+
+- correct status;
+- correct error code;
+- correct message;
+- supports cause;
+- optional details.
+
+## API response
+
+- success format;
+- success with metadata;
+- error format;
+- request ID present when relevant.
+
+## Error mapping
+
+- Validation → 422;
+- Unauthorized → 401;
+- Forbidden → 403;
+- NotFound → 404;
+- Conflict → 409;
+- Infrastructure → configured 5xx;
+- unknown → 500.
+
+## API wrapper
+
+- catches expected error;
+- catches unknown error;
+- returns standardized response;
+- preserves request ID;
+- logs error.
+
+## Logger
+
+- structured payload;
+- context merge;
+- sensitive data redaction.
+
+## Tenant
+
+- successful resolution;
+- missing tenant;
+- resolver failure behavior.
+
+## Session
+
+- valid session;
+- missing session;
+- expired session;
+- tenant mismatch.
+
+---
+
+# 26. TypeScript Rules
+
+Use strict TypeScript.
+
+Forbidden unless absolutely justified:
+
+```ts
+any
+```
+
+Prefer:
+
+```ts
+unknown
+```
+
+for external/untrusted data.
+
+Use:
+
+```ts
+import type
+```
+
+for type-only imports.
+
+Prefer immutable fields:
+
+```ts
+readonly
+```
+
+DTO/interfaces should be readonly where possible.
+
+---
+
+# 27. Error Handling Rules
+
+Do not write:
+
+```ts
+catch (error) {
+  console.error(error);
+}
+```
+
+without propagation/mapping.
+
+Do not swallow errors.
+
+Do not throw strings:
+
+```ts
+throw "error";
+```
+
+Always throw proper `Error` subclasses.
+
+---
+
+# 28. Logging Rules
+
+Do not leave:
+
+```ts
+console.log
+console.debug
+```
+
+inside production core implementation.
+
+All logging goes through logger abstraction.
+
+If logger ultimately uses `console` internally for Phase 1, that is acceptable, as long as caller code only depends on `Logger`.
+
+---
+
+# 29. API Wrapper Example Target
+
+Desired usage should become simple:
+
+```ts
+export const GET = withApiHandler(
+  async ({ requestId, logger }) => {
+    logger.info(
+      "Health check",
+      {
+        requestId,
+        event: "health_check",
+      },
+    );
+
+    return {
+      status: HttpStatus.OK,
+      data: {
+        status: "ok",
+      },
+    };
+  },
+);
+```
+
+Actual API may differ if project conventions make another implementation cleaner.
+
+Keep route code concise.
+
+---
+
+# 30. Dependency Rules
+
+Allowed:
+
+```text
+core/http
+→ core/errors
+→ core/logger
+→ core/security
+```
+
+Avoid cyclic dependency.
+
+Especially avoid:
+
+```text
+core/errors → core/http → core/errors
+```
+
+Design status mapping carefully.
+
+Recommended:
+
+- errors may contain semantic status code if desired;
+- HTTP layer maps errors;
+- errors should not import Next.js.
+
+---
+
+# 31. Next.js Dependency Boundary
+
+Core `http` may know Web `Request`/`Response` primitives.
+
+Prefer not to couple every core class to:
+
+```text
+next/server
+next/headers
+next/cookies
+```
+
+unless specifically required.
+
+`domain-style` core abstractions such as:
+
+```text
+Result
+Logger
+TenantContext
+CurrentActor
+Session
+```
+
+must remain framework-neutral.
+
+---
+
+# 32. Security Boundary
+
+Phase 1 must establish foundations for:
+
+```text
+Browser
+→ Next.js
+→ external systems
+```
+
+Do not add client-visible secrets.
+
+Files that may process secrets should be server-only where appropriate.
+
+---
+
+# 33. File Organization Rules
+
+Do not create barrel exports automatically such as:
+
+```text
+index.ts
+```
+
+in every directory unless repository existing already standardizes them.
+
+Avoid import cycles caused by global barrels.
+
+Prefer explicit imports.
+
+---
+
+# 34. Scope Guard
+
+Do NOT implement during Phase 1:
 
 ```text
 MoodleRestClient
-MoodleErrorMapper
-MoodleClientFactory
-MoodleCredentialProvider
+Moodle login
+database schema
+Prisma
+Redis
+quiz
+course
+question
+grade
+exam
+real tenant database repository
+real cookie authentication
+UI dashboard
 ```
 
-## Done
+Those belong to later phases.
 
-- [ ] client cannot be imported by browser bundle;
-- [ ] all Moodle communication uses this client;
-- [ ] no Moodle token is returned to frontend.
+Phase 1 only establishes reusable Core Foundation.
 
 ---
 
-# 25. Phase 3 — Tenant
+# 35. Verification Commands
 
-Implement tenant first before auth because all Moodle access must be tenant-aware.
+At the end run all relevant commands.
 
-Tasks:
+At minimum:
 
-- [ ] Tenant entity.
-- [ ] Tenant repository.
-- [ ] Tenant lookup by subdomain.
-- [ ] encrypted Moodle configuration.
-- [ ] tenant status.
-- [ ] Moodle connection test.
+```bash
+npm run typecheck
+npm run lint
+npm run test
+npm run build
+```
+
+If package manager is not npm, use package manager already configured in the project.
+
+Do not change package manager.
+
+---
+
+# 36. Required Final Report
+
+After implementation, report:
+
+```text
+1. Files created
+2. Files modified
+3. RED tests added
+4. GREEN implementation completed
+5. Important architectural decisions
+6. Verification results
+7. Remaining Phase 1 risks / TODO
+```
+
+Do not only say:
+
+```text
+Done.
+```
+
+---
+
+# 37. Acceptance Criteria
+
+Phase 1 dianggap selesai hanya jika semua kondisi berikut terpenuhi.
+
+## Base
+
+- [ ] `Result` implemented.
+- [ ] Result is generic and immutable.
+- [ ] `BaseEntity` minimal.
+- [ ] `BaseService` does not become service locator.
+
+## Errors
+
+- [ ] application error hierarchy implemented.
+- [ ] stable error codes.
+- [ ] HTTP semantics mapped consistently.
+- [ ] unknown errors sanitized.
+
+## HTTP
+
+- [ ] standardized success response.
+- [ ] standardized failure response.
+- [ ] API route wrapper.
+- [ ] centralized error mapping.
+- [ ] request ID on response.
+
+## Logging
+
+- [ ] structured logger.
+- [ ] contextual logging.
+- [ ] secret redaction.
+- [ ] no scattered console logging.
+
+## Tenant
+
+- [ ] `TenantContext`.
+- [ ] `TenantResolver`.
 - [ ] `resolveCurrentTenant`.
+- [ ] tests for tenant resolution.
 
-Expected flow:
+## Auth
 
-```text
-request hostname
-  ↓
-tenant slug
-  ↓
-TenantRepository
-  ↓
-TenantContext
-  ↓
-MoodleClientFactory
-```
+- [ ] `CurrentActor`.
+- [ ] `Session`.
+- [ ] `SessionResolver`.
+- [ ] `resolveCurrentActor`.
+- [ ] tests for session/actor resolution.
 
----
+## Quality
 
-# 26. Phase 4 — Authentication
-
-## RED
-
-Tests:
-
-- [ ] valid login;
-- [ ] invalid Moodle credentials;
-- [ ] inactive tenant;
-- [ ] site info cannot be loaded;
-- [ ] logout invalidates application session.
-
-## GREEN
-
-Implement:
-
-```text
-LoginUseCase
-LogoutUseCase
-GetCurrentUserUseCase
-MoodleAuthRepository
-CookieSessionRepository
-useAuthApi
-```
-
-UI:
-
-```text
-sections/auth/
-├── molecules/
-│   └── LoginForm.tsx
-├── organisms/
-│   └── LoginView.tsx
-└── pages/
-    └── LoginPageSection.tsx
-```
-
----
-
-# 27. Phase 5 — Course Dashboard
-
-Implement:
-
-```text
-GetMyCoursesUseCase
-GetCourseDetailUseCase
-GetCourseContentsUseCase
-```
-
-Moodle:
-
-```text
-core_enrol_get_users_courses
-core_course_get_courses_by_field
-core_course_get_contents
-```
-
-UI:
-
-```text
-sections/courses/
-├── atoms/
-│   └── CourseStatusBadge.tsx
-├── molecules/
-│   ├── CourseCard.tsx
-│   └── CourseSkeletonCard.tsx
-├── organisms/
-│   └── CourseListView.tsx
-└── pages/
-    └── CoursePageSection.tsx
-```
-
----
-
-# 28. Phase 6 — Quiz Listing & Access
-
-Implement:
-
-```text
-GetCourseQuizzesUseCase
-GetQuizDetailUseCase
-GetQuizAccessUseCase
-```
-
-Before displaying "Mulai Ujian", access information must be loaded from backend.
-
-States:
-
-```text
-AVAILABLE
-NOT_OPEN
-CLOSED
-ATTEMPT_LIMIT_REACHED
-PASSWORD_REQUIRED
-RESTRICTED
-```
-
-Do not infer Moodle access rules only from frontend timestamps.
-
----
-
-# 29. Phase 7 — Quiz Attempt Core
-
-This is the highest-priority domain.
-
-## RED Tests
-
-### Start attempt
-
-- [ ] starts valid attempt;
-- [ ] rejects attempt not owned by active actor;
-- [ ] maps Moodle access error;
-- [ ] prevents invalid quiz id.
-
-### Load attempt
-
-- [ ] maps Moodle question data;
-- [ ] preserves attempt state;
-- [ ] handles finished attempt.
-
-### Autosave
-
-- [ ] accepts valid answer;
-- [ ] preserves Moodle response parameter names only inside infrastructure;
-- [ ] handles transient error;
-- [ ] prevents stale write where applicable.
-
-### Submit
-
-- [ ] final submission;
-- [ ] duplicate submit behavior;
-- [ ] expired attempt;
-- [ ] invalid attempt ownership.
-
-## GREEN
-
-Implement all use cases and adapters.
-
----
-
-# 30. Phase 8 — Student Exam UI
-
-Required state:
-
-```text
-loading
-ready
-saving
-saved
-retrying
-offline
-submitting
-submitted
-error
-```
-
-Required functionality:
-
-- [ ] timer;
-- [ ] question navigation;
-- [ ] answered indicator;
-- [ ] flagged question if supported;
-- [ ] autosave;
-- [ ] network status;
-- [ ] previous/next;
-- [ ] summary;
-- [ ] final confirmation;
-- [ ] submit;
-- [ ] review.
-
-No generic spinner-only loading for the main exam.
-
----
-
-# 31. Phase 9 — Grade / Result
-
-Implement:
-
-```text
-GetQuizGradeUseCase
-GetCourseGradesUseCase
-```
-
-UI:
-
-```text
-sections/grades/
-├── atoms/
-│   └── GradeBadge.tsx
-├── molecules/
-│   └── GradeCard.tsx
-├── organisms/
-│   └── StudentGradeView.tsx
-└── pages/
-    └── ResultPageSection.tsx
-```
-
-Respect Moodle review options. Do not expose answer correctness if Moodle access rules do not allow it.
-
----
-
-# 32. Phase 10 — Administration Foundation
-
-Order:
-
-```text
-users
-↓
-enrolments
-↓
-groups
-↓
-questions
-↓
-exam-administration
-```
-
-All management modules use:
-
-- filter;
-- pagination;
-- Skeleton;
-- EmptyState;
-- action menu;
-- create/edit modal or page;
-- delete confirmation.
-
----
-
-# 33. Phase 11 — Question Bank
-
-Requires `local_examapi`.
-
-Next.js module remains independent from custom plugin contract.
-
-Domain operation:
-
-```text
-QuestionRepository.create()
-```
-
-Infrastructure translates it to:
-
-```text
-local_exam_create_question
-```
-
-Never expose `local_exam_*` names outside infrastructure.
-
----
-
-# 34. Phase 12 — Exam Administration
-
-Features:
-
-- [ ] create exam;
-- [ ] update settings;
-- [ ] delete/archive;
-- [ ] duplicate;
-- [ ] question selection;
-- [ ] random questions;
-- [ ] reorder questions;
-- [ ] preview;
-- [ ] participant configuration.
-
----
-
-# 35. Phase 13 — Exam Monitoring
-
-Initial polling implementation:
-
-```text
-GET /api/v1/exam-monitor/:quizId
-```
-
-Use a sane polling interval.
-
-Do not poll Moodle separately for every participant.
-
-Backend/custom plugin should return aggregated monitor data.
-
-Features:
-
-- [ ] active participant;
-- [ ] started;
-- [ ] not started;
-- [ ] finished;
-- [ ] disconnected/last activity if available;
-- [ ] force finish;
-- [ ] extend time;
-- [ ] reset;
-- [ ] force logout;
-- [ ] audit administrative actions.
-
----
-
-# 36. Phase 14 — Audit
-
-Audit actions:
-
-```text
-TENANT_CREATED
-TENANT_UPDATED
-USER_CREATED
-USER_UPDATED
-EXAM_CREATED
-EXAM_UPDATED
-EXAM_DELETED
-ATTEMPT_STARTED
-ATTEMPT_SUBMITTED
-ATTEMPT_FORCE_FINISHED
-ATTEMPT_RESET
-ATTEMPT_TIME_EXTENDED
-USER_FORCE_LOGOUT
-QUESTION_CREATED
-QUESTION_UPDATED
-QUESTION_DELETED
-```
-
-Minimum payload:
-
-```ts
-interface AuditEvent {
-  readonly tenantId: string;
-  readonly actorId: string;
-  readonly action: string;
-  readonly entityType: string;
-  readonly entityId: string | null;
-  readonly requestId: string;
-  readonly metadata?: Readonly<Record<string, unknown>>;
-  readonly createdAt: Date;
-}
-```
-
-Never log secrets or raw student answer payload unnecessarily.
-
----
-
-# 37. Phase 15 — Security Hardening
-
-Checklist:
-
-- [ ] HttpOnly application session.
-- [ ] Secure cookies in production.
-- [ ] SameSite policy.
-- [ ] CSRF strategy.
-- [ ] tenant isolation tests.
-- [ ] authorization tests.
-- [ ] rate limiting login.
-- [ ] rate limiting sensitive admin mutation.
-- [ ] Moodle token encryption at rest.
-- [ ] no token in browser.
-- [ ] no credentials in logs.
-- [ ] security headers.
-- [ ] upload validation.
-- [ ] request body size limits.
-- [ ] server-side validation.
-
----
-
-# 38. Phase 16 — Performance
-
-Checklist:
-
-- [ ] no N+1 Moodle calls;
-- [ ] batch operations;
-- [ ] parallel independent reads;
-- [ ] bounded Moodle request timeout;
-- [ ] metadata caching;
-- [ ] no caching active attempt source of truth;
-- [ ] monitor endpoint returns aggregated data;
-- [ ] pagination on large tables.
-
----
-
-# 39. Phase 17 — E2E
-
-Critical student flow:
-
-```text
-login
-→ dashboard
-→ course
-→ exam
-→ access check
-→ start
-→ answer
-→ autosave
-→ navigate
-→ summary
-→ submit
-→ result
-```
-
-Critical admin flow:
-
-```text
-login
-→ create/import users
-→ enrol
-→ manage question bank
-→ create exam
-→ add questions
-→ monitor
-→ force administrative action
-→ result/export
-```
-
----
-
-# 40. TDD Standard for Every Module
-
-## RED
-
-- create domain/application test first;
-- use mock repository port;
-- verify failure represents required behavior.
-
-## GREEN
-
-- implement minimal domain/use case;
-- implement infrastructure adapter;
-- integrate route.
-
-## REFACTOR
-
-- remove duplication;
-- improve naming;
-- preserve boundaries;
-- keep all tests green.
-
-For bug fixes:
-
-```text
-reproduce
-→ regression test RED
-→ fix
-→ GREEN
-→ refactor
-```
-
----
-
-# 41. Testing Layout Example
-
-```text
-modules/quiz-attempts/__tests__/
-├── domain/
-│   ├── QuizAttempt.test.ts
-│   └── QuizAttemptRules.test.ts
-├── application/
-│   ├── StartQuizAttemptUseCase.test.ts
-│   ├── SaveQuizAnswerUseCase.test.ts
-│   └── SubmitQuizAttemptUseCase.test.ts
-├── infrastructure/
-│   ├── MoodleQuizAttemptMapper.test.ts
-│   └── MoodleQuizAttemptRepository.test.ts
-└── helpers/
-    ├── MockQuizAttemptRepository.ts
-    └── QuizAttemptTestFactory.ts
-```
-
----
-
-# 42. Implementation Order
-
-Do not implement modules randomly.
-
-Use this dependency order:
-
-```text
-1. Project bootstrap
-2. Core base/errors/http
-3. MoodleRestClient
-4. Tenant
-5. Auth
-6. Courses
-7. Quizzes
-8. Quiz Attempts
-9. Grades
-10. Student Exam UI
-11. Users
-12. Enrolments
-13. Groups/Cohorts
-14. Questions
-15. Exam Administration
-16. Exam Monitoring
-17. Audit
-18. Security Hardening
-19. Performance
-20. E2E
-```
-
----
-
-# 43. MVP Scope
-
-MVP is complete when a student can:
-
-- [ ] login;
-- [ ] resolve correct tenant;
-- [ ] view courses;
-- [ ] view available exams;
-- [ ] see access state;
-- [ ] start/resume attempt;
-- [ ] answer questions;
-- [ ] autosave;
-- [ ] navigate questions;
-- [ ] submit;
-- [ ] view result allowed by Moodle.
-
-Admin MVP:
-
-- [ ] list users;
-- [ ] enrol students;
-- [ ] list exams;
-- [ ] monitor active attempts.
-
-Question-bank authoring can be delivered immediately after custom `local_examapi` is ready.
-
----
-
-# 44. Definition of Done per Feature
-
-A feature is not complete until:
-
-- [ ] Domain contract exists.
-- [ ] Use case exists.
-- [ ] Repository port exists.
-- [ ] Infrastructure adapter exists.
-- [ ] Mapper exists where external response is involved.
-- [ ] Dependency factory exists.
-- [ ] API route is thin.
-- [ ] Presentation hook exists where client interaction is required.
-- [ ] UI follows atom/molecule/organism/page boundary.
-- [ ] Loading state exists.
-- [ ] Empty state exists where relevant.
-- [ ] Error state exists.
-- [ ] Pagination exists for scalable lists.
-- [ ] Domain/application tests pass.
-- [ ] Adapter tests pass where relevant.
+- [ ] no `any` without explicit justification.
+- [ ] no circular dependency.
+- [ ] no Moodle implementation.
+- [ ] no business-feature implementation.
 - [ ] TypeScript passes.
 - [ ] Biome passes.
-- [ ] Build passes.
-- [ ] No Moodle secret reaches browser.
-- [ ] Tenant isolation is preserved.
-- [ ] No dead code.
-- [ ] No unexplained `any`.
+- [ ] tests pass.
+- [ ] production build passes.
 
 ---
 
-# 45. Explicit Non-Goals
+# 38. Definition of Success
 
-For initial architecture:
+Setelah Phase 1 selesai, module berikutnya harus dapat menggunakan Core dengan pola seperti:
 
-- Do not edit Moodle core.
-- Do not expose Moodle REST directly to browser.
-- Do not duplicate Moodle Quiz Engine in Next.js.
-- Do not calculate authoritative grade in browser.
-- Do not store student answer as a second authoritative copy unless a specific offline architecture is approved.
-- Do not implement WebSocket prematurely for monitoring.
-- Do not build generic abstractions before two or more real use cases prove the need.
-- Do not combine `quizzes` and `quiz-attempts` into one module.
+```ts
+const tenant =
+  await resolveCurrentTenant(
+    request,
+    tenantResolver,
+  );
 
----
+const actor =
+  await resolveCurrentActor(
+    request,
+    sessionResolver,
+    tenant,
+  );
 
-# 46. Future Custom Moodle Plugin
+const result =
+  await useCase.execute(input);
 
-Maintain separately deployable Moodle plugin:
-
-```text
-local_examapi/
-├── classes/
-│   ├── external/
-│   ├── local/
-│   └── service/
-├── db/
-│   ├── access.php
-│   ├── services.php
-│   └── upgrade.php
-├── lang/
-│   └── en/
-├── tests/
-├── version.php
-└── README.md
+return ApiResponse.success(result);
 ```
 
-Initial functions:
+dan semua error dari application dapat masuk ke:
 
 ```text
-local_exam_get_question_bank
-local_exam_create_question
-local_exam_update_question
-local_exam_delete_question
-
-local_exam_create_quiz
-local_exam_update_quiz
-local_exam_delete_quiz
-local_exam_duplicate_quiz
-
-local_exam_add_question_to_quiz
-local_exam_remove_question_from_quiz
-local_exam_reorder_quiz_questions
-local_exam_add_random_questions
-
-local_exam_get_exam_monitor
-local_exam_get_active_attempts
-local_exam_force_finish_attempt
-local_exam_reset_attempt
-local_exam_extend_attempt_time
-local_exam_force_logout_user
+withApiHandler
+→ mapErrorToHttpResponse
+→ structured API error
+→ requestId
+→ structured logger
 ```
 
-Next.js domain must remain unaware that the implementation is named `local_examapi`.
+tanpa route membuat error mapping sendiri.
 
----
-
-# 47. Final Architecture Target
-
-```text
-┌───────────────────────────────────────────────┐
-│                  Browser                      │
-└──────────────────────┬────────────────────────┘
-                       ↓
-┌───────────────────────────────────────────────┐
-│ Sections / UI                                 │
-│ Atom → Molecule → Organism → Page             │
-└──────────────────────┬────────────────────────┘
-                       ↓
-┌───────────────────────────────────────────────┐
-│ Presentation Hooks                            │
-└──────────────────────┬────────────────────────┘
-                       ↓
-┌───────────────────────────────────────────────┐
-│ Next.js /api/v1                               │
-│ Inbound Adapter                               │
-└──────────────────────┬────────────────────────┘
-                       ↓
-┌───────────────────────────────────────────────┐
-│ Application                                   │
-│ Use Cases / Services                          │
-└──────────────────────┬────────────────────────┘
-                       ↓
-┌───────────────────────────────────────────────┐
-│ Domain                                        │
-│ Entities / DTO / Rules / Ports                │
-└──────────────────────┬────────────────────────┘
-                       ↑
-┌───────────────────────────────────────────────┐
-│ Infrastructure                                │
-│ Moodle Repositories / Mappers / Providers     │
-└──────────────────────┬────────────────────────┘
-                       ↓
-┌───────────────────────────────────────────────┐
-│ Moodle                                        │
-│ core_* / mod_quiz_* / local_examapi_*         │
-└───────────────────────────────────────────────┘
-```
-
----
-
-# 48. Initial Issue Completion Criteria
-
-This architecture issue may be closed only when:
-
-- [ ] project base folders are created;
-- [ ] lint/typecheck/test/build commands work;
-- [ ] `core` scaffolding exists;
-- [ ] Moodle REST client has tests and implementation;
-- [ ] tenant boundary exists;
-- [ ] auth module scaffold exists;
-- [ ] course module scaffold exists;
-- [ ] quiz module scaffold exists;
-- [ ] quiz-attempt module scaffold exists;
-- [ ] shared UI base exists;
-- [ ] internal `/api/v1` namespace exists;
-- [ ] at least one full vertical slice is implemented:
-
-```text
-UI
-→ hook
-→ Next.js API
-→ use case
-→ repository port
-→ Moodle repository
-→ MoodleRestClient
-```
-
-Recommended first vertical slice:
-
-```text
-GET /api/v1/courses
-→ GetMyCoursesUseCase
-→ CourseRepository
-→ MoodleCourseRepository
-→ core_enrol_get_users_courses
-```
-
-After this issue is complete, development continues per feature issue using the same architecture.
+Tujuan utama Phase 1 adalah memastikan seluruh feature berikutnya dibangun di atas fondasi yang **type-safe, testable, framework-aware hanya pada boundary yang benar, tenant-ready, session-ready, observable, dan konsisten**.

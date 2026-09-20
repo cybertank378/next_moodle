@@ -1,11 +1,11 @@
 import { AppError, type AppErrorOptions } from "./AppError";
 
-export class ForbiddenError extends AppError {
+export class ConflictError extends AppError {
   public readonly code: string;
-  public readonly statusCode: number = 403;
+  public readonly statusCode: number = 409;
 
   constructor(
-    message = "Access forbidden",
+    message = "Conflict detected",
     options?: AppErrorOptions | unknown,
   ) {
     super(message, options);
@@ -15,6 +15,6 @@ export class ForbiddenError extends AppError {
       "code" in options &&
       typeof options.code === "string"
         ? options.code
-        : "FORBIDDEN";
+        : "CONFLICT";
   }
 }

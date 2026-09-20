@@ -1,20 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { CurrentActor } from "../auth/CurrentActor";
 import { resolveCurrentActor } from "../auth/resolveCurrentActor";
-import { AppError } from "../errors/AppError";
-import { createLogger, type ILogger } from "../logger";
-import { generateRequestId } from "../security/RequestId";
+import { createLogger, type Logger } from "../logger";
+import { getOrGenerateRequestId } from "../security/RequestId";
 import { resolveCurrentTenant } from "../tenant/resolveCurrentTenant";
 import type { TenantContext } from "../tenant/TenantContext";
-import { createErrorResponse } from "./ApiErrorResponse";
-import { createSuccessResponse } from "./ApiResponse";
+import { ApiResponse } from "./ApiResponse";
 import { HttpStatus } from "./HttpStatus";
+import { mapErrorToHttpResponse } from "./mapErrorToHttpResponse";
 
 export interface ApiHandlerContext {
   readonly requestId: string;
   readonly tenant: TenantContext;
   readonly actor: CurrentActor | null;
-  readonly logger: ILogger;
+  readonly logger: Logger;
   readonly params: Record<string, string | string[]>;
 }
 
@@ -35,28 +34,28 @@ export function withApiHandler<T>(
     request: NextRequest,
     routeSegmentContext: {
       params: Promise<Record<string, string | string[] | undefined>>;
+    } = {
+      params: Promise.resolve({}),
     },
   ): Promise<NextResponse> => {
-    const requestId = generateRequestId();
-    const logger = createLogger({ requestId });
+    const requestId = getOrGenerateRequestId(request);
+    let logger: Logger = createLogger({ requestId });
 
     try {
       const tenant = await resolveCurrentTenant(request);
-      const actor = await resolveCurrentActor(request);
 
-      if (options.requireAuth && !actor) {
-        return NextResponse.json(
-          createErrorResponse(
-            "UNAUTHORIZED",
-            "Authentication required to access this resource",
-          ),
-          { status: HttpStatus.UNAUTHORIZED },
-        );
+      let actor: CurrentActor | null = null;
+      try {
+        actor = await resolveCurrentActor(request, undefined, tenant);
+      } catch (authErr) {
+        if (options.requireAuth) {
+          throw authErr;
+        }
       }
 
-      const contextualLogger = logger.child({
+      logger = logger.child({
         tenantId: tenant.tenantId,
-        actorId: actor?.id,
+        actorId: actor?.userId,
       });
 
       const resolvedParams = routeSegmentContext?.params
@@ -70,7 +69,7 @@ export function withApiHandler<T>(
         requestId,
         tenant,
         actor,
-        logger: contextualLogger,
+        logger,
         params: resolvedParams,
       };
 
@@ -82,36 +81,18 @@ export function withApiHandler<T>(
         return result;
       }
 
-      // Otherwise format as standard ApiResponse
-      const response = NextResponse.json(createSuccessResponse(result), {
+      // Format as standard ApiResponse.success
+      const responseBody = ApiResponse.success(result);
+      const response = NextResponse.json(responseBody, {
         status: HttpStatus.OK,
       });
       response.headers.set("x-request-id", requestId);
       return response;
     } catch (error) {
-      if (error instanceof AppError) {
-        logger.warn(`Handled application error: ${error.message}`, {
-          code: error.code,
-          statusCode: error.statusCode,
-        });
+      logger.error("API handler execution error", error, { requestId });
 
-        const response = NextResponse.json(
-          createErrorResponse(error.code, error.message, error.details),
-          { status: error.statusCode },
-        );
-        response.headers.set("x-request-id", requestId);
-        return response;
-      }
-
-      logger.error("Unhandled API exception occurred", error);
-
-      const response = NextResponse.json(
-        createErrorResponse(
-          "INTERNAL_SERVER_ERROR",
-          "An unexpected server error occurred. Please try again later.",
-        ),
-        { status: HttpStatus.INTERNAL_SERVER_ERROR },
-      );
+      const { status, body } = mapErrorToHttpResponse(error, requestId);
+      const response = NextResponse.json(body, { status });
       response.headers.set("x-request-id", requestId);
       return response;
     }

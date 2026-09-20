@@ -1,36 +1,57 @@
-import type { NextRequest } from "next/server";
-import { UnauthorizedError } from "../errors/UnauthorizedError";
+import { ForbiddenError } from "../errors/ForbiddenError";
+import { NotFoundError } from "../errors/NotFoundError";
 import type { TenantContext } from "./TenantContext";
+import type { TenantResolver } from "./TenantResolver";
+
+export class DefaultDevTenantResolver implements TenantResolver {
+  public async resolve(): Promise<TenantContext> {
+    return {
+      tenantId: process.env.DEFAULT_TENANT_ID || "tenant_demo",
+      slug: process.env.DEFAULT_TENANT_SLUG || "demo",
+      status: "ACTIVE",
+    };
+  }
+}
 
 export async function resolveCurrentTenant(
-  request: NextRequest,
+  request: Request,
+  resolver: TenantResolver = new DefaultDevTenantResolver(),
 ): Promise<TenantContext> {
-  const headerTenantId = request.headers.get("x-tenant-id");
-  const headerTenantSlug = request.headers.get("x-tenant-slug");
-  const host = request.headers.get("host") || "";
+  const url = new URL(request.url);
+  const host = request.headers.get("host") || url.host;
+  const headerSlug = request.headers.get("x-tenant-slug");
+  const headerId = request.headers.get("x-tenant-id");
 
-  // Check custom headers or subdomains
-  const slugFromHost = host.split(".")[0] || "demo";
-  const slug = headerTenantSlug || slugFromHost;
-  const tenantId = headerTenantId || `tenant_${slug}`;
-
-  // Fallback / default tenant configuration for local dev and bootstrap
-  const defaultUrl =
-    process.env.DEFAULT_MOODLE_URL || "https://moodle.example.com";
-  const defaultToken = process.env.DEFAULT_MOODLE_TOKEN || "mock_moodle_token";
-
-  const context: TenantContext = {
-    tenantId,
-    slug,
-    name: slug.toUpperCase(),
-    moodleUrl: defaultUrl,
-    moodleToken: defaultToken,
-    isActive: true,
-  };
-
-  if (!context.isActive) {
-    throw new UnauthorizedError(`Tenant '${context.slug}' is inactive`);
+  // Determine identifier from header or host subdomain
+  let identifier = headerSlug || headerId || "";
+  if (!identifier && host) {
+    const parts = host.split(":")[0]?.split(".") ?? [];
+    if (parts.length > 2) {
+      identifier = parts[0] || "";
+    } else if (
+      parts.length > 0 &&
+      parts[0] !== "localhost" &&
+      parts[0] !== "127"
+    ) {
+      identifier = parts[0] || "";
+    }
   }
 
-  return context;
+  const tenant = await resolver.resolve({
+    identifier: identifier || "demo",
+    host,
+    headers: request.headers,
+  });
+
+  if (!tenant) {
+    throw new NotFoundError(`Tenant '${identifier}' tidak ditemukan.`);
+  }
+
+  if (tenant.status === "INACTIVE") {
+    throw new ForbiddenError(`Tenant '${tenant.slug}' tidak aktif.`, {
+      code: "TENANT_INACTIVE",
+    });
+  }
+
+  return tenant;
 }

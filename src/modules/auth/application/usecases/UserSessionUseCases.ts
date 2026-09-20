@@ -11,10 +11,12 @@ export class GetCurrentUserUseCase {
     }
 
     return {
-      id: actor.id,
-      username: actor.username,
-      fullName: `${actor.firstname} ${actor.lastname}`.trim(),
-      email: actor.email,
+      id: actor.id ?? actor.userId,
+      username: actor.username ?? actor.userId,
+      fullName:
+        `${actor.firstname ?? ""} ${actor.lastname ?? ""}`.trim() ||
+        (actor.username ?? actor.userId),
+      email: actor.email ?? "",
       tenantId: actor.tenantId,
       roles: actor.roles,
     };
