@@ -1,287 +1,501 @@
-# ISSUE: Phase 3 — Tenant
+# PLANNING — Phase 3 Tenant & Custom Domain Resolution
 
-## Objective
+## 1. Objective
 
-Implementasikan **Phase 3 — Tenant** sebagai fondasi multi-tenant sebelum authentication dan seluruh feature Moodle lainnya.
+Membangun mekanisme multi-tenant untuk SaaS ujian berbasis Next.js + Moodle dengan karakteristik:
 
-Tujuan utama phase ini adalah memastikan setiap request:
+- setiap tenant/sekolah dapat memiliki domain frontend sendiri;
+- domain tidak harus berada di bawah satu parent domain;
+- domain sudah diarahkan melalui Nginx ke aplikasi Next.js;
+- tenant ditentukan dari **exact hostname mapping**, bukan dari subdomain extraction;
+- setiap tenant memiliki konfigurasi Moodle sendiri;
+- setiap tenant dapat menunjuk ke Moodle instance/domain yang berbeda;
+- Moodle credential tersimpan terenkripsi;
+- tidak ada cross-tenant credential leakage;
+- tenant resolution selalu terjadi sebelum authentication dan akses Moodle.
 
-1. menentukan tenant berdasarkan hostname/subdomain;
-2. mengambil konfigurasi tenant dari repository;
-3. tidak mengekspos credential Moodle ke layer luar;
-4. hanya menggunakan Moodle credential milik tenant yang benar;
-5. menolak tenant yang tidak aktif;
-6. membangun `TenantContext`;
-7. menghubungkan `TenantContext` ke `MoodleClientFactory`.
+Contoh:
 
-Semua Moodle access setelah phase ini harus tenant-aware.
+```text
+Tenant SMPN 29
+
+Frontend:
+https://ujian.smpn29jkt.sch.id
+
+Moodle:
+https://lms.smpn29jkt.sch.id
+```
+
+Tenant lain dapat menggunakan pola yang berbeda:
+
+```text
+Frontend:
+https://cbt.sekolahb.id
+
+Moodle:
+https://elearning.sekolahb.sch.id
+```
+
+Tidak ada requirement parent domain yang sama.
 
 ---
 
-# 1. Architectural Context
+# 2. Final Architecture
 
 ```text
-Incoming Request
-      ↓
-hostname
-      ↓
-TenantResolver
-      ↓
-tenant slug
-      ↓
-TenantRepository
-      ↓
-Tenant Entity
-      ↓
+Browser
+   ↓
+https://ujian.smpn29jkt.sch.id
+   ↓
+Nginx
+   ↓
+Next.js
+   ↓
+Request Hostname
+   ↓
+normalize hostname
+   ↓
+TenantDomainRepository.findByHostname()
+   ↓
+TenantDomain
+   ↓
+TenantRepository.findById()
+   ↓
+Tenant
+   ↓
 TenantContext
-      ↓
+   ↓
+TenantMoodleConfiguration
+   ↓
 MoodleCredentialProvider
-      ↓
+   ↓
 MoodleClientFactory
-      ↓
+   ↓
 MoodleRestClient
+   ↓
+https://lms.smpn29jkt.sch.id
 ```
 
-Tenant resolution terjadi sebelum authentication, course, quiz, attempt, question bank, grade, dan exam monitoring.
+Tenant tidak ditentukan oleh Moodle.
 
-Tidak boleh ada Moodle request tanpa `TenantContext` yang valid.
+Tenant authority berada di Next.js.
 
 ---
 
-# 2. Dependency on Previous Phases
+# 3. Core Principle
 
-Phase ini mengasumsikan sudah tersedia dari Phase 1:
+Jangan gunakan `subdomain extraction` sebagai tenant authority.
 
-```text
-core/base
-core/errors
-core/http
-core/logger
-core/security
-core/tenant
-core/auth
-```
-
-dan dari Phase 2:
+Gunakan **exact hostname lookup**:
 
 ```text
-core/moodle/
-├── MoodleRestClient.ts
-├── MoodleClientFactory.ts
-├── MoodleCredentialProvider.ts
-├── MoodleCredential.ts
-├── MoodleErrorMapper.ts
-└── MoodleRequestEncoder.ts
-```
+ujian.smpn29jkt.sch.id
+→ Tenant SMPN29
 
-Gunakan abstraction existing. Jangan menduplikasi abstraction yang sudah tersedia.
+cbt.sekolahb.id
+→ Tenant School B
 
----
-
-# 3. Scope
-
-Implement:
-
-- [ ] Tenant entity.
-- [ ] Tenant repository port.
-- [ ] Tenant persistence adapter.
-- [ ] Tenant lookup by subdomain.
-- [ ] Tenant status.
-- [ ] Moodle configuration.
-- [ ] encrypted Moodle credential/configuration.
-- [ ] TenantContext mapping.
-- [ ] Tenant resolver.
-- [ ] Moodle connection test.
-- [ ] integration ke `MoodleClientFactory`.
-- [ ] tests.
-
-Do not implement yet:
-
-```text
-student login
-teacher login
-Moodle user token flow
-course
-quiz
-quiz attempt
-question bank
-grade
-exam monitor
+asesmen.school-c.sch.id
+→ Tenant School C
 ```
 
 ---
 
-# 4. Target Module Structure
+# 4. Main Domain Models
 
-```text
-src/modules/tenant/
-├── domain/
-│   ├── dto/
-│   │   ├── CreateTenantRequestDTO.ts
-│   │   ├── UpdateTenantRequestDTO.ts
-│   │   ├── TenantResponseDTO.ts
-│   │   ├── TenantDetailResponseDTO.ts
-│   │   ├── TenantMoodleConfigDTO.ts
-│   │   └── TestTenantConnectionResponseDTO.ts
-│   ├── entities/
-│   │   └── Tenant.ts
-│   ├── interfaces/
-│   │   ├── TenantRepository.ts
-│   │   ├── TenantCredentialRepository.ts
-│   │   └── TenantConnectionTester.ts
-│   ├── rules/
-│   │   └── TenantRules.ts
-│   ├── types/
-│   │   ├── TenantStatus.ts
-│   │   └── TenantMoodleConfiguration.ts
-│   ├── validators/
-│   │   └── TenantValidator.ts
-│   └── value-objects/
-│       └── TenantSlug.ts
-│
-├── application/
-│   └── usecases/
-│       ├── CreateTenantUseCase.ts
-│       ├── UpdateTenantUseCase.ts
-│       ├── GetTenantUseCase.ts
-│       ├── GetTenantBySlugUseCase.ts
-│       ├── ChangeTenantStatusUseCase.ts
-│       └── TestTenantMoodleConnectionUseCase.ts
-│
-├── infrastructure/
-│   ├── mappers/
-│   │   └── TenantPersistenceMapper.ts
-│   ├── providers/
-│   │   ├── EncryptedTenantCredentialProvider.ts
-│   │   └── MoodleTenantConnectionTester.ts
-│   ├── repositories/
-│   │   ├── DatabaseTenantRepository.ts
-│   │   └── DatabaseTenantCredentialRepository.ts
-│   └── factories/
-│       └── createTenantDependencies.ts
-│
-├── presentation/
-│   └── hooks/
-│       └── useTenantApi.ts
-│
-└── __tests__/
-    ├── domain/
-    ├── application/
-    ├── infrastructure/
-    └── helpers/
-```
-
----
-
-# 5. Core Tenant Integration
-
-Lengkapi bila Phase 1 baru menyediakan contract:
-
-```text
-src/core/tenant/
-├── TenantContext.ts
-├── TenantResolver.ts
-├── TenantResolutionInput.ts
-└── resolveCurrentTenant.ts
-```
-
-`core/tenant` hanya berisi abstraction/runtime resolution generic.
-
-Business entity `Tenant` tetap berada di:
-
-```text
-modules/tenant/domain/
-```
-
----
-
-# 6. Tenant Entity
-
-Tenant entity minimal:
-
-```ts
-interface TenantProps {
-  readonly id: string;
-  readonly slug: string;
-  readonly name: string;
-  readonly status: TenantStatus;
-  readonly moodleBaseUrl: string;
-  readonly moodleServiceShortname: string | null;
-}
-```
-
-Credential/token Moodle tidak boleh menjadi public property entity.
-
-Preferred split:
+Gunakan pemisahan:
 
 ```text
 Tenant
-→ non-sensitive tenant metadata
-
-TenantCredential
-→ encrypted infrastructure concern
+TenantDomain
+TenantMoodleConfiguration
+TenantMoodleCredential
 ```
+
+Jangan menyimpan seluruh informasi dalam satu entity besar.
 
 ---
 
-# 7. Tenant Status
+# 5. Tenant
 
-Recommended:
+Suggested fields:
 
-```ts
-export type TenantStatus =
-  | "ACTIVE"
-  | "INACTIVE"
-  | "SUSPENDED";
+```text
+id
+slug
+name
+status
+createdAt
+updatedAt
+```
+
+Example:
+
+```json
+{
+  "id": "tenant-smpn29",
+  "slug": "smpn29",
+  "name": "SMP Negeri 29 Jakarta",
+  "status": "ACTIVE"
+}
+```
+
+`slug` hanya identifier internal. Slug tidak menentukan domain.
+
+---
+
+# 6. Tenant Status
+
+```text
+ACTIVE
+INACTIVE
+SUSPENDED
 ```
 
 Behavior:
 
 ```text
 ACTIVE
-→ request allowed
+→ normal access allowed
 
 INACTIVE
-→ tenant exists but application access blocked
+→ tenant exists but access disabled
 
 SUSPENDED
-→ blocked due to administrative restriction
+→ tenant blocked administratively
 ```
 
 ---
 
-# 8. TenantSlug Value Object
+# 7. TenantDomain
 
-Recommended format:
-
-```regex
-^[a-z0-9]+(?:-[a-z0-9]+)*$
-```
-
-Valid:
+Suggested fields:
 
 ```text
-smpn29
-hangtuah2
-school-a
-school-2026
+id
+tenantId
+hostname
+type
+isPrimary
+status
+createdAt
+updatedAt
 ```
 
-Invalid:
+Example:
 
-```text
-SMPN29
-school_a
-school a
-.school
-school.
+```json
+{
+  "tenantId": "tenant-smpn29",
+  "hostname": "ujian.smpn29jkt.sch.id",
+  "type": "FRONTEND",
+  "isPrimary": true,
+  "status": "ACTIVE"
+}
 ```
-
-Gunakan satu canonical policy untuk create, lookup, dan hostname resolution.
 
 ---
 
-# 9. Tenant Repository Port
+# 8. TenantDomain Type
+
+```text
+FRONTEND
+ADMIN
+ALIAS
+```
+
+Example:
+
+```text
+ujian.smpn29jkt.sch.id
+→ FRONTEND
+
+admin.smpn29jkt.sch.id
+→ ADMIN
+
+asesmen.smpn29jkt.sch.id
+→ ALIAS
+```
+
+---
+
+# 9. TenantDomain Status
+
+```text
+PENDING
+ACTIVE
+DISABLED
+```
+
+Onboarding:
+
+```text
+Create domain
+   ↓
+PENDING
+   ↓
+DNS/Nginx/TLS configured
+   ↓
+verification
+   ↓
+ACTIVE
+```
+
+Normal tenant resolution hanya menerima `ACTIVE`.
+
+---
+
+# 10. TenantMoodleConfiguration
+
+Suggested fields:
+
+```text
+tenantId
+baseUrl
+serviceShortnameStudent
+serviceShortnameAdmin
+apiVersion
+connectionStatus
+lastConnectionTestAt
+createdAt
+updatedAt
+```
+
+Example:
+
+```json
+{
+  "tenantId": "tenant-smpn29",
+  "baseUrl": "https://lms.smpn29jkt.sch.id",
+  "serviceShortnameStudent": "nextjs_student",
+  "serviceShortnameAdmin": "nextjs_admin",
+  "apiVersion": 1,
+  "connectionStatus": "CONNECTED"
+}
+```
+
+---
+
+# 11. TenantMoodleCredential
+
+Suggested fields:
+
+```text
+id
+tenantId
+type
+encryptedToken
+iv
+authTag
+keyVersion
+createdAt
+updatedAt
+```
+
+Credential type awal:
+
+```text
+ADMIN_SERVICE
+```
+
+Student Moodle token tidak disimpan sebagai tenant credential; token siswa bersifat per-user/per-session.
+
+---
+
+# 12. Domain Mapping Example
+
+```text
+Tenant
+------------------------------------------------
+tenant-smpn29
+tenant-school-b
+
+TenantDomain
+------------------------------------------------
+ujian.smpn29jkt.sch.id      → tenant-smpn29
+asesmen.smpn29jkt.sch.id    → tenant-smpn29
+cbt.sekolahb.id              → tenant-school-b
+
+TenantMoodleConfiguration
+------------------------------------------------
+tenant-smpn29
+→ https://lms.smpn29jkt.sch.id
+
+tenant-school-b
+→ https://elearning.sekolahb.sch.id
+```
+
+---
+
+# 13. Exact Hostname Resolution
+
+```text
+Host: ujian.smpn29jkt.sch.id
+   ↓
+normalize
+   ↓
+TenantDomainRepository.findByHostname(
+  "ujian.smpn29jkt.sch.id"
+)
+   ↓
+TenantDomain
+   ↓
+tenantId
+   ↓
+TenantRepository.findById()
+   ↓
+TenantContext
+```
+
+Tidak ada string manipulation untuk menemukan tenant.
+
+---
+
+# 14. Forbidden Tenant Resolution
+
+Jangan gunakan:
+
+```ts
+hostname.split(".")[0]
+```
+
+Jangan gunakan:
+
+```ts
+hostname.replace("ujian.", "")
+```
+
+Jangan gunakan shared root domain sebagai requirement global.
+
+Jangan mengubah frontend hostname menjadi Moodle URL menggunakan string replacement.
+
+Moodle URL selalu berasal dari database configuration.
+
+---
+
+# 15. Hostname Normalization
+
+Utility:
+
+```text
+normalizeRequestHostname()
+```
+
+Behavior:
+
+```text
+lowercase
+trim whitespace
+remove port
+remove trailing dot if supported
+validate hostname syntax
+```
+
+Examples:
+
+```text
+UJIAN.SMPN29JKT.SCH.ID
+→ ujian.smpn29jkt.sch.id
+
+ujian.smpn29jkt.sch.id:443
+→ ujian.smpn29jkt.sch.id
+```
+
+---
+
+# 16. Nginx Integration
+
+Nginx menjadi trusted reverse proxy.
+
+```nginx
+server {
+    listen 443 ssl http2;
+
+    server_name ujian.smpn29jkt.sch.id;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+Tenant lain dapat memiliki `server_name` berbeda tetapi mengarah ke Next.js instance yang sama.
+
+---
+
+# 17. Trusted Host Resolution
+
+Implement helper:
+
+```text
+resolveRequestHostname(request)
+```
+
+Recommended strategy:
+
+```text
+trusted X-Forwarded-Host
+   ↓
+Host fallback
+   ↓
+normalize
+   ↓
+validate
+```
+
+Jangan mempercayai arbitrary forwarded headers tanpa konfigurasi trusted proxy.
+
+---
+
+# 18. Tenant Resolver
+
+```ts
+export interface TenantResolver {
+  resolveByHostname(
+    hostname: string,
+  ): Promise<TenantContext | null>;
+}
+```
+
+Jangan gunakan `resolveBySubdomain()`.
+
+---
+
+# 19. TenantDomainRepository
+
+```ts
+export interface TenantDomainRepository {
+  findByHostname(
+    hostname: string,
+  ): Promise<TenantDomain | null>;
+
+  findByTenantId(
+    tenantId: string,
+  ): Promise<readonly TenantDomain[]>;
+
+  create(
+    domain: TenantDomain,
+  ): Promise<TenantDomain>;
+
+  update(
+    domain: TenantDomain,
+  ): Promise<TenantDomain>;
+
+  existsByHostname(
+    hostname: string,
+  ): Promise<boolean>;
+}
+```
+
+---
+
+# 20. TenantRepository
 
 ```ts
 export interface TenantRepository {
@@ -300,289 +514,137 @@ export interface TenantRepository {
   update(
     tenant: Tenant,
   ): Promise<Tenant>;
-
-  existsBySlug(
-    slug: string,
-  ): Promise<boolean>;
 }
 ```
 
-Jangan membuat generic CRUD base repository hanya karena terlihat serupa.
+---
+
+# 21. TenantMoodleConfigurationRepository
+
+```ts
+export interface TenantMoodleConfigurationRepository {
+  getByTenantId(
+    tenantId: string,
+  ): Promise<TenantMoodleConfiguration | null>;
+
+  save(
+    config: TenantMoodleConfiguration,
+  ): Promise<void>;
+
+  update(
+    config: TenantMoodleConfiguration,
+  ): Promise<void>;
+}
+```
 
 ---
 
-# 10. Tenant Credential Repository
+# 22. TenantCredentialRepository
 
 ```ts
 export interface TenantCredentialRepository {
-  getByTenantId(
+  getAdminServiceCredential(
     tenantId: string,
   ): Promise<TenantMoodleCredential | null>;
 
-  save(
+  saveAdminServiceCredential(
     credential: TenantMoodleCredential,
   ): Promise<void>;
-
-  deleteByTenantId(
-    tenantId: string,
-  ): Promise<void>;
 }
 ```
 
-Sensitive credential persistence dipisahkan dari tenant metadata.
-
 ---
 
-# 11. Moodle Configuration
-
-Tenant Moodle configuration minimal:
+# 23. Target Module Structure
 
 ```text
-baseUrl
-serviceShortname
-encryptedToken
-```
-
-Optional operational metadata:
-
-```text
-connectionStatus
-lastConnectionTestAt
-Moodle version
-```
-
-Do not store username/password unless later architecture explicitly requires it.
-
----
-
-# 12. Encrypted Moodle Configuration
-
-Sensitive fields wajib encrypted at rest.
-
-Minimum:
-
-```text
-Moodle token
-service credential
-future client secret
-```
-
-Conceptual storage:
-
-```text
-tenantId
-encryptedValue
-iv / nonce
-authTag
-keyVersion
-createdAt
-updatedAt
-```
-
-Never store plaintext Moodle token.
-
----
-
-# 13. Encryption Boundary
-
-Encryption/decryption adalah Infrastructure concern.
-
-```text
-Application
-   ↓
-TenantCredentialRepository
-   ↓
-EncryptedTenantCredentialProvider
-   ↓
-EncryptionProvider
-   ↓
-Database
-```
-
-Domain tidak boleh import crypto implementation.
-
----
-
-# 14. Encryption Requirements
-
-Jika project menggunakan local encryption, gunakan authenticated encryption seperti:
-
-```text
-AES-256-GCM
-```
-
-Do not use:
-
-```text
-Base64 as encryption
-MD5
-SHA as encryption
-AES-ECB
-static IV
-hard-coded key
-```
-
-Encryption key harus server-only.
-
-Contoh:
-
-```text
-TENANT_CREDENTIAL_ENCRYPTION_KEY
-```
-
-Never use `NEXT_PUBLIC_*` untuk secret.
-
----
-
-# 15. Hostname Resolution
-
-Example:
-
-```text
-smpn29.exam.example.com
-```
-
-must resolve to:
-
-```text
-smpn29
-```
-
-Flow:
-
-```text
-Request
- ↓
-Host
- ↓
-normalized hostname
- ↓
-subdomain extraction
- ↓
-TenantSlug
- ↓
-TenantRepository.findBySlug()
+src/modules/tenant/
+├── domain/
+│   ├── dto/
+│   │   ├── CreateTenantRequestDTO.ts
+│   │   ├── UpdateTenantRequestDTO.ts
+│   │   ├── TenantResponseDTO.ts
+│   │   ├── TenantDomainDTO.ts
+│   │   ├── TenantMoodleConfigurationDTO.ts
+│   │   └── TestTenantConnectionResponseDTO.ts
+│   ├── entities/
+│   │   ├── Tenant.ts
+│   │   └── TenantDomain.ts
+│   ├── interfaces/
+│   │   ├── TenantRepository.ts
+│   │   ├── TenantDomainRepository.ts
+│   │   ├── TenantMoodleConfigurationRepository.ts
+│   │   ├── TenantCredentialRepository.ts
+│   │   └── TenantConnectionTester.ts
+│   ├── rules/
+│   │   ├── TenantRules.ts
+│   │   └── TenantDomainRules.ts
+│   ├── types/
+│   │   ├── TenantStatus.ts
+│   │   ├── TenantDomainStatus.ts
+│   │   ├── TenantDomainType.ts
+│   │   ├── TenantConnectionStatus.ts
+│   │   └── TenantMoodleConfiguration.ts
+│   ├── validators/
+│   │   ├── TenantValidator.ts
+│   │   └── TenantDomainValidator.ts
+│   └── value-objects/
+│       ├── TenantSlug.ts
+│       └── TenantHostname.ts
+│
+├── application/
+│   └── usecases/
+│       ├── CreateTenantUseCase.ts
+│       ├── UpdateTenantUseCase.ts
+│       ├── GetTenantUseCase.ts
+│       ├── AddTenantDomainUseCase.ts
+│       ├── UpdateTenantDomainUseCase.ts
+│       ├── VerifyTenantDomainUseCase.ts
+│       ├── ChangeTenantStatusUseCase.ts
+│       ├── ConfigureTenantMoodleUseCase.ts
+│       └── TestTenantMoodleConnectionUseCase.ts
+│
+├── infrastructure/
+│   ├── mappers/
+│   │   ├── TenantPersistenceMapper.ts
+│   │   ├── TenantDomainPersistenceMapper.ts
+│   │   └── TenantMoodleConfigurationMapper.ts
+│   ├── providers/
+│   │   ├── EncryptedTenantCredentialProvider.ts
+│   │   ├── HostnameTenantResolver.ts
+│   │   └── MoodleTenantConnectionTester.ts
+│   ├── repositories/
+│   │   ├── DatabaseTenantRepository.ts
+│   │   ├── DatabaseTenantDomainRepository.ts
+│   │   ├── DatabaseTenantMoodleConfigurationRepository.ts
+│   │   └── DatabaseTenantCredentialRepository.ts
+│   └── factories/
+│       └── createTenantDependencies.ts
+│
+└── __tests__/
+    ├── domain/
+    ├── application/
+    ├── infrastructure/
+    └── helpers/
 ```
 
 ---
 
-# 16. Root Domain
-
-Configure:
+# 24. Core Tenant Structure
 
 ```text
-APP_ROOT_DOMAIN=exam.example.com
-```
-
-Then:
-
-```text
-smpn29.exam.example.com
-→ smpn29
-```
-
-Do not hard-code root domain inside resolver.
-
----
-
-# 17. Hostname Normalization
-
-Handle:
-
-```text
-smpn29.exam.example.com
-smpn29.exam.example.com:3000
-SMPN29.EXAM.EXAMPLE.COM
-```
-
-Normalize:
-
-```text
-lowercase
-remove port
-trim whitespace
-```
-
-Reject malformed hostname.
-
----
-
-# 18. Forwarded Host Security
-
-Possible inputs:
-
-```text
-host
-x-forwarded-host
-```
-
-If deployment is behind a trusted reverse proxy, forwarded host may be used according to deployment configuration.
-
-Do not blindly trust arbitrary forwarded headers.
-
----
-
-# 19. Local Development
-
-Recommended:
-
-```text
-smpn29.localhost:3000
-school-a.localhost:3000
-```
-
-Do not silently map all localhost traffic to one tenant.
-
----
-
-# 20. TenantResolver Contract
-
-```ts
-export interface TenantResolver {
-  resolve(
-    input: TenantResolutionInput,
-  ): Promise<TenantContext | null>;
-}
-```
-
-Suggested:
-
-```ts
-interface TenantResolutionInput {
-  readonly hostname: string;
-}
-```
-
-Keep this abstraction framework-neutral where possible.
-
----
-
-# 21. resolveCurrentTenant
-
-Expected:
-
-```text
-request
- ↓
-hostname extraction
- ↓
-TenantResolver
- ↓
-TenantContext
-```
-
-Suggested codes:
-
-```text
-TENANT_NOT_FOUND
-TENANT_INACTIVE
-TENANT_SUSPENDED
-TENANT_HOST_INVALID
+src/core/tenant/
+├── TenantContext.ts
+├── TenantResolver.ts
+├── TenantResolutionInput.ts
+├── normalizeRequestHostname.ts
+├── resolveRequestHostname.ts
+└── resolveCurrentTenant.ts
 ```
 
 ---
 
-# 22. TenantContext
+# 25. TenantContext
 
 ```ts
 export interface TenantContext {
@@ -590,1006 +652,625 @@ export interface TenantContext {
   readonly slug: string;
   readonly name: string;
   readonly status: TenantStatus;
+  readonly hostname: string;
 }
 ```
 
-Must not contain:
+Do not include Moodle credential or token.
+
+---
+
+# 26. Tenant Resolution Flow
 
 ```text
-Moodle token
-encrypted credential
-encryption key
-auth tag
+Request
+  ↓
+resolveRequestHostname()
+  ↓
+normalizeRequestHostname()
+  ↓
+TenantDomainRepository.findByHostname()
+  ↓
+TenantDomain
+  ↓
+check DomainStatus
+  ↓
+TenantRepository.findById()
+  ↓
+check TenantStatus
+  ↓
+TenantContext
 ```
 
 ---
 
-# 23. Tenant → MoodleClientFactory
+# 27. Domain Resolution Errors
 
-Target:
-
-```ts
-const tenant =
-  await resolveCurrentTenant(
-    request,
-    tenantResolver,
-  );
-
-const moodleClient =
-  await moodleClientFactory.create({
-    tenant,
-    requestId,
-  });
+```text
+TENANT_DOMAIN_INVALID
+TENANT_DOMAIN_NOT_FOUND
+TENANT_DOMAIN_INACTIVE
+TENANT_NOT_FOUND
+TENANT_INACTIVE
+TENANT_SUSPENDED
 ```
 
-Factory flow:
+---
+
+# 28. Exact Hostname Uniqueness
+
+Database constraint:
+
+```text
+TenantDomain.hostname UNIQUE
+```
+
+Satu hostname tidak boleh memetakan ke dua tenant.
+
+---
+
+# 29. Tenant Alias
+
+Satu tenant boleh memiliki beberapa domain:
+
+```text
+ujian.smpn29jkt.sch.id
+→ SMPN29
+
+asesmen.smpn29jkt.sch.id
+→ SMPN29
+```
+
+Keduanya menghasilkan TenantContext yang sama.
+
+---
+
+# 30. Moodle Configuration Resolution
 
 ```text
 TenantContext
- ↓
+   ↓
+TenantMoodleConfigurationRepository
+   ↓
+Moodle Configuration
+   ↓
 MoodleCredentialProvider
- ↓
-server-side decrypted credential
- ↓
-MoodleRestClient
-```
-
----
-
-# 24. EncryptedTenantCredentialProvider
-
-Responsibilities:
-
-```text
-tenantId
- ↓
-TenantCredentialRepository
- ↓
-encrypted credential
- ↓
-EncryptionProvider.decrypt()
- ↓
-MoodleCredential
-```
-
-Plain token tidak boleh keluar dari provider/factory infrastructure path selain untuk instantiate `MoodleRestClient`.
-
----
-
-# 25. Moodle Connection Test
-
-Implement:
-
-```text
-TestTenantMoodleConnectionUseCase
-```
-
-Use:
-
-```text
-core_webservice_get_site_info
-```
-
-through:
-
-```text
+   ↓
 MoodleClientFactory
-→ MoodleRestClient
 ```
 
-No direct fetch.
+Jangan derive Moodle URL dari request hostname.
 
 ---
 
-# 26. Connection Test Flow
+# 31. Moodle Service Separation
+
+Prepare two service contexts:
 
 ```text
-tenantId
+nextjs_student
+nextjs_admin
+```
+
+`nextjs_student`:
+
+```text
+student Moodle user token
+→ quiz attempt lifecycle
+```
+
+`nextjs_admin`:
+
+```text
+tenant service account token
+→ local_examapi / admin operations
+```
+
+---
+
+# 32. Student Credential Flow
+
+Authentication phase nanti:
+
+```text
+Request hostname
+   ↓
+TenantContext
+   ↓
+Tenant Moodle base URL
+   ↓
+/login/token.php
+service=nextjs_student
+   ↓
+Moodle user token
+   ↓
+encrypted session-side storage
+```
+
+Student token bukan tenant credential.
+
+---
+
+# 33. Admin Credential Flow
+
+```text
+TenantContext
+   ↓
+TenantMoodleConfiguration
+   ↓
+TenantMoodleCredential
+   ↓
+decrypt server-side
+   ↓
+MoodleClientFactory
+   ↓
+nextjs_admin
+```
+
+---
+
+# 34. Moodle Connection Test
+
+```text
+Tenant
  ↓
-TenantRepository
+TenantMoodleConfiguration
  ↓
-Tenant exists
+Admin Service Credential
  ↓
 MoodleClientFactory
  ↓
-MoodleRestClient
- ↓
 core_webservice_get_site_info
  ↓
-safe connection result DTO
-```
-
-Example:
-
-```ts
-interface TestTenantConnectionResponseDTO {
-  readonly success: boolean;
-  readonly moodleVersion?: string;
-  readonly siteName?: string;
-  readonly message: string;
-}
-```
-
-Never return token or raw Moodle response.
-
----
-
-# 27. Connection Error Mapping
-
-Suggested:
-
-```text
-invalid token
-→ TENANT_MOODLE_INVALID_CREDENTIAL
-
-timeout
-→ TENANT_MOODLE_TIMEOUT
-
-network
-→ TENANT_MOODLE_UNREACHABLE
-
-invalid response
-→ TENANT_MOODLE_INVALID_RESPONSE
+local_examapi_get_health
+ ↓
+validate functions/API version
 ```
 
 ---
 
-# 28. Administrative Status vs Moodle Health
+# 35. Connection Status
 
-Do not equate temporary Moodle outage with tenant deactivation.
-
-Keep separate:
+Separate from tenant status:
 
 ```text
-Tenant.status
+CONNECTED
+DEGRADED
+DISCONNECTED
+INVALID_CREDENTIAL
+INCOMPATIBLE
+```
+
+---
+
+# 36. Nginx Onboarding Flow
+
+```text
+1. Create Tenant
+2. Register TenantDomain as PENDING
+3. Configure DNS
+4. Configure Nginx server_name
+5. Configure TLS certificate
+6. Verify hostname
+7. Mark TenantDomain ACTIVE
+8. Configure Moodle base URL
+9. Store encrypted Moodle admin credential
+10. Test Moodle connection
+11. Mark Moodle connection CONNECTED
+12. Tenant ready
+```
+
+---
+
+# 37. Domain Verification
+
+Recommended:
+
+```text
+request domain through HTTPS
+↓
+confirm request reaches correct Next.js deployment
+↓
+hostname resolves to expected TenantDomain
+↓
+mark ACTIVE
+```
+
+Do not activate domain that is not configured in DNS/Nginx/TLS.
+
+---
+
+# 38. RED Tests — Hostname
+
+- [ ] lowercase hostname.
+- [ ] uppercase normalized.
+- [ ] port removed.
+- [ ] invalid hostname rejected.
+- [ ] unknown hostname rejected.
+- [ ] disabled domain rejected.
+- [ ] alias domain resolves.
+- [ ] exact-match only.
+- [ ] substring domain does not match.
+- [ ] one hostname cannot map to two tenants.
+
+---
+
+# 39. RED Tests — Tenant Isolation
+
+```text
+ujian.smpn29jkt.sch.id
+→ Tenant A
+→ Moodle A
+
+cbt.sekolahb.id
+→ Tenant B
+→ Moodle B
+```
+
+Assert no cross-tenant configuration or credential leakage.
+
+---
+
+# 40. RED Tests — Moodle Mapping
+
+Verify:
+
+```text
+ujian.smpn29jkt.sch.id
+→ Tenant SMPN29
+→ lms.smpn29jkt.sch.id
 ```
 
 and:
 
 ```text
-Moodle connectivity status
+cbt.sekolahb.id
+→ Tenant School B
+→ elearning.sekolahb.sch.id
 ```
 
-A failed connection test must not automatically change `ACTIVE → INACTIVE`.
+Moodle URL must come from persisted configuration, not hostname transformation.
 
 ---
 
-# 29. Tenant Creation
-
-`CreateTenantUseCase` validates:
-
-- [ ] slug.
-- [ ] name.
-- [ ] Moodle base URL.
-- [ ] service shortname.
-- [ ] slug uniqueness.
-- [ ] credential presence when required.
-
-Flow:
+# 41. RED Tests — Domain Status
 
 ```text
-request
- ↓
-validation
- ↓
-TenantRules
- ↓
-slug uniqueness
- ↓
-create Tenant
- ↓
-encrypt/store Moodle credential
-```
+PENDING
+→ rejected
 
----
+ACTIVE
+→ allowed
 
-# 30. Tenant Creation Atomicity
-
-Tenant metadata + credential must not silently leave a half-configured tenant.
-
-Prefer transaction where supported.
-
-Otherwise document compensation strategy.
-
----
-
-# 31. Tenant Update
-
-Separate:
-
-```text
-metadata
-Moodle configuration
-status
-```
-
-If token omitted during metadata update:
-
-```text
-preserve current credential
-```
-
-unless explicit replacement/removal requested.
-
----
-
-# 32. Secret API Response Rule
-
-Never return:
-
-```text
-moodleToken
-encryptedMoodleToken
-iv
-authTag
-encryption key
-```
-
-Safe response:
-
-```json
-{
-  "id": "tenant-1",
-  "slug": "smpn29",
-  "name": "SMPN 29 Jakarta",
-  "status": "ACTIVE",
-  "moodle": {
-    "baseUrl": "https://moodle.example.com",
-    "serviceShortname": "exam_frontend",
-    "configured": true
-  }
-}
-```
-
----
-
-# 33. Persistence Mapper
-
-Use:
-
-```text
-TenantPersistenceMapper
-```
-
-Flow:
-
-```text
-ORM/database row
- ↓
-TenantPersistenceMapper
- ↓
-Tenant entity
-```
-
-Persistence model must not leak into domain.
-
----
-
-# 34. Database Rules
-
-Use database/ORM already selected by project.
-
-If Prisma exists, infrastructure may use Prisma.
-
-Do not introduce a second ORM.
-
----
-
-# 35. Suggested Persistence Model
-
-```text
-Tenant
-------
-id
-slug
-name
-status
-moodleBaseUrl
-moodleServiceShortname
-createdAt
-updatedAt
-
-TenantCredential
-----------------
-id
-tenantId
-encryptedToken
-iv
-authTag
-keyVersion
-createdAt
-updatedAt
-```
-
-Require unique constraint:
-
-```text
-Tenant.slug
-```
-
----
-
-# 36. ChangeTenantStatusUseCase
-
-Implement:
-
-```text
-ChangeTenantStatusUseCase
-```
-
-Input:
-
-```ts
-{
-  tenantId,
-  status,
-}
-```
-
-Rules:
-
-- [ ] valid status.
-- [ ] tenant exists.
-- [ ] update status.
-- [ ] safe response.
-- [ ] no credential leakage.
-
----
-
-# 37. Mandatory Workflow
-
-```text
-RED
-↓
-GREEN
-↓
-REFACTOR
-```
-
-Do not implement production code before RED tests establish expected behavior.
-
----
-
-# 38. RED — Domain Tests
-
-## TenantSlug
-
-- [ ] valid lowercase slug.
-- [ ] hyphen allowed.
-- [ ] whitespace rejected.
-- [ ] underscore rejected.
-- [ ] empty rejected.
-- [ ] normalization policy tested.
-- [ ] max length tested if defined.
-
-## Tenant
-
-- [ ] valid entity creation.
-- [ ] valid status.
-- [ ] invalid state rejected.
-- [ ] credentials not exposed.
-
-## TenantRules
-
-- [ ] ACTIVE usable.
-- [ ] INACTIVE rejected.
-- [ ] SUSPENDED rejected.
-
----
-
-# 39. RED — Application Tests
-
-## CreateTenantUseCase
-
-- [ ] creates tenant.
-- [ ] duplicate slug rejected.
-- [ ] credential saved through credential port.
-- [ ] credential failure does not silently succeed.
-- [ ] response contains no token.
-
-## UpdateTenantUseCase
-
-- [ ] metadata update.
-- [ ] Moodle config update.
-- [ ] missing new token preserves existing token.
-- [ ] tenant not found.
-
-## GetTenantUseCase
-
-- [ ] tenant exists.
-- [ ] not found.
-- [ ] safe DTO.
-
-## GetTenantBySlugUseCase
-
-- [ ] slug lookup.
-- [ ] unknown slug.
-- [ ] canonical slug handling.
-
-## ChangeTenantStatusUseCase
-
-- [ ] ACTIVE.
-- [ ] INACTIVE.
-- [ ] SUSPENDED.
-- [ ] tenant not found.
-
-## TestTenantMoodleConnectionUseCase
-
-- [ ] success.
-- [ ] invalid credential.
-- [ ] timeout.
-- [ ] unreachable.
-- [ ] no credential configured.
-- [ ] no secret returned.
-
----
-
-# 40. RED — Tenant Resolution Tests
-
-```text
-smpn29.exam.example.com
-→ smpn29
-```
-
-```text
-smpn29.exam.example.com:443
-→ smpn29
-```
-
-```text
-SMPN29.EXAM.EXAMPLE.COM
-→ smpn29
-```
-
-Root domain:
-
-```text
-exam.example.com
-→ no tenant
-```
-
-Unrelated domain:
-
-```text
-attacker.example.net
+DISABLED
 → rejected
 ```
 
-Unknown tenant:
+---
+
+# 42. RED Tests — Tenant Status
 
 ```text
-unknown.exam.example.com
-→ TENANT_NOT_FOUND
-```
+ACTIVE
+→ allowed
 
-Status:
-
-```text
 INACTIVE
-→ TENANT_INACTIVE
+→ rejected
 
 SUSPENDED
-→ TENANT_SUSPENDED
+→ rejected
 ```
 
 ---
 
-# 41. RED — Encryption Tests
-
-- [ ] encrypted value differs from plaintext.
-- [ ] decrypt restores credential.
-- [ ] random IV/nonce produces different ciphertext.
-- [ ] corrupted ciphertext fails.
-- [ ] invalid auth tag fails.
-- [ ] wrong key fails.
-- [ ] safe error does not contain token.
-- [ ] key is not logged.
-
----
-
-# 42. RED — Credential Isolation Tests
-
-Scenario:
-
-```text
-Tenant A → TOKEN_A
-Tenant B → TOKEN_B
-```
-
-Expected:
-
-```text
-Tenant A → TOKEN_A
-Tenant B → TOKEN_B
-```
-
-Never cross-bind credentials.
-
-Also test:
-
-- [ ] missing credential.
-- [ ] repository failure.
-- [ ] decryption failure.
-- [ ] token absent from logger.
-
----
-
-# 43. RED — Connection Tester Tests
-
-Use mocked `MoodleRestClient`.
-
-Do not connect to live Moodle in unit tests.
-
-Test:
-
-- [ ] `core_webservice_get_site_info` success.
-- [ ] invalid credential mapping.
-- [ ] timeout mapping.
-- [ ] network mapping.
-- [ ] malformed Moodle response.
-- [ ] safe response.
-
----
-
-# 44. GREEN Implementation Order
+# 43. GREEN Implementation Order
 
 ```text
 1. TenantStatus
-2. TenantSlug
-3. Tenant entity
-4. TenantRules
-5. Tenant DTOs
-6. TenantRepository
-7. TenantCredentialRepository
-8. TenantPersistenceMapper
-9. DatabaseTenantRepository
-10. DatabaseTenantCredentialRepository
-11. encryption provider integration
-12. EncryptedTenantCredentialProvider
-13. Tenant resolver
+2. TenantDomainStatus
+3. TenantDomainType
+4. TenantSlug
+5. TenantHostname
+6. Tenant entity
+7. TenantDomain entity
+8. repositories/ports
+9. persistence mappers
+10. database repositories
+11. hostname normalization
+12. request hostname resolver
+13. HostnameTenantResolver
 14. resolveCurrentTenant
-15. tenant use cases
-16. MoodleTenantConnectionTester
-17. TestTenantMoodleConnectionUseCase
-18. MoodleClientFactory integration
+15. TenantMoodleConfiguration repository
+16. encrypted credential repository/provider
+17. MoodleClientFactory integration
+18. connection test
+19. domain verification flow
 ```
 
 ---
 
-# 45. No Mutable Global Tenant State
+# 44. API Planning
 
-Forbidden:
-
-```ts
-let currentTenant;
-let activeTenant;
-let activeMoodleToken;
-```
-
-Tenant context must be request-scoped.
-
----
-
-# 46. API Routes
-
-If tenant administration API is included:
+Potential admin APIs:
 
 ```text
-GET    /api/v1/tenants
 POST   /api/v1/tenants
-
 GET    /api/v1/tenants/:tenantId
 PATCH  /api/v1/tenants/:tenantId
 
+POST   /api/v1/tenants/:tenantId/domains
+PATCH  /api/v1/tenants/:tenantId/domains/:domainId
+POST   /api/v1/tenants/:tenantId/domains/:domainId/verify
+
+PUT    /api/v1/tenants/:tenantId/moodle
+POST   /api/v1/tenants/:tenantId/moodle/test-connection
+
 PATCH  /api/v1/tenants/:tenantId/status
-
-POST   /api/v1/tenants/:tenantId/test-connection
 ```
 
-If admin authorization is not ready, do not expose unsafe management routes publicly merely to satisfy this issue.
+Do not expose management routes publicly before admin authorization exists.
 
 ---
 
-# 47. Presentation Hook
+# 45. Security Rules
 
-If required:
+Tenant identity must never come from query parameter, request body, localStorage, or arbitrary client-supplied tenantId.
+
+Normal tenant authority:
 
 ```text
-modules/tenant/presentation/hooks/useTenantApi.ts
+trusted request hostname
+→ exact TenantDomain mapping
 ```
-
-It may only call internal `/api/v1/tenants/*`.
 
 ---
 
-# 48. Logging
+# 46. Proxy Security
 
-Safe:
+- [ ] preserve Host.
+- [ ] set X-Forwarded-Host.
+- [ ] set X-Forwarded-Proto.
+- [ ] document trusted reverse proxy.
+- [ ] do not trust forwarded host from arbitrary untrusted deployment.
+
+---
+
+# 47. Credential Security
+
+- [ ] encrypt Moodle service token at rest.
+- [ ] encryption key server-only.
+- [ ] no secret in API response.
+- [ ] no token in logger.
+- [ ] no token in TenantContext.
+- [ ] no mutable global credential.
+- [ ] credential lookup always scoped by tenantId.
+
+---
+
+# 48. Forbidden Patterns
+
+Do not implement:
+
+```ts
+const tenantSlug = hostname.split(".")[0];
+```
+
+Do not implement:
+
+```ts
+const moodleUrl = hostname.replace("ujian.", "lms.");
+```
+
+Do not implement client-controlled tenantId as security authority.
+
+Do not implement global mutable `currentTenant`.
+
+---
+
+# 49. Logging
+
+Safe context:
 
 ```text
+requestId
+hostname
 tenantId
 tenantSlug
-requestId
 event
-```
-
-Forbidden:
-
-```text
-Moodle token
-encrypted token
-IV
-authTag
-encryption key
 ```
 
 Suggested events:
 
 ```text
+tenant_domain_resolved
+tenant_domain_not_found
+tenant_domain_disabled
 tenant_resolved
-tenant_resolution_failed
-tenant_created
-tenant_updated
-tenant_status_changed
+tenant_blocked
+tenant_moodle_configuration_loaded
 tenant_moodle_connection_tested
-tenant_moodle_connection_failed
 ```
+
+Never log Moodle token, encrypted token, encryption key, session token, or password.
 
 ---
 
-# 49. Error Codes
+# 50. Acceptance Criteria
 
-Suggested:
+## Domain Mapping
 
-```text
-TENANT_NOT_FOUND
-TENANT_SLUG_INVALID
-TENANT_SLUG_EXISTS
-TENANT_INACTIVE
-TENANT_SUSPENDED
-TENANT_HOST_INVALID
-TENANT_CONFIGURATION_INVALID
-TENANT_CREDENTIAL_NOT_CONFIGURED
-TENANT_CREDENTIAL_DECRYPTION_FAILED
-TENANT_MOODLE_INVALID_CREDENTIAL
-TENANT_MOODLE_TIMEOUT
-TENANT_MOODLE_UNREACHABLE
-TENANT_MOODLE_INVALID_RESPONSE
-```
+- [ ] custom domains supported.
+- [ ] no shared parent domain required.
+- [ ] exact hostname lookup implemented.
+- [ ] hostname unique constraint.
+- [ ] aliases supported.
+- [ ] domain status supported.
 
----
-
-# 50. Layer Boundaries
-
-## Domain may know
-
-```text
-Tenant
-TenantStatus
-TenantSlug
-TenantRepository
-TenantRules
-```
-
-## Domain must not know
-
-```text
-Prisma
-PostgreSQL
-crypto implementation
-MoodleRestClient
-NextRequest
-headers
-cookies
-```
-
-## Application may orchestrate
-
-```text
-TenantRepository
-TenantCredentialRepository
-TenantConnectionTester
-```
-
-## Application must not directly use
-
-```text
-Prisma
-fetch
-crypto
-Moodle REST
-```
-
-## Infrastructure may implement/use
-
-```text
-DatabaseTenantRepository
-DatabaseTenantCredentialRepository
-EncryptedTenantCredentialProvider
-MoodleTenantConnectionTester
-database client
-EncryptionProvider
-MoodleRestClient
-```
-
----
-
-# 51. Security Requirements
-
-- [ ] Moodle token encrypted at rest.
-- [ ] encryption key server-only.
-- [ ] no token in API response.
-- [ ] no token in logs.
-- [ ] no cross-tenant credential access.
-- [ ] root domain configurable.
-- [ ] hostname validation implemented.
-- [ ] forwarded host trust documented.
-- [ ] tenant status enforced before Moodle usage.
-- [ ] inactive/suspended tenant cannot obtain normal Moodle client.
-
----
-
-# 52. Verification Commands
-
-Run:
-
-```bash
-npm run typecheck
-npm run lint
-npm run test
-npm run build
-```
-
-Use the package manager/scripts already configured.
-
----
-
-# 53. Security Scan Before Completion
-
-Search for:
-
-```text
-moodleToken
-encryptedToken
-TENANT_CREDENTIAL_ENCRYPTION_KEY
-```
-
-Verify:
-
-- [ ] token never returned.
-- [ ] token never logged.
-- [ ] encryption key is server-only.
-- [ ] no secret uses `NEXT_PUBLIC_*`.
-
-Search for mutable global tenant state:
-
-```text
-activeTenant
-currentTenant
-activeMoodleToken
-```
-
-Must not exist.
-
----
-
-# 54. Acceptance Criteria
-
-## Tenant Domain
-
-- [ ] Tenant entity implemented.
-- [ ] explicit TenantStatus.
-- [ ] canonical TenantSlug.
-- [ ] no credentials exposed by entity.
-- [ ] rules tested.
-
-## Repository
-
-- [ ] TenantRepository implemented.
-- [ ] infrastructure repository implemented.
-- [ ] lookup by slug.
-- [ ] lookup by ID.
-- [ ] unique slug enforced.
-- [ ] persistence errors normalized.
-
-## Resolution
+## Tenant Resolution
 
 - [ ] hostname normalized.
-- [ ] tenant slug extracted from subdomain.
-- [ ] root domain configurable.
-- [ ] invalid host rejected.
-- [ ] unknown tenant handled.
-- [ ] inactive tenant rejected.
-- [ ] suspended tenant rejected.
-- [ ] `resolveCurrentTenant` returns safe context.
+- [ ] Nginx forwarded hostname supported safely.
+- [ ] TenantDomain resolved.
+- [ ] Tenant resolved.
+- [ ] TenantContext generated.
+- [ ] blocked tenants rejected.
 
-## Credential Security
+## Moodle Mapping
 
-- [ ] Moodle token encrypted at rest.
-- [ ] authenticated encryption.
-- [ ] key server-only.
-- [ ] token absent from API.
-- [ ] token absent from logs.
-- [ ] A/B credential isolation tested.
-- [ ] decryption only on server infrastructure path.
+- [ ] Moodle URL loaded from persisted config.
+- [ ] Moodle URL not inferred from frontend hostname.
+- [ ] admin service config supported.
+- [ ] student service config supported.
+- [ ] Moodle connection status separate from TenantStatus.
 
-## Moodle Integration
+## Security
 
-- [ ] `MoodleCredentialProvider` integrated with tenant storage.
-- [ ] `MoodleClientFactory` builds client from TenantContext.
-- [ ] Moodle connection test implemented.
-- [ ] uses `core_webservice_get_site_info`.
-- [ ] failures normalized.
-- [ ] no direct Moodle fetch.
+- [ ] no cross-tenant Moodle config.
+- [ ] no cross-tenant credential leakage.
+- [ ] no token in TenantContext.
+- [ ] no token in browser.
+- [ ] no token in logs.
+- [ ] credential encrypted at rest.
+
+## Infrastructure
+
+- [ ] Nginx custom domains documented.
+- [ ] DNS/TLS onboarding documented.
+- [ ] domain verification flow exists.
 
 ## Quality
 
-- [ ] RED tests created.
-- [ ] GREEN implementation passes.
-- [ ] REFACTOR completed.
+- [ ] RED tests written.
+- [ ] GREEN implementation complete.
+- [ ] REFACTOR complete.
 - [ ] TypeScript passes.
 - [ ] Biome passes.
 - [ ] tests pass.
-- [ ] build passes.
-- [ ] no unexplained `any`.
-- [ ] no dead code.
-- [ ] no circular dependencies.
+- [ ] production build passes.
 
 ---
 
-# 55. Definition of Done
+# 51. Definition of Done
 
-Phase 3 selesai ketika request dapat melakukan:
-
-```ts
-const tenant =
-  await resolveCurrentTenant(
-    request,
-    tenantResolver,
-  );
-
-const moodleClient =
-  await moodleClientFactory.create({
-    tenant,
-    requestId,
-  });
-
-const siteInfo =
-  await moodleClient.call<SiteInfoResponse>(
-    "core_webservice_get_site_info",
-  );
-```
-
-dengan jaminan:
+Phase 3 tenant/custom-domain foundation selesai ketika:
 
 ```text
-hostname menentukan tenant
-tenant menentukan credential
-credential encrypted at rest
-credential tenant tidak bocor lintas tenant
-inactive/suspended tenant ditolak
-Moodle token tidak keluar ke browser
+https://ujian.smpn29jkt.sch.id
 ```
+
+resolves to:
+
+```text
+Tenant SMPN29
+```
+
+and then to:
+
+```text
+https://lms.smpn29jkt.sch.id
+```
+
+while:
+
+```text
+https://cbt.sekolahb.id
+```
+
+resolves independently to:
+
+```text
+Tenant School B
+→ https://elearning.sekolahb.sch.id
+```
+
+without shared root domain, subdomain extraction, hostname string replacement, or global tenant state.
 
 ---
 
-# 56. Expected Final Flow
+# 52. Final Flow
 
 ```text
-https://smpn29.exam.example.com
+Incoming HTTPS Request
         ↓
-smpn29.exam.example.com
+Nginx server_name
         ↓
-smpn29
+Next.js
         ↓
-TenantRepository.findBySlug("smpn29")
+resolveRequestHostname()
         ↓
-Tenant
+normalizeRequestHostname()
         ↓
-status check
+TenantDomainRepository.findByHostname()
+        ↓
+TenantDomain
+        ↓
+TenantRepository.findById()
+        ↓
+Tenant status check
         ↓
 TenantContext
         ↓
-MoodleCredentialProvider
+TenantMoodleConfigurationRepository
         ↓
-decrypt credential server-side
+Moodle base URL
+        ↓
+MoodleCredentialProvider
         ↓
 MoodleClientFactory
         ↓
 MoodleRestClient
         ↓
-Moodle milik tenant SMPN29
-```
-
-Another tenant:
-
-```text
-school-b.exam.example.com
-→ Tenant B
-→ Credential B
-→ Moodle B
-```
-
-must resolve independently.
-
----
-
-# 57. Explicit Non-Goals
-
-Do not implement during Phase 3:
-
-- [ ] user login.
-- [ ] student authentication.
-- [ ] teacher authentication.
-- [ ] Moodle `/login/token.php` user flow.
-- [ ] courses.
-- [ ] quizzes.
-- [ ] quiz attempts.
-- [ ] questions.
-- [ ] grades.
-- [ ] files.
-- [ ] notifications.
-- [ ] exam monitoring.
-- [ ] billing/subscription.
-- [ ] complex tenant cache.
-- [ ] unrelated UI.
-
----
-
-# 58. Required Final Report
-
-After implementation report:
-
-```text
-1. Files created
-2. Files modified
-3. RED tests added
-4. GREEN implementation completed
-5. Tenant slug policy
-6. Hostname resolution strategy
-7. Credential encryption strategy
-8. MoodleClientFactory integration
-9. Connection test behavior
-10. Multi-tenant isolation verification
-11. TypeScript/Biome/test/build results
-12. Remaining Phase 3 TODO / risks
-```
-
-Also include:
-
-```text
-Tenant isolation audit: PASS / FAIL
-Credential exposure audit: PASS / FAIL
-Hostname resolution audit: PASS / FAIL
-Moodle client tenant-binding audit: PASS / FAIL
+Moodle instance owned by that tenant
 ```
 
 ---
 
-# 59. Next Phase Readiness
+# 53. Next Phase Readiness
 
-After Phase 3:
+Setelah foundation ini selesai, Authentication dapat menggunakan:
 
 ```text
-Request
- ↓
-resolveCurrentTenant
+request hostname
  ↓
 TenantContext
  ↓
-Moodle tenant configuration
+tenant Moodle URL
  ↓
-Authentication
+nextjs_student service
+ ↓
+Moodle user token
+ ↓
+Next.js session
  ↓
 CurrentActor
 ```
 
-Authentication must not occur before tenant resolution for normal tenant-scoped requests.
+Authentication otomatis tenant-aware.
 
-Recommended next issue:
+---
+
+# 54. Final Architectural Rule
+
+Tenant ditentukan oleh:
 
 ```text
-Phase 4 — Authentication
+exact custom hostname
 ```
 
-Phase 3 berhasil hanya ketika **tenant identity dan Moodle credential selection deterministic, isolated, encrypted, server-only, dan tersedia sebelum authentication dimulai**.
+Moodle instance ditentukan oleh:
+
+```text
+persisted TenantMoodleConfiguration
+```
+
+Credential ditentukan oleh:
+
+```text
+tenantId
+```
+
+Tidak ada derivasi domain otomatis.
+
+Tidak ada assumption parent domain bersama.
+
+Tidak ada tenant selection dari client-controlled parameter.
