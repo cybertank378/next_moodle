@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Tenant } from "../../domain/entities/Tenant";
-import { TenantRules } from "../../domain/rules/TenantRules";
+import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import { TenantRules } from "@/modules/tenant/domain/rules/TenantRules";
 
 describe("Tenant Domain Entity & Rules", () => {
   describe("Tenant Entity", () => {

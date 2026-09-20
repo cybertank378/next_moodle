@@ -3,11 +3,11 @@ import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { InfrastructureError } from "@/core/errors/InfrastructureError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { TenantContext } from "@/core/tenant/TenantContext";
-import { Tenant } from "../../domain/entities/Tenant";
-import { AesGcmEncryptionProvider } from "../../infrastructure/providers/AesGcmEncryptionProvider";
-import { EncryptedTenantCredentialProvider } from "../../infrastructure/providers/EncryptedTenantCredentialProvider";
-import { DatabaseTenantCredentialRepository } from "../../infrastructure/repositories/DatabaseTenantCredentialRepository";
-import { DatabaseTenantRepository } from "../../infrastructure/repositories/DatabaseTenantRepository";
+import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import { AesGcmEncryptionProvider } from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
+import { EncryptedTenantCredentialProvider } from "@/modules/tenant/infrastructure/providers/EncryptedTenantCredentialProvider";
+import { DatabaseTenantCredentialRepository } from "@/modules/tenant/infrastructure/repositories/DatabaseTenantCredentialRepository";
+import { DatabaseTenantRepository } from "@/modules/tenant/infrastructure/repositories/DatabaseTenantRepository";
 
 describe("EncryptedTenantCredentialProvider Multi-Tenant Isolation", () => {
   const encryptionProvider = new AesGcmEncryptionProvider(

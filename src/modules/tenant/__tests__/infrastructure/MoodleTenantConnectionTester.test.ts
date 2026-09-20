@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { MoodleError } from "@/core/errors/MoodleError";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
-import { Tenant } from "../../domain/entities/Tenant";
-import { MoodleTenantConnectionTester } from "../../infrastructure/providers/MoodleTenantConnectionTester";
+import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import { MoodleTenantConnectionTester } from "@/modules/tenant/infrastructure/providers/MoodleTenantConnectionTester";
 
 describe("MoodleTenantConnectionTester", () => {
   const tenant = new Tenant({

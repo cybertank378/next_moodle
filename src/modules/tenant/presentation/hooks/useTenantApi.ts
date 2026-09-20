@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import type { ApiErrorResponse } from "@/core/http/ApiErrorResponse";
 import type { ApiResponse } from "@/core/http/ApiResponse";
-import type { TenantResponseDTO } from "../../domain/dto/TenantResponseDTO";
-import type { TestTenantConnectionResponseDTO } from "../../domain/dto/TestTenantConnectionResponseDTO";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
+import type { TestTenantConnectionResponseDTO } from "@/modules/tenant/domain/dto/TestTenantConnectionResponseDTO";
 
 export function useTenantApi() {
   const [loading, setLoading] = useState(false);

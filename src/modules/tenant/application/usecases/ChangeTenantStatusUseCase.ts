@@ -1,9 +1,9 @@
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { TenantResponseDTO } from "../../domain/dto/TenantResponseDTO";
-import { Tenant } from "../../domain/entities/Tenant";
-import type { TenantRepository } from "../../domain/interfaces/TenantRepository";
-import type { TenantStatus } from "../../domain/types/TenantStatus";
-import { TenantValidator } from "../../domain/validators/TenantValidator";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
+import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
+import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
 
 export interface ChangeTenantStatusInput {
   readonly tenantId: string;

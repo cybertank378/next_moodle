@@ -1,16 +1,16 @@
 import crypto from "node:crypto";
 import { ConflictError } from "@/core/errors/ConflictError";
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { CreateTenantRequestDTO } from "../../domain/dto/CreateTenantRequestDTO";
-import type { TenantResponseDTO } from "../../domain/dto/TenantResponseDTO";
-import { Tenant } from "../../domain/entities/Tenant";
-import type { TenantCredentialRepository } from "../../domain/interfaces/TenantCredentialRepository";
-import type { TenantRepository } from "../../domain/interfaces/TenantRepository";
-import { TenantValidator } from "../../domain/validators/TenantValidator";
+import type { CreateTenantRequestDTO } from "@/modules/tenant/domain/dto/CreateTenantRequestDTO";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
+import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import type { TenantCredentialRepository } from "@/modules/tenant/domain/interfaces/TenantCredentialRepository";
+import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
+import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
 import {
   type AesGcmEncryptionProvider,
   defaultEncryptionProvider,
-} from "../../infrastructure/providers/AesGcmEncryptionProvider";
+} from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
 
 export class CreateTenantUseCase {
   constructor(

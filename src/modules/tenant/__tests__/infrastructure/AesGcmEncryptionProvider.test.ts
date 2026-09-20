@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InfrastructureError } from "@/core/errors/InfrastructureError";
-import { AesGcmEncryptionProvider } from "../../infrastructure/providers/AesGcmEncryptionProvider";
+import { AesGcmEncryptionProvider } from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
 
 describe("AesGcmEncryptionProvider", () => {
   // 32-byte (64 hex characters) test key

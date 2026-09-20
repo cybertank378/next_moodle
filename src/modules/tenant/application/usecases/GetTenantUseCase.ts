@@ -1,6 +1,6 @@
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { TenantResponseDTO } from "../../domain/dto/TenantResponseDTO";
-import type { TenantRepository } from "../../domain/interfaces/TenantRepository";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
+import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
 
 export class GetTenantUseCase {
   constructor(private readonly tenantRepository: TenantRepository) {}

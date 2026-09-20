@@ -1,9 +1,9 @@
 import "server-only";
 import { MoodleError } from "@/core/errors/MoodleError";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
-import type { TestTenantConnectionResponseDTO } from "../../domain/dto/TestTenantConnectionResponseDTO";
-import type { Tenant } from "../../domain/entities/Tenant";
-import type { TenantConnectionTester } from "../../domain/interfaces/TenantConnectionTester";
+import type { TestTenantConnectionResponseDTO } from "@/modules/tenant/domain/dto/TestTenantConnectionResponseDTO";
+import type { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import type { TenantConnectionTester } from "@/modules/tenant/domain/interfaces/TenantConnectionTester";
 
 interface MoodleSiteInfoRaw {
   readonly sitename?: string;

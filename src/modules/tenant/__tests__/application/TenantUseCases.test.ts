@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { ConflictError } from "@/core/errors/ConflictError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import { ChangeTenantStatusUseCase } from "../../application/usecases/ChangeTenantStatusUseCase";
-import { CreateTenantUseCase } from "../../application/usecases/CreateTenantUseCase";
-import { GetTenantBySlugUseCase } from "../../application/usecases/GetTenantBySlugUseCase";
-import { GetTenantUseCase } from "../../application/usecases/GetTenantUseCase";
-import { TestTenantMoodleConnectionUseCase } from "../../application/usecases/TestTenantMoodleConnectionUseCase";
-import { UpdateTenantUseCase } from "../../application/usecases/UpdateTenantUseCase";
-import { AesGcmEncryptionProvider } from "../../infrastructure/providers/AesGcmEncryptionProvider";
-import { DatabaseTenantCredentialRepository } from "../../infrastructure/repositories/DatabaseTenantCredentialRepository";
-import { DatabaseTenantRepository } from "../../infrastructure/repositories/DatabaseTenantRepository";
+import { ChangeTenantStatusUseCase } from "@/modules/tenant/application/usecases/ChangeTenantStatusUseCase";
+import { CreateTenantUseCase } from "@/modules/tenant/application/usecases/CreateTenantUseCase";
+import { GetTenantBySlugUseCase } from "@/modules/tenant/application/usecases/GetTenantBySlugUseCase";
+import { GetTenantUseCase } from "@/modules/tenant/application/usecases/GetTenantUseCase";
+import { TestTenantMoodleConnectionUseCase } from "@/modules/tenant/application/usecases/TestTenantMoodleConnectionUseCase";
+import { UpdateTenantUseCase } from "@/modules/tenant/application/usecases/UpdateTenantUseCase";
+import { AesGcmEncryptionProvider } from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
+import { DatabaseTenantCredentialRepository } from "@/modules/tenant/infrastructure/repositories/DatabaseTenantCredentialRepository";
+import { DatabaseTenantRepository } from "@/modules/tenant/infrastructure/repositories/DatabaseTenantRepository";
 
 describe("Tenant Application Use Cases", () => {
   let tenantRepo: DatabaseTenantRepository;

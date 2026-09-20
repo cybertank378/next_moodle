@@ -1,7 +1,7 @@
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { TenantResponseDTO } from "../../domain/dto/TenantResponseDTO";
-import type { TenantRepository } from "../../domain/interfaces/TenantRepository";
-import { TenantSlug } from "../../domain/value-objects/TenantSlug";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
+import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
+import { TenantSlug } from "@/modules/tenant/domain/value-objects/TenantSlug";
 
 export class GetTenantBySlugUseCase {
   constructor(private readonly tenantRepository: TenantRepository) {}

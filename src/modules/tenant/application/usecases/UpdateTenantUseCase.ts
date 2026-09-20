@@ -1,15 +1,15 @@
 import crypto from "node:crypto";
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { TenantResponseDTO } from "../../domain/dto/TenantResponseDTO";
-import type { UpdateTenantRequestDTO } from "../../domain/dto/UpdateTenantRequestDTO";
-import { Tenant } from "../../domain/entities/Tenant";
-import type { TenantCredentialRepository } from "../../domain/interfaces/TenantCredentialRepository";
-import type { TenantRepository } from "../../domain/interfaces/TenantRepository";
-import { TenantValidator } from "../../domain/validators/TenantValidator";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
+import type { UpdateTenantRequestDTO } from "@/modules/tenant/domain/dto/UpdateTenantRequestDTO";
+import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
+import type { TenantCredentialRepository } from "@/modules/tenant/domain/interfaces/TenantCredentialRepository";
+import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
+import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
 import {
   type AesGcmEncryptionProvider,
   defaultEncryptionProvider,
-} from "../../infrastructure/providers/AesGcmEncryptionProvider";
+} from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
 
 export class UpdateTenantUseCase {
   constructor(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ValidationError } from "@/core/errors/ValidationError";
-import { TenantSlug } from "../../domain/value-objects/TenantSlug";
+import { TenantSlug } from "@/modules/tenant/domain/value-objects/TenantSlug";
 
 describe("TenantSlug Value Object", () => {
   describe("Validation & Normalization", () => {
