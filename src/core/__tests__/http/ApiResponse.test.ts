@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ApiResponse } from "../../http/ApiResponse";
+import { ApiResponse } from "@/core/http/ApiResponse";
 
 describe("ApiResponse", () => {
   it("should create standardized success response without meta", () => {

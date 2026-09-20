@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
-import { NotFoundError } from "../../errors/NotFoundError";
-import { withApiHandler } from "../../http/withApiHandler";
+import { NotFoundError } from "@/core/errors/NotFoundError";
+import { withApiHandler } from "@/core/http/withApiHandler";
 
 describe("withApiHandler", () => {
   it("should return standard success response and attach x-request-id", async () => {

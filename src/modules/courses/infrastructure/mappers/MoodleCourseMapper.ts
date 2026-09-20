@@ -1,4 +1,4 @@
-import { Course } from "../../domain/entities/Course";
+import { Course } from "@/modules/courses/domain/entities/Course";
 
 export interface MoodleCourseRaw {
   readonly id: number;

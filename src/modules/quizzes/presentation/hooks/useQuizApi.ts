@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import type { ApiErrorResponse } from "@/core/http/ApiErrorResponse";
 import type { ApiResponse } from "@/core/http/ApiResponse";
-import type { QuizAccessResponseDTO } from "../../domain/dto";
+import type { QuizAccessResponseDTO } from "@/modules/quizzes/domain/dto";
 
 export function useQuizApi() {
   const [loading, setLoading] = useState(false);

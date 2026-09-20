@@ -1,8 +1,8 @@
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import type { CourseResponseDTO } from "../../domain/dto/CourseResponseDTO";
-import type { Course } from "../../domain/entities/Course";
-import type { CourseRepository } from "../../domain/interfaces/CourseRepository";
+import type { CourseResponseDTO } from "@/modules/courses/domain/dto/CourseResponseDTO";
+import type { Course } from "@/modules/courses/domain/entities/Course";
+import type { CourseRepository } from "@/modules/courses/domain/interfaces/CourseRepository";
 
 export class GetMyCoursesUseCase {
   constructor(private readonly courseRepository: CourseRepository) {}

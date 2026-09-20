@@ -1,4 +1,4 @@
-import { GetTenantUseCase } from "../../application/usecases/GetTenantUseCase";
+import { GetTenantUseCase } from "@/modules/tenant/application/usecases/GetTenantUseCase";
 import { InMemoryTenantRepository } from "../repositories/InMemoryTenantRepository";
 
 const tenantRepository = new InMemoryTenantRepository();

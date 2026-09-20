@@ -8,7 +8,7 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-} from "../../errors";
+} from "@/core/errors";
 
 describe("Application Error Hierarchy", () => {
   it("ValidationError should have status 422 and default code VALIDATION_ERROR", () => {

@@ -1,108 +1,132 @@
-# ISSUE: Phase 1 — Core Foundation
+# ISSUE: Phase 2 — Moodle REST Adapter
 
 ## Objective
 
-Implementasikan **Phase 1 — Core Foundation** untuk project SaaS ujian berbasis **Next.js + TypeScript + Hexagonal Architecture**.
+Implementasikan **Phase 2 — Moodle REST Adapter** sebagai satu-satunya gateway komunikasi antara aplikasi Next.js dan Moodle REST Web Service.
 
-Fokus fase ini adalah membangun fondasi reusable yang akan digunakan seluruh module berikutnya.
+Phase ini bertujuan membangun outbound adapter yang:
 
-Jangan mengimplementasikan Moodle integration, tenant persistence/database, authentication provider, atau feature business lain pada fase ini.
+- type-safe;
+- server-only;
+- reusable lintas module;
+- mendukung parameter Moodle yang nested;
+- memiliki timeout;
+- memiliki error normalization;
+- tidak membocorkan secret;
+- dapat digunakan oleh seluruh repository infrastructure berikutnya.
+
+Phase ini **tidak** mengimplementasikan feature bisnis seperti login, course, quiz, attempt, question, grade, atau tenant persistence.
 
 ---
 
 # 1. Architectural Context
 
-Project menggunakan Hexagonal Architecture dengan dependency direction:
+Project menggunakan Hexagonal Architecture:
 
 ```text
 Presentation
     ↓
-API Route
+Next.js API Route
     ↓
-Application
+Application Use Case
     ↓
-Domain
+Domain Port
     ↑
-Infrastructure
+Infrastructure Repository
+    ↓
+MoodleRestClient
+    ↓
+Moodle REST API
 ```
 
-Core Foundation berada di:
+`MoodleRestClient` adalah infrastructure concern.
+
+Business module tidak boleh mengetahui detail:
 
 ```text
-src/core/
+wstoken
+wsfunction
+moodlewsrestformat
+/webservice/rest/server.php
+Moodle exception payload
+URLSearchParams Moodle
 ```
 
-dan boleh digunakan lintas module.
-
-Core tidak boleh mengetahui detail bisnis spesifik seperti:
-
-```text
-Quiz
-Course
-Question
-Exam
-Grade
-Moodle
-```
-
-Core harus generic dan reusable.
+Semua detail tersebut harus berhenti di Core Moodle Adapter.
 
 ---
 
-# 2. Target Structure
+# 2. Dependency on Phase 1
 
-Buat atau lengkapi struktur berikut:
+Phase 2 mengasumsikan Phase 1 sudah tersedia:
 
 ```text
-src/core/
-├── base/
-│   ├── BaseEntity.ts
-│   ├── BaseService.ts
-│   └── Result.ts
-│
-├── errors/
-│   ├── AppError.ts
-│   ├── DomainError.ts
-│   ├── ValidationError.ts
-│   ├── UnauthorizedError.ts
-│   ├── ForbiddenError.ts
-│   ├── NotFoundError.ts
-│   ├── ConflictError.ts
-│   └── InfrastructureError.ts
-│
-├── http/
-│   ├── ApiResponse.ts
-│   ├── ApiErrorResponse.ts
-│   ├── HttpStatus.ts
-│   ├── mapErrorToHttpResponse.ts
-│   └── withApiHandler.ts
-│
-├── logger/
-│   ├── Logger.ts
-│   ├── LogContext.ts
-│   └── createLogger.ts
-│
-├── security/
-│   ├── RequestId.ts
-│   └── SensitiveData.ts
-│
-├── tenant/
-│   ├── TenantContext.ts
-│   ├── TenantResolver.ts
-│   └── resolveCurrentTenant.ts
-│
-└── auth/
-    ├── CurrentActor.ts
-    ├── Session.ts
-    ├── SessionResolver.ts
-    └── resolveCurrentActor.ts
+core/base
+core/errors
+core/http
+core/logger
+core/security
+core/tenant
+core/auth
 ```
 
-Boleh menambah file helper jika memang diperlukan, tetapi jangan membuat abstraction kosong atau over-engineering.
+Gunakan foundation yang sudah dibuat, terutama:
+
+```text
+AppError
+InfrastructureError
+Logger
+RequestId
+TenantContext
+```
+
+Jangan membuat duplikat abstraction yang sudah tersedia dari Phase 1.
+
+Jika ditemukan kekurangan kecil pada Core Foundation yang menghalangi Phase 2:
+
+1. tambahkan test;
+2. lakukan perubahan minimal;
+3. dokumentasikan perubahan;
+4. jangan melakukan refactor besar yang tidak terkait.
 
 ---
 
-# 3. Mandatory Workflow
+# 3. Target Structure
+
+Buat atau lengkapi:
+
+```text
+src/core/moodle/
+├── MoodleRestClient.ts
+├── MoodleErrorMapper.ts
+├── MoodleClientFactory.ts
+├── MoodleCredentialProvider.ts
+├── MoodleCredential.ts
+├── MoodleClientConfig.ts
+├── MoodleRequestEncoder.ts
+└── types/
+    ├── MoodleExceptionResponse.ts
+    ├── MoodleWarning.ts
+    ├── MoodleRequestParameters.ts
+    └── MoodleResponse.ts
+```
+
+Test:
+
+```text
+src/core/__tests__/moodle/
+├── MoodleRequestEncoder.test.ts
+├── MoodleErrorMapper.test.ts
+├── MoodleRestClient.test.ts
+├── MoodleClientFactory.test.ts
+└── MoodleCredentialProvider.test.ts
+```
+
+Boleh menyesuaikan struktur jika repository existing memiliki convention lain, tetapi boundary dan tanggung jawab harus tetap sama.
+
+---
+
+# 4. Mandatory Workflow
 
 Gunakan:
 
@@ -114,452 +138,428 @@ GREEN
 REFACTOR
 ```
 
-Jangan langsung membuat implementation.
+Urutan kerja:
 
-Urutan kerja wajib:
+1. audit Core Foundation existing;
+2. audit test convention existing;
+3. tulis test encoding terlebih dahulu;
+4. pastikan test gagal karena implementation belum tersedia;
+5. implement encoder minimum;
+6. tulis test error handling;
+7. implement error mapper;
+8. tulis test MoodleRestClient;
+9. implement client;
+10. implement factory dan credential provider;
+11. refactor;
+12. jalankan seluruh verification.
 
-1. audit struktur project existing;
-2. identifikasi shared conventions yang sudah digunakan;
-3. buat test untuk behavior yang dibutuhkan;
-4. pastikan test gagal dengan alasan yang benar;
-5. implementasikan kode minimal;
-6. jalankan test;
-7. refactor;
-8. jalankan seluruh verification;
-9. perbaiki seluruh error TypeScript, lint, dan test terkait.
-
-Jangan menghapus test hanya agar implementation lulus.
-
----
-
-# 4. Result
-
-Buat generic `Result` untuk merepresentasikan operasi sukses atau gagal tanpa menggunakan exception untuk seluruh flow bisnis.
-
-Target usage:
-
-```ts
-const result = Result.ok(data);
-
-const result = Result.fail(
-  new ValidationError("Invalid input"),
-);
-```
-
-Result harus mendukung minimal:
-
-```ts
-Result.ok()
-Result.fail()
-
-result.isSuccess
-result.isFailure
-
-result.value
-result.error
-
-result.getValue()
-result.getError()
-```
-
-Rules:
-
-- immutable;
-- strongly typed;
-- tidak menggunakan `any`;
-- failure tidak boleh memiliki success value;
-- success tidak boleh memiliki error.
-
-Contoh type:
-
-```ts
-Result<T, E extends Error = Error>
-```
-
-Tentukan API terbaik yang konsisten dengan codebase existing.
+Jangan langsung menulis implementation penuh sebelum RED test tersedia.
 
 ---
 
-# 5. BaseEntity
+# 5. Moodle REST Contract
 
-Buat abstraction entity yang minimal.
-
-Tujuannya hanya menyediakan fondasi identity jika memang dibutuhkan oleh module berikutnya.
-
-Contoh konsep:
-
-```ts
-abstract class BaseEntity<TId> {
-  protected constructor(
-    public readonly id: TId,
-  ) {}
-}
-```
-
-Jangan memasukkan:
+Endpoint utama:
 
 ```text
-createdAt
-updatedAt
-tenantId
-serialization
-database mapping
+POST {MOODLE_BASE_URL}/webservice/rest/server.php
 ```
 
-secara paksa ke semua entity.
+Request minimal:
+
+```text
+wstoken=<TOKEN>
+wsfunction=<FUNCTION_NAME>
+moodlewsrestformat=json
+```
+
+Semua request Moodle REST harus menggunakan `POST`.
+
+Jangan melakukan GET dengan token pada query URL.
 
 ---
 
-# 6. BaseService
+# 6. MoodleRestClient Responsibility
 
-Jika codebase existing memang sudah menggunakan `BaseService`, pertahankan convention tersebut.
+`MoodleRestClient` bertanggung jawab atas:
 
-`BaseService` harus tetap tipis.
+- membangun endpoint REST Moodle;
+- menambahkan `wstoken`;
+- menambahkan `wsfunction`;
+- menambahkan `moodlewsrestformat=json`;
+- encode parameter scalar;
+- encode parameter array;
+- encode nested array/object;
+- melakukan HTTP request;
+- timeout;
+- membaca JSON response;
+- mendeteksi Moodle exception response;
+- mendeteksi non-200 HTTP response;
+- normalize error melalui `MoodleErrorMapper`;
+- structured logging yang aman;
+- correlation dengan `requestId`.
 
-Jangan menjadikan `BaseService` sebagai:
+`MoodleRestClient` tidak bertanggung jawab atas:
 
-- service locator;
-- dependency container;
-- HTTP abstraction;
-- global mutable state.
-
-Jika keberadaannya tidak memberikan behavior reusable yang jelas, pertahankan API seminimal mungkin.
-
----
-
-# 7. Application Error Hierarchy
-
-Buat error hierarchy berikut:
-
-```text
-Error
-└── AppError
-    ├── DomainError
-    ├── ValidationError
-    ├── UnauthorizedError
-    ├── ForbiddenError
-    ├── NotFoundError
-    ├── ConflictError
-    └── InfrastructureError
-```
-
-`AppError` minimal memiliki:
-
-```ts
-message
-code
-statusCode
-details?
-cause?
-```
-
-Contoh:
-
-```ts
-new NotFoundError(
-  "COURSE_NOT_FOUND",
-  "Course tidak ditemukan.",
-);
-```
-
-atau API lain yang lebih konsisten dengan project existing.
-
-Requirements:
-
-- setiap error memiliki stable error code;
-- `statusCode` tidak ditentukan ulang tersebar di route;
-- support `cause`;
-- support optional structured metadata/details;
-- tidak menggunakan raw stack trace sebagai API output;
-- tidak expose internal error detail ke client.
+- login flow;
+- tenant lookup;
+- authorization domain;
+- quiz rule;
+- course rule;
+- question mapping;
+- DTO feature;
+- persistence credential.
 
 ---
 
-# 8. Error Codes
-
-Error code menggunakan:
-
-```text
-UPPER_SNAKE_CASE
-```
-
-Contoh:
-
-```text
-VALIDATION_ERROR
-UNAUTHORIZED
-FORBIDDEN
-NOT_FOUND
-CONFLICT
-INFRASTRUCTURE_ERROR
-INTERNAL_SERVER_ERROR
-```
-
-Error spesifik feature nanti boleh menggunakan:
-
-```text
-QUIZ_NOT_FOUND
-ATTEMPT_NOT_ALLOWED
-TENANT_INACTIVE
-```
-
-Core jangan mendefinisikan error business spesifik feature.
-
----
-
-# 9. HttpStatus
-
-Buat central HTTP status constants atau type-safe helper.
-
-Minimal support:
-
-```text
-200 OK
-201 CREATED
-204 NO_CONTENT
-400 BAD_REQUEST
-401 UNAUTHORIZED
-403 FORBIDDEN
-404 NOT_FOUND
-409 CONFLICT
-422 UNPROCESSABLE_ENTITY
-429 TOO_MANY_REQUESTS
-500 INTERNAL_SERVER_ERROR
-502 BAD_GATEWAY
-503 SERVICE_UNAVAILABLE
-```
-
-Jangan menggunakan magic number tersebar seperti:
-
-```ts
-return Response.json(data, { status: 403 });
-```
-
-jika central abstraction tersedia.
-
----
-
-# 10. Standard API Response
-
-Semua API internal nantinya menggunakan format konsisten.
-
-Success:
-
-```json
-{
-  "success": true,
-  "data": {},
-  "meta": {}
-}
-```
-
-Error:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Data tidak ditemukan."
-  },
-  "requestId": "..."
-}
-```
-
-Buat type generic seperti:
-
-```ts
-ApiSuccessResponse<T, M>
-ApiFailureResponse
-ApiResponse<T, M>
-```
-
-`meta` optional.
-
-Tidak boleh mengembalikan:
-
-```text
-stack
-debugInfo
-raw exception
-secret
-token
-password
-```
-
----
-
-# 11. Error → HTTP Mapping
-
-Implementasikan:
-
-```text
-mapErrorToHttpResponse
-```
-
-Mapping minimal:
-
-```text
-ValidationError
-→ 422
-
-UnauthorizedError
-→ 401
-
-ForbiddenError
-→ 403
-
-NotFoundError
-→ 404
-
-ConflictError
-→ 409
-
-InfrastructureError
-→ 502 atau status yang ditentukan error
-
-Unknown Error
-→ 500
-```
-
-Unknown error tidak boleh mengekspos:
-
-```ts
-error.message
-```
-
-secara langsung ke client jika message tersebut bersifat internal.
-
-Gunakan generic message:
-
-```text
-Terjadi kesalahan pada server.
-```
-
----
-
-# 12. API Route Wrapper
-
-Implementasikan helper seperti:
-
-```ts
-withApiHandler(...)
-```
-
-atau API setara yang sesuai codebase.
+# 7. Public Client API
 
 Target penggunaan:
 
 ```ts
-export const GET = withApiHandler(
-  async (request, context) => {
-    return ApiResponse.success(data);
+const response = await moodleClient.call<MoodleResponseType>(
+  "core_webservice_get_site_info",
+);
+```
+
+Dengan parameter:
+
+```ts
+const response = await moodleClient.call<MoodleQuizResponse>(
+  "mod_quiz_get_quizzes_by_courses",
+  {
+    courseids: [10, 20, 30],
   },
 );
 ```
 
-Wrapper bertanggung jawab atas:
+Nested:
 
-- request ID;
-- centralized try/catch;
-- error mapping;
-- structured logging;
-- standardized API response;
-- unexpected error handling.
+```ts
+await moodleClient.call(
+  "some_function",
+  {
+    users: [
+      { id: 1, role: "student" },
+      { id: 2, role: "teacher" },
+    ],
+  },
+);
+```
 
-Wrapper tidak boleh menangani:
-
-- domain logic;
-- tenant business rule;
-- authorization business rule;
-- feature-specific validation.
+API public tidak boleh meminta caller membangun `URLSearchParams`, `wstoken`, atau `moodlewsrestformat` secara manual.
 
 ---
 
-# 13. Request ID
+# 8. MoodleRequestParameters Type
 
-Buat utility:
+Gunakan type yang cukup kuat untuk Moodle payload.
 
-```text
-RequestId
+```ts
+type MoodlePrimitive =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined;
+
+type MoodleParameterValue =
+  | MoodlePrimitive
+  | readonly MoodleParameterValue[]
+  | Readonly<Record<string, MoodleParameterValue>>;
+
+export type MoodleRequestParameters =
+  Readonly<Record<string, MoodleParameterValue>>;
 ```
 
-Behavior:
-
-1. jika incoming request memiliki valid request ID header, gunakan bila aman;
-2. jika tidak ada, generate UUID;
-3. request ID harus tersedia untuk logger;
-4. request ID dikembalikan pada response header;
-5. error response menyertakan request ID.
-
-Header convention:
-
-```text
-x-request-id
-```
-
-Gunakan `crypto.randomUUID()` jika tersedia.
-
-Jangan menggunakan random implementation yang lemah jika platform sudah menyediakan UUID.
+Jangan menggunakan `Record<string, any>`.
 
 ---
 
-# 14. Structured Logger
+# 9. Parameter Encoding — Scalar
 
-Buat logger abstraction yang menghasilkan structured data.
+## RED
 
-Interface minimal:
+Buat test untuk string, number, boolean, `0`, `false`, dan empty string.
+
+Contoh input:
 
 ```ts
-interface Logger {
-  debug(...)
-  info(...)
-  warn(...)
-  error(...)
+{
+  quizid: 10,
+  password: "abc",
+  finishattempt: true,
 }
 ```
 
-Log context:
+Expected encoding harus eksplisit dan konsisten dengan form encoding Moodle/PHP.
+
+`0`, `false`, dan `""` tidak boleh salah dianggap sebagai missing value.
+
+---
+
+# 10. Parameter Encoding — Arrays
+
+## RED
+
+Input:
 
 ```ts
-interface LogContext {
-  readonly requestId?: string;
-  readonly tenantId?: string;
-  readonly actorId?: string;
-  readonly event?: string;
-  readonly [key: string]: unknown;
+{
+  courseids: [10, 20, 30],
 }
 ```
 
-Expected output:
+Expected:
+
+```text
+courseids[0]=10
+courseids[1]=20
+courseids[2]=30
+```
+
+Test juga:
+
+- empty array;
+- array of strings;
+- array of numbers;
+- readonly array.
+
+Tidak boleh menghasilkan `courseids=10,20,30`.
+
+---
+
+# 11. Parameter Encoding — Nested Objects
+
+## RED
+
+Input:
+
+```ts
+{
+  users: [
+    { id: 10, role: "student" },
+    { id: 20, role: "teacher" },
+  ],
+}
+```
+
+Expected:
+
+```text
+users[0][id]=10
+users[0][role]=student
+users[1][id]=20
+users[1][role]=teacher
+```
+
+Nested object juga harus didukung.
+
+---
+
+# 12. Null and Undefined Rules
+
+Tentukan melalui test.
+
+Recommended:
+
+```text
+undefined → omitted
+null      → omitted unless explicit null semantics are required
+```
+
+Jangan encode string literal `undefined` atau `null` tanpa kebutuhan endpoint yang jelas.
+
+---
+
+# 13. Moodle Exception Response
+
+Moodle dapat mengembalikan HTTP `200` tetapi body berupa exception.
+
+Contoh:
 
 ```json
 {
-  "level": "info",
-  "message": "Request completed",
-  "requestId": "...",
-  "tenantId": "...",
-  "actorId": "...",
-  "event": "api_request_completed"
+  "exception": "moodle_exception",
+  "errorcode": "invalidparameter",
+  "message": "Invalid parameter value detected",
+  "debuginfo": "..."
 }
 ```
 
-Jangan membuat logger bergantung pada business feature.
+Client wajib mendeteksi ini sebagai error.
+
+HTTP `200` tidak otomatis berarti success.
 
 ---
 
-# 15. Sensitive Logging
+# 14. MoodleExceptionResponse
 
-Logger tidak boleh mencatat field sensitif.
+Buat type guard untuk external JSON yang awalnya diperlakukan sebagai `unknown`.
 
-Minimal redaction terhadap key:
+```ts
+interface MoodleExceptionResponse {
+  readonly exception: string;
+  readonly errorcode: string;
+  readonly message: string;
+  readonly debuginfo?: string;
+}
+```
+
+---
+
+# 15. MoodleErrorMapper
+
+Implementasikan:
 
 ```text
-password
-token
-accessToken
-refreshToken
+Moodle response / transport error
+        ↓
+MoodleErrorMapper
+        ↓
+InfrastructureError / MoodleError
+```
+
+Jika Phase 1 sudah memiliki `MoodleError`, gunakan itu.
+
+Minimal internal metadata:
+
+```text
+code
+message
+statusCode
+moodleErrorCode?
+moodleException?
+requestId?
+cause?
+```
+
+Jangan expose `debuginfo`, stack, atau token ke client.
+
+---
+
+# 16. Moodle Error Mapping
+
+Minimal categories:
+
+```text
+invalidtoken / invalid_token
+→ authentication/infrastructure failure
+
+invalidparameter / invalid_parameter_exception
+→ upstream request failure
+
+accesscontrol / nopermissions
+→ upstream permission failure
+
+dmlreadexception / dmlwriteexception
+→ Moodle infrastructure failure
+
+unknown exception
+→ generic Moodle upstream error
+```
+
+Feature-specific mapping dilakukan nanti di repository/application.
+
+---
+
+# 17. HTTP Non-200 Handling
+
+## RED
+
+Test minimal:
+
+```text
+400
+401
+403
+404
+429
+500
+502
+503
+```
+
+Client harus menghasilkan normalized infrastructure error.
+
+Suggested stable codes:
+
+```text
+MOODLE_REQUEST_FAILED
+MOODLE_RATE_LIMITED
+MOODLE_BAD_GATEWAY
+MOODLE_UNAVAILABLE
+```
+
+---
+
+# 18. Timeout
+
+Semua Moodle request wajib memiliki timeout configurable.
+
+Contoh:
+
+```ts
+const DEFAULT_MOODLE_TIMEOUT_MS = 10_000;
+```
+
+Gunakan `AbortController` atau runtime-compatible equivalent.
+
+Jangan hard-code timeout tersebar.
+
+---
+
+# 19. Timeout Test
+
+## RED
+
+```text
+request exceeds timeout
+→ request aborted
+→ normalized MOODLE_TIMEOUT error
+```
+
+Native `AbortError` tidak boleh keluar dari adapter.
+
+---
+
+# 20. Network Error Handling
+
+Test `fetch` rejection, connection failure, atau error transport setara.
+
+Semua menjadi normalized infrastructure error, misalnya:
+
+```text
+MOODLE_NETWORK_ERROR
+```
+
+Original error boleh disimpan sebagai `cause` secara internal.
+
+---
+
+# 21. Invalid JSON Response
+
+Test:
+
+```text
+HTTP 200
+body invalid JSON
+→ MOODLE_INVALID_RESPONSE
+```
+
+Raw `SyntaxError` tidak boleh keluar dari adapter.
+
+---
+
+# 22. Secret-Safe Logging
+
+## RED
+
+Pastikan logger tidak menerima raw:
+
+```text
 wstoken
+password
 authorization
 cookie
 secret
@@ -567,546 +567,447 @@ clientSecret
 apiKey
 ```
 
-Implementasikan helper redaction sederhana jika diperlukan.
+Logger boleh menerima:
 
-Contoh:
+```text
+requestId
+tenantId
+wsfunction
+durationMs
+httpStatus
+errorCode
+```
 
-```json
-{
-  "password": "[REDACTED]"
+Jangan log parameter request lengkap secara default karena dapat berisi jawaban siswa atau PII.
+
+---
+
+# 23. Logging Events
+
+Suggested events:
+
+```text
+moodle_request_started
+moodle_request_completed
+moodle_request_failed
+moodle_request_timeout
+```
+
+Catat duration request, tetapi jangan menambah observability framework besar pada Phase 2.
+
+---
+
+# 24. Server-Only Boundary
+
+Tambahkan `import "server-only";` pada implementation yang relevan:
+
+```text
+MoodleRestClient
+MoodleClientFactory
+MoodleCredentialProvider concrete server implementation
+```
+
+Pure type tidak perlu dipaksa server-only jika aman untuk type import.
+
+---
+
+# 25. MoodleCredential
+
+Representation internal:
+
+```ts
+interface MoodleCredential {
+  readonly baseUrl: string;
+  readonly token: string;
 }
 ```
 
-Nested object harus dipertimbangkan.
+Rules:
 
-Jangan over-engineer recursive sanitizer jika tidak diperlukan, tetapi data sensitif umum harus terlindungi.
+- immutable;
+- tidak menjadi API DTO;
+- tidak di-log;
+- tidak tersedia ke Client Component.
 
 ---
 
-# 16. Tenant Context Abstraction
+# 26. MoodleCredentialProvider
 
-Pada fase ini jangan implementasikan database tenant.
-
-Buat abstraction reusable.
-
-Contoh model:
+Buat abstraction:
 
 ```ts
-interface TenantContext {
-  readonly tenantId: string;
-  readonly slug: string;
-  readonly status: "ACTIVE" | "INACTIVE";
+interface MoodleCredentialProvider {
+  getCredential(
+    tenant: TenantContext,
+  ): Promise<MoodleCredential>;
 }
 ```
 
-atau bentuk minimal lain yang sesuai architecture.
+Pada Phase 2 jangan implementasikan Prisma, secret manager, atau persistence nyata.
 
-Jangan masukkan Moodle credentials ke public tenant context.
+Gunakan abstraction dan fake provider pada test.
 
 ---
 
-# 17. TenantResolver
+# 27. MoodleClientFactory
 
-Buat interface:
+Target:
 
 ```ts
-interface TenantResolver {
-  resolve(input: TenantResolutionInput):
-    Promise<TenantContext | null>;
-}
+const client = await moodleClientFactory.create({
+  tenant,
+  requestId,
+});
 ```
 
-`TenantResolver` adalah port.
-
-Jangan implementasikan database lookup nyata pada fase ini.
-
-Boleh membuat:
+Flow:
 
 ```text
-resolveCurrentTenant
+TenantContext
+    ↓
+CredentialProvider
+    ↓
+MoodleCredential
+    ↓
+MoodleRestClient
 ```
 
-sebagai orchestration helper yang menggunakan resolver abstraction.
+Factory tidak boleh melakukan login Moodle, resolve hostname, atau menyimpan client global mutable lintas tenant.
 
 ---
 
-# 18. Tenant Resolution Strategy
+# 28. Multi-Tenant Safety
 
-Untuk saat ini siapkan abstraction agar nantinya dapat resolve berdasarkan:
+Test minimal:
 
 ```text
-hostname
-subdomain
-header internal
+tenant A → credential A
+tenant B → credential B
 ```
 
-Jangan hard-code:
+Dilarang menggunakan mutable global seperti:
+
+```ts
+let currentToken = "...";
+```
+
+---
+
+# 29. Base URL Normalization
+
+Kedua input:
 
 ```text
-smpn29
-hangtuah2
-localhost tenant
+https://moodle.example.com
+https://moodle.example.com/
 ```
 
-di Core.
-
-Jangan gunakan Moodle URL sebagai identifier tenant.
-
----
-
-# 19. Actor Abstraction
-
-Buat:
+harus menghasilkan:
 
 ```text
-CurrentActor
+https://moodle.example.com/webservice/rest/server.php
 ```
 
-Minimal:
-
-```ts
-interface CurrentActor {
-  readonly userId: string;
-  readonly tenantId: string;
-  readonly roles: readonly string[];
-}
-```
-
-Jika architecture existing menggunakan numeric Moodle user ID, jangan paksa domain actor memakai numeric ID untuk semua provider.
-
-Gunakan ID internal aplikasi jika tersedia.
+Bukan double slash.
 
 ---
 
-# 20. Session Abstraction
+# 30. URL Security
 
-Buat session model generic:
+Base URL hanya menerima scheme yang relevan (`http`/`https`), dengan `https` diwajibkan atau diprioritaskan untuk production.
 
-```ts
-interface Session {
-  readonly id: string;
-  readonly userId: string;
-  readonly tenantId: string;
-  readonly expiresAt: Date;
-}
-```
-
-Tambahkan data minimal jika diperlukan.
-
-Jangan simpan:
+Jangan menerima arbitrary scheme seperti:
 
 ```text
-raw password
-Moodle privileged token
-plaintext credential
+file:
+ftp:
+javascript:
+data:
 ```
-
-dalam session object publik.
 
 ---
 
-# 21. SessionResolver
+# 31. No Direct Moodle Fetch
 
-Buat port:
-
-```ts
-interface SessionResolver {
-  resolve(request: Request):
-    Promise<Session | null>;
-}
-```
-
-Kemudian buat helper:
+Setelah Phase 2 selesai, seluruh komunikasi Moodle harus melalui:
 
 ```text
-resolveCurrentActor
+MoodleRestClient
 ```
 
-yang mengubah valid session menjadi actor.
-
-Pada Phase 1 tidak perlu implementasi cookie persistence final.
-
-Gunakan test fake/mock resolver.
+Feature repository tidak boleh membuat direct `fetch` ke Moodle.
 
 ---
 
-# 22. Tenant Resolution Tests
+# 32. No Moodle Response Leakage
 
-Buat test untuk minimal:
-
-### success
+Future flow:
 
 ```text
-tenant ditemukan
-→ return TenantContext
+MoodleRestClient
+    ↓
+MoodleFeatureRepository
+    ↓
+MoodleFeatureMapper
+    ↓
+Internal DTO
 ```
 
-### missing tenant
+Phase 2 belum membuat feature mapper.
+
+---
+
+# 33. Fetch Dependency for Testing
+
+Design agar client dapat diuji tanpa network nyata.
+
+Gunakan dependency injection terhadap fetcher atau mocking convention existing.
+
+Unit test tidak boleh memanggil server Moodle nyata.
+
+---
+
+# 34. MoodleRestClient Constructor
+
+Prefer config object:
+
+```ts
+new MoodleRestClient({
+  baseUrl,
+  token,
+  timeoutMs,
+  logger,
+  requestId,
+  tenantId,
+});
+```
+
+Hindari banyak positional arguments.
+
+---
+
+# 35. Generic Response Type
+
+Target:
+
+```ts
+async call<TResponse>(
+  wsfunction: string,
+  parameters?: MoodleRequestParameters,
+): Promise<TResponse>
+```
+
+Dilarang `Promise<any>`.
+
+---
+
+# 36. Response Warnings
+
+Presence `warnings` pada response Moodle bukan otomatis exception.
+
+Business interpretation warning dilakukan oleh feature repository kemudian.
+
+---
+
+# 37. Retry Scope
+
+Jangan implementasikan broad automatic retry pada Phase 2.
+
+Mutation seperti:
 
 ```text
-tenant tidak ditemukan
-→ NotFoundError / suitable error
+mod_quiz_start_attempt
+mod_quiz_process_attempt
+core_user_create_users
 ```
 
-### inactive tenant
+bisa memiliki side effect dan tidak boleh blind retry.
 
-Jika inactive behavior sudah menjadi tanggung jawab resolver/core abstraction:
+---
+
+# 38. Cache Scope
+
+Jangan implementasikan caching di `MoodleRestClient`.
+
+Caching adalah concern repository/application/cache adapter.
+
+---
+
+# 39. Authentication Scope Guard
+
+Jangan implementasikan `/login/token.php` di generic `MoodleRestClient.call()`.
+
+Token endpoint memiliki contract berbeda dari standard `wsfunction` REST endpoint.
+
+Authentication implementation dilakukan di phase berikutnya.
+
+---
+
+# 40. File API Scope Guard
+
+Jangan implementasikan:
 
 ```text
-INACTIVE
-→ Forbidden / appropriate error
+/webservice/upload.php
+/webservice/pluginfile.php
 ```
 
-Jika inactive rule akan menjadi application concern, jangan paksa rule ke Core.
+pada Phase 2 kecuali fondasi minimal memang dibutuhkan.
 
-Pilih satu boundary dan dokumentasikan.
+File transfer akan ditangani module/infrastructure terpisah.
 
 ---
 
-# 23. Session Resolution Tests
-
-Minimal:
-
-```text
-valid session
-→ CurrentActor
-
-missing session
-→ UnauthorizedError
-
-expired session
-→ UnauthorizedError
-
-tenant mismatch
-→ ForbiddenError
-```
-
-Jangan membuat network request nyata dalam unit test.
-
----
-
-# 24. Required Test Structure
-
-Buat test di lokasi yang konsisten dengan project.
-
-Disarankan:
-
-```text
-src/core/__tests__/
-├── base/
-│   └── Result.test.ts
-├── errors/
-│   └── AppError.test.ts
-├── http/
-│   ├── ApiResponse.test.ts
-│   ├── mapErrorToHttpResponse.test.ts
-│   └── withApiHandler.test.ts
-├── logger/
-│   └── createLogger.test.ts
-├── security/
-│   └── RequestId.test.ts
-├── tenant/
-│   └── resolveCurrentTenant.test.ts
-└── auth/
-    └── resolveCurrentActor.test.ts
-```
-
-Jika repository existing memiliki pattern test lain, ikuti pattern existing.
-
----
-
-# 25. Mandatory Test Cases
-
-## `Result`
-
-- success contains value;
-- failure contains error;
-- `isSuccess`;
-- `isFailure`;
-- invalid access behavior jika API menggunakan getter yang melempar.
-
-## Errors
-
-- correct status;
-- correct error code;
-- correct message;
-- supports cause;
-- optional details.
-
-## API response
-
-- success format;
-- success with metadata;
-- error format;
-- request ID present when relevant.
-
-## Error mapping
-
-- Validation → 422;
-- Unauthorized → 401;
-- Forbidden → 403;
-- NotFound → 404;
-- Conflict → 409;
-- Infrastructure → configured 5xx;
-- unknown → 500.
-
-## API wrapper
-
-- catches expected error;
-- catches unknown error;
-- returns standardized response;
-- preserves request ID;
-- logs error.
-
-## Logger
-
-- structured payload;
-- context merge;
-- sensitive data redaction.
-
-## Tenant
-
-- successful resolution;
-- missing tenant;
-- resolver failure behavior.
-
-## Session
-
-- valid session;
-- missing session;
-- expired session;
-- tenant mismatch.
-
----
-
-# 26. TypeScript Rules
-
-Use strict TypeScript.
-
-Forbidden unless absolutely justified:
-
-```ts
-any
-```
-
-Prefer:
-
-```ts
-unknown
-```
-
-for external/untrusted data.
-
-Use:
-
-```ts
-import type
-```
-
-for type-only imports.
-
-Prefer immutable fields:
-
-```ts
-readonly
-```
-
-DTO/interfaces should be readonly where possible.
-
----
-
-# 27. Error Handling Rules
-
-Do not write:
-
-```ts
-catch (error) {
-  console.error(error);
-}
-```
-
-without propagation/mapping.
-
-Do not swallow errors.
-
-Do not throw strings:
-
-```ts
-throw "error";
-```
-
-Always throw proper `Error` subclasses.
-
----
-
-# 28. Logging Rules
-
-Do not leave:
-
-```ts
-console.log
-console.debug
-```
-
-inside production core implementation.
-
-All logging goes through logger abstraction.
-
-If logger ultimately uses `console` internally for Phase 1, that is acceptable, as long as caller code only depends on `Logger`.
-
----
-
-# 29. API Wrapper Example Target
-
-Desired usage should become simple:
-
-```ts
-export const GET = withApiHandler(
-  async ({ requestId, logger }) => {
-    logger.info(
-      "Health check",
-      {
-        requestId,
-        event: "health_check",
-      },
-    );
-
-    return {
-      status: HttpStatus.OK,
-      data: {
-        status: "ok",
-      },
-    };
-  },
-);
-```
-
-Actual API may differ if project conventions make another implementation cleaner.
-
-Keep route code concise.
-
----
-
-# 30. Dependency Rules
+# 41. Import Boundary
 
 Allowed:
 
 ```text
-core/http
-→ core/errors
-→ core/logger
-→ core/security
+modules/*/infrastructure
+→ core/moodle
 ```
 
-Avoid cyclic dependency.
-
-Especially avoid:
+Not allowed:
 
 ```text
-core/errors → core/http → core/errors
+modules/*/domain
+→ core/moodle
+
+modules/*/application
+→ core/moodle
+
+sections/*
+→ core/moodle
+
+presentation/hooks
+→ core/moodle
 ```
-
-Design status mapping carefully.
-
-Recommended:
-
-- errors may contain semantic status code if desired;
-- HTTP layer maps errors;
-- errors should not import Next.js.
 
 ---
 
-# 31. Next.js Dependency Boundary
+# 42. Required RED Tests
 
-Core `http` may know Web `Request`/`Response` primitives.
+## MoodleRequestEncoder
 
-Prefer not to couple every core class to:
+- [ ] scalar string encoding;
+- [ ] scalar integer encoding;
+- [ ] scalar boolean encoding;
+- [ ] zero preserved;
+- [ ] false preserved appropriately;
+- [ ] empty string preserved;
+- [ ] undefined omitted;
+- [ ] null handling documented/tested;
+- [ ] numeric array;
+- [ ] string array;
+- [ ] nested object;
+- [ ] array of objects;
+- [ ] deeply nested supported structure.
 
-```text
-next/server
-next/headers
-next/cookies
-```
+## MoodleErrorMapper
 
-unless specifically required.
+- [ ] Moodle exception maps correctly;
+- [ ] `invalidtoken`;
+- [ ] `invalidparameter`;
+- [ ] unknown Moodle exception;
+- [ ] network error;
+- [ ] timeout error;
+- [ ] HTTP 5xx;
+- [ ] `debuginfo` not exposed.
 
-`domain-style` core abstractions such as:
+## MoodleRestClient
 
-```text
-Result
-Logger
-TenantContext
-CurrentActor
-Session
-```
+- [ ] correct REST endpoint;
+- [ ] POST method;
+- [ ] correct content type;
+- [ ] token included internally in body;
+- [ ] `wsfunction` included;
+- [ ] `moodlewsrestformat=json`;
+- [ ] parameters encoded correctly;
+- [ ] HTTP 200 success;
+- [ ] Moodle exception with HTTP 200 becomes failure;
+- [ ] non-200 normalized;
+- [ ] timeout aborts;
+- [ ] invalid JSON normalized;
+- [ ] logger never receives raw token.
 
-must remain framework-neutral.
+## MoodleClientFactory
 
----
-
-# 32. Security Boundary
-
-Phase 1 must establish foundations for:
-
-```text
-Browser
-→ Next.js
-→ external systems
-```
-
-Do not add client-visible secrets.
-
-Files that may process secrets should be server-only where appropriate.
-
----
-
-# 33. File Organization Rules
-
-Do not create barrel exports automatically such as:
-
-```text
-index.ts
-```
-
-in every directory unless repository existing already standardizes them.
-
-Avoid import cycles caused by global barrels.
-
-Prefer explicit imports.
+- [ ] resolves credentials for tenant;
+- [ ] creates client with correct tenant config;
+- [ ] tenant A/B isolation;
+- [ ] provider failure becomes safe infrastructure error.
 
 ---
 
-# 34. Scope Guard
+# 43. Suggested Test Fixtures
 
-Do NOT implement during Phase 1:
+Gunakan fake data:
 
 ```text
-MoodleRestClient
-Moodle login
-database schema
-Prisma
-Redis
-quiz
-course
-question
-grade
-exam
-real tenant database repository
-real cookie authentication
-UI dashboard
+https://moodle-a.example.test
+https://moodle-b.example.test
+TOKEN_A
+TOKEN_B
 ```
 
-Those belong to later phases.
-
-Phase 1 only establishes reusable Core Foundation.
+Jangan gunakan credential production.
 
 ---
 
-# 35. Verification Commands
+# 44. GREEN Implementation Order
 
-At the end run all relevant commands.
+Implementasikan dalam urutan:
 
-At minimum:
+```text
+1. MoodleRequestParameters
+2. MoodleRequestEncoder
+3. MoodleExceptionResponse type guard
+4. MoodleErrorMapper
+5. MoodleRestClient
+6. MoodleCredential
+7. MoodleCredentialProvider
+8. MoodleClientFactory
+```
+
+---
+
+# 45. Suggested Infrastructure Error Codes
+
+```text
+MOODLE_REQUEST_FAILED
+MOODLE_TIMEOUT
+MOODLE_NETWORK_ERROR
+MOODLE_INVALID_RESPONSE
+MOODLE_EXCEPTION
+MOODLE_INVALID_TOKEN
+MOODLE_INVALID_PARAMETER
+MOODLE_FORBIDDEN
+MOODLE_RATE_LIMITED
+MOODLE_BAD_GATEWAY
+MOODLE_UNAVAILABLE
+```
+
+Jangan menambahkan business codes seperti `ATTEMPT_EXPIRED` atau `COURSE_NOT_FOUND` ke Core Moodle Adapter.
+
+---
+
+# 46. Biome / TypeScript Quality
+
+Requirements:
+
+- [ ] TypeScript strict;
+- [ ] no unexplained `any`;
+- [ ] `import type` untuk type-only imports;
+- [ ] readonly config/type bila sesuai;
+- [ ] no unused code;
+- [ ] no disabled lint rule tanpa alasan;
+- [ ] no cyclic dependency.
+
+---
+
+# 47. Verification Commands
+
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -1115,129 +1016,216 @@ npm run test
 npm run build
 ```
 
-If package manager is not npm, use package manager already configured in the project.
+Gunakan package manager yang sudah dipakai repository. Jangan mengganti package manager.
 
-Do not change package manager.
+Selama development jalankan focused tests sesuai script yang tersedia.
 
 ---
 
-# 36. Required Final Report
+# 48. Security Verification
 
-After implementation, report:
+Sebelum selesai, audit repository untuk:
+
+```text
+/webservice/rest/server.php
+wstoken
+moodlewsrestformat
+```
+
+Expected: hanya muncul pada Core Moodle Adapter, test, atau dokumentasi yang memang relevan.
+
+Audit juga:
+
+```text
+console.log(token)
+logger.info({ token })
+logger.debug({ wstoken })
+```
+
+Semua harus tidak ada.
+
+---
+
+# 49. Required Final Report
+
+Setelah implementasi, report:
 
 ```text
 1. Files created
 2. Files modified
-3. RED tests added
+3. RED tests implemented
 4. GREEN implementation completed
-5. Important architectural decisions
-6. Verification results
-7. Remaining Phase 1 risks / TODO
+5. Moodle parameter encoding decisions
+6. Error mapping decisions
+7. Timeout configuration
+8. Secret logging protections
+9. Verification results
+10. Remaining Phase 2 risks / TODO
 ```
 
-Do not only say:
+Tambahkan:
 
 ```text
-Done.
+Moodle direct communication audit: PASS / FAIL
+Browser secret exposure audit: PASS / FAIL
 ```
 
 ---
 
-# 37. Acceptance Criteria
+# 50. Acceptance Criteria
 
-Phase 1 dianggap selesai hanya jika semua kondisi berikut terpenuhi.
+## Request Encoding
 
-## Base
+- [ ] scalar parameter encoding passes;
+- [ ] numeric array encoding passes;
+- [ ] string array encoding passes;
+- [ ] nested object encoding passes;
+- [ ] array-of-object encoding passes;
+- [ ] zero preserved;
+- [ ] false behavior tested;
+- [ ] undefined behavior tested;
+- [ ] null behavior documented/tested.
 
-- [ ] `Result` implemented.
-- [ ] Result is generic and immutable.
-- [ ] `BaseEntity` minimal.
-- [ ] `BaseService` does not become service locator.
+## Moodle Error Handling
 
-## Errors
+- [ ] HTTP 200 Moodle exception detected;
+- [ ] non-200 normalized;
+- [ ] timeout normalized;
+- [ ] network error normalized;
+- [ ] invalid JSON normalized;
+- [ ] Moodle debug info not client-visible.
 
-- [ ] application error hierarchy implemented.
-- [ ] stable error codes.
-- [ ] HTTP semantics mapped consistently.
-- [ ] unknown errors sanitized.
+## MoodleRestClient
 
-## HTTP
+- [ ] uses POST;
+- [ ] uses standard REST endpoint;
+- [ ] injects token internally;
+- [ ] injects `wsfunction`;
+- [ ] injects `moodlewsrestformat=json`;
+- [ ] configurable timeout;
+- [ ] structured logging;
+- [ ] request duration logging;
+- [ ] no automatic mutation retry;
+- [ ] no caching responsibility.
 
-- [ ] standardized success response.
-- [ ] standardized failure response.
-- [ ] API route wrapper.
-- [ ] centralized error mapping.
-- [ ] request ID on response.
+## Factory
 
-## Logging
+- [ ] `MoodleClientFactory` implemented;
+- [ ] credential provider injected;
+- [ ] tenant A/B isolation tested;
+- [ ] no global mutable credential state.
 
-- [ ] structured logger.
-- [ ] contextual logging.
-- [ ] secret redaction.
-- [ ] no scattered console logging.
+## Credential
 
-## Tenant
+- [ ] `MoodleCredentialProvider` abstraction implemented;
+- [ ] credential immutable;
+- [ ] credential not exposed to client;
+- [ ] no database persistence in this phase.
 
-- [ ] `TenantContext`.
-- [ ] `TenantResolver`.
-- [ ] `resolveCurrentTenant`.
-- [ ] tests for tenant resolution.
+## Security
 
-## Auth
+- [ ] client implementation server-only;
+- [ ] token never appears in returned API data;
+- [ ] token never appears in logs;
+- [ ] sensitive parameters not logged by default;
+- [ ] no real credential in tests.
 
-- [ ] `CurrentActor`.
-- [ ] `Session`.
-- [ ] `SessionResolver`.
-- [ ] `resolveCurrentActor`.
-- [ ] tests for session/actor resolution.
+## Architecture
+
+- [ ] domain does not import Core Moodle adapter;
+- [ ] application does not import Core Moodle adapter;
+- [ ] presentation does not import Core Moodle adapter;
+- [ ] future infrastructure repositories can use `MoodleRestClient`;
+- [ ] no feature-specific business rule added.
 
 ## Quality
 
-- [ ] no `any` without explicit justification.
-- [ ] no circular dependency.
-- [ ] no Moodle implementation.
-- [ ] no business-feature implementation.
-- [ ] TypeScript passes.
-- [ ] Biome passes.
-- [ ] tests pass.
-- [ ] production build passes.
+- [ ] TypeScript passes;
+- [ ] Biome passes;
+- [ ] tests pass;
+- [ ] build passes;
+- [ ] no unexplained `any`;
+- [ ] no dead code;
+- [ ] no cyclic dependencies.
 
 ---
 
-# 38. Definition of Success
+# 51. Definition of Done
 
-Setelah Phase 1 selesai, module berikutnya harus dapat menggunakan Core dengan pola seperti:
+Phase 2 selesai ketika infrastructure adapter dapat melakukan:
 
 ```ts
-const tenant =
-  await resolveCurrentTenant(
-    request,
-    tenantResolver,
-  );
-
-const actor =
-  await resolveCurrentActor(
-    request,
-    sessionResolver,
+const moodleClient =
+  await moodleClientFactory.create({
     tenant,
+    requestId,
+  });
+
+const siteInfo =
+  await moodleClient.call<SiteInfoResponse>(
+    "core_webservice_get_site_info",
   );
-
-const result =
-  await useCase.execute(input);
-
-return ApiResponse.success(result);
 ```
 
-dan semua error dari application dapat masuk ke:
+tanpa caller mengetahui:
 
 ```text
-withApiHandler
-→ mapErrorToHttpResponse
-→ structured API error
-→ requestId
-→ structured logger
+Moodle token
+REST endpoint
+URLSearchParams
+parameter nesting syntax
+timeout implementation
+Moodle exception shape
+network error mapping
+secret sanitization
 ```
 
-tanpa route membuat error mapping sendiri.
+Seluruh external failure harus berubah menjadi application-safe infrastructure error.
 
-Tujuan utama Phase 1 adalah memastikan seluruh feature berikutnya dibangun di atas fondasi yang **type-safe, testable, framework-aware hanya pada boundary yang benar, tenant-ready, session-ready, observable, dan konsisten**.
+---
+
+# 52. Explicit Non-Goals
+
+Phase 2 tidak mencakup:
+
+- [ ] Moodle login implementation;
+- [ ] auth session implementation;
+- [ ] course repository;
+- [ ] quiz repository;
+- [ ] quiz attempt repository;
+- [ ] question repository;
+- [ ] grade repository;
+- [ ] file upload/download;
+- [ ] custom Moodle plugin;
+- [ ] Prisma tenant storage;
+- [ ] Redis;
+- [ ] caching;
+- [ ] generic retry framework;
+- [ ] UI;
+- [ ] feature API routes.
+
+Jangan memperluas scope tanpa requirement baru.
+
+---
+
+# 53. Next Phase Readiness
+
+Setelah issue ini selesai, dependency chain menjadi:
+
+```text
+Core Foundation
+    ↓
+Moodle REST Adapter
+    ↓
+Tenant Persistence / Configuration
+    ↓
+Authentication
+    ↓
+Courses
+    ↓
+Quizzes
+    ↓
+Quiz Attempts
+```
+
+Phase 2 dinyatakan berhasil hanya jika Moodle telah menjadi **implementation detail di sisi server**, bukan dependency yang tersebar di seluruh codebase.

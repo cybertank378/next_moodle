@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   MoodleCourseMapper,
   type MoodleCourseRaw,
-} from "../../infrastructure/mappers/MoodleCourseMapper";
+} from "@/modules/courses/infrastructure/mappers/MoodleCourseMapper";
 
 describe("MoodleCourseMapper", () => {
   it("should map raw Moodle course JSON to domain Course entity", () => {

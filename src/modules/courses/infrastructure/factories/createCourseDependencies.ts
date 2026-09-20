@@ -2,7 +2,7 @@ import "server-only";
 import type { ILogger } from "@/core/logger";
 import { moodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { TenantContext } from "@/core/tenant/TenantContext";
-import { GetMyCoursesUseCase } from "../../application/usecases/GetMyCoursesUseCase";
+import { GetMyCoursesUseCase } from "@/modules/courses/application/usecases/GetMyCoursesUseCase";
 import { MoodleCourseRepository } from "../repositories/MoodleCourseRepository";
 
 export async function createCourseDependencies(

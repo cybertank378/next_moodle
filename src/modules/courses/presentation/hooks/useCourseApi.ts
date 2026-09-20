@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ApiErrorResponse } from "@/core/http/ApiErrorResponse";
 import type { ApiResponse } from "@/core/http/ApiResponse";
-import type { CourseResponseDTO } from "../../domain/dto/CourseResponseDTO";
+import type { CourseResponseDTO } from "@/modules/courses/domain/dto/CourseResponseDTO";
 
 export function useCourseApi() {
   const [courses, setCourses] = useState<readonly CourseResponseDTO[]>([]);

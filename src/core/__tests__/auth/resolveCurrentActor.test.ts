@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { resolveCurrentActor } from "../../auth/resolveCurrentActor";
-import type { Session } from "../../auth/Session";
-import type { SessionResolver } from "../../auth/SessionResolver";
-import { ForbiddenError } from "../../errors/ForbiddenError";
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
-import type { TenantContext } from "../../tenant/TenantContext";
+import {
+  resolveCurrentActor,
+  type Session,
+  type SessionResolver,
+} from "@/core/auth";
+import { ForbiddenError, UnauthorizedError } from "@/core/errors";
+import type { TenantContext } from "@/core/tenant";
 
 describe("resolveCurrentActor", () => {
   const currentTenant: TenantContext = {
