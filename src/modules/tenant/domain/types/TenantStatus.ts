@@ -1,1 +1,1 @@
-export type TenantStatus = "active" | "inactive" | "suspended";
+export type TenantStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";

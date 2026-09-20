@@ -1,18 +1,17 @@
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { TenantResponseDTO } from "../../domain/dto/TenantResponseDTO";
 import type { TenantRepository } from "../../domain/interfaces/TenantRepository";
+import { TenantSlug } from "../../domain/value-objects/TenantSlug";
 
-export class GetTenantUseCase {
+export class GetTenantBySlugUseCase {
   constructor(private readonly tenantRepository: TenantRepository) {}
 
-  public async execute(idOrSlug: string): Promise<TenantResponseDTO> {
-    let tenant = await this.tenantRepository.findById(idOrSlug);
-    if (!tenant) {
-      tenant = await this.tenantRepository.findBySlug(idOrSlug);
-    }
+  public async execute(slug: string): Promise<TenantResponseDTO> {
+    const canonicalSlug = TenantSlug.normalize(slug);
+    const tenant = await this.tenantRepository.findBySlug(canonicalSlug);
 
     if (!tenant) {
-      throw new NotFoundError(`Tenant '${idOrSlug}' tidak ditemukan.`, {
+      throw new NotFoundError(`Tenant dengan slug '${slug}' tidak ditemukan.`, {
         code: "TENANT_NOT_FOUND",
       });
     }

@@ -1,8 +1,8 @@
 import type { TenantContext } from "./TenantContext";
 
 export interface TenantResolutionInput {
-  readonly identifier: string;
-  readonly host?: string;
+  readonly hostname: string;
+  readonly identifier?: string;
   readonly headers?: Headers;
 }
 

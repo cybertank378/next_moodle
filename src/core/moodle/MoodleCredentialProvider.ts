@@ -7,6 +7,7 @@ export interface MoodleCredentialProvider {
 }
 
 // Aliases for backward compatibility
+export type { MoodleCredential } from "./MoodleCredential";
 export type IMoodleCredentialProvider = MoodleCredentialProvider;
 export type MoodleCredentials = MoodleCredential;
 

@@ -9,6 +9,7 @@ describe("MoodleCredentialProvider", () => {
   const tenantA: TenantContext = {
     tenantId: "tenant_a",
     slug: "tenant-a",
+    name: "Tenant A",
     status: "ACTIVE",
   };
 
@@ -50,6 +51,7 @@ describe("MoodleCredentialProvider", () => {
     const credB = await customProvider.getCredential({
       tenantId: "tenant_b",
       slug: "tenant-b",
+      name: "Tenant B",
       status: "ACTIVE",
     });
     expect(credB.baseUrl).toBe("https://moodle-b.example.test");
