@@ -1,9 +1,12 @@
+import { AppError } from "../errors";
+import { createLogger, type Logger } from "../logger";
 import { resolveRequestId } from "../security/RequestId";
 import { ApiResponse } from "./ApiResponse";
 import { mapErrorToHttpResponse } from "./mapErrorToHttpResponse";
 
 export interface ApiHandlerContext {
   requestId: string;
+  logger: Logger;
   params?:
     | Promise<Record<string, string | string[]>>
     | Record<string, string | string[]>;
@@ -24,8 +27,10 @@ export function withApiHandler<T = unknown>(handler: ApiRouteHandler<T>) {
     },
   ): Promise<Response> => {
     const requestId = resolveRequestId(req);
+    const logger = createLogger("ApiHandler", { requestId });
     const context: ApiHandlerContext = {
       requestId,
+      logger,
       params: routeParams?.params,
     };
 
@@ -45,6 +50,14 @@ export function withApiHandler<T = unknown>(handler: ApiRouteHandler<T>) {
         },
       });
     } catch (error) {
+      if (error instanceof AppError && error.isOperational) {
+        logger.warn(`Operational request error: ${error.message}`, {
+          code: error.code,
+          statusCode: error.statusCode,
+        });
+      } else {
+        logger.error("API handler execution failed", error);
+      }
       const apiResponse = mapErrorToHttpResponse(error, requestId);
 
       return Response.json(apiResponse.body, {
