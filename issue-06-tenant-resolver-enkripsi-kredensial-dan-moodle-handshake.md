@@ -88,6 +88,7 @@ Jalankan dan pastikan lulus:
 npm run typecheck
 npm run lint
 npm run test
+npm run dev
 npm run build
 ```
 
@@ -106,5 +107,5 @@ Jika repository menyediakan `npm run verify`, jalankan juga sebagai pemeriksaan 
 - [ ] Pagination tersedia bila issue memiliki list yang dapat membesar.
 - [ ] Tenant isolation dipertahankan.
 - [ ] Tidak ada secret Moodle yang mencapai browser/log.
-- [ ] Tidak ada dead code dan tidak ada `any` tanpa penjelasan.
+- [ ] Tidak ada dead code dan tidak ada `dev` tanpa penjelasan.
 - [ ] TypeScript, Biome, test, dan build lulus.
