@@ -62,6 +62,18 @@ export class Tenant {
     return this.props.status === "SUSPENDED";
   }
 
+  get isMaintenance(): boolean {
+    return this.props.status === "MAINTENANCE";
+  }
+
+  canServeRequests(): boolean {
+    return this.props.status === "ACTIVE";
+  }
+
+  static isValidSlug(slug: string): boolean {
+    return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+  }
+
   toJSON(): TenantProps {
     return { ...this.props };
   }

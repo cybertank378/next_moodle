@@ -37,6 +37,13 @@ export async function resolveCurrentTenant(
   }
 
   if (tenant.status !== "ACTIVE") {
+    if (tenant.status === "MAINTENANCE") {
+      throw new ForbiddenError("Tenant is currently undergoing maintenance", {
+        tenantId: tenant.tenantId,
+        status: tenant.status,
+      });
+    }
+
     throw new ForbiddenError(
       `Tenant access is denied: status is ${tenant.status}`,
       {

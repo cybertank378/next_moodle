@@ -92,6 +92,23 @@ describe("PrismaTenantRepository", () => {
     });
   });
 
+  it("should find tenant by customDomain and map to domain entity", async () => {
+    const mockPrisma = createMockPrisma();
+    (
+      mockPrisma.tenant.findUnique as ReturnType<typeof vi.fn>
+    ).mockResolvedValue(mockPrismaTenant);
+
+    const repository = new PrismaTenantRepository(mockPrisma);
+    const tenant = await repository.findByCustomDomain("lms.acme.edu");
+
+    expect(tenant).toBeInstanceOf(Tenant);
+    expect(tenant?.customDomain).toBe("lms.acme.edu");
+    expect(mockPrisma.tenant.findUnique).toHaveBeenCalledWith({
+      where: { customDomain: "lms.acme.edu" },
+      include: { credential: true, branding: true },
+    });
+  });
+
   it("should save tenant with relations using upsert", async () => {
     const mockPrisma = createMockPrisma();
     (mockPrisma.tenant.upsert as ReturnType<typeof vi.fn>).mockResolvedValue(

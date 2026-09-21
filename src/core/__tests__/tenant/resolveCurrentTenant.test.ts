@@ -26,11 +26,11 @@ describe("resolveCurrentTenant", () => {
           status: "SUSPENDED",
         };
       }
-      if (identifier === "inactive-school") {
+      if (identifier === "maintenance-school") {
         return {
-          tenantId: "tenant_inact_789",
-          tenantSlug: "inactive-school",
-          status: "INACTIVE",
+          tenantId: "tenant_maint_789",
+          tenantSlug: "maintenance-school",
+          status: "MAINTENANCE",
         };
       }
       return null;
@@ -93,12 +93,15 @@ describe("resolveCurrentTenant", () => {
     );
   });
 
-  it("should throw ForbiddenError if tenant is INACTIVE", async () => {
-    const request = new Request("https://inactive.example.com/api/v1/courses", {
-      headers: {
-        "x-tenant-slug": "inactive-school",
+  it("should throw ForbiddenError if tenant is in MAINTENANCE", async () => {
+    const request = new Request(
+      "https://maintenance.example.com/api/v1/courses",
+      {
+        headers: {
+          "x-tenant-slug": "maintenance-school",
+        },
       },
-    });
+    );
 
     await expect(resolveCurrentTenant(request, mockResolver)).rejects.toThrow(
       ForbiddenError,

@@ -16,9 +16,10 @@ export class MoodleRestClient implements MoodleClient {
   private readonly baseUrl: string;
   private readonly token: string;
   private readonly logger: Logger;
-
   constructor(credentials: MoodleCredentials) {
-    this.baseUrl = credentials.baseUrl.trim().replace(/\/+$/, "");
+    this.baseUrl = (credentials.baseUrl || credentials.moodleUrl || "")
+      .trim()
+      .replace(/\/+$/, "");
     this.token = credentials.token.trim();
     this.logger = createLogger("MoodleRestClient");
   }

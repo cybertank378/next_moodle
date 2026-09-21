@@ -101,6 +101,19 @@ export class PrismaTenantRepository implements TenantRepository {
     return this.toDomain(record as PrismaTenantWithRelations);
   }
 
+  async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
+    const record = await this.prisma.tenant.findUnique({
+      where: { customDomain },
+      include: {
+        credential: true,
+        branding: true,
+      },
+    });
+
+    if (!record) return null;
+    return this.toDomain(record as PrismaTenantWithRelations);
+  }
+
   async save(tenant: Tenant): Promise<Tenant> {
     const upsertData = {
       slug: tenant.slug,
