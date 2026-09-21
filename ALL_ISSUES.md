@@ -212,18 +212,18 @@ Jika repository menyediakan `npm run verify`, jalankan juga sebagai pemeriksaan 
 
 ## Definition of Done issue
 
-- [ ] Scope issue selesai tanpa pekerjaan tersembunyi dari issue berikutnya.
-- [ ] RED test dibuat terlebih dahulu untuk perilaku baru/bug yang relevan.
-- [ ] GREEN dicapai dengan implementasi minimum yang benar.
-- [ ] REFACTOR dilakukan tanpa mematahkan boundary arsitektur.
-- [ ] Domain/application tests lulus.
-- [ ] Adapter/infrastructure tests lulus bila relevan.
-- [ ] Loading/Empty/Error state tersedia bila issue memiliki UI.
-- [ ] Pagination tersedia bila issue memiliki list yang dapat membesar.
-- [ ] Tenant isolation dipertahankan.
-- [ ] Tidak ada secret Moodle yang mencapai browser/log.
-- [ ] Tidak ada dead code dan tidak ada `any` tanpa penjelasan.
-- [ ] TypeScript, Biome, test, dan build lulus.
+- [x] Scope issue selesai tanpa pekerjaan tersembunyi dari issue berikutnya.
+- [x] RED test dibuat terlebih dahulu untuk perilaku baru/bug yang relevan.
+- [x] GREEN dicapai dengan implementasi minimum yang benar.
+- [x] REFACTOR dilakukan tanpa mematahkan boundary arsitektur.
+- [x] Domain/application tests lulus.
+- [x] Adapter/infrastructure tests lulus bila relevan.
+- [x] Loading/Empty/Error state tersedia bila issue memiliki UI.
+- [x] Pagination tersedia bila issue memiliki list yang dapat membesar.
+- [x] Tenant isolation dipertahankan.
+- [x] Tidak ada secret Moodle yang mencapai browser/log.
+- [x] Tidak ada dead code dan tidak ada `any` tanpa penjelasan.
+- [x] TypeScript, Biome, test, dan build lulus.
 
 
 ---
