@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   closePrismaConnection,
   disconnectPrisma,
@@ -6,8 +7,7 @@ import {
   prisma,
   withIsolatedPrisma,
   withPrisma,
-} from "@libs/prisma";
-import { afterEach, describe, expect, it, vi } from "vitest";
+} from "@/libs/prisma";
 import { prisma as tenantPrisma } from "@/modules/tenant/infrastructure/prismaClient";
 
 describe("libs/prisma singleton & lifecycle", () => {

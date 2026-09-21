@@ -9,4 +9,4 @@ export {
   prisma,
   withIsolatedPrisma,
   withPrisma,
-} from "@libs/prisma";
+} from "@/libs/prisma";

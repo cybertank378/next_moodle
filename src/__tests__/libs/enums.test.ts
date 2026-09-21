@@ -1,5 +1,5 @@
-import { TenantStatus } from "@libs/enums";
 import { describe, expect, it } from "vitest";
+import { TenantStatus } from "@/libs/enums";
 
 describe("libs/enums", () => {
   it("should define TenantStatus with expected values", () => {
