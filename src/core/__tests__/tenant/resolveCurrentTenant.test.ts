@@ -1,0 +1,107 @@
+import { describe, expect, it } from "vitest";
+import { ForbiddenError, NotFoundError } from "@/core/errors";
+import {
+  resolveCurrentTenant,
+  type TenantContext,
+  type TenantResolver,
+} from "@/core/tenant";
+
+describe("resolveCurrentTenant", () => {
+  const mockResolver: TenantResolver = {
+    async resolveFromIdentifier(
+      identifier: string,
+    ): Promise<TenantContext | null> {
+      if (identifier === "acme") {
+        return {
+          tenantId: "tenant_acme_123",
+          tenantSlug: "acme",
+          status: "ACTIVE",
+          customDomain: "lms.acme.edu",
+        };
+      }
+      if (identifier === "suspended-corp") {
+        return {
+          tenantId: "tenant_susp_456",
+          tenantSlug: "suspended-corp",
+          status: "SUSPENDED",
+        };
+      }
+      if (identifier === "inactive-school") {
+        return {
+          tenantId: "tenant_inact_789",
+          tenantSlug: "inactive-school",
+          status: "INACTIVE",
+        };
+      }
+      return null;
+    },
+  };
+
+  it("should resolve active tenant successfully from header or domain", async () => {
+    const request = new Request("https://lms.acme.edu/api/v1/courses", {
+      headers: {
+        "x-tenant-slug": "acme",
+      },
+    });
+
+    const tenant = await resolveCurrentTenant(request, mockResolver);
+
+    expect(tenant).toBeDefined();
+    expect(tenant.tenantId).toBe("tenant_acme_123");
+    expect(tenant.tenantSlug).toBe("acme");
+    expect(tenant.status).toBe("ACTIVE");
+    expect(tenant.customDomain).toBe("lms.acme.edu");
+  });
+
+  it("should resolve tenant from Host header when x-tenant-slug header is missing", async () => {
+    const request = new Request("https://lms.acme.edu/api/v1/courses", {
+      headers: {
+        host: "acme",
+      },
+    });
+
+    const tenant = await resolveCurrentTenant(request, mockResolver);
+
+    expect(tenant).toBeDefined();
+    expect(tenant.tenantId).toBe("tenant_acme_123");
+  });
+
+  it("should throw NotFoundError if tenant is not found", async () => {
+    const request = new Request("https://unknown.example.com/api/v1/courses", {
+      headers: {
+        "x-tenant-slug": "unknown-slug",
+      },
+    });
+
+    await expect(resolveCurrentTenant(request, mockResolver)).rejects.toThrow(
+      NotFoundError,
+    );
+  });
+
+  it("should throw ForbiddenError if tenant is SUSPENDED", async () => {
+    const request = new Request(
+      "https://suspended.example.com/api/v1/courses",
+      {
+        headers: {
+          "x-tenant-slug": "suspended-corp",
+        },
+      },
+    );
+
+    await expect(resolveCurrentTenant(request, mockResolver)).rejects.toThrow(
+      ForbiddenError,
+    );
+  });
+
+  it("should throw ForbiddenError if tenant is INACTIVE", async () => {
+    const request = new Request("https://inactive.example.com/api/v1/courses", {
+      headers: {
+        "x-tenant-slug": "inactive-school",
+      },
+    });
+
+    await expect(resolveCurrentTenant(request, mockResolver)).rejects.toThrow(
+      ForbiddenError,
+    );
+  });
+});
