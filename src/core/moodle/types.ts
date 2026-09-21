@@ -1,6 +1,10 @@
 export interface MoodleCredentials {
   baseUrl: string;
   token: string;
+  moodleUrl?: string;
+  proctorToken?: string;
+  timeoutMs?: number;
+  sslVerify?: boolean;
 }
 
 export interface MoodleRequestOptions {

@@ -5,5 +5,6 @@ export * from "./ForbiddenError";
 export * from "./InfrastructureError";
 export * from "./MoodleError";
 export * from "./NotFoundError";
+export * from "./SecurityError";
 export * from "./UnauthorizedError";
 export * from "./ValidationError";
