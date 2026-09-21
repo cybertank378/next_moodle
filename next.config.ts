@@ -18,6 +18,54 @@ const nextConfig: NextConfig = {
   // Prevent memory-heavy source map generation in production
   productionBrowserSourceMaps: false,
 
+  // Image optimization configuration
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+    ],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: false,
+  },
+
+  // HTTP Security and caching headers
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
+        ],
+      },
+    ];
+  },
+
   // Bundle and compile-time optimizations
   experimental: {
     // Tree-shake and selectively load icon/utility barrel modules to reduce memory usage during build & SSR
