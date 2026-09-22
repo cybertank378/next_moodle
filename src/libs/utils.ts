@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { ROUTES } from "@/libs/routes";
 
 export function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -9,14 +10,14 @@ export function redirectByRole(role?: string | null): string {
   switch (role) {
     case "ADMIN":
     case "SUPERADMIN":
-      return "/admin/dashboard";
+      return ROUTES.ADMIN.DASHBOARD;
     case "TENANT":
     case "TENANT_ADMIN":
     case "TEACHER":
-      return "/tenant/dashboard";
+      return ROUTES.TENANT.DASHBOARD;
     case "STUDENT":
-      return "/student/dashboard";
+      return ROUTES.STUDENT.DASHBOARD;
     default:
-      return "/login";
+      return ROUTES.AUTH.LOGIN;
   }
 }
