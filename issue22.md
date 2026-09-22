@@ -1,89 +1,56 @@
-# Issue 16 — Exam Administration Vertical Slice
+# Issue 22 — E2E, CI & Release Gate
 
 ## Nama Issue
 
-`exam-administration`
+`e2e-ci-release-gate`
 
 ## Bounded Engineering Objective
 
-Mengelola komposisi exam/quiz yang didukung backend tanpa mengarang full quiz lifecycle endpoint.
+Menyertifikasi keseluruhan sistem melalui E2E kritis, negative security scenarios, CI quality gates, build production, dan release checklist.
 
 ## Dependency
 
-Issue 15 selesai.
-
-## Mandatory Vertical Slice Paths
-
-Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
-
-```text
-src/modules/exam-administration/
-src/sections/exam-administration/
-src/app/api/exam-administration/
-src/app/(protected)/dashboard/exams/
-src/app/(protected)/dashboard/exams/create/
-src/app/(protected)/dashboard/exams/[id]/
-src/app/(protected)/dashboard/exams/[id]/edit/
-```
-
-Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
+Issue 21 selesai.
 
 ## Scope Pengerjaan
 
-- [ ] Buat canonical module structure lengkap.
-- [ ] Semua port di satu `domain/interfaces/ExamAdministrationInterfaces.ts`.
-- [ ] Implement `GetExamQuestionsUseCase` beserta tests.
-- [ ] Implement `AddQuestionToExamUseCase` beserta tests.
-- [ ] Implement `RemoveQuestionFromExamUseCase` beserta tests.
-- [ ] Implement `ReorderExamQuestionsUseCase` beserta tests.
-- [ ] Implement `AddRandomQuestionsUseCase` beserta tests.
-- [ ] Implement infrastructure repository/provider/mapper/normalizer yang diperlukan.
-- [ ] Implement controller dan API factory/routes.
-- [ ] Implement presentation hook.
-- [ ] Implement Atomic UI `atoms/molecules/organisms/pages` sesuai kebutuhan nyata.
-- [ ] Implement protected page guard + composition.
-- [ ] Tambahkan loading/error/empty state dan pagination jika list scalable.
-- [ ] Tambahkan authorization + tenant/ownership tests.
-- [ ] Verifikasi backend contract sebelum menggunakan Moodle function.
+- [ ] E2E ADMIN tenant management flow.
+- [ ] E2E TENANT users/enrolments/groups/questions/exams/monitor/results flow sesuai backend readiness.
+- [ ] E2E STUDENT login/course/quiz/attempt/submit/result flow.
+- [ ] Negative cross-tenant, ownership, role, direct API tampering tests.
+- [ ] CI menjalankan typecheck/lint/test/build.
+- [ ] Contract/preflight checks terhadap Moodle test environment.
+- [ ] Production env validation dan secret checklist.
+- [ ] Release blocker policy untuk security/regression failure.
 
 ## Out of Scope
 
-- Create/update/delete/duplicate quiz lifecycle bila belum terdaftar production-ready.
+- Feature baru.
+- Menutup backend gap dengan mock lalu menganggap production-ready.
 
 ## Target Structure / Deliverables
 
-- `src/modules/exam-administration/`
-- `src/sections/exam-administration/`
-- `src/app/api/exam-administration/`
-- protected resource page(s)
-- Unit/application/infrastructure/UI tests
-- Contract mapping: local_examapi quiz composition functions only; feature unavailable marked BACKEND_BLOCKED
+- E2E suite, CI pipeline, release checklist/gate.
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis failing domain/use-case tests untuk happy path + validation + authorization.
-- [ ] Tulis failing repository contract tests untuk Moodle/Prisma mapping.
-- [ ] Tulis failing section/page behavior tests untuk loading/error/empty/permission state.
+- [ ] Tambahkan E2E/negative scenario yang gagal pada baseline yang belum tersertifikasi.
 
 ### GREEN
 
-- [ ] Implement minimum vertical slice dari domain hingga protected page.
-- [ ] Tidak boleh menunda section/API/page ke issue lain untuk feature ini.
+- [ ] Perbaiki hanya defect yang berada dalam scope release certification; defect besar harus menjadi issue baru.
 
 ### REFACTOR
 
-- [ ] Rapikan mapper/normalizer/query builder/components tanpa mengubah behavior.
-- [ ] Pastikan domain tetap bebas transport/framework detail.
+- [ ] Stabilkan fixtures/test utilities tanpa melemahkan assertions.
 
 ## Acceptance Criteria
 
-- [ ] Feature dapat digunakan end-to-end dari protected page → internal API → controller → use case → repository.
-- [ ] Semua empat boundary feature tersedia.
-- [ ] Authorization/tenant/ownership sesuai actor.
-- [ ] Moodle detail tidak bocor ke UI.
-- [ ] Tidak ada pekerjaan out-of-scope yang disisipkan.
+- [ ] Seluruh critical E2E lulus.
+- [ ] CI gate tidak dapat di-bypass diam-diam.
+- [ ] Backend-blocked capability tetap ditandai blocked, bukan dimock sebagai production success.
 
 ## Global Constraints
 

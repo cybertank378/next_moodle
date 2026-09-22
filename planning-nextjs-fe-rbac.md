@@ -172,9 +172,11 @@ Wajib dilakukan pada tiga lapis:
 Contoh:
 
 ```text
-Student membuka /student/exams/31/attempt/900
+Student membuka /dashboard/exams/31/attempt/900
   ↓
-(student)/layout.tsx → requireRole(STUDENT)
+(protected)/layout.tsx → requireAuthenticatedSession()
+  ↓
+page/resource guard → requirePermission(ATTEMPT_READ_OWN)
   ↓
 GET /api/attempts/900
   ↓
@@ -300,7 +302,7 @@ Biome/CI harus memiliki pemeriksaan yang mencegah barrel baru masuk ke repositor
 
 # 6. Standard Module Pattern
 
-Semua module mengikuti pola yang Anda gunakan.
+Semua module **WAJIB** mengikuti satu pola canonical. Struktur tidak boleh berubah per feature hanya karena implementasinya berbeda. Folder yang benar-benar tidak diperlukan boleh dihilangkan, tetapi layer dan dependency direction tidak boleh dilanggar.
 
 ```text
 src/modules/{feature}/
@@ -308,43 +310,41 @@ src/modules/{feature}/
 │   ├── services/
 │   │   └── {Feature}Service.ts
 │   └── usecases/
-│       ├── Get{Feature}UseCase.ts
 │       ├── Create{Feature}UseCase.ts
+│       ├── Delete{Feature}UseCase.ts
+│       ├── Get{Feature}ByIdUseCase.ts
+│       ├── GetAll{Feature}sUseCase.ts
+│       ├── Update{Feature}UseCase.ts
 │       └── ...
 │
 ├── domain/
 │   ├── builder/
 │   │   └── {Feature}QueryBuilder.ts
 │   ├── dto/
-│   │   ├── {Feature}RequestDTO.ts
-│   │   └── {Feature}ResponseDTO.ts
+│   │   ├── {Feature}RequestDto.ts
+│   │   └── {Feature}ResponseDto.ts
 │   ├── entity/
 │   │   └── {Feature}Entity.ts
 │   ├── interfaces/
-│   │   ├── {Feature}Interfaces.ts
-│   │   └── {Feature}RepositoryInterface.ts
+│   │   └── {Feature}Interfaces.ts
 │   ├── mapper/
 │   │   └── {Feature}Mapper.ts
+│   ├── normalizers/
+│   │   └── {Feature}Normalizer.ts
 │   ├── types/
-│   │   └── {Feature}Types.ts
-│   └── value-object/
-│       └── {Feature}ValueObject.ts
+│   │   └── {Feature}Metadata.ts
+│   └── validators/
+│       └── {Feature}Validator.ts
 │
 ├── infrastructure/
 │   ├── http/
 │   │   └── {Feature}Controller.ts
-│   ├── providers/
-│   │   └── {Feature}Provider.ts
 │   ├── repo/
 │   │   └── {Feature}Repository.ts
-│   ├── templates/
-│   │   └── ...
 │   └── validators/
-│       └── {feature}Validator.ts
+│       └── {feature}.validator.ts
 │
 ├── presentation/
-│   ├── helpers/
-│   │   └── ...
 │   └── hooks/
 │       └── use{Feature}Api.ts
 │
@@ -355,16 +355,114 @@ src/modules/{feature}/
     └── helpers/
 ```
 
-Folder opsional tidak perlu dibuat jika belum memiliki kebutuhan nyata.
+Folder tambahan seperti `providers/`, `templates/`, `helpers/`, atau `value-object/` hanya dibuat bila ada kebutuhan nyata pada module tersebut. Jangan membuat folder kosong sebagai placeholder.
 
-### Naming rules
+## 6.1 Interface ownership — mandatory
 
-- `entity`, bukan `entities`.
-- `repo`, bukan `repositories`.
-- dependency factory API ditempatkan pada `src/app/api/{feature}/_factory.ts`.
-- controller berada di `infrastructure/http`.
-- external Moodle response dimapping sebelum masuk ke application/domain.
-- nama `core_*`, `mod_quiz_*`, `local_examapi_*` tidak boleh bocor ke presentation/UI.
+**Seluruh port/interface yang dibutuhkan application service atau use case dimiliki oleh domain.**
+
+Satu module memakai satu contract file utama:
+
+```text
+domain/interfaces/{Feature}Interfaces.ts
+```
+
+File tersebut dapat mengekspor beberapa named interface yang masih merupakan kontrak domain module yang sama, misalnya:
+
+```ts
+export interface AccreditationRepository {
+  findById(id: string): Promise<AccreditationEntity | null>;
+  findAll(query: AccreditationQueryBuilder): Promise<readonly AccreditationEntity[]>;
+  create(entity: AccreditationEntity): Promise<AccreditationEntity>;
+  update(entity: AccreditationEntity): Promise<AccreditationEntity>;
+  delete(id: string): Promise<void>;
+}
+
+export interface AccreditationUnitOfWork {
+  transaction<T>(work: () => Promise<T>): Promise<T>;
+}
+```
+
+Aturan mutlak:
+
+- `application/usecases/*` **hanya mengimpor dan menggunakan** interface dari `domain/interfaces/{Feature}Interfaces.ts`;
+- use case **dilarang mendefinisikan interface lokal**;
+- `application/interfaces/` **dilarang**;
+- `infrastructure/interfaces/` **dilarang**;
+- `presentation/interfaces/` **dilarang**;
+- jangan membuat file `*RepositoryInterface.ts`, `*ProviderInterface.ts`, atau `*GatewayInterface.ts` terpisah bila kontraknya masih milik module yang sama;
+- concrete implementation berada di `infrastructure/repo`, `infrastructure/providers`, atau adapter infrastructure yang sesuai;
+- infrastructure mengimplementasikan contract domain, bukan sebaliknya;
+- domain tidak mengimpor infrastructure, Prisma, Next.js, React, atau Moodle REST client.
+
+Dependency direction:
+
+```text
+Application Service / Use Case
+             │
+             │ depends on
+             ▼
+ domain/interfaces/{Feature}Interfaces.ts
+             ▲
+             │ implements
+             │
+ Infrastructure Repository / Provider
+```
+
+Contoh use case:
+
+```ts
+import type { AccreditationRepository } from
+  "@/modules/accreditations/domain/interfaces/AccreditationInterfaces";
+
+export class GetAccreditationByIdUseCase {
+  constructor(
+    private readonly repository: AccreditationRepository,
+  ) {}
+}
+```
+
+Contoh implementation:
+
+```ts
+import type { AccreditationRepository } from
+  "@/modules/accreditations/domain/interfaces/AccreditationInterfaces";
+
+export class PrismaAccreditationRepository
+  implements AccreditationRepository {
+  // implementation
+}
+```
+
+## 6.2 Validator ownership
+
+`domain/validators/{Feature}Validator.ts` menangani:
+
+- domain invariant;
+- business rule;
+- valid state transition;
+- domain-level consistency.
+
+`infrastructure/validators/{feature}.validator.ts` menangani:
+
+- HTTP request payload;
+- query/path parameter;
+- transport schema;
+- external API input/output boundary.
+
+Business rule tidak boleh dipindahkan ke infrastructure validator.
+
+## 6.3 Naming rules
+
+- `entity`, bukan `entities`;
+- `repo`, bukan `repositories`;
+- DTO memakai suffix `Dto`, contoh `AccreditationRequestDto.ts`;
+- satu contract file module: `{Feature}Interfaces.ts`;
+- dependency factory API ditempatkan pada `src/app/api/{feature}/_factory.ts`;
+- controller berada di `infrastructure/http`;
+- external Moodle response dimapping/normalisasi sebelum masuk application/domain;
+- nama `core_*`, `mod_quiz_*`, `local_examapi_*` tidak boleh bocor ke presentation/UI;
+- tidak menggunakan barrel export.
 
 ---
 
@@ -427,107 +525,278 @@ Empty state:
 
 ---
 
-# 8. App Router — Separate Pages per Role
+# 8. App Router — Protected / Public Dashboard Structure
+
+Struktur page pada `src/app` **wajib** menggunakan dua route group utama:
 
 ```text
-src/app/
-├── layout.tsx
-├── page.tsx
-│
-├── (auth)/
-│   ├── layout.tsx
-│   ├── login/
-│   │   └── page.tsx
-│   ├── forgot-password/
-│   │   └── page.tsx
-│   └── reset-password/
-│       └── page.tsx
-│
-├── (admin)/
-│   └── admin/
-│       ├── layout.tsx
-│       ├── dashboard/
-│       │   └── page.tsx
-│       ├── tenants/
-│       │   ├── page.tsx
-│       │   └── [tenantId]/
-│       │       └── page.tsx
-│       ├── audit/
-│       │   └── page.tsx
-│       └── settings/
-│           └── page.tsx
-│
-├── (tenant)/
-│   └── tenant/
-│       ├── layout.tsx
-│       ├── dashboard/
-│       │   └── page.tsx
-│       ├── users/
-│       │   └── page.tsx
-│       ├── enrolments/
-│       │   └── page.tsx
-│       ├── groups/
-│       │   └── page.tsx
-│       ├── courses/
-│       │   ├── page.tsx
-│       │   └── [courseId]/
-│       │       └── page.tsx
-│       ├── questions/
-│       │   └── page.tsx
-│       ├── exams/
-│       │   ├── page.tsx
-│       │   └── [quizId]/
-│       │       ├── page.tsx
-│       │       └── monitor/
-│       │           └── page.tsx
-│       ├── results/
-│       │   └── page.tsx
-│       ├── branding/
-│       │   └── page.tsx
-│       └── audit/
-│           └── page.tsx
-│
-├── (student)/
-│   └── student/
-│       ├── layout.tsx
-│       ├── dashboard/
-│       │   └── page.tsx
-│       ├── courses/
-│       │   ├── page.tsx
-│       │   └── [courseId]/
-│       │       └── page.tsx
-│       ├── exams/
-│       │   ├── page.tsx
-│       │   └── [quizId]/
-│       │       ├── page.tsx
-│       │       └── attempt/
-│       │           └── [attemptId]/
-│       │               └── page.tsx
-│       └── results/
-│           ├── page.tsx
-│           └── [quizId]/
-│               └── page.tsx
-│
-└── api/
-    └── ...
+(protected)
+(public)
 ```
 
-### Layout guard
+Project **tidak** membuat root route berdasarkan role seperti `(admin)`, `(tenant)`, atau `(student)`. Semua user yang sudah terautentikasi masuk melalui `/dashboard`, sedangkan role dan permission menentukan dashboard component, menu, action, serta resource yang boleh diakses.
+
+## 8.1 Canonical `src/app` page structure
+
+Struktur halaman wajib mengikuti pola berikut:
 
 ```text
-(admin)/admin/layout.tsx
-  → requireRole(ADMIN)
-
-(tenant)/tenant/layout.tsx
-  → requireRole(TENANT)
-  → require tenantId
-
-(student)/student/layout.tsx
-  → requireRole(STUDENT)
-  → require tenantId
+├── src
+│   ├── app
+│   │   ├── (protected)
+│   │   │   ├── dashboard
+│   │   │   │   ├── component
+│   │   │   │   │   ├── AdminDashboard.tsx
+│   │   │   │   │   ├── TenantDashboard.tsx
+│   │   │   │   │   └── StudentDashboard.tsx
+│   │   │   │   │
+│   │   │   │   ├── tenants
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   ├── edit
+│   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── create
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── users
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   ├── edit
+│   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── create
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── enrolments
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   ├── edit
+│   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── create
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── groups
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   ├── edit
+│   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── create
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── courses
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── questions
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   ├── edit
+│   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── create
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── exams
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   ├── edit
+│   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   ├── monitor
+│   │   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   │   ├── attempt
+│   │   │   │   │   │   │   └── [attemptId]
+│   │   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── create
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── results
+│   │   │   │   │   ├── [id]
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   │
+│   │   │   │   ├── branding
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── audit
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── settings
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx
+│   │   │
+│   │   ├── (public)
+│   │   │   ├── change-password
+│   │   │   │   └── page.tsx
+│   │   │   ├── forgot-password
+│   │   │   │   └── page.tsx
+│   │   │   ├── login
+│   │   │   │   └── page.tsx
+│   │   │   ├── register
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx
+│   │   │
+│   │   ├── favicon.ico
+│   │   ├── layout.tsx
+│   │   └── page.tsx
 ```
 
-Role mismatch harus diarahkan ke halaman aman (`/login` atau role home yang sesuai), namun API tetap wajib mengembalikan `403` untuk request yang tidak authorized.
+`src/app/api/*` tetap digunakan untuk BFF/API Route Handler, tetapi merupakan **technical route tree**, bukan bagian dari page hierarchy di atas. Struktur API dibahas terpisah pada Bagian 9.
+
+## 8.2 Protected layout
+
+`src/app/(protected)/layout.tsx` adalah authentication boundary global untuk seluruh halaman dashboard:
+
+```text
+(protected)/layout.tsx
+  → resolveCurrentActor()
+  → requireAuthenticatedSession()
+  → TENANT/STUDENT wajib memiliki tenantId
+  → render protected application shell
+```
+
+Aturan:
+
+- layout ini hanya memastikan user sudah authenticated;
+- layout tidak memberikan akses otomatis ke seluruh `/dashboard/*`;
+- permission spesifik resource tetap diperiksa pada page/server boundary;
+- API/controller mengulangi authorization secara server-side;
+- application/domain tetap melakukan tenant isolation dan ownership check.
+
+## 8.3 Dashboard composition
+
+`src/app/(protected)/dashboard/page.tsx` hanya melakukan route-level composition berdasarkan actor yang sudah tervalidasi.
+
+```text
+ADMIN   → AdminDashboard.tsx
+TENANT  → TenantDashboard.tsx
+STUDENT → StudentDashboard.tsx
+```
+
+Contoh:
+
+```tsx
+const actor = await resolveCurrentActor();
+
+switch (actor.role) {
+  case AppRole.ADMIN:
+    return <AdminDashboard />;
+
+  case AppRole.TENANT:
+    return <TenantDashboard />;
+
+  case AppRole.STUDENT:
+    return <StudentDashboard />;
+}
+```
+
+`dashboard/component/*` adalah route-level composition component. Component tersebut:
+
+- boleh meng-compose `sections/*`;
+- tidak boleh memanggil Moodle langsung;
+- tidak boleh menyimpan business rule;
+- tidak boleh menggantikan authorization di API/application layer.
+
+## 8.4 Resource page authorization
+
+Path `/dashboard/*` bukan role boundary. **Permission + tenant scope + ownership** adalah authorization boundary.
+
+Contoh:
+
+```text
+/dashboard/tenants
+  → requirePermission(TENANT_READ)
+  → normalnya hanya ADMIN yang lolos
+
+/dashboard/users
+  → requirePermission(USER_READ)
+  → tenant scope berasal dari actor/session
+
+/dashboard/courses/10
+  → TENANT: course harus berasal dari tenant yang sama
+  → STUDENT: course harus enrolled/accessible untuk student tersebut
+
+/dashboard/questions/21/edit
+  → requirePermission(QUESTION_UPDATE)
+  → tenant isolation wajib divalidasi
+
+/dashboard/exams/31/monitor
+  → requirePermission(EXAM_MONITOR_READ)
+
+/dashboard/exams/31/attempt/900
+  → requirePermission(ATTEMPT_READ_OWN)
+  → assertAttemptOwnership(actor, attempt)
+
+/dashboard/results/31
+  → TENANT: requirePermission(GRADE_READ)
+  → STUDENT: requirePermission(GRADE_READ_OWN)
+  → Moodle review/result policy tetap authoritative
+```
+
+## 8.5 Page responsibility
+
+Setiap `page.tsx` harus tipis.
+
+`page.tsx` hanya boleh:
+
+1. resolve actor/session bila diperlukan;
+2. menjalankan permission guard page;
+3. membaca route params/search params;
+4. compose `sections/{feature}/pages/*`;
+5. melakukan redirect aman bila unauthorized.
+
+`page.tsx` tidak boleh:
+
+- memanggil Moodle REST langsung;
+- mengakses Prisma langsung;
+- mengandung repository implementation;
+- mengandung domain/business logic;
+- mendefinisikan interface module;
+- melakukan mutation langsung;
+- menggantikan controller/use case.
+
+Contoh yang benar:
+
+```tsx
+import QuestionEditPageSection from
+  "@/sections/questions/pages/QuestionEditPageSection";
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const actor = await requirePermission(Permission.QUESTION_UPDATE);
+  const { id } = await params;
+
+  return (
+    <QuestionEditPageSection
+      actor={actor}
+      questionId={id}
+    />
+  );
+}
+```
+
+## 8.6 Mandatory route rules
+
+- tidak membuat `(admin)`, `(tenant)`, atau `(student)` route group;
+- tidak membuat `/admin/*`, `/tenant/*`, atau `/student/*` sebagai root authenticated route;
+- semua authenticated page berada di `(protected)/dashboard/*`;
+- public authentication page berada di `(public)/*`;
+- role tidak ditentukan dari pathname;
+- sidebar/menu boleh permission-aware tetapi tidak menjadi authorization mechanism;
+- dynamic resource mengikuti `[id]/page.tsx`;
+- create page mengikuti `create/page.tsx`;
+- edit page mengikuti `[id]/edit/page.tsx`;
+- feature-specific nested operation hanya dibuat bila punya route semantics nyata, contoh `[id]/monitor/page.tsx`;
+- folder route kosong tidak boleh dibuat;
+- `page.tsx` tidak boleh menjadi tempat business logic;
+- unauthorized UI diarahkan ke `/dashboard` atau safe page;
+- unauthorized API tetap mengembalikan `401/403` sesuai kondisi.
 
 ---
 
@@ -719,6 +988,8 @@ Tidak ada `index.ts` pada folder di atas.
 
 ## 11.1 `auth`
 
+`auth` tetap mengikuti Standard Module Pattern. Semua kontrak dependency authentication berada di `domain/interfaces` dan digunakan oleh use case/application service.
+
 ```text
 src/modules/auth/
 ├── application/
@@ -738,14 +1009,15 @@ src/modules/auth/
 │   ├── builder/
 │   │   └── AuthQueryBuilder.ts
 │   ├── dto/
-│   │   ├── AuthRequestDTO.ts
-│   │   └── AuthResponseDTO.ts
+│   │   ├── AuthRequestDto.ts
+│   │   └── AuthResponseDto.ts
 │   ├── entity/
 │   │   ├── AuthEntity.ts
 │   │   ├── AuthPayloadEntity.ts
 │   │   ├── AuthSessionEntity.ts
 │   │   └── RefreshTokenEntity.ts
 │   ├── interfaces/
+│   │   ├── AuthInterfaces.ts
 │   │   ├── AuthInterfaces.ts
 │   │   ├── AuthUnitOfWorkInterface.ts
 │   │   ├── CookieManagerInterface.ts
@@ -755,8 +1027,12 @@ src/modules/auth/
 │   │   └── TokenProviderInterface.ts
 │   ├── mapper/
 │   │   └── AuthMapper.ts
+│   ├── normalizers/
+│   │   └── AuthNormalizer.ts
 │   ├── types/
-│   │   └── AuthJwtPayload.ts
+│   │   └── AuthMetadata.ts
+│   ├── validators/
+│   │   └── AuthValidator.ts
 │   └── value-object/
 │       └── RefreshToken.ts
 ├── infrastructure/
@@ -766,7 +1042,7 @@ src/modules/auth/
 │   │   ├── Argon2PasswordHasher.ts
 │   │   ├── CookieManager.ts
 │   │   ├── JoseTokenProvider.ts
-│   │   └── MailProviders.ts
+│   │   └── MailProvider.ts
 │   ├── repo/
 │   │   ├── AuthRepository.ts
 │   │   └── AuthUnitOfWork.ts
@@ -775,7 +1051,7 @@ src/modules/auth/
 │   │   ├── resetPasswordTemplate.ts
 │   │   └── verificationTemplate.ts
 │   └── validators/
-│       └── authValidator.ts
+│       └── auth.validator.ts
 └── presentation/
     ├── helpers/
     │   └── getCurrentSessions.ts
@@ -783,38 +1059,59 @@ src/modules/auth/
         └── useAuthApi.ts
 ```
 
-Untuk Exam SaaS, repository login tenant/student mengadaptasi Moodle `/login/token.php` + `core_webservice_get_site_info`. Bila platform `ADMIN` menggunakan auth terpisah dari Moodle, implementasinya tetap berada di port/repo auth yang sama dan dibedakan melalui actor strategy; credential Moodle tidak boleh dibocorkan ke browser.
+Untuk Exam SaaS, repository login tenant/student mengadaptasi Moodle `/login/token.php` + `core_webservice_get_site_info`. Bila platform `ADMIN` menggunakan auth terpisah dari Moodle, implementasi concrete tetap berada pada infrastructure dan harus memenuhi interface domain. Credential Moodle tidak boleh dibocorkan ke browser.
 
 ## 11.2 `tenant`
 
 ```text
 src/modules/tenant/
 ├── application/
-│   ├── services/TenantService.ts
+│   ├── services/
+│   │   └── TenantService.ts
 │   └── usecases/
-│       ├── GetTenantsUseCase.ts
-│       ├── GetTenantUseCase.ts
 │       ├── CreateTenantUseCase.ts
-│       ├── UpdateTenantUseCase.ts
+│       ├── GetTenantByIdUseCase.ts
+│       ├── GetAllTenantsUseCase.ts
+│       ├── TestMoodleConnectionUseCase.ts
 │       ├── UpdateTenantStatusUseCase.ts
-│       └── TestMoodleConnectionUseCase.ts
+│       └── UpdateTenantUseCase.ts
 ├── domain/
-│   ├── builder/TenantQueryBuilder.ts
-│   ├── dto/TenantRequestDTO.ts
-│   ├── dto/TenantResponseDTO.ts
-│   ├── entity/TenantEntity.ts
-│   ├── interfaces/TenantRepositoryInterface.ts
-│   ├── mapper/TenantMapper.ts
-│   ├── types/TenantTypes.ts
-│   └── value-object/TenantSlug.ts
+│   ├── builder/
+│   │   └── TenantQueryBuilder.ts
+│   ├── dto/
+│   │   ├── TenantRequestDto.ts
+│   │   └── TenantResponseDto.ts
+│   ├── entity/
+│   │   └── TenantEntity.ts
+│   ├── interfaces/
+│   │   ├── TenantInterfaces.ts
+│   │   ├── TenantCredentialProviderInterface.ts
+│   │   └── TenantInterfaces.ts
+│   ├── mapper/
+│   │   └── TenantMapper.ts
+│   ├── normalizers/
+│   │   └── TenantNormalizer.ts
+│   ├── types/
+│   │   └── TenantMetadata.ts
+│   ├── validators/
+│   │   └── TenantValidator.ts
+│   └── value-object/
+│       └── TenantSlug.ts
 ├── infrastructure/
-│   ├── http/TenantController.ts
-│   ├── providers/EncryptedTenantCredentialProvider.ts
-│   ├── repo/TenantRepository.ts
-│   └── validators/tenantValidator.ts
+│   ├── http/
+│   │   └── TenantController.ts
+│   ├── providers/
+│   │   └── EncryptedTenantCredentialProvider.ts
+│   ├── repo/
+│   │   └── TenantRepository.ts
+│   └── validators/
+│       └── tenant.validator.ts
 └── presentation/
-    └── hooks/useTenantApi.ts
+    └── hooks/
+        └── useTenantApi.ts
 ```
+
+`EncryptedTenantCredentialProvider` adalah implementasi dari `TenantCredentialProviderInterface` yang kontraknya dimiliki domain.
 
 ## 11.3 `courses`
 
@@ -869,7 +1166,7 @@ GetQuizAttemptReviewUseCase
 Moodle:
 
 ```text
-mod_quiz_get_user_quiz_attempts
+mod_quiz_get_user_attempts
 mod_quiz_get_attempt_access_information
 mod_quiz_start_attempt
 mod_quiz_get_attempt_data
@@ -897,7 +1194,7 @@ exam-administration
 exam-monitor
 ```
 
-Semua module tetap memakai standard module pattern pada Bagian 6.
+Semua module tetap memakai **Standard Module Pattern pada Bagian 6 tanpa variasi struktur sendiri**. Jika sebuah module memerlukan repository, provider, gateway, unit-of-work, credential store, notifier, atau abstraction eksternal lain, interface-nya wajib dibuat di `domain/interfaces` lalu di-inject ke application service/use case. Infrastructure hanya menyediakan concrete implementation.
 
 ---
 
@@ -1082,21 +1379,26 @@ Never expose Moodle stack trace, raw Moodle exception, token, secret, or interna
 
 ---
 
-# 16. UI Role Separation
+# 16. Protected UI Composition & Permission-Aware Sections
 
-## Admin sections
+Route tree tidak dipisahkan per role. UI di bawah `/dashboard/*` disusun berdasarkan resource/feature, sementara dashboard utama memiliki role-specific composition component.
+
+## Dashboard composition
 
 ```text
-src/sections/admin-dashboard/
-src/sections/tenant-management/
-src/sections/platform-audit/
-src/sections/platform-settings/
+src/app/(protected)/dashboard/component/
+├── AdminDashboard.tsx
+├── TenantDashboard.tsx
+└── StudentDashboard.tsx
 ```
 
-## Tenant sections
+Ketiga component di atas hanya melakukan composition. Data fetching client-side tetap melalui `modules/*/presentation/hooks`, sedangkan server authorization dilakukan sebelum resource page dirender.
+
+## Resource sections
 
 ```text
-src/sections/tenant-dashboard/
+src/sections/dashboard/
+src/sections/tenant-management/
 src/sections/users/
 src/sections/enrolments/
 src/sections/groups/
@@ -1104,22 +1406,21 @@ src/sections/courses/
 src/sections/questions/
 src/sections/exam-administration/
 src/sections/exam-monitor/
+src/sections/quiz-attempts/
 src/sections/grades/
 src/sections/tenant-branding/
-src/sections/tenant-audit/
+src/sections/audit/
+src/sections/settings/
 ```
 
-## Student sections
+Aturan:
 
-```text
-src/sections/student-dashboard/
-src/sections/student-courses/
-src/sections/student-exams/
-src/sections/quiz-attempts/
-src/sections/student-results/
-```
-
-Komponen yang benar-benar generik tetap berada di `shared-ui`, bukan dipindahkan antar role section.
+- section dinamai berdasarkan feature/resource, bukan role, kecuali memang UI tersebut benar-benar eksklusif dan berbeda secara domain;
+- component generic tetap berada di `shared-ui`;
+- atoms dan molecules tidak memanggil API;
+- organism boleh menggunakan presentation hook;
+- permission-aware rendering hanya untuk UX, bukan pengganti server authorization;
+- resource yang sama dapat dipakai beberapa role dengan policy berbeda tanpa menggandakan route tree.
 
 ---
 
@@ -1210,49 +1511,83 @@ Tidak ada module lain yang melakukan `fetch()` langsung ke Moodle.
 
 ---
 
-# 20. Custom Moodle API Boundary
+# 20. Custom Moodle API Boundary — `local_examapi`
 
-Custom plugin tetap terpisah:
+Kontrak custom Moodle berasal dari repository `cybertank378/moodle_mod/local_examapi`. Agent tidak boleh mengarang nama Web Service berdasarkan planning lama.
 
-```text
-local_examapi/
-```
-
-Question bank:
+Urutan authority:
 
 ```text
-local_exam_get_question_bank
-local_exam_create_question
-local_exam_update_question
-local_exam_delete_question
-local_exam_import_questions
+local_examapi/db/services.php
+  ↓
+local_examapi/classes/external/*
+  ↓
+local_examapi/api-manifest.json
+  ↓
+planning/documentation
 ```
 
-Exam administration:
+Jika planning bertentangan dengan function yang benar-benar diregistrasikan, **registered implementation menang** dan feature ditandai `BACKEND_BLOCKED` bila kontraknya belum tersedia.
+
+Question bank yang saat ini terdaftar:
 
 ```text
-local_exam_create_quiz
-local_exam_update_quiz
-local_exam_delete_quiz
-local_exam_duplicate_quiz
-local_exam_add_question_to_quiz
-local_exam_remove_question_from_quiz
-local_exam_reorder_quiz_questions
-local_exam_add_random_questions
+local_examapi_get_question_categories
+local_examapi_create_question_category
+local_examapi_update_question_category
+local_examapi_delete_question_category
+local_examapi_get_questions
+local_examapi_get_question
+local_examapi_create_question
+local_examapi_update_question
+local_examapi_delete_question
+local_examapi_move_question
+local_examapi_duplicate_question
+local_examapi_import_questions
 ```
 
-Exam monitor:
+Quiz composition yang saat ini terdaftar:
 
 ```text
-local_exam_get_exam_monitor
-local_exam_get_active_attempts
-local_exam_force_finish_attempt
-local_exam_reset_attempt
-local_exam_extend_attempt_time
-local_exam_force_logout_user
+local_examapi_get_quiz_questions
+local_examapi_add_question_to_quiz
+local_examapi_remove_question_from_quiz
+local_examapi_reorder_quiz_questions
+local_examapi_add_random_questions
 ```
 
-Nama fungsi Moodle hanya muncul di infrastructure adapter.
+Exam monitor/proctor yang saat ini terdaftar:
+
+```text
+local_examapi_get_exam_monitor
+local_examapi_lock_attempt
+local_examapi_unlock_attempt
+local_examapi_force_finish_attempt
+local_examapi_extend_attempt_time
+local_examapi_get_exam_results
+local_examapi_get_exam_statistics
+```
+
+Integration/introspection:
+
+```text
+local_examapi_get_health
+local_examapi_get_api_version
+local_examapi_get_capabilities
+local_examapi_get_audit_logs
+local_examapi_get_student_exam_result
+```
+
+Feature berikut **tidak boleh dianggap tersedia** sebelum muncul di `db/services.php` dan memiliki implementation production-ready:
+
+```text
+create/update/delete/duplicate quiz lifecycle penuh
+reset attempt
+force logout user
+incident evidence CRUD
+```
+
+Nama function Moodle hanya boleh muncul di infrastructure adapter. Domain, application, presentation, sections, dan App Router tidak mengenal string `core_*`, `mod_quiz_*`, atau `local_examapi_*`.
 
 ---
 
@@ -1320,12 +1655,12 @@ Implementasi tidak dilakukan secara acak.
 ```text
 01 Bootstrap & Architecture Guardrails
 02 Core Foundation
-03 RBAC & Role Route Separation
+03 RBAC & Public/Protected Route Boundary
 04 Tenant SaaS Database & Tenant Module
 05 Moodle REST Adapter & Credential Security
 06 Authentication, Session & Actor Resolution
-07 Admin Portal — Tenant Management
-08 Tenant Portal Foundation & Dashboard
+07 Admin Capability — Tenant Management
+08 Protected Dashboard Foundation & Tenant Experience
 09 Courses
 10 Quizzes & Access
 11 Quiz Attempts Core
@@ -1350,7 +1685,9 @@ Feature hanya selesai jika:
 
 - domain contract tersedia;
 - use case tersedia;
-- repository/interface tersedia;
+- seluruh repository/provider/gateway contract yang dipakai use case tersedia di satu file `domain/interfaces/{Feature}Interfaces.ts`;
+- use case hanya bergantung pada domain interface, bukan concrete infrastructure;
+- tidak ada interface dependency business/application di `application`, `infrastructure`, `presentation`, `sections`, atau `app`;
 - controller tersedia;
 - infrastructure adapter tersedia;
 - mapper tersedia bila ada external response;
@@ -1387,6 +1724,7 @@ Feature hanya selesai jika:
 - tidak membuat WebSocket sebelum kebutuhan monitoring membuktikannya;
 - tidak membuat abstraction kosong;
 - tidak menggunakan barrel exports.
+- tidak membuat root route `/admin/*`, `/tenant/*`, atau `/student/*`; seluruh authenticated UX berada di `/dashboard/*` dengan permission guard.
 
 ---
 
@@ -1395,11 +1733,11 @@ Feature hanya selesai jika:
 ```text
 ┌──────────────────────────────────────────────┐
 │ Browser                                      │
-│ /admin/*  /tenant/*  /student/*             │
+│ /(public)/*  /dashboard/*                    │
 └──────────────────────┬───────────────────────┘
                        ↓
 ┌──────────────────────────────────────────────┐
-│ Role Layout Guard + Sections                 │
+│ Protected Layout + Permission Guards         │
 │ Atom → Molecule → Organism → Page            │
 └──────────────────────┬───────────────────────┘
                        ↓

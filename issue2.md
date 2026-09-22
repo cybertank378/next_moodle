@@ -2,188 +2,86 @@
 
 ## Nama Issue
 
-**Core Foundation: Result, Error, HTTP, Logger, Request Context, Actor & Tenant Context**
+`core-foundation`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun primitive lintas module yang menjadi kontrak bersama untuk error handling, API response, logging, request ID, current actor, session, dan tenant context.
+Menyediakan primitive lintas-feature yang stabil: Result/error, HTTP response envelope, request ID, logger redaction, actor/session contracts, pagination primitive, dan base utilities tanpa memasuki feature bisnis.
 
 ## Dependency
 
-- [x] Issue 01 selesai.
+Issue 01 selesai.
 
 ## Scope Pengerjaan
 
-- `BaseEntity`, `BaseService`, `Result`.
-- Error hierarchy aplikasi.
-- Standard success/error response.
-- `withApiHandler` atau wrapper API setara.
-- Request ID generation/propagation.
-- Structured logger dengan redaction hook.
-- `CurrentActor` contract.
-- `Session` contract.
-- `TenantContext` contract.
-- Unit test core foundation.
+- [ ] Implement `src/core/base/*` yang benar-benar digunakan.
+- [ ] Implement standard `ApiResponse`, `ApiErrorResponse`, `withApiHandler`.
+- [ ] Implement request/correlation ID.
+- [ ] Implement logger dengan secret redaction.
+- [ ] Implement `CurrentActor` dan session contracts tingkat core.
+- [ ] Implement common pagination types/helpers.
+- [ ] Unit test setiap primitive dan error mapping generik.
 
 ## Out of Scope
 
-- Role-permission map RBAC.
-- Auth login/logout sebenarnya.
-- Tenant database repository.
-- Moodle REST client.
+- RBAC permission map.
+- Moodle REST transport.
+- Feature module.
 
-## Target Struktur / Deliverables
+## Target Structure / Deliverables
 
-```text
-src/core/
-├── base/
-│   ├── BaseEntity.ts
-│   ├── BaseService.ts
-│   └── Result.ts
-├── errors/
-│   ├── AppError.ts
-│   ├── DomainError.ts
-│   ├── ForbiddenError.ts
-│   ├── InfrastructureError.ts
-│   ├── MoodleError.ts
-│   ├── NotFoundError.ts
-│   ├── UnauthorizedError.ts
-│   └── ValidationError.ts
-├── http/
-│   ├── ApiErrorResponse.ts
-│   ├── ApiResponse.ts
-│   ├── HttpStatus.ts
-│   └── withApiHandler.ts
-├── logger/
-│   ├── Logger.ts
-│   └── createLogger.ts
-├── security/
-│   └── RequestId.ts
-├── auth/
-│   ├── CurrentActor.ts
-│   └── Session.ts
-└── tenant/
-    └── TenantContext.ts
-```
-
-## Task Checklist
-
-### Base Contracts
-
-- [x] Implement `Result.success`.
-- [x] Implement `Result.failure`.
-- [x] Pastikan Result tidak bergantung pada Next.js/React.
-- [x] Implement base entity hanya jika ada behavior yang digunakan nyata.
-- [x] Implement base service tanpa membuat dependency ke feature tertentu.
-
-### Error Model
-
-- [x] Buat `AppError` sebagai error aplikasi terstruktur.
-- [x] Buat error unauthorized.
-- [x] Buat error forbidden.
-- [x] Buat error not found.
-- [x] Buat error validation.
-- [x] Buat error infrastructure.
-- [x] Buat error Moodle generic tanpa membocorkan payload rahasia.
-- [x] Tentukan stable error code untuk response client.
-
-### HTTP Contract
-
-- [x] Definisikan standard success response.
-- [x] Definisikan standard error response.
-- [x] Implement `withApiHandler`.
-- [x] Map known application error ke HTTP status yang benar.
-- [x] Map unknown error menjadi response aman.
-- [x] Jangan kirim stack trace ke client.
-
-### Request & Logging
-
-- [x] Implement request ID generator.
-- [x] Support propagation request ID yang valid.
-- [x] Masukkan request ID pada structured log.
-- [x] Siapkan redaction untuk key sensitif (`token`, `password`, `authorization`, `cookie`, `secret`).
-
-### Actor & Tenant Context
-
-- [x] Definisikan `CurrentActor` contract dasar.
-- [x] Definisikan `Session` contract dasar.
-- [x] Definisikan `TenantContext` contract.
-- [x] Validasi context agar nilai invalid tidak diteruskan ke feature layer.
-
-### Tests
-
-- [x] Test Result success.
-- [x] Test Result failure.
-- [x] Test known error mapping.
-- [x] Test unknown error redaction.
-- [x] Test request ID generation.
-- [x] Test request ID propagation.
-- [x] Test logger redaction.
-- [x] Test actor contract validation.
-- [x] Test tenant context validation.
+- `src/core/base/*`
+- `src/core/errors/*`
+- `src/core/http/*`
+- `src/core/logger/*`
+- common actor/session/pagination contracts.
 
 ## TDD Workflow
 
 ### RED
 
-- [x] Buat test untuk setiap behavior core sebelum implementasi.
-- [x] Pastikan test error mapping dan secret redaction gagal terlebih dahulu.
+- [ ] Test response envelope, logger redaction, request ID, Result/error behavior harus gagal lebih dahulu.
 
 ### GREEN
 
-- [x] Implement minimum code sampai seluruh core tests lulus.
+- [ ] Implement primitive minimum sampai test hijau.
 
 ### REFACTOR
 
-- [x] Hapus duplikasi error mapping.
-- [x] Pastikan `core` tidak mengimpor `modules/*` atau `sections/*`.
-- [x] Pastikan naming konsisten dan tidak membuat barrel.
+- [ ] Hilangkan duplikasi dan pertahankan API core kecil/stabil.
 
 ## Acceptance Criteria
 
-- [x] Semua API feature berikutnya dapat memakai satu response contract.
-- [x] Stack trace/unknown exception tidak bocor ke browser.
-- [x] Request ID tersedia untuk log/audit.
-- [x] Logger dapat meredaksi secret.
-- [x] Actor dan tenant context memiliki contract yang jelas.
-- [x] `core` tidak bergantung pada feature module.
-
-## Definition of Done (DoD)
-
-- [x] Semua core contract yang masuk scope tersedia.
-- [x] Unit tests mencakup success dan failure path.
-- [x] Unknown error menghasilkan response aman.
-- [x] Secret redaction terbukti melalui test.
-- [x] Tidak ada import dependency terbalik dari core ke feature.
-- [x] `npm run typecheck` lulus.
-- [x] `npm run lint` lulus.
-- [x] `npm run test` lulus.
-- [x] `npm run build` lulus.
-- [x] Tidak ada barrel export.
+- [ ] Tidak ada dependency feature ke concrete infrastructure.
+- [ ] Logger tidak mem-print token/password.
+- [ ] API error envelope konsisten.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [x] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [x] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [x] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [x] Tidak ada direct call **browser → Moodle**.
-- [x] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [x] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [x] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [x] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [x] Authorization tidak mengandalkan UI hiding.
-- [x] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [x] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [x] External Moodle response dimapping sebelum masuk ke application/domain.
-- [x] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [x] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [x] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -192,4 +90,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

@@ -1,89 +1,56 @@
-# Issue 16 — Exam Administration Vertical Slice
+# Issue 21 — Performance & Resilience
 
 ## Nama Issue
 
-`exam-administration`
+`performance-resilience`
 
 ## Bounded Engineering Objective
 
-Mengelola komposisi exam/quiz yang didukung backend tanpa mengarang full quiz lifecycle endpoint.
+Meningkatkan performa dan ketahanan tanpa mengubah source-of-truth: bounded parallelism, pagination, N+1 prevention, safe cache, timeout/retry policy, dan observability.
 
 ## Dependency
 
-Issue 15 selesai.
-
-## Mandatory Vertical Slice Paths
-
-Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
-
-```text
-src/modules/exam-administration/
-src/sections/exam-administration/
-src/app/api/exam-administration/
-src/app/(protected)/dashboard/exams/
-src/app/(protected)/dashboard/exams/create/
-src/app/(protected)/dashboard/exams/[id]/
-src/app/(protected)/dashboard/exams/[id]/edit/
-```
-
-Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
+Issue 20 selesai.
 
 ## Scope Pengerjaan
 
-- [ ] Buat canonical module structure lengkap.
-- [ ] Semua port di satu `domain/interfaces/ExamAdministrationInterfaces.ts`.
-- [ ] Implement `GetExamQuestionsUseCase` beserta tests.
-- [ ] Implement `AddQuestionToExamUseCase` beserta tests.
-- [ ] Implement `RemoveQuestionFromExamUseCase` beserta tests.
-- [ ] Implement `ReorderExamQuestionsUseCase` beserta tests.
-- [ ] Implement `AddRandomQuestionsUseCase` beserta tests.
-- [ ] Implement infrastructure repository/provider/mapper/normalizer yang diperlukan.
-- [ ] Implement controller dan API factory/routes.
-- [ ] Implement presentation hook.
-- [ ] Implement Atomic UI `atoms/molecules/organisms/pages` sesuai kebutuhan nyata.
-- [ ] Implement protected page guard + composition.
-- [ ] Tambahkan loading/error/empty state dan pagination jika list scalable.
-- [ ] Tambahkan authorization + tenant/ownership tests.
-- [ ] Verifikasi backend contract sebelum menggunakan Moodle function.
+- [ ] Audit Moodle N+1 dan query fan-out.
+- [ ] Enforce server-side pagination pada list besar.
+- [ ] Bounded parallel reads bila benar-benar diperlukan.
+- [ ] Cache hanya metadata/read-safe data, tidak authoritative attempt/answer/grade state.
+- [ ] Timeout budgets per operation class.
+- [ ] Retry hanya safe/idempotent operation.
+- [ ] Request/correlation tracing dan metrics dasar.
+- [ ] Regression tests untuk timeout, retry, stale cache, pagination bounds.
 
 ## Out of Scope
 
-- Create/update/delete/duplicate quiz lifecycle bila belum terdaftar production-ready.
+- Mengubah semantics feature.
+- Membuat mirror database Moodle.
 
 ## Target Structure / Deliverables
 
-- `src/modules/exam-administration/`
-- `src/sections/exam-administration/`
-- `src/app/api/exam-administration/`
-- protected resource page(s)
-- Unit/application/infrastructure/UI tests
-- Contract mapping: local_examapi quiz composition functions only; feature unavailable marked BACKEND_BLOCKED
+- Performance/resilience policy dan tests.
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis failing domain/use-case tests untuk happy path + validation + authorization.
-- [ ] Tulis failing repository contract tests untuk Moodle/Prisma mapping.
-- [ ] Tulis failing section/page behavior tests untuk loading/error/empty/permission state.
+- [ ] Benchmark/regression test menunjukkan masalah atau expected budget terlebih dahulu.
 
 ### GREEN
 
-- [ ] Implement minimum vertical slice dari domain hingga protected page.
-- [ ] Tidak boleh menunda section/API/page ke issue lain untuk feature ini.
+- [ ] Implement optimisasi minimum.
 
 ### REFACTOR
 
-- [ ] Rapikan mapper/normalizer/query builder/components tanpa mengubah behavior.
-- [ ] Pastikan domain tetap bebas transport/framework detail.
+- [ ] Refactor tanpa mengorbankan readability dan correctness.
 
 ## Acceptance Criteria
 
-- [ ] Feature dapat digunakan end-to-end dari protected page → internal API → controller → use case → repository.
-- [ ] Semua empat boundary feature tersedia.
-- [ ] Authorization/tenant/ownership sesuai actor.
-- [ ] Moodle detail tidak bocor ke UI.
-- [ ] Tidak ada pekerjaan out-of-scope yang disisipkan.
+- [ ] Tidak ada unsafe mutation retry.
+- [ ] Tidak ada attempt/grade authoritative cache.
+- [ ] Monitoring tidak melakukan N+1 per peserta.
 
 ## Global Constraints
 

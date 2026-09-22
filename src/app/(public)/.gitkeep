@@ -1,0 +1,7 @@
+# Bootstrap placeholder — public route group
+#
+# This directory is the foundation boundary for unauthenticated pages
+# established in Issue 01 (Bootstrap & Architecture Guardrails).
+#
+# Public pages (login, forgot-password, etc.) live under this group.
+# Auth layout is implemented in Issue 06.

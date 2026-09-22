@@ -1,6 +1,9 @@
 import type { PrismaClient } from "@prisma/client";
 import { Tenant, type TenantDomainStatus } from "../domain/Tenant";
-import type { TenantRepository } from "../domain/TenantRepository";
+import type {
+  TenantFindAllOptions,
+  TenantRepository,
+} from "../domain/TenantRepository";
 
 type PrismaTenantWithRelations = {
   id: string;
@@ -75,6 +78,25 @@ export class PrismaTenantRepository implements TenantRepository {
     });
   }
 
+  private buildWhereClause(filter?: TenantFindAllOptions["filter"]) {
+    if (!filter) return undefined;
+
+    const where: Record<string, unknown> = {};
+
+    if (filter.status) {
+      where.status = filter.status;
+    }
+
+    if (filter.search) {
+      where.OR = [
+        { name: { contains: filter.search, mode: "insensitive" } },
+        { slug: { contains: filter.search, mode: "insensitive" } },
+      ];
+    }
+
+    return Object.keys(where).length > 0 ? where : undefined;
+  }
+
   async findById(id: string): Promise<Tenant | null> {
     const record = await this.prisma.tenant.findUnique({
       where: { id },
@@ -112,6 +134,35 @@ export class PrismaTenantRepository implements TenantRepository {
 
     if (!record) return null;
     return this.toDomain(record as PrismaTenantWithRelations);
+  }
+
+  async findAll(options?: TenantFindAllOptions): Promise<Tenant[]> {
+    const filter = options?.filter;
+    const page = Math.max(1, filter?.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, filter?.pageSize ?? 20));
+    const skip = (page - 1) * pageSize;
+
+    const where = this.buildWhereClause(filter);
+
+    const records = await this.prisma.tenant.findMany({
+      where,
+      include: {
+        credential: true,
+        branding: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
+    });
+
+    return records.map((r) => this.toDomain(r as PrismaTenantWithRelations));
+  }
+
+  async count(options?: {
+    filter?: { status?: TenantDomainStatus; search?: string };
+  }): Promise<number> {
+    const where = this.buildWhereClause(options?.filter);
+    return this.prisma.tenant.count({ where });
   }
 
   async save(tenant: Tenant): Promise<Tenant> {

@@ -1,159 +1,110 @@
-# Issue 19 — Performance & Resilience
+# Issue 19 — Audit Vertical Slice
 
 ## Nama Issue
 
-**BFF/Moodle Performance, Timeout, Retry, Cache & Resilience Hardening**
+`audit`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Mengoptimalkan latency dan load Next.js↔Moodle tanpa mengubah authorization, tenant isolation, ownership, atau Moodle source-of-truth correctness.
+Menampilkan audit platform/tenant dengan permission projection dan redaction yang aman.
 
 ## Dependency
 
-- [ ] Issue 18 selesai.
+Issue 18 selesai.
+
+## Mandatory Vertical Slice Paths
+
+Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
+
+```text
+src/modules/audit/
+src/sections/audit/
+src/app/api/audit/
+src/app/(protected)/dashboard/audit/
+```
+
+Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
 
 ## Scope Pengerjaan
 
-- Hilangkan N+1 Moodle calls.
-- Batch operations bila Moodle/custom API mendukung.
-- Parallel independent reads secara bounded.
-- Bounded timeout.
-- Retry hanya untuk operation yang aman/idempotent.
-- Metadata cache yang aman.
-- Tidak cache mutable active-attempt source of truth secara berbahaya.
-- Aggregated monitor endpoint.
-- Pagination untuk large tables.
-- Request correlation ID.
-- Observability latency/error dasar.
+- [ ] Buat canonical module structure lengkap.
+- [ ] Semua port di satu `domain/interfaces/AuditInterfaces.ts`.
+- [ ] Implement `GetAuditLogsUseCase` beserta tests.
+- [ ] Implement `GetAuditLogDetailUseCase` beserta tests.
+- [ ] Implement infrastructure repository/provider/mapper/normalizer yang diperlukan.
+- [ ] Implement controller dan API factory/routes.
+- [ ] Implement presentation hook.
+- [ ] Implement Atomic UI `atoms/molecules/organisms/pages` sesuai kebutuhan nyata.
+- [ ] Implement protected page guard + composition.
+- [ ] Tambahkan loading/error/empty state dan pagination jika list scalable.
+- [ ] Tambahkan authorization + tenant/ownership tests.
+- [ ] Verifikasi backend contract sebelum menggunakan Moodle function.
 
 ## Out of Scope
 
-- Mengubah Moodle menjadi eventually consistent copy di SaaS DB.
-- Retry otomatis pada non-idempotent submit tanpa idempotency contract.
-- Premature WebSocket migration.
-- Caching password/token plaintext.
+- Security hardening lint/rate-limit global; itu issue berikutnya.
 
-## Task Checklist
+## Target Structure / Deliverables
 
-### Baseline & Measurement
-
-- [ ] Identifikasi endpoint/use case dengan call count tertinggi.
-- [ ] Catat baseline request count/latency pada dev/test environment yang representatif.
-- [ ] Identifikasi N+1 pattern.
-- [ ] Identifikasi duplicate requests dari React/client effects.
-
-### Moodle Calls
-
-- [ ] Gunakan batch endpoint jika tersedia.
-- [ ] Gunakan aggregated custom endpoint untuk monitoring.
-- [ ] Parallelize independent reads dengan concurrency yang dibatasi.
-- [ ] Hindari fan-out tak terbatas.
-- [ ] Pastikan setiap request memiliki timeout budget.
-
-### Retry Policy
-
-- [ ] Definisikan transient error yang retryable.
-- [ ] Retry hanya idempotent-safe operations.
-- [ ] Gunakan bounded attempts/backoff.
-- [ ] Jangan auto-retry final submit/mutation non-idempotent tanpa contract aman.
-- [ ] Preserve request ID/correlation across retry context.
-
-### Cache Policy
-
-- [ ] Tentukan resource metadata yang dapat dicache.
-- [ ] Definisikan TTL/invalidation.
-- [ ] Tenant menjadi bagian cache key.
-- [ ] Actor/permission-sensitive data tidak dicache lintas actor.
-- [ ] Active attempt mutable state tidak menggunakan stale shared cache.
-- [ ] Credential/token tidak masuk general-purpose cache.
-
-### Pagination & Payload
-
-- [ ] Large admin/tenant tables menggunakan pagination.
-- [ ] Avoid over-fetching raw Moodle fields yang tidak dipakai.
-- [ ] Batasi page size.
-- [ ] Validate sort/filter parameters.
-
-### Resilience & Observability
-
-- [ ] Log latency/error category tanpa secret.
-- [ ] Include request ID.
-- [ ] Distinguish timeout, upstream error, validation, unauthorized.
-- [ ] Pastikan fallback/error state UI tidak menyembunyikan data stale sebagai success.
-
-### Tests
-
-- [ ] Timeout behavior.
-- [ ] Retryable transient read retries sesuai policy.
-- [ ] Non-idempotent mutation tidak retry otomatis.
-- [ ] Cache tenant key isolation.
-- [ ] Cache authorization isolation jika applicable.
-- [ ] Cache TTL/invalidation.
-- [ ] Request deduplication bila digunakan.
-- [ ] Monitor no-N+1 regression.
-- [ ] Pagination maximum limit.
+- `src/modules/audit/`
+- `src/sections/audit/`
+- `src/app/api/audit/`
+- protected resource page(s)
+- Unit/application/infrastructure/UI tests
+- Contract mapping: SaaS audit + local_examapi audit mapped through infrastructure; secrets always redacted
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tambahkan regression tests untuk timeout/retry/cache/N+1 sebelum optimasi.
+- [ ] Tulis failing domain/use-case tests untuk happy path + validation + authorization.
+- [ ] Tulis failing repository contract tests untuk Moodle/Prisma mapping.
+- [ ] Tulis failing section/page behavior tests untuk loading/error/empty/permission state.
 
 ### GREEN
 
-- [ ] Implement optimization yang terukur tanpa mengubah semantic behavior.
+- [ ] Implement minimum vertical slice dari domain hingga protected page.
+- [ ] Tidak boleh menunda section/API/page ke issue lain untuk feature ini.
 
 ### REFACTOR
 
-- [ ] Hapus optimization-specific duplication.
-- [ ] Keep policy explicit; jangan menyembunyikan retry/cache di tempat yang membuat mutation unsafe.
+- [ ] Rapikan mapper/normalizer/query builder/components tanpa mengubah behavior.
+- [ ] Pastikan domain tetap bebas transport/framework detail.
 
 ## Acceptance Criteria
 
-- [ ] Tidak ada known N+1 besar pada critical flows.
-- [ ] Timeout policy konsisten.
-- [ ] Retry policy tidak menyebabkan duplicate unsafe mutation.
-- [ ] Cache tidak melanggar tenant/actor isolation.
-- [ ] Active attempt correctness tidak dikorbankan.
-- [ ] Pagination tersedia untuk list besar.
-
-## Definition of Done (DoD)
-
-- [ ] Baseline dan hasil optimasi terdokumentasi singkat di issue/PR.
-- [ ] N+1 regression tests GREEN.
-- [ ] Timeout/retry tests GREEN.
-- [ ] Cache isolation tests GREEN.
-- [ ] No unsafe retry untuk submit/destructive action.
-- [ ] Authorization/tenant isolation regression tetap GREEN.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Feature dapat digunakan end-to-end dari protected page → internal API → controller → use case → repository.
+- [ ] Semua empat boundary feature tersedia.
+- [ ] Authorization/tenant/ownership sesuai actor.
+- [ ] Moodle detail tidak bocor ke UI.
+- [ ] Tidak ada pekerjaan out-of-scope yang disisipkan.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -162,4 +113,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

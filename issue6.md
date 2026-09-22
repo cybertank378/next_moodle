@@ -1,232 +1,102 @@
-# Issue 06 — Authentication, Session & Actor Resolution
+# Issue 06 — Authentication, Session & Actor Resolution Vertical Slice
 
 ## Nama Issue
 
-**Authentication Module, Secure Session & Current Actor Resolution**
+`auth-session-actor`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun module auth mengikuti pattern project, mengautentikasi actor melalui strategy yang tepat, menyimpan session secara aman, dan menghasilkan `CurrentActor` yang siap dipakai RBAC/tenant isolation.
+Membangun login/logout/current-session dan protected-shell integration dengan Moodle student/tenant authentication, app session aman, serta actor resolution yang siap RBAC.
 
 ## Dependency
 
-- [ ] Issue 05 selesai.
+Issue 05 selesai.
 
-## Scope Pengerjaan
+## Mandatory Vertical Slice Paths
 
-Use cases:
-
-```text
-ChangePasswordUseCase
-ForgotPasswordUseCase
-GetCurrentSessionUseCase
-LoginUseCase
-LogoutAllUseCase
-LogoutUseCase
-RefreshTokenUseCase
-RegisterUseCase
-ResetPasswordUseCase
-```
-
-API:
-
-```text
-/api/auth/login
-/api/auth/logout
-/api/auth/logout-all
-/api/auth/current-session
-/api/auth/refresh
-/api/auth/forgot
-/api/auth/reset
-/api/auth/change
-/api/auth/register   # hanya jika policy deployment mengaktifkannya
-```
-
-Tenant/Student login menggunakan Moodle REST authentication. Platform ADMIN dapat menggunakan auth strategy platform yang terpisah tetapi tetap melalui auth port/module yang sama.
-
-## Out of Scope
-
-- Role-specific dashboard UI selain redirect target.
-- Feature authorization selain session actor production integration.
-- Penyimpanan password Moodle di SaaS database.
-
-## Target Struktur / Deliverables
+Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
 
 ```text
 src/modules/auth/
-├── application/
-│   ├── services/AuthService.ts
-│   └── usecases/*.ts
-├── domain/
-│   ├── builder/AuthQueryBuilder.ts
-│   ├── dto/AuthRequestDTO.ts
-│   ├── dto/AuthResponseDTO.ts
-│   ├── entity/*.ts
-│   ├── interfaces/*.ts
-│   ├── mapper/AuthMapper.ts
-│   ├── types/AuthJwtPayload.ts
-│   └── value-object/RefreshToken.ts
-├── infrastructure/
-│   ├── http/AuthController.ts
-│   ├── providers/*.ts
-│   ├── repo/*.ts
-│   ├── templates/*.ts
-│   └── validators/authValidator.ts
-└── presentation/
-    ├── helpers/getCurrentSessions.ts
-    └── hooks/useAuthApi.ts
-```
-
-```text
+src/sections/auth/
 src/app/api/auth/
-├── _factory.ts
-├── login/route.ts
-├── logout/route.ts
-├── logout-all/route.ts
-├── current-session/route.ts
-├── refresh/route.ts
-├── forgot/route.ts
-├── reset/route.ts
-├── change/route.ts
-└── register/route.ts       # bila enabled
+src/app/(protected)/layout.tsx
+src/app/(protected)/dashboard/page.tsx  # auth integration only; dashboard content issue berikutnya
+src/app/(public)/login/
+src/app/(public)/register/
+src/app/(public)/forgot-password/
+src/app/(public)/change-password/
 ```
 
-## Task Checklist
+Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
 
-### Domain
+## Scope Pengerjaan
 
-- [ ] Definisikan auth request/response DTO.
-- [ ] Definisikan session entity.
-- [ ] Definisikan auth payload entity.
-- [ ] Definisikan refresh token value object bila session strategy membutuhkannya.
-- [ ] Definisikan interfaces untuk auth repository, token, cookie, mail/reset notifier yang benar-benar digunakan.
-- [ ] Jangan membuat interface/provider yang tidak dipakai deployment.
+- [ ] Domain auth contracts berada hanya di `AuthInterfaces.ts`.
+- [ ] Login use case resolve tenant, panggil Moodle `/login/token.php`, lalu `core_webservice_get_site_info`.
+- [ ] Raw Moodle user token dibungkus dalam signed/encrypted app session dan tidak dikirim ke JS browser.
+- [ ] Implement current-session/logout/logout-all/refresh sesuai session strategy yang dipilih.
+- [ ] Controller, API routes, hooks, login/register/forgot/change-password UI sesuai planning support.
+- [ ] Integrasikan `(protected)/layout.tsx` dengan `resolveCurrentActor()`.
+- [ ] Root page redirect ke `/login` atau `/dashboard` sesuai auth state.
 
-### Application
+## Out of Scope
 
-- [ ] Implement `LoginUseCase`.
-- [ ] Implement `LogoutUseCase`.
-- [ ] Implement `LogoutAllUseCase`.
-- [ ] Implement `GetCurrentSessionUseCase`.
-- [ ] Implement `RefreshTokenUseCase` jika session strategy menggunakan refresh token.
-- [ ] Implement password/reset use case sesuai provider/platform capability.
-- [ ] Implement `RegisterUseCase` hanya bila registration diaktifkan; jika tidak, route harus eksplisit disabled/not available.
-- [ ] Resolve role ADMIN/TENANT/STUDENT secara authoritative.
-- [ ] Resolve `tenantId` untuk TENANT/STUDENT.
+- Tenant management CRUD.
+- Course/quiz feature.
+- Password reset behavior yang Moodle/backend belum mendukung; tandai blocked bila kontrak tidak ada.
 
-### Infrastructure
+## Target Structure / Deliverables
 
-- [ ] Implement Moodle auth repository untuk tenant/student via `/login/token.php`.
-- [ ] Validate Moodle user via `core_webservice_get_site_info`.
-- [ ] Implement platform admin auth repository/provider bila diperlukan.
-- [ ] Implement HttpOnly cookie manager.
-- [ ] Set `Secure` pada production.
-- [ ] Set SameSite policy.
-- [ ] Pastikan raw Moodle token hanya berada server-side session envelope/storage.
-- [ ] Implement session integrity/signing/encryption sesuai strategy.
-- [ ] Implement validator request auth.
-
-### Controller & API
-
-- [ ] Implement `AuthController`.
-- [ ] Implement `src/app/api/auth/_factory.ts`.
-- [ ] Implement login route.
-- [ ] Implement logout route.
-- [ ] Implement logout-all route.
-- [ ] Implement current-session route.
-- [ ] Implement refresh route bila dipakai.
-- [ ] Implement forgot/reset/change route sesuai capability.
-- [ ] Implement/disable register route secara eksplisit.
-
-### Presentation & Auth Pages
-
-- [ ] Implement `useAuthApi`.
-- [ ] Implement login section mengikuti atoms/molecules/organisms/pages.
-- [ ] Implement forgot/reset UI bila feature aktif.
-- [ ] Redirect sukses login ke role home yang benar.
-- [ ] Jangan menyimpan token di localStorage/sessionStorage.
-
-### Tests
-
-- [ ] Valid tenant/student Moodle login.
-- [ ] Invalid Moodle credential.
-- [ ] Inactive/suspended tenant.
-- [ ] ADMIN role resolution.
-- [ ] TENANT role resolution.
-- [ ] STUDENT role resolution.
-- [ ] TENANT/STUDENT tanpa tenant ditolak.
-- [ ] Logout invalidates session.
-- [ ] Logout-all invalidates seluruh session terkait bila didukung.
-- [ ] Cookie tidak mengandung raw Moodle token dalam bentuk terbaca.
-- [ ] Session tampering ditolak.
-- [ ] Expired session ditolak.
-- [ ] Current session tidak expose secret.
-- [ ] Login redirect role-specific.
+- Auth module lengkap, auth sections, auth API, public auth pages, protected layout integration.
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis use case/session/controller tests terlebih dahulu.
-- [ ] Pastikan tampered-cookie dan raw-token-exposure test gagal sebelum fix.
+- [ ] RED tests login success/failure, token non-exposure, tenant mismatch, session expiry, unauthorized protected access.
 
 ### GREEN
 
-- [ ] Implement auth flow minimum sampai seluruh test lulus.
+- [ ] Implement flow minimum sampai test hijau.
 
 ### REFACTOR
 
-- [ ] Pisahkan actor resolution dari transport/controller.
-- [ ] Pastikan session provider dapat diuji tanpa Next.js page component.
-- [ ] Hapus duplicate auth validation.
+- [ ] Refactor session/actor mapping dan UI state tanpa membocorkan Moodle transport detail.
 
 ## Acceptance Criteria
 
-- [ ] Raw Moodle token server-only.
-- [ ] Session cookie HttpOnly.
-- [ ] Current actor memiliki `id`, `role`, `tenantId`, `moodleUserId`, dan permissions yang sesuai.
-- [ ] TENANT/STUDENT tidak dapat memiliki tenant context arbitrer.
-- [ ] Login mengarah ke home role yang benar.
-- [ ] Logout benar-benar menonaktifkan session aplikasi.
-
-## Definition of Done (DoD)
-
-- [ ] Semua auth use case yang enabled tersedia dan teruji.
-- [ ] Controller/factory/API route tersedia.
-- [ ] Auth UI yang masuk scope tersedia.
-- [ ] Session security test GREEN.
-- [ ] Role/tenant resolution test GREEN.
-- [ ] Tidak ada raw token pada browser storage/response/log.
-- [ ] RBAC Issue 03 terintegrasi dengan current actor production.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Login menghasilkan app session aman.
+- [ ] Browser tidak menerima raw Moodle token.
+- [ ] Protected route dapat resolve actor.
+- [ ] Semua boundary auth yang relevan tercakup.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -235,4 +105,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

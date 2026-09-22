@@ -1,180 +1,116 @@
-# Issue 14 — Tenant Users, Enrolments & Groups
+# Issue 14 — Groups & Cohorts Vertical Slice
 
 ## Nama Issue
 
-**TENANT Participant Administration — Users, Enrolments, Groups & Cohorts**
+`groups`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun administrasi peserta pada TENANT portal melalui module `users`, `enrolments`, dan `groups`, seluruhnya tenant-scoped dan menggunakan Moodle APIs melalui infrastructure adapters.
+Tenant-scoped group/cohort listing and membership management.
 
 ## Dependency
 
-- [ ] Issue 13 selesai.
+Issue 13 selesai.
+
+## Mandatory Vertical Slice Paths
+
+Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
+
+```text
+src/modules/groups/
+src/sections/groups/
+src/app/api/groups/
+src/app/(protected)/dashboard/groups/
+src/app/(protected)/dashboard/groups/create/
+src/app/(protected)/dashboard/groups/[id]/
+src/app/(protected)/dashboard/groups/[id]/edit/
+```
+
+Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
 
 ## Scope Pengerjaan
 
-Pages:
-
-```text
-/tenant/users
-/tenant/enrolments
-/tenant/groups
-```
-
-Modules:
-
-```text
-users
-enrolments
-groups
-```
-
-Capabilities:
-
-- list/search/filter/pagination user;
-- create/update/deactivate user sesuai Moodle capability;
-- bulk import validation bila digunakan;
-- enrol/unenrol;
-- group/cohort list dan membership management.
+- [ ] Buat canonical module structure lengkap.
+- [ ] Semua port di satu `domain/interfaces/GroupsInterfaces.ts`.
+- [ ] Implement `GetGroupsUseCase` beserta tests.
+- [ ] Implement `CreateGroupUseCase` beserta tests.
+- [ ] Implement `UpdateGroupUseCase` beserta tests.
+- [ ] Implement `AddGroupMemberUseCase` beserta tests.
+- [ ] Implement `RemoveGroupMemberUseCase` beserta tests.
+- [ ] Implement infrastructure repository/provider/mapper/normalizer yang diperlukan.
+- [ ] Implement controller dan API factory/routes.
+- [ ] Implement presentation hook.
+- [ ] Implement Atomic UI `atoms/molecules/organisms/pages` sesuai kebutuhan nyata.
+- [ ] Implement protected page guard + composition.
+- [ ] Tambahkan loading/error/empty state dan pagination jika list scalable.
+- [ ] Tambahkan authorization + tenant/ownership tests.
+- [ ] Verifikasi backend contract sebelum menggunakan Moodle function.
 
 ## Out of Scope
 
-- Question bank.
-- Exam administration.
-- Cross-tenant/global user management oleh ADMIN.
+- Enrolment CRUD.
 
-## Task Checklist
+## Target Structure / Deliverables
 
-### Users Module
-
-- [ ] Definisikan user request/response DTO.
-- [ ] Definisikan user repository interface.
-- [ ] Implement list/search user use case.
-- [ ] Implement create user use case.
-- [ ] Implement update user use case.
-- [ ] Implement deactivate/status use case sesuai Moodle capability.
-- [ ] Implement import validation use case bila import disediakan.
-- [ ] Implement Moodle user repository/mapper.
-- [ ] Implement controller/factory/routes/hook.
-
-### Enrolments Module
-
-- [ ] Definisikan enrolment DTO/interfaces.
-- [ ] Implement participant list.
-- [ ] Implement manual enrol.
-- [ ] Implement unenrol.
-- [ ] Implement status mapping.
-- [ ] Implement repository/controller/factory/routes/hook.
-
-### Groups Module
-
-- [ ] Definisikan group/cohort DTO/interfaces.
-- [ ] Implement group/cohort list.
-- [ ] Implement membership read.
-- [ ] Implement add/remove member sesuai capability.
-- [ ] Implement repository/controller/factory/routes/hook.
-
-### API & Moodle Boundary
-
-- [ ] Gunakan `core_user_*` hanya di infrastructure.
-- [ ] Gunakan enrolment functions hanya di infrastructure.
-- [ ] Gunakan group/cohort functions hanya di infrastructure.
-- [ ] Jangan bocorkan Moodle function name ke sections.
-- [ ] Route handler tetap tipis.
-
-### UI
-
-- [ ] User management table mengikuti standard project.
-- [ ] Enrolment table mengikuti standard project.
-- [ ] Group table mengikuti standard project.
-- [ ] Gunakan Pagination.
-- [ ] Gunakan Skeleton saat loading.
-- [ ] EmptyState hanya mengganti table body/content.
-- [ ] Filter/search tetap terlihat pada loading/empty.
-- [ ] Mutation menggunakan confirmation bila destructive.
-
-### Security/RBAC
-
-- [ ] USER_READ/CREATE/UPDATE/DEACTIVATE/IMPORT permissions diterapkan.
-- [ ] ENROLMENT_READ/MANAGE permissions diterapkan.
-- [ ] GROUP_READ/MANAGE permissions diterapkan.
-- [ ] Tenant isolation pada setiap mutation.
-- [ ] Target user/group/course diverifikasi milik tenant context.
-
-### Tests
-
-- [ ] User list pagination/filter.
-- [ ] User mutation permission.
-- [ ] Cross-tenant user mutation rejected.
-- [ ] Import validation rejects invalid rows.
-- [ ] Enrol success.
-- [ ] Unenrol success.
-- [ ] Enrol cross-tenant rejected.
-- [ ] Group membership add/remove.
-- [ ] Cross-tenant group membership rejected.
-- [ ] Skeleton/EmptyState/Pagination behavior.
+- `src/modules/groups/`
+- `src/sections/groups/`
+- `src/app/api/groups/`
+- protected resource page(s)
+- Unit/application/infrastructure/UI tests
+- Contract mapping: core_group/core_cohort calls only in infrastructure and only registered functions
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis use case/RBAC/tenant-isolation tests per module terlebih dahulu.
+- [ ] Tulis failing domain/use-case tests untuk happy path + validation + authorization.
+- [ ] Tulis failing repository contract tests untuk Moodle/Prisma mapping.
+- [ ] Tulis failing section/page behavior tests untuk loading/error/empty/permission state.
 
 ### GREEN
 
-- [ ] Implement masing-masing vertical slice secara lengkap.
+- [ ] Implement minimum vertical slice dari domain hingga protected page.
+- [ ] Tidak boleh menunda section/API/page ke issue lain untuk feature ini.
 
 ### REFACTOR
 
-- [ ] Reuse table primitives, bukan business logic lintas module.
-- [ ] Hindari giant participant service yang mencampur users/enrolments/groups.
-- [ ] Pastikan module boundaries tetap jelas.
+- [ ] Rapikan mapper/normalizer/query builder/components tanpa mengubah behavior.
+- [ ] Pastikan domain tetap bebas transport/framework detail.
 
 ## Acceptance Criteria
 
-- [ ] TENANT dapat mengelola participant dalam tenant sendiri.
-- [ ] TENANT tidak dapat mengelola user/resource tenant lain.
-- [ ] Semua management table mengikuti Pagination/Skeleton/EmptyState standard.
-- [ ] Moodle tetap source of truth user/enrolment/group akademik.
-
-## Definition of Done (DoD)
-
-- [ ] Tiga module memiliki domain/application/infrastructure/presentation sesuai kebutuhan.
-- [ ] Controller/factory/routes tersedia.
-- [ ] Tenant pages tersedia.
-- [ ] Permission matrix tests GREEN.
-- [ ] Cross-tenant negative tests GREEN.
-- [ ] Table UI standard terpenuhi.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Feature dapat digunakan end-to-end dari protected page → internal API → controller → use case → repository.
+- [ ] Semua empat boundary feature tersedia.
+- [ ] Authorization/tenant/ownership sesuai actor.
+- [ ] Moodle detail tidak bocor ke UI.
+- [ ] Tidak ada pekerjaan out-of-scope yang disisipkan.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -183,4 +119,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

@@ -1,172 +1,79 @@
-# Issue 07 — Admin Portal: Tenant Management
+# Issue 07 — Protected Dashboard Foundation
 
 ## Nama Issue
 
-**ADMIN Portal — Dashboard, Tenant Management, Connection Diagnostics & Platform Settings**
+`dashboard-foundation`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun UI dan orchestration khusus `ADMIN` untuk mengelola tenant SaaS menggunakan tenant module/API yang telah dibuat.
+Membangun `/dashboard` sebagai authenticated landing page tunggal yang memilih dashboard composition berdasarkan actor/permission tanpa memecah root route per role.
 
 ## Dependency
 
-- [ ] Issue 06 selesai.
+Issue 06 selesai.
 
 ## Scope Pengerjaan
 
-Pages:
-
-```text
-/admin/dashboard
-/admin/tenants
-/admin/tenants/[tenantId]
-/admin/audit
-/admin/settings
-```
-
-Sections:
-
-```text
-sections/admin-dashboard
-sections/tenant-management
-sections/platform-audit
-sections/platform-settings
-```
-
-Fokus issue ini adalah ADMIN experience dan integration dengan tenant API, bukan implementasi audit security final yang akan diperdalam di Issue 18.
+- [ ] Implement `src/app/(protected)/dashboard/page.tsx` tipis.
+- [ ] Implement route-level components `AdminDashboard`, `TenantDashboard`, `StudentDashboard`.
+- [ ] Buat `src/sections/dashboard` untuk reusable dashboard composition/widgets yang tidak feature-specific.
+- [ ] Menu/navigation permission-aware tetapi bukan authorization source.
+- [ ] Pastikan role mismatch tidak menciptakan route root baru.
 
 ## Out of Scope
 
-- Tenant operational pages.
-- Student pages.
-- Academic Moodle administration.
-- Audit/security hardening final.
+- Feature-specific metric yang membutuhkan module belum tersedia.
+- CRUD resource.
 
-## Task Checklist
+## Target Structure / Deliverables
 
-### Admin Shell & Navigation
-
-- [ ] Buat admin sidebar/navigation.
-- [ ] Tampilkan menu berdasarkan permission ADMIN.
-- [ ] Pastikan direct page access tetap dijaga server layout.
-- [ ] Implement admin dashboard page shell.
-
-### Tenant List
-
-- [ ] Buat page header.
-- [ ] Buat statistics summary yang relevan.
-- [ ] Buat search/filter.
-- [ ] Buat tenant table.
-- [ ] Gunakan shared Pagination.
-- [ ] Gunakan Skeleton pada content/table body.
-- [ ] EmptyState tidak menutup header/filter/table header.
-- [ ] Buat action menu.
-
-### Tenant Create/Edit
-
-- [ ] Buat form create tenant.
-- [ ] Buat form update tenant.
-- [ ] Validasi slug/name/status input.
-- [ ] Jangan render existing encrypted token/ciphertext ke browser.
-- [ ] Credential baru hanya dikirim melalui protected mutation dan tidak dikembalikan lagi.
-
-### Tenant Detail & Connection Diagnostics
-
-- [ ] Buat detail tenant.
-- [ ] Tampilkan status tenant.
-- [ ] Tampilkan Moodle endpoint yang aman.
-- [ ] Integrasikan connection test.
-- [ ] Tampilkan diagnostic status/latency/version tanpa token.
-- [ ] Buat activate/suspend action dengan confirmation.
-
-### Platform Audit/Settings Shell
-
-- [ ] Buat platform audit page shell untuk data audit yang tersedia.
-- [ ] Buat platform settings shell untuk setting yang memang sudah memiliki contract.
-- [ ] Jangan menambahkan dummy settings tanpa backend contract.
-
-### Security/RBAC
-
-- [ ] Semua admin mutation memerlukan permission yang benar.
-- [ ] TENANT mendapat 403 untuk admin API mutation.
-- [ ] STUDENT mendapat 403 untuk admin API mutation.
-- [ ] Sensitive credential tidak dirender.
-- [ ] Setiap mutation menyediakan audit-ready actor/request context.
-
-### Tests
-
-- [ ] Admin tenant list loading/empty/error/success.
-- [ ] Pagination/filter interaction.
-- [ ] Create tenant success/error.
-- [ ] Update tenant success/error.
-- [ ] Status mutation confirmation.
-- [ ] Connection test success/error.
-- [ ] TENANT/STUDENT forbidden.
-- [ ] EmptyState tidak mengganti page header/filter.
-- [ ] Sensitive token tidak muncul di rendered output.
+- `/dashboard` landing composition dan protected application shell/navigation.
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis interaction/component tests dan RBAC integration tests sebelum UI behavior final.
+- [ ] RED tests untuk role composition, unauthenticated access, menu permission projection.
 
 ### GREEN
 
-- [ ] Implement sections/pages sampai flow tenant management berjalan.
+- [ ] Implement dashboard shell minimum.
 
 ### REFACTOR
 
-- [ ] Jaga API call hanya di organism/presentation hook.
-- [ ] Molecule menerima props/callback saja.
-- [ ] Reuse shared table/filter/pagination tanpa membuat barrel.
+- [ ] Refactor shared layout/components tanpa memasukkan business logic.
 
 ## Acceptance Criteria
 
-- [ ] Hanya ADMIN dapat memakai admin portal.
-- [ ] Tenant list dapat filter dan paginate.
-- [ ] Tenant dapat create/update/status update.
-- [ ] Moodle connection dapat dites tanpa expose secret.
-- [ ] Loading/empty/error state sesuai standard UI project.
-- [ ] Mutation siap menghasilkan audit event.
-
-## Definition of Done (DoD)
-
-- [ ] Semua page dalam scope tersedia.
-- [ ] Semua admin tenant actions terhubung ke API.
-- [ ] Permission tests GREEN.
-- [ ] Sensitive data exposure tests GREEN.
-- [ ] Table pattern mengikuti Header → Stats → Filter → Table → Pagination.
-- [ ] Skeleton/EmptyState sesuai standard.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Semua authenticated actor masuk melalui `/dashboard`.
+- [ ] Tidak ada `(admin)/(tenant)/(student)` route group.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -175,4 +82,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

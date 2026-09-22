@@ -1,214 +1,104 @@
-# Issue 04 — Tenant SaaS Database & Tenant Module
+# Issue 04 — Tenants — SaaS Metadata Management Vertical Slice
 
 ## Nama Issue
 
-**Prisma 7 SaaS Tenant Storage & Tenant Domain Module**
+`tenants-metadata-management`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun persistence metadata multi-tenant dan vertical slice module `tenant` sesuai pattern project, tanpa menduplikasi data akademik Moodle.
+Membangun tenant CRUD + encrypted credential record management sebagai satu vertical slice lengkap untuk operator platform, tanpa melakukan connection test Moodle pada issue ini.
 
 ## Dependency
 
-- [ ] Issue 03 selesai.
+Issue 03 selesai.
+
+## Mandatory Vertical Slice Paths
+
+Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
+
+```text
+src/modules/tenants/
+src/sections/tenants/
+src/app/api/tenants/
+src/app/(protected)/dashboard/tenants/
+src/app/(protected)/dashboard/tenants/create/
+src/app/(protected)/dashboard/tenants/[id]/
+src/app/(protected)/dashboard/tenants/[id]/edit/
+```
+
+Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
 
 ## Scope Pengerjaan
 
-SaaS database hanya menyimpan:
-
-```text
-tenants
-tenant_credentials
-tenant_brandings
-saas_audit_logs
-```
-
-Module mengikuti:
-
-```text
-application/services
-application/usecases
-domain/builder
-domain/dto
-domain/entity
-domain/interfaces
-domain/mapper
-domain/types
-domain/value-object
-infrastructure/http
-infrastructure/providers
-infrastructure/repo
-infrastructure/validators
-presentation/hooks
-```
-
-Use case minimum:
-
-```text
-GetTenantsUseCase
-GetTenantUseCase
-CreateTenantUseCase
-UpdateTenantUseCase
-UpdateTenantStatusUseCase
-```
+- [ ] Prisma models `Tenant`, `TenantCredential`, `TenantBranding` minimum yang dibutuhkan.
+- [ ] Domain entity/DTO/builder/mapper/normalizer/types/validators tenant.
+- [ ] Satu contract file `TenantsInterfaces.ts` untuk repository/credential ports yang digunakan use case.
+- [ ] Use cases list/detail/create/update/status + credential configuration mutation tanpa exposing plaintext.
+- [ ] Infrastructure Prisma repository + credential encryption provider placeholder contract-compatible.
+- [ ] Controller + `_factory.ts` + API routes.
+- [ ] Atomic UI table/form/detail pages dengan Pagination/Skeleton/EmptyState.
+- [ ] Protected pages `/dashboard/tenants`, `/create`, `/[id]`, `/[id]/edit`.
+- [ ] ADMIN permission enforcement.
 
 ## Out of Scope
 
-- Enkripsi credential implementation final (Issue 05).
-- Moodle connection handshake final (Issue 05).
-- Admin UI tenant management (Issue 07).
-- Data user/course/quiz/question/attempt/grade Moodle.
+- Test Moodle connection.
+- General Moodle REST client.
+- Course/user sync.
 
-## Target Struktur / Deliverables
+## Target Structure / Deliverables
 
-```text
-prisma/schema.prisma
-prisma/migrations/*
-
-src/modules/tenant/
-├── application/
-├── domain/
-├── infrastructure/
-├── presentation/
-└── __tests__/
-
-src/app/api/tenants/
-├── route.ts
-├── [tenantId]/
-│   ├── route.ts
-│   └── status/route.ts
-└── _factory.ts
-```
-
-## Task Checklist
-
-### Prisma Schema
-
-- [ ] Buat enum status tenant.
-- [ ] Buat model `Tenant`.
-- [ ] Buat model `TenantCredential` dengan field ciphertext saja.
-- [ ] Buat model `TenantBranding`.
-- [ ] Buat model `SaasAuditLog`.
-- [ ] Tambahkan unique constraint pada tenant slug.
-- [ ] Tambahkan relation/cascade yang aman.
-- [ ] Buat migration.
-- [ ] Pastikan tidak ada model akademik Moodle.
-
-### Domain
-
-- [ ] Implement `TenantEntity`.
-- [ ] Implement `TenantSlug` value object.
-- [ ] Implement request/response DTO.
-- [ ] Implement query builder untuk list/filter/pagination jika diperlukan.
-- [ ] Definisikan repository interface.
-- [ ] Definisikan tenant status types.
-- [ ] Implement domain mapper yang tidak mengenal Prisma type di consumer.
-
-### Application
-
-- [ ] Implement `TenantService` bila orchestration lintas use case memang diperlukan.
-- [ ] Implement `GetTenantsUseCase`.
-- [ ] Implement `GetTenantUseCase`.
-- [ ] Implement `CreateTenantUseCase`.
-- [ ] Implement `UpdateTenantUseCase`.
-- [ ] Implement `UpdateTenantStatusUseCase`.
-- [ ] Enforce ADMIN permission pada operation platform tenant.
-
-### Infrastructure
-
-- [ ] Implement Prisma `TenantRepository`.
-- [ ] Implement `TenantController`.
-- [ ] Implement request validator.
-- [ ] Jangan expose encrypted credential pada response DTO.
-
-### API
-
-- [ ] Implement `src/app/api/tenants/_factory.ts`.
-- [ ] Implement list/create route.
-- [ ] Implement detail/update route.
-- [ ] Implement status route.
-- [ ] Pastikan route tidak mengandung business logic.
-
-### Presentation
-
-- [ ] Implement `useTenantApi` untuk kebutuhan client issue berikutnya.
-- [ ] Hook hanya memanggil Next.js API, bukan Moodle.
-
-### Tests
-
-- [ ] Unique tenant slug.
-- [ ] Invalid slug rejected.
-- [ ] Tenant create requires permission.
-- [ ] Tenant update requires permission.
-- [ ] Tenant status update requires permission.
-- [ ] Suspended tenant rejected untuk tenant-scoped context.
-- [ ] Tenant lookup by slug/hostname sesuai resolver contract.
-- [ ] TENANT tidak dapat resolve tenant lain.
-- [ ] Credential ciphertext tidak tampil pada response.
+- Complete tenants module vertical slice.
+- Prisma migration untuk metadata tenant.
+- Encrypted credential persisted server-side only.
+- Management UI dan protected routes.
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis tests domain slug/status/repository contract/use cases sebelum production implementation.
+- [ ] RED tests untuk CRUD, duplicate slug, encryption boundary, ADMIN-only authorization, tenant secret non-serialization.
 
 ### GREEN
 
-- [ ] Implement schema, repository, use cases, controller, API factory/routes, dan hook minimum.
+- [ ] Implement vertical slice minimum sampai seluruh tests hijau.
 
 ### REFACTOR
 
-- [ ] Pisahkan Prisma mapping dari domain entity.
-- [ ] Hilangkan duplicated validation.
-- [ ] Pastikan concrete import dan dependency direction benar.
+- [ ] Refactor mapper/normalizer/query builder dan UI composition tanpa mengubah behavior.
 
 ## Acceptance Criteria
 
-- [ ] ADMIN dapat CRUD/configure metadata tenant sesuai permission.
-- [ ] Tenant resolver dapat memperoleh tenant yang valid.
-- [ ] Suspended tenant dapat dibedakan secara eksplisit.
-- [ ] Database tetap operational metadata only.
-- [ ] Credential ciphertext tidak pernah diserialisasi ke browser.
-
-## Definition of Done (DoD)
-
-- [ ] Migration berhasil dijalankan pada database test/dev.
-- [ ] Prisma client dapat generate.
-- [ ] Seluruh tenant use case tersedia.
-- [ ] Controller + `_factory.ts` + route tersedia.
-- [ ] `useTenantApi` tersedia.
-- [ ] Permission dan tenant isolation tests GREEN.
-- [ ] Tidak ada model akademik Moodle di Prisma.
-- [ ] Tidak ada credential plaintext di database/response/log.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Tenant CRUD dapat digunakan end-to-end melalui internal API.
+- [ ] Secret tidak pernah muncul di response DTO/browser.
+- [ ] Semua empat boundary feature tersedia.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -217,4 +107,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.
