@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "@/core/errors";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import type { CurrentActor } from "./CurrentActor";
 import type { SessionRepository } from "./SessionRepository";
 

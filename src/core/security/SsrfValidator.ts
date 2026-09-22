@@ -1,4 +1,5 @@
-import { SecurityError, ValidationError } from "@/core/errors";
+import { SecurityError } from "@/core/errors/SecurityError";
+import { ValidationError } from "@/core/errors/ValidationError";
 
 /**
  * Validates outgoing URLs to prevent Server-Side Request Forgery (SSRF).

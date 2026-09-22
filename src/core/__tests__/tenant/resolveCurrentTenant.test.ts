@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { ForbiddenError, NotFoundError } from "@/core/errors";
-import {
-  resolveCurrentTenant,
-  type TenantContext,
-  type TenantResolver,
-} from "@/core/tenant";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { NotFoundError } from "@/core/errors/NotFoundError";
+import { resolveCurrentTenant } from "@/core/tenant/resolveCurrentTenant";
+import type { TenantContext } from "@/core/tenant/TenantContext";
+import type { TenantResolver } from "@/core/tenant/TenantResolver";
 
 describe("resolveCurrentTenant", () => {
   const mockResolver: TenantResolver = {

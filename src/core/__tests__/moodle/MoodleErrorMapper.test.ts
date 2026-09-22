@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import {
-  ForbiddenError,
-  InfrastructureError,
-  MoodleError,
-  UnauthorizedError,
-} from "@/core/errors";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { MoodleError } from "@/core/errors/MoodleError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { MoodleErrorMapper } from "@/core/moodle/MoodleErrorMapper";
 
 describe("MoodleErrorMapper", () => {

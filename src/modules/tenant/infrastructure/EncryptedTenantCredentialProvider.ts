@@ -1,4 +1,4 @@
-import { NotFoundError } from "@/core/errors";
+import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { MoodleCredentialProvider } from "@/core/moodle/MoodleCredentialProvider";
 import type { MoodleCredentials } from "@/core/moodle/types";
 import type { TenantEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";

@@ -1,4 +1,5 @@
-import { ForbiddenError, NotFoundError } from "@/core/errors";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { TenantContext } from "./TenantContext";
 import type { TenantResolver } from "./TenantResolver";
 

@@ -1,10 +1,8 @@
-import {
-  type AppError,
-  ForbiddenError,
-  InfrastructureError,
-  MoodleError,
-  UnauthorizedError,
-} from "@/core/errors";
+import type { AppError } from "@/core/errors/AppError";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { MoodleError } from "@/core/errors/MoodleError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import type { MoodleRawException } from "./types";
 
 export function isMoodleException(

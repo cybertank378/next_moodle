@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
-import {
-  AppError,
-  ConflictError,
-  DomainError,
-  ForbiddenError,
-  InfrastructureError,
-  MoodleError,
-  NotFoundError,
-  UnauthorizedError,
-  ValidationError,
-} from "@/core/errors";
+import { AppError } from "@/core/errors/AppError";
+import { ConflictError } from "@/core/errors/ConflictError";
+import { DomainError } from "@/core/errors/DomainError";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { MoodleError } from "@/core/errors/MoodleError";
+import { NotFoundError } from "@/core/errors/NotFoundError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+import { ValidationError } from "@/core/errors/ValidationError";
 
 describe("AppError Hierarchy", () => {
   it("should instantiate DomainError with 400 status code", () => {

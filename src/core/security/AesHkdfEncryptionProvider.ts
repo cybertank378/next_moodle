@@ -4,7 +4,7 @@ import {
   hkdfSync,
   randomBytes,
 } from "node:crypto";
-import { SecurityError } from "@/core/errors";
+import { SecurityError } from "@/core/errors/SecurityError";
 
 export interface TenantEncryptionProvider {
   encrypt(plainText: string, tenantId: string): Promise<string>;
