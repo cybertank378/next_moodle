@@ -42,7 +42,15 @@ export class Result<T = void, E = unknown> {
     return new Result<U, F>(true, undefined, value);
   }
 
+  public static success<U = void, F = unknown>(value?: U): Result<U, F> {
+    return Result.ok<U, F>(value);
+  }
+
   public static fail<U = void, F = unknown>(error: F): Result<U, F> {
     return new Result<U, F>(false, error);
+  }
+
+  public static failure<U = void, F = unknown>(error: F): Result<U, F> {
+    return Result.fail<U, F>(error);
   }
 }

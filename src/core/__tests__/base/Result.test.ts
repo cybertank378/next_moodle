@@ -34,4 +34,19 @@ describe("Result", () => {
       "Cannot retrieve error from a successful result.",
     );
   });
+
+  it("should support Result.success factory method", () => {
+    const result = Result.success<string>("hello");
+    expect(result.isSuccess).toBe(true);
+    expect(result.isFailure).toBe(false);
+    expect(result.getValue()).toBe("hello");
+  });
+
+  it("should support Result.failure factory method", () => {
+    const error = new Error("failure");
+    const result = Result.failure<string, Error>(error);
+    expect(result.isSuccess).toBe(false);
+    expect(result.isFailure).toBe(true);
+    expect(result.getError()).toBe(error);
+  });
 });
