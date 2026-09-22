@@ -1,77 +1,64 @@
+// Files: src/shared-ui/layout/AppLayout.tsx
+
 "use client";
 
-import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
-import { ROUTES } from "@/libs/routes";
+import { type ReactNode, useState } from "react";
+import type { UserRole } from "@/libs/enums";
+import AppSidebar from "@/shared-ui/layout/AppSidebar";
+import AppTopbar from "@/shared-ui/layout/AppTopbar";
 
 export interface AppLayoutProps {
-  userRole?: string;
-  username?: string;
   children: ReactNode;
+  role?: UserRole;
+  userRole?: UserRole;
+  username?: string;
 }
 
 export default function AppLayout({
-  userRole = "USER",
-  username = "User",
   children,
+  role,
+  userRole,
+  username,
 }: AppLayoutProps) {
-  const router = useRouter();
+  //////////////////////////////////////////////////////////////
+  // RESOLVE ACTIVE ROLE
+  //////////////////////////////////////////////////////////////
 
-  const getDashboardRoute = (r: string) => {
-    switch (r.toUpperCase()) {
-      case "ADMIN":
-      case "SUPERADMIN":
-        return ROUTES.ADMIN.DASHBOARD;
-      case "TENANT":
-      case "TENANT_ADMIN":
-        return ROUTES.TENANT.DASHBOARD;
-      case "STUDENT":
-        return ROUTES.STUDENT.DASHBOARD;
-      default:
-        return ROUTES.HOME;
-    }
-  };
+  const activeRole: UserRole = role || userRole || "ADMIN";
 
-  const dashboardRoute = getDashboardRoute(userRole);
+  //////////////////////////////////////////////////////////////
+  // MOBILE SIDEBAR
+  //////////////////////////////////////////////////////////////
 
-  const handleLogout = () => {
-    router.push(ROUTES.AUTH.LOGIN);
-  };
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  //////////////////////////////////////////////////////////////
+  // RENDER
+  //////////////////////////////////////////////////////////////
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#1e1e2d] text-gray-200">
-      {/* App Header Navigation */}
-      <header className="h-16 border-b border-slate-800 bg-[#151521] px-6 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <button
-            type="button"
-            onClick={() => router.push(dashboardRoute)}
-            className="text-lg font-bold text-white tracking-wide hover:text-indigo-300 transition-colors"
-          >
-            Exam SaaS
-          </button>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-            {userRole}
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-400">
-            Hai, <strong className="text-gray-200">{username}</strong>
-          </span>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="text-xs text-red-400 hover:text-red-300 transition-colors"
-          >
-            Keluar
-          </button>
-        </div>
-      </header>
+    <div className="flex h-screen overflow-hidden bg-[#1e1e2d] text-gray-200">
+      {/* SIDEBAR */}
+      <AppSidebar
+        role={activeRole}
+        mobileOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      />
 
-      {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
-        {children}
-      </main>
+      {/* RIGHT LAYOUT */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* TOPBAR */}
+        <AppTopbar
+          role={activeRole}
+          username={username}
+          onMenuClick={() => setMobileOpen(true)}
+        />
+
+        {/* SCROLLABLE CONTENT */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="min-h-full px-4 py-6 md:px-6">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }
