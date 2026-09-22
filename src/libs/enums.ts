@@ -12,3 +12,11 @@ export enum TenantStatus {
 }
 
 export type TenantStatusType = (typeof TenantStatus)[keyof typeof TenantStatus];
+
+export enum Role {
+  ADMIN = "ADMIN",
+  TENANT = "TENANT",
+  STUDENT = "STUDENT",
+}
+
+export type UserRole = "ADMIN" | "TENANT" | "STUDENT";
