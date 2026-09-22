@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AesEncryptionProvider } from "@/core/security";
+import { AesEncryptionProvider } from "@/core/security/EncryptionProvider";
 
 describe("AesEncryptionProvider", () => {
   // 32-byte key in hex (64 hex characters)

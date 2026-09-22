@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NotFoundError } from "@/core/errors";
+import { NotFoundError } from "@/core/errors/NotFoundError";
 import { withApiHandler } from "@/core/http/withApiHandler";
 
 describe("withApiHandler", () => {

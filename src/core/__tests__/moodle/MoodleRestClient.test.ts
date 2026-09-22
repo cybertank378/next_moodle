@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { InfrastructureError, UnauthorizedError } from "@/core/errors";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 
 describe("MoodleRestClient", () => {

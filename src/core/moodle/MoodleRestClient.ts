@@ -1,7 +1,8 @@
 import "server-only";
 
-import { InfrastructureError } from "@/core/errors";
-import { createLogger, type Logger } from "@/core/logger";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { createLogger } from "@/core/logger/createLogger";
+import type { Logger } from "@/core/logger/Logger";
 import { encodeMoodleParams } from "./MoodleEncoder";
 import { MoodleErrorMapper } from "./MoodleErrorMapper";
 import type {

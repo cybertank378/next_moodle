@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import {
-  resolveCurrentActor,
-  type Session,
-  type SessionRepository,
-} from "@/core/auth";
-import { UnauthorizedError } from "@/core/errors";
+import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
+import type { Session } from "@/core/auth/Session";
+import type { SessionRepository } from "@/core/auth/SessionRepository";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 
 describe("resolveCurrentActor", () => {
   const activeSession: Session = {

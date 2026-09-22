@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { InMemoryRateLimiter } from "@/core/security";
+import { InMemoryRateLimiter } from "@/core/security/RateLimiter";
 
 describe("InMemoryRateLimiter", () => {
   it("should allow requests within limit and return accurate remaining count", async () => {

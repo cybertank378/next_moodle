@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createLogger } from "@/core/logger";
+import { createLogger } from "@/core/logger/createLogger";
 
 describe("createLogger", () => {
   it("should output structured JSON log with level, name, and message", () => {

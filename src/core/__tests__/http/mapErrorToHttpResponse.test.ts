@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ForbiddenError, NotFoundError } from "@/core/errors";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { NotFoundError } from "@/core/errors/NotFoundError";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 
 describe("mapErrorToHttpResponse", () => {
