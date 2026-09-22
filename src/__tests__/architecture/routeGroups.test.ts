@@ -9,7 +9,7 @@ describe("Architecture Guard: Route Groups & Directory Layout", () => {
       "src/modules",
       "src/sections",
       "src/shared-ui",
-      "src/components/ui",
+      "src/shared-ui/component",
     ];
 
     for (const dir of requiredDirs) {
