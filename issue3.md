@@ -1,178 +1,84 @@
-# Issue 03 — RBAC & Role Route Separation
+# Issue 03 — RBAC & Public/Protected Route Boundary
 
 ## Nama Issue
 
-**RBAC Permission System & Separate Admin/Tenant/Student Route Trees**
+`rbac-protected-public-boundary`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun authorization layer berbasis permission untuk tiga actor aplikasi (`ADMIN`, `TENANT`, `STUDENT`) dan memisahkan page tree agar setiap role memiliki shell, navigation boundary, dan server guard sendiri.
+Menerapkan model role/permission dan authentication boundary global `(protected)` tanpa membuat root route berdasarkan role.
 
 ## Dependency
 
-- [x] Issue 02 selesai.
+Issue 02 selesai.
 
 ## Scope Pengerjaan
 
-- `AppRole`.
-- Permission constants.
-- Role-permission map.
-- Authorization context/error.
-- `hasPermission`, `authorize`, `requireRole`, `requirePermission`.
-- Mandatory `tenantId` untuk TENANT/STUDENT.
-- Server layout guard untuk `/admin/*`, `/tenant/*`, `/student/*`.
-- Safe redirect untuk page role mismatch.
-- API tetap mengembalikan 401/403, bukan hanya redirect.
-- Test matrix role, permission, tenant spoofing.
+- [ ] Implement `AppRole`, `Permission`, `RolePermissionMap`, authorization helpers.
+- [ ] Implement `src/app/(protected)/layout.tsx` sebagai authentication boundary.
+- [ ] TENANT/STUDENT wajib memiliki `tenantId` pada actor.
+- [ ] Tambahkan reusable server permission guard untuk resource pages.
+- [ ] Pastikan unauthorized API tetap 401/403 dan UI redirect tidak menggantikan API auth.
+- [ ] Test tenant spoofing dan ownership guard primitives.
 
 ## Out of Scope
 
-- Login/session persistence sebenarnya.
-- Tenant CRUD.
-- Feature-specific ownership selain helper contract dasar.
-- UI bisnis dashboard.
+- Feature CRUD.
+- Role-specific root URL `/admin`, `/tenant`, `/student`.
+- Dashboard content feature.
 
-## Target Struktur / Deliverables
+## Target Structure / Deliverables
 
-```text
-src/core/rbac/
-├── AppRole.ts
-├── Permission.ts
-├── RolePermissionMap.ts
-├── AuthorizationContext.ts
-├── AuthorizationError.ts
-├── authorize.ts
-├── hasPermission.ts
-├── requireRole.ts
-└── requirePermission.ts
-
-src/app/(admin)/admin/layout.tsx
-src/app/(tenant)/tenant/layout.tsx
-src/app/(student)/student/layout.tsx
-```
-
-Required page roots:
-
-```text
-/admin/*
-/tenant/*
-/student/*
-```
-
-## Task Checklist
-
-### Role & Permission Model
-
-- [x] Definisikan role `ADMIN`.
-- [x] Definisikan role `TENANT`.
-- [x] Definisikan role `STUDENT`.
-- [x] Definisikan permission ADMIN sesuai planning.
-- [x] Definisikan permission TENANT sesuai planning.
-- [x] Definisikan permission STUDENT/own-resource sesuai planning.
-- [x] Implement role-permission map tunggal.
-
-### Authorization Core
-
-- [x] Implement `hasPermission` sebagai pure function.
-- [x] Implement `authorize` dengan error terstruktur.
-- [x] Implement `requireRole`.
-- [x] Implement `requirePermission`.
-- [x] Pastikan TENANT tanpa `tenantId` invalid.
-- [x] Pastikan STUDENT tanpa `tenantId` invalid.
-- [x] Pastikan ADMIN boleh memiliki `tenantId = null`.
-
-### Route Separation
-
-- [x] Buat layout `/admin` dengan guard ADMIN.
-- [x] Buat layout `/tenant` dengan guard TENANT + tenant context.
-- [x] Buat layout `/student` dengan guard STUDENT + tenant context.
-- [x] Tentukan safe redirect untuk page mismatch.
-- [x] Pastikan API helper tidak menggunakan redirect untuk authorization failure.
-
-### Tenant Isolation Guard
-
-- [x] Session/context menjadi source of truth tenant untuk TENANT/STUDENT.
-- [x] Abaikan/reject `tenantId` spoof dari body/query jika bertentangan dengan session.
-- [x] Buat helper assertion tenant scope yang dapat dipakai use case berikutnya.
-
-### Tests
-
-- [x] ADMIN dapat mengakses admin route.
-- [x] TENANT ditolak dari admin route.
-- [x] STUDENT ditolak dari admin route.
-- [x] STUDENT ditolak dari tenant route.
-- [x] TENANT ditolak dari student route jika policy tidak mengizinkan.
-- [x] Missing permission menghasilkan 403.
-- [x] Unauthenticated actor menghasilkan 401.
-- [x] TENANT tanpa tenantId ditolak.
-- [x] STUDENT tanpa tenantId ditolak.
-- [x] Spoofed tenantId tidak mengganti tenant context.
-- [x] Permission own-resource tidak otomatis memberikan akses ke resource orang lain.
+- `src/core/rbac/*`
+- `src/app/(protected)/layout.tsx`
+- RBAC tests.
 
 ## TDD Workflow
 
 ### RED
 
-- [x] Tulis seluruh role-permission matrix test sebelum guard implementation.
-- [x] Tulis regression test tenant spoofing.
+- [ ] Test role/permission matrix, tenant isolation, unauthenticated protected access harus gagal.
 
 ### GREEN
 
-- [x] Implement permission map dan guard minimum sampai test lulus.
-- [x] Integrasikan guard ke server layouts.
+- [ ] Implement guards minimum sampai test hijau.
 
 ### REFACTOR
 
-- [x] Hindari duplicate role checks tersebar di feature.
-- [x] UI navigation boleh derived dari permission, tetapi API/application guard tetap authoritative.
-- [x] Pastikan helper tetap framework-light bila memungkinkan.
+- [ ] Sederhanakan authorization helpers tanpa menyatukan authentication, authorization, tenant isolation, dan ownership menjadi satu fungsi besar.
 
 ## Acceptance Criteria
 
-- [x] Admin, Tenant, Student memiliki page shell terpisah.
-- [x] Direct URL dengan role salah diarahkan ke halaman aman.
-- [x] API authorization helper menghasilkan 401/403 yang konsisten.
-- [x] TENANT/STUDENT tidak dapat mengganti tenant scope melalui request.
-- [x] Permission helper dapat digunakan seluruh module berikutnya.
-- [x] Tenant isolation test lulus.
-
-## Definition of Done (DoD)
-
-- [x] Role dan permission constants final untuk MVP.
-- [x] Role-permission map teruji.
-- [x] Server layout guard aktif pada tiga route tree.
-- [x] API authorization helper siap dipakai.
-- [x] Tenant spoofing test GREEN.
-- [x] Tidak ada authorization yang hanya bergantung pada menu hiding.
-- [x] `npm run typecheck` lulus.
-- [x] `npm run lint` lulus.
-- [x] `npm run test` lulus.
-- [x] `npm run build` lulus.
-- [x] Tidak ada barrel export.
+- [ ] `(protected)` hanya authentication shell.
+- [ ] Page/API tetap melakukan permission guard spesifik.
+- [ ] TENANT/STUDENT tidak dapat override tenant dari payload.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [x] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [x] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [x] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [x] Tidak ada direct call **browser → Moodle**.
-- [x] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [x] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [x] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [x] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [x] Authorization tidak mengandalkan UI hiding.
-- [x] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [x] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [x] External Moodle response dimapping sebelum masuk ke application/domain.
-- [x] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [x] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [x] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -181,4 +87,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

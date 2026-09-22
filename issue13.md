@@ -1,153 +1,115 @@
-# Issue 13 — Grades & Results
+# Issue 13 — Enrolments Vertical Slice
 
 ## Nama Issue
 
-**Grades, Results & Moodle Review-Policy Enforcement for STUDENT/TENANT**
+`enrolments`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun module grades/results untuk STUDENT dan TENANT dengan Moodle tetap authoritative terhadap nilai dan visibility review/correctness.
+Tenant-scoped participant enrol/unenrol management.
 
 ## Dependency
 
-- [ ] Issue 12 selesai.
+Issue 12 selesai.
+
+## Mandatory Vertical Slice Paths
+
+Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
+
+```text
+src/modules/enrolments/
+src/sections/enrolments/
+src/app/api/enrolments/
+src/app/(protected)/dashboard/enrolments/
+src/app/(protected)/dashboard/enrolments/create/
+src/app/(protected)/dashboard/enrolments/[id]/
+src/app/(protected)/dashboard/enrolments/[id]/edit/
+```
+
+Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
 
 ## Scope Pengerjaan
 
-Pages:
-
-```text
-/student/results
-/student/results/[quizId]
-/tenant/results
-```
-
-Use cases minimum:
-
-```text
-GetQuizGradeUseCase
-GetCourseGradesUseCase
-```
-
-Tambahkan use case/query lain hanya bila benar-benar diperlukan oleh page result.
+- [ ] Buat canonical module structure lengkap.
+- [ ] Semua port di satu `domain/interfaces/EnrolmentsInterfaces.ts`.
+- [ ] Implement `GetEnrolmentsUseCase` beserta tests.
+- [ ] Implement `EnrolUserUseCase` beserta tests.
+- [ ] Implement `UnenrolUserUseCase` beserta tests.
+- [ ] Implement `UpdateEnrolmentUseCase` beserta tests.
+- [ ] Implement infrastructure repository/provider/mapper/normalizer yang diperlukan.
+- [ ] Implement controller dan API factory/routes.
+- [ ] Implement presentation hook.
+- [ ] Implement Atomic UI `atoms/molecules/organisms/pages` sesuai kebutuhan nyata.
+- [ ] Implement protected page guard + composition.
+- [ ] Tambahkan loading/error/empty state dan pagination jika list scalable.
+- [ ] Tambahkan authorization + tenant/ownership tests.
+- [ ] Verifikasi backend contract sebelum menggunakan Moodle function.
 
 ## Out of Scope
 
-- Menghitung ulang nilai di Next.js.
-- Menyimpan authoritative grade di SaaS DB.
-- Membuka correctness ketika Moodle review option melarang.
+- User CRUD dan group CRUD.
 
-## Task Checklist
+## Target Structure / Deliverables
 
-### Domain & Application
-
-- [ ] Definisikan grade/result DTO/entity/types.
-- [ ] Definisikan grade repository interface.
-- [ ] Implement `GetQuizGradeUseCase`.
-- [ ] Implement `GetCourseGradesUseCase`.
-- [ ] STUDENT hanya dapat membaca nilai sendiri.
-- [ ] TENANT hanya dapat membaca result tenant sendiri.
-- [ ] Enforce Moodle review visibility policy.
-- [ ] Model state not-graded/pending/finished dengan eksplisit.
-
-### Infrastructure
-
-- [ ] Implement Moodle grade/review repository melalui adapter.
-- [ ] Map grade values ke internal DTO.
-- [ ] Map review visibility/correctness flags.
-- [ ] Handle missing grade/not-yet-graded secara aman.
-
-### API
-
-- [ ] Implement GradeController.
-- [ ] Implement `/api/grades/_factory.ts`.
-- [ ] Implement grade routes yang dibutuhkan.
-- [ ] Integrasikan `/api/quizzes/[quizId]/grade` bila contract planning menggunakannya.
-- [ ] Apply actor/tenant/ownership checks.
-
-### Presentation & Sections
-
-- [ ] Implement `useGradeApi`.
-- [ ] Student result list.
-- [ ] Student result detail.
-- [ ] Tenant result list/table.
-- [ ] Skeleton loading.
-- [ ] EmptyState.
-- [ ] ErrorState.
-- [ ] Pagination/filter pada tenant result list bila scalable.
-- [ ] Jangan render answer correctness jika policy melarang.
-
-### Tests
-
-- [ ] STUDENT own grade success.
-- [ ] STUDENT other-user grade forbidden.
-- [ ] TENANT own tenant result success.
-- [ ] Cross-tenant result forbidden.
-- [ ] Review correctness hidden jika Moodle melarang.
-- [ ] Review correctness visible jika Moodle mengizinkan.
-- [ ] Not-yet-graded state.
-- [ ] Finished state.
-- [ ] Empty result state.
+- `src/modules/enrolments/`
+- `src/sections/enrolments/`
+- `src/app/api/enrolments/`
+- protected resource page(s)
+- Unit/application/infrastructure/UI tests
+- Contract mapping: manual enrolment Moodle APIs hanya infrastructure
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis authorization/review-policy tests sebelum implementation.
+- [ ] Tulis failing domain/use-case tests untuk happy path + validation + authorization.
+- [ ] Tulis failing repository contract tests untuk Moodle/Prisma mapping.
+- [ ] Tulis failing section/page behavior tests untuk loading/error/empty/permission state.
 
 ### GREEN
 
-- [ ] Implement grade vertical slice dan role-specific UI.
+- [ ] Implement minimum vertical slice dari domain hingga protected page.
+- [ ] Tidak boleh menunda section/API/page ke issue lain untuk feature ini.
 
 ### REFACTOR
 
-- [ ] Centralize review policy mapping.
-- [ ] Jangan duplicate grade calculation di UI.
+- [ ] Rapikan mapper/normalizer/query builder/components tanpa mengubah behavior.
+- [ ] Pastikan domain tetap bebas transport/framework detail.
 
 ## Acceptance Criteria
 
-- [ ] Moodle tetap authoritative untuk nilai.
-- [ ] Student hanya membaca result sendiri.
-- [ ] Tenant hanya membaca result tenant sendiri.
-- [ ] Correctness/review mengikuti Moodle settings.
-- [ ] Pending/not-graded ditampilkan sebagai state, bukan error generik.
-
-## Definition of Done (DoD)
-
-- [ ] Grade use cases/repository/controller/API/hook lengkap.
-- [ ] Student dan tenant result pages tersedia.
-- [ ] Ownership dan tenant isolation tests GREEN.
-- [ ] Review policy tests GREEN.
-- [ ] Tidak ada authoritative grade copy di SaaS DB.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Feature dapat digunakan end-to-end dari protected page → internal API → controller → use case → repository.
+- [ ] Semua empat boundary feature tersedia.
+- [ ] Authorization/tenant/ownership sesuai actor.
+- [ ] Moodle detail tidak bocor ke UI.
+- [ ] Tidak ada pekerjaan out-of-scope yang disisipkan.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -156,4 +118,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

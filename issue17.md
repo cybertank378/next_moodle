@@ -1,172 +1,113 @@
-# Issue 17 — Exam Monitoring
+# Issue 17 — Exam Monitoring Vertical Slice
 
 ## Nama Issue
 
-**TENANT Exam Runtime Monitoring & Proctor Administrative Actions**
+`exam-monitor`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun monitor runtime ujian untuk TENANT/proctor dengan data agregat, polling yang efisien, dan administrative actions yang diaudit serta tenant-scoped.
+Live/polling exam monitoring dan supported proctor interventions sebagai satu bounded slice.
 
 ## Dependency
 
-- [ ] Issue 16 selesai.
-- [ ] Aggregated monitor/custom Moodle API tersedia/terverifikasi.
+Issue 16 selesai.
+
+## Mandatory Vertical Slice Paths
+
+Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
+
+```text
+src/modules/exam-monitor/
+src/sections/exam-monitor/
+src/app/api/exam-monitor/
+src/app/(protected)/dashboard/exams/[id]/monitor/
+```
+
+Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
 
 ## Scope Pengerjaan
 
-Features:
-
-- active participants;
-- started/not started/finished;
-- last activity/disconnected bila backend tersedia;
-- force finish;
-- reset attempt;
-- extend time;
-- force logout;
-- audit-ready context untuk semua action.
-
-Page:
-
-```text
-/tenant/exams/[quizId]/monitor
-```
+- [ ] Buat canonical module structure lengkap.
+- [ ] Semua port di satu `domain/interfaces/ExamMonitorInterfaces.ts`.
+- [ ] Implement `GetExamMonitorUseCase` beserta tests.
+- [ ] Implement `LockAttemptUseCase` beserta tests.
+- [ ] Implement `UnlockAttemptUseCase` beserta tests.
+- [ ] Implement `ForceFinishAttemptUseCase` beserta tests.
+- [ ] Implement `ExtendAttemptTimeUseCase` beserta tests.
+- [ ] Implement infrastructure repository/provider/mapper/normalizer yang diperlukan.
+- [ ] Implement controller dan API factory/routes.
+- [ ] Implement presentation hook.
+- [ ] Implement Atomic UI `atoms/molecules/organisms/pages` sesuai kebutuhan nyata.
+- [ ] Implement protected page guard + composition.
+- [ ] Tambahkan loading/error/empty state dan pagination jika list scalable.
+- [ ] Tambahkan authorization + tenant/ownership tests.
+- [ ] Verifikasi backend contract sebelum menggunakan Moodle function.
 
 ## Out of Scope
 
-- WebSocket wajib; initial implementation menggunakan polling.
-- Browser polling per participant.
-- AI cheating/proctor evidence system (separate project/issue jika dibutuhkan).
+- AI cheating evidence, reset attempt, force logout user jika backend contract belum ada.
 
-## Task Checklist
+## Target Structure / Deliverables
 
-### Domain & Application
-
-- [ ] Definisikan monitor response DTO.
-- [ ] Definisikan active attempt/participant status DTO.
-- [ ] Definisikan monitor status types.
-- [ ] Implement `GetExamMonitorUseCase`.
-- [ ] Implement `GetActiveAttemptsUseCase` bila diperlukan terpisah.
-- [ ] Implement `ForceFinishAttemptUseCase`.
-- [ ] Implement `ResetAttemptUseCase`.
-- [ ] Implement `ExtendAttemptTimeUseCase`.
-- [ ] Implement `ForceLogoutUserUseCase`.
-- [ ] Apply read/action permissions.
-- [ ] Validate target belongs to quiz + tenant.
-
-### Infrastructure
-
-- [ ] Gunakan aggregated monitor endpoint dari custom plugin.
-- [ ] Jangan query Moodle satu kali per participant.
-- [ ] Map participant state ke internal types.
-- [ ] Map administrative action result/error.
-- [ ] Support request ID untuk audit correlation.
-
-### API
-
-- [ ] Implement ExamMonitorController.
-- [ ] Implement `/api/exam-monitor/_factory.ts`.
-- [ ] Implement quiz monitor route.
-- [ ] Implement force-finish route.
-- [ ] Implement reset route.
-- [ ] Implement extend-time route.
-- [ ] Implement force-logout route.
-- [ ] Semua mutation memerlukan `EXAM_MONITOR_ACTION`.
-
-### Presentation/UI
-
-- [ ] Implement `useExamMonitorApi`.
-- [ ] Monitor summary/header.
-- [ ] Participant status table/grid.
-- [ ] Filter status/search participant.
-- [ ] Polling dengan interval masuk akal.
-- [ ] Pause/slow polling ketika page tidak aktif bila feasible.
-- [ ] Indikator last updated.
-- [ ] Action confirmation untuk force finish/reset/logout.
-- [ ] Extend-time form validation.
-- [ ] Skeleton/empty/error state.
-
-### Audit Context
-
-- [ ] Setiap action membawa actorId/tenantId/requestId.
-- [ ] Simpan action/result metadata yang aman untuk Issue 18.
-- [ ] Jangan simpan token/raw Moodle payload pada audit.
-
-### Tests
-
-- [ ] Monitor read permission.
-- [ ] Mutation requires `EXAM_MONITOR_ACTION`.
-- [ ] Cross-tenant target rejected.
-- [ ] Target not belonging to quiz rejected.
-- [ ] Force finish success/failure.
-- [ ] Reset success/failure.
-- [ ] Extend time validation.
-- [ ] Force logout success/failure.
-- [ ] Polling uses aggregated endpoint.
-- [ ] No N+1 participant request regression.
-- [ ] UI action confirmation.
+- `src/modules/exam-monitor/`
+- `src/sections/exam-monitor/`
+- `src/app/api/exam-monitor/`
+- protected resource page(s)
+- Unit/application/infrastructure/UI tests
+- Contract mapping: local_examapi_get_exam_monitor/lock/unlock/force_finish/extend only; no invented reset/logout
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis action authorization dan N+1 regression tests terlebih dahulu.
+- [ ] Tulis failing domain/use-case tests untuk happy path + validation + authorization.
+- [ ] Tulis failing repository contract tests untuk Moodle/Prisma mapping.
+- [ ] Tulis failing section/page behavior tests untuk loading/error/empty/permission state.
 
 ### GREEN
 
-- [ ] Implement monitor vertical slice menggunakan aggregated endpoint.
+- [ ] Implement minimum vertical slice dari domain hingga protected page.
+- [ ] Tidak boleh menunda section/API/page ke issue lain untuk feature ini.
 
 ### REFACTOR
 
-- [ ] Centralize polling state.
-- [ ] Jangan menyimpan server mutable attempt state sebagai authoritative cache di client.
-- [ ] Keep action components callback-driven.
+- [ ] Rapikan mapper/normalizer/query builder/components tanpa mengubah behavior.
+- [ ] Pastikan domain tetap bebas transport/framework detail.
 
 ## Acceptance Criteria
 
-- [ ] Tenant dapat melihat runtime status exam tenant sendiri.
-- [ ] Administrative actions hanya untuk actor dengan permission.
-- [ ] Cross-tenant action ditolak.
-- [ ] Monitor tidak melakukan polling per participant.
-- [ ] Action menyediakan audit-ready context.
-
-## Definition of Done (DoD)
-
-- [ ] Monitor page lengkap.
-- [ ] Aggregated polling terimplementasi.
-- [ ] Semua administrative actions terimplementasi sesuai custom API capability.
-- [ ] RBAC/tenant target tests GREEN.
-- [ ] N+1 regression test GREEN.
-- [ ] Audit context tersedia.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Feature dapat digunakan end-to-end dari protected page → internal API → controller → use case → repository.
+- [ ] Semua empat boundary feature tersedia.
+- [ ] Authorization/tenant/ownership sesuai actor.
+- [ ] Moodle detail tidak bocor ke UI.
+- [ ] Tidak ada pekerjaan out-of-scope yang disisipkan.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -175,4 +116,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

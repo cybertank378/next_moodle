@@ -76,17 +76,22 @@ interface InputProps {
   onClick?: () => void;
 
   disabled?: boolean;
+
+  sizeClass?: string;
 }
 
 const CustomInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ value, placeholder, onClick, disabled }, ref) => {
+  ({ value, placeholder, onClick, disabled, sizeClass }, ref) => {
     return (
       <button
         ref={ref as never}
         type="button"
         disabled={disabled}
         onClick={onClick}
-        className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-300 bg-white px-4 text-left transition-all hover:border-sky-500 focus:border-sky-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-100"
+        className={clsx(
+          "flex w-full items-center justify-between rounded-xl border border-slate-300 bg-white text-left transition-all hover:border-sky-500 focus:border-sky-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-100",
+          sizeClass ?? SIZE.md,
+        )}
       >
         <span
           className={clsx(
@@ -151,7 +156,11 @@ export default function DatePicker({
         fixedHeight
         calendarStartDay={1}
         customInput={
-          <CustomInput placeholder={placeholder} disabled={disabled} />
+          <CustomInput
+            placeholder={placeholder}
+            disabled={disabled}
+            sizeClass={SIZE[size]}
+          />
         }
         renderCustomHeader={({
           date,

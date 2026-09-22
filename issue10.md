@@ -1,172 +1,115 @@
-# Issue 10 — Quizzes & Access
+# Issue 10 — Quiz Attempts — Student Exam Lifecycle Vertical Slice
 
 ## Nama Issue
 
-**Quiz Listing, Quiz Detail & Authoritative Moodle Access Check**
+`quiz-attempts`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membangun module `quizzes` untuk listing/detail ujian dan menentukan apakah STUDENT dapat memulai ujian berdasarkan hasil authoritative backend/Moodle, bukan perhitungan UI.
+Satu vertical slice lengkap untuk start/resume/load/save/summary/submit/review attempt milik STUDENT beserta exam UI.
 
 ## Dependency
 
-- [ ] Issue 09 selesai.
+Issue 09 selesai.
+
+## Mandatory Vertical Slice Paths
+
+Issue ini **wajib** menyentuh seluruh boundary feature yang relevan:
+
+```text
+src/modules/quiz-attempts/
+src/sections/quiz-attempts/
+src/app/api/quiz-attempts/
+src/app/(protected)/dashboard/exams/[id]/attempt/[attemptId]/
+```
+
+Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, dokumentasikan alasannya di issue; jangan diam-diam menghilangkan layer.
 
 ## Scope Pengerjaan
 
-Use cases:
-
-```text
-GetCourseQuizzesUseCase
-GetQuizDetailUseCase
-GetQuizAccessUseCase
-```
-
-Access states:
-
-```text
-AVAILABLE
-NOT_OPEN
-CLOSED
-ATTEMPT_LIMIT_REACHED
-PASSWORD_REQUIRED
-RESTRICTED
-```
-
-Pages:
-
-```text
-/student/exams
-/student/exams/[quizId]
-/tenant/exams
-/tenant/exams/[quizId]
-```
+- [ ] Buat canonical module structure lengkap.
+- [ ] Semua port di satu `domain/interfaces/QuizAttemptsInterfaces.ts`.
+- [ ] Implement `GetUserQuizAttemptsUseCase` beserta tests.
+- [ ] Implement `StartQuizAttemptUseCase` beserta tests.
+- [ ] Implement `GetQuizAttemptUseCase` beserta tests.
+- [ ] Implement `SaveQuizAnswerUseCase` beserta tests.
+- [ ] Implement `GetQuizAttemptSummaryUseCase` beserta tests.
+- [ ] Implement `SubmitQuizAttemptUseCase` beserta tests.
+- [ ] Implement `GetQuizAttemptReviewUseCase` beserta tests.
+- [ ] Implement infrastructure repository/provider/mapper/normalizer yang diperlukan.
+- [ ] Implement controller dan API factory/routes.
+- [ ] Implement presentation hook.
+- [ ] Implement Atomic UI `atoms/molecules/organisms/pages` sesuai kebutuhan nyata.
+- [ ] Implement protected page guard + composition.
+- [ ] Tambahkan loading/error/empty state dan pagination jika list scalable.
+- [ ] Tambahkan authorization + tenant/ownership tests.
+- [ ] Verifikasi backend contract sebelum menggunakan Moodle function.
 
 ## Out of Scope
 
-- Starting/saving/submitting attempt (Issue 11).
-- Exam creation/mutation (Issue 16).
-- Proctor monitoring (Issue 17).
+- Grades aggregate dan proctor actions.
 
-## Task Checklist
+## Target Structure / Deliverables
 
-### Domain & Application
-
-- [ ] Definisikan Quiz entity/DTO/types.
-- [ ] Definisikan access result DTO/state.
-- [ ] Implement repository interface.
-- [ ] Implement `GetCourseQuizzesUseCase`.
-- [ ] Implement `GetQuizDetailUseCase`.
-- [ ] Implement `GetQuizAccessUseCase`.
-- [ ] Jangan menghitung access hanya dari client timestamp.
-- [ ] Validate quiz-course-tenant relationship.
-
-### Infrastructure
-
-- [ ] Integrasikan `mod_quiz_get_quizzes_by_courses`.
-- [ ] Integrasikan access information endpoint yang diperlukan.
-- [ ] Integrasikan required qtypes check bila diperlukan.
-- [ ] Map Moodle access reason ke internal access state.
-- [ ] Map invalid quiz ke safe error.
-
-### API
-
-- [ ] Implement QuizController.
-- [ ] Implement `/api/quizzes/_factory.ts`.
-- [ ] Implement `/api/quizzes/[quizId]`.
-- [ ] Implement `/api/quizzes/[quizId]/access`.
-- [ ] Siapkan `/api/quizzes/[quizId]/attempts` boundary untuk Issue 11 tanpa business logic duplikat.
-
-### Presentation & UI
-
-- [ ] Implement `useQuizApi`.
-- [ ] Student exam list.
-- [ ] Student quiz detail.
-- [ ] Tenant exam read/list/detail.
-- [ ] Tampilkan access reason yang user-friendly tanpa raw Moodle exception.
-- [ ] Enable “Mulai Ujian” hanya jika backend access state `AVAILABLE` atau state yang memang memungkinkan flow password.
-- [ ] Loading/empty/error state.
-
-### Security/RBAC
-
-- [ ] Student quiz harus tenant-scoped.
-- [ ] Student harus memiliki course/quiz access yang sah.
-- [ ] Tenant tidak dapat membaca quiz tenant lain.
-- [ ] API permission checks aktif.
-
-### Tests
-
-- [ ] AVAILABLE state.
-- [ ] NOT_OPEN state.
-- [ ] CLOSED state.
-- [ ] ATTEMPT_LIMIT_REACHED state.
-- [ ] PASSWORD_REQUIRED state.
-- [ ] RESTRICTED state.
-- [ ] Wrong tenant/course relation rejected.
-- [ ] Invalid quiz safely mapped.
-- [ ] Start button disabled untuk denied states.
-- [ ] UI tidak merekonstruksi access rule dari timestamp saja.
+- `src/modules/quiz-attempts/`
+- `src/sections/quiz-attempts/`
+- `src/app/api/quiz-attempts/`
+- protected resource page(s)
+- Unit/application/infrastructure/UI tests
+- Contract mapping: student token identity + Moodle attempt state authoritative; autosave/submit race dan ownership diuji
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis access-state mapping/use-case/UI tests lebih dahulu.
+- [ ] Tulis failing domain/use-case tests untuk happy path + validation + authorization.
+- [ ] Tulis failing repository contract tests untuk Moodle/Prisma mapping.
+- [ ] Tulis failing section/page behavior tests untuk loading/error/empty/permission state.
 
 ### GREEN
 
-- [ ] Implement quiz vertical slice dan access endpoint integration.
+- [ ] Implement minimum vertical slice dari domain hingga protected page.
+- [ ] Tidak boleh menunda section/API/page ke issue lain untuk feature ini.
 
 ### REFACTOR
 
-- [ ] Centralize access reason mapping.
-- [ ] Jangan duplicate quiz DTO antara tenant/student jika contract sama.
-- [ ] Jaga role-specific composition di sections/pages.
+- [ ] Rapikan mapper/normalizer/query builder/components tanpa mengubah behavior.
+- [ ] Pastikan domain tetap bebas transport/framework detail.
 
 ## Acceptance Criteria
 
-- [ ] Quiz listing/detail tersedia untuk actor yang berhak.
-- [ ] Access result berasal dari backend/Moodle authoritative rule.
-- [ ] “Mulai Ujian” tidak aktif pada denied state.
-- [ ] Cross-tenant/cross-course access ditolak.
-- [ ] Raw Moodle error tidak tampil di UI.
-
-## Definition of Done (DoD)
-
-- [ ] Quiz domain/application/repository/controller/API/hook lengkap.
-- [ ] Tenant/student quiz pages tersedia.
-- [ ] Semua access state memiliki test.
-- [ ] Permission/tenant isolation tests GREEN.
-- [ ] Loading/empty/error UI tersedia.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Feature dapat digunakan end-to-end dari protected page → internal API → controller → use case → repository.
+- [ ] Semua empat boundary feature tersedia.
+- [ ] Authorization/tenant/ownership sesuai actor.
+- [ ] Moodle detail tidak bocor ke UI.
+- [ ] Tidak ada pekerjaan out-of-scope yang disisipkan.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -175,4 +118,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.

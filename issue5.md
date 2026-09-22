@@ -2,196 +2,86 @@
 
 ## Nama Issue
 
-**Server-Only Moodle REST Adapter, Tenant Credential Encryption & Connection Handshake**
+`moodle-rest-adapter-security`
 
-## Tujuan
+## Bounded Engineering Objective
 
-Membuat satu-satunya jalur komunikasi Next.js → Moodle serta mekanisme aman untuk mengambil/dekripsi credential service per tenant.
+Menyediakan satu server-only Moodle REST transport yang aman, tenant-aware, mampu nested form encoding, timeout, error normalization, safe-read retry, health/version/capability preflight, dan credential resolution dari tenant.
 
 ## Dependency
 
-- [ ] Issue 04 selesai.
+Issue 04 selesai.
 
 ## Scope Pengerjaan
 
-- `MoodleRestClient` server-only.
-- Moodle nested parameter encoder.
-- Timeout dan response parsing.
-- Moodle exception mapping.
-- Secret-safe logging.
-- `MoodleClientFactory` tenant-aware.
-- `MoodleCredentialProvider`.
-- AES-256-GCM encryption/decryption.
-- Tenant-specific key derivation.
-- SSRF validation Moodle URL.
-- `TestMoodleConnectionUseCase`.
-- Admin/proctor token health handshake.
+- [ ] Implement `src/core/moodle/MoodleRestClient.ts` server-only.
+- [ ] Implement nested Moodle parameter encoder.
+- [ ] Implement timeout budget dan retry hanya untuk safe/idempotent reads.
+- [ ] Implement Moodle error mapper tanpa raw exception leak.
+- [ ] Implement `MoodleCredentialProvider` tenant-aware dari encrypted SaaS store.
+- [ ] Implement `MoodleClientFactory` yang menerima validated tenant context.
+- [ ] Implement health/API version/capabilities preflight terhadap `local_examapi`.
+- [ ] SSRF/base URL validation dan TLS policy.
+- [ ] Contract tests untuk `local_examapi` apiVersion/component.
 
 ## Out of Scope
 
-- Feature repository courses/quizzes/attempts.
-- Admin UI connection diagnostics.
-- Browser access ke Moodle token.
+- Feature page/UI.
+- Authentication flow.
+- Tenant CRUD tambahan.
 
-## Target Struktur / Deliverables
+## Target Structure / Deliverables
 
-```text
-src/core/moodle/
-├── MoodleRestClient.ts
-├── MoodleClientFactory.ts
-├── MoodleCredentialProvider.ts
-├── MoodleErrorMapper.ts
-└── types/
-    ├── MoodleExceptionResponse.ts
-    └── MoodleRequestParameters.ts
-
-src/core/security/
-└── EncryptionProvider.ts
-```
-
-Tenant module tambahan:
-
-```text
-src/modules/tenant/application/usecases/TestMoodleConnectionUseCase.ts
-src/modules/tenant/infrastructure/providers/EncryptedTenantCredentialProvider.ts
-src/app/api/tenants/[tenantId]/connection-test/route.ts
-```
-
-## Task Checklist
-
-### Moodle REST Client
-
-- [ ] Tambahkan `import "server-only"` pada adapter yang relevan.
-- [ ] Implement POST request ke Moodle REST endpoint.
-- [ ] Implement scalar parameter encoding.
-- [ ] Implement array parameter encoding.
-- [ ] Implement nested object/list parameter encoding sesuai Moodle REST.
-- [ ] Implement bounded timeout.
-- [ ] Handle non-2xx HTTP response.
-- [ ] Handle malformed JSON.
-- [ ] Detect Moodle exception payload.
-- [ ] Map Moodle exception ke application-safe error.
-- [ ] Attach request/correlation ID.
-- [ ] Redact token/authorization/password dari log.
-
-### Credential Security
-
-- [ ] Implement AES-256-GCM.
-- [ ] Gunakan 12-byte random IV per encryption.
-- [ ] Gunakan authentication tag.
-- [ ] Gunakan tenant-specific key derivation/HKDF dari master key.
-- [ ] Master key hanya berasal dari server environment.
-- [ ] Pastikan decrypt Tenant A tidak dapat digunakan sebagai credential Tenant B.
-- [ ] Pastikan plaintext credential tidak persist/log.
-
-### SSRF Protection
-
-- [ ] Validasi scheme hanya HTTPS untuk production policy.
-- [ ] Reject malformed URL.
-- [ ] Reject loopback/private/link-local target sesuai deployment policy.
-- [ ] Prevent credential URL injection/redirection ke host tidak terpercaya.
-- [ ] Test redirect/host validation bila HTTP client mengikuti redirect.
-
-### Client Factory
-
-- [ ] Factory menerima tenant context tervalidasi.
-- [ ] Factory mengambil credential tenant yang benar.
-- [ ] Factory tidak menerima arbitrary token dari browser.
-- [ ] Factory tidak mencampur credential antar tenant.
-
-### Moodle Connection Test
-
-- [ ] Implement `TestMoodleConnectionUseCase`.
-- [ ] Validate admin/service token via site info.
-- [ ] Validate proctor token via site info bila dikonfigurasi.
-- [ ] Validate custom plugin health endpoint.
-- [ ] Return diagnostic DTO tanpa secret.
-- [ ] Include latency/release/site metadata yang aman.
-
-### API
-
-- [ ] Tambahkan connection-test controller action.
-- [ ] Tambahkan route `/api/tenants/[tenantId]/connection-test`.
-- [ ] Enforce `TENANT_CONNECTION_TEST`/ADMIN permission sesuai permission map.
-
-### Tests
-
-- [ ] Scalar encoding.
-- [ ] Array encoding.
-- [ ] Nested encoding.
-- [ ] Moodle exception mapping.
-- [ ] HTTP timeout.
-- [ ] Non-200 response.
-- [ ] Malformed JSON.
-- [ ] Secret redaction.
-- [ ] Cross-tenant credential rejection.
-- [ ] Invalid SSRF target rejection.
-- [ ] Invalid token handshake.
-- [ ] Plugin health mismatch.
-- [ ] Successful connection diagnostic.
+- `src/core/moodle/*` dan tests.
+- Credential decryption path server-only.
+- Compatibility/preflight result type.
 
 ## TDD Workflow
 
 ### RED
 
-- [ ] Tulis adapter/encryption/SSRF/handshake tests sebelum implementation.
+- [ ] RED tests untuk nested encoding, invalid token mapping, timeout, retry mutation prohibition, tenant token isolation, SSRF rejection, redaction.
 
 ### GREEN
 
-- [ ] Implement minimum secure adapter sampai tests lulus.
+- [ ] Implement minimum client/factory/provider sampai hijau.
 
 ### REFACTOR
 
-- [ ] Centralize parameter encoding/error mapping.
-- [ ] Pastikan feature layer tidak perlu mengetahui token atau Moodle endpoint format.
-- [ ] Pastikan semua server-only boundary eksplisit.
+- [ ] Refactor transport, mapping, and secret handling; no feature-specific logic in core client.
 
 ## Acceptance Criteria
 
-- [ ] Seluruh komunikasi Next.js → Moodle melewati adapter ini.
-- [ ] `MoodleRestClient` tidak dapat masuk browser bundle.
-- [ ] Token tidak tampil pada browser/log/error response.
-- [ ] Credential tenant dienkripsi at rest.
-- [ ] Tenant A credential tidak dapat dipakai untuk Tenant B.
-- [ ] Connection test dapat memvalidasi token dan plugin health.
-
-## Definition of Done (DoD)
-
-- [ ] Adapter test mencakup happy/error/timeout/exception paths.
-- [ ] Encryption round-trip dan cross-tenant negative test GREEN.
-- [ ] SSRF validation test GREEN.
-- [ ] Connection handshake test GREEN.
-- [ ] Tidak ada feature yang melakukan raw Moodle fetch di luar adapter.
-- [ ] Tidak ada raw token pada client-side state/network response.
-- [ ] `npm run typecheck` lulus.
-- [ ] `npm run lint` lulus.
-- [ ] `npm run test` lulus.
-- [ ] `npm run build` lulus.
-- [ ] Tidak ada barrel export.
+- [ ] Tidak ada direct Moodle `fetch` di module lain.
+- [ ] Token Tenant A tidak dapat dipakai untuk Tenant B.
+- [ ] Missing required Moodle function menghasilkan incompatible state, bukan silent fallback.
 
 ## Global Constraints
 
-Checklist berikut berlaku selama pengerjaan issue ini:
-
-- [ ] Mengikuti **TDD RED → GREEN → REFACTOR** untuk behavior yang dapat diuji.
-- [ ] TypeScript `strict` tetap aktif dan tidak dimatikan untuk melewati error.
-- [ ] Semua error/warning Biome yang terkait perubahan diselesaikan.
-- [ ] Tidak ada direct call **browser → Moodle**.
-- [ ] Tidak ada direct SQL dari Next.js ke database Moodle.
-- [ ] Moodle token, password, credential, secret, atau stack trace tidak masuk response browser maupun log.
-- [ ] Route handler tetap tipis: parse request → resolve context → panggil controller/factory → return response.
-- [ ] Business rule berada di domain/application, bukan di `route.ts` atau komponen UI.
-- [ ] Authorization tidak mengandalkan UI hiding.
-- [ ] Tenant isolation diperiksa untuk seluruh operasi tenant-scoped.
-- [ ] Ownership diperiksa untuk seluruh resource milik STUDENT.
-- [ ] External Moodle response dimapping sebelum masuk ke application/domain.
-- [ ] Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) tidak bocor ke presentation/UI.
-- [ ] Tidak membuat abstraction/folder kosong hanya untuk memenuhi template.
-- [ ] **Dilarang membuat barrel `index.ts` / `index.tsx`; semua import menggunakan concrete file path.**
+- **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.
+- TDD wajib **RED → GREEN → REFACTOR**. Production code tidak ditulis sebelum failing test yang relevan tersedia untuk behavior baru/bug fix.
+- TypeScript `strict`; hindari `any`, `@ts-ignore`, `@ts-nocheck`, dan suppression luas.
+- Biome wajib konsisten.
+- Tidak menggunakan barrel export `index.ts` / `index.tsx` untuk re-export project.
+- Domain tidak boleh import React, Next.js, Prisma, `fetch`, Moodle client, atau infrastructure.
+- Semua dependency contract milik feature berada pada satu file `src/modules/{feature}/domain/interfaces/{Feature}Interfaces.ts`.
+- Dilarang membuat `application/interfaces`, `infrastructure/interfaces`, `presentation/interfaces`, atau interface dependency lokal di file use case.
+- Application/use case hanya bergantung pada domain contract; infrastructure mengimplementasikan domain contract.
+- Browser tidak pernah memanggil Moodle langsung.
+- Next.js tidak pernah direct SQL ke database Moodle.
+- Moodle tetap source of truth untuk user akademik, enrolment, course, quiz, question, attempt, answer, review, dan grade.
+- Token Moodle, credential, password, session secret, raw exception, dan stack trace tidak boleh bocor ke browser/log.
+- `route.ts` harus tipis: parse input → resolve actor/context → controller → standardized response.
+- Nama fungsi Moodle (`core_*`, `mod_quiz_*`, `local_examapi_*`) hanya boleh muncul di infrastructure adapter/repository/provider.
+- Page `src/app/(protected)/dashboard/**/page.tsx` harus tipis dan hanya melakukan guard + composition.
+- TENANT/STUDENT tenant scope berasal dari trusted session/current actor, bukan request body/query.
+- STUDENT own-resource selalu memerlukan ownership enforcement.
+- Feature list/table memakai Pagination, Skeleton, dan EmptyState sesuai shared component yang ada; EmptyState tidak boleh menutup header/filter/table header.
+- Jangan membuat folder/abstraction kosong hanya untuk memenuhi template.
 
 ## Verification
 
-Jalankan seluruh command berikut dan pastikan semuanya lulus:
+Jalankan minimal:
 
 ```bash
 npm run typecheck
@@ -200,4 +90,16 @@ npm run test
 npm run build
 ```
 
-Jika issue menambahkan integration/E2E test, jalankan command test tambahan yang relevan sebelum issue ditutup.
+Jika issue menyentuh subset test tertentu, jalankan subset tersebut selama RED/GREEN lalu tetap jalankan quality gate penuh sebelum issue dinyatakan selesai.
+
+## Completion Report
+
+Saat selesai, laporkan:
+
+1. failing test yang membuktikan fase **RED**;
+2. implementasi minimum pada fase **GREEN**;
+3. refactor yang dilakukan tanpa mengubah behavior;
+4. file/path yang berubah;
+5. hasil `typecheck`, `lint`, `test`, dan `build`;
+6. blocker/backend contract yang belum tersedia, bila ada;
+7. konfirmasi bahwa tidak ada pekerjaan issue berikutnya yang dikerjakan lebih awal.
