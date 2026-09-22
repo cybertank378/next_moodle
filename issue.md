@@ -34,20 +34,20 @@ src/
 
 ## Scope Pengerjaan
 
-- [ ] Validasi versi Next.js terpasang dan baca dokumentasi lokal `node_modules/next/dist/docs/` sebelum menulis code.
-- [ ] Konfigurasi TypeScript strict (`strict: true`, tidak ada `any`, `@ts-ignore`, `@ts-nocheck`).
-- [ ] Konfigurasi Biome (`biome.json`) dan tambahkan scripts quality gate (`typecheck`, `lint`, `lint:fix`, `test`, `build`) ke `package.json`.
-- [ ] Konfigurasi Vitest + coverage baseline; pastikan minimal satu test architecture guard.
-- [ ] Konfigurasi Prisma 7 untuk database SaaS metadata-only; generate client; validasi `prisma.config.ts`.
-- [ ] Buat root structure: `src/app`, `src/core`, `src/modules`, `src/sections`, `src/shared-ui`.
-- [ ] Buat route group placeholder `(public)` dan `(protected)` — tanpa `(admin)/(tenant)/(student)`.
-- [ ] Tambahkan architecture guard tests yang menolak:
+- [x] Validasi versi Next.js terpasang dan baca dokumentasi lokal `node_modules/next/dist/docs/` sebelum menulis code.
+- [x] Konfigurasi TypeScript strict (`strict: true`, tidak ada `any`, `@ts-ignore`, `@ts-nocheck`).
+- [x] Konfigurasi Biome (`biome.json`) dan tambahkan scripts quality gate (`typecheck`, `lint`, `lint:fix`, `test`, `build`) ke `package.json`.
+- [x] Konfigurasi Vitest + coverage baseline; pastikan minimal satu test architecture guard.
+- [x] Konfigurasi Prisma 7 untuk database SaaS metadata-only; generate client; validasi `prisma.config.ts`.
+- [x] Buat root structure: `src/app`, `src/core`, `src/modules`, `src/sections`, `src/shared-ui`.
+- [x] Buat route group placeholder `(public)` dan `(protected)` — tanpa `(admin)/(tenant)/(student)`.
+- [x] Tambahkan architecture guard tests yang menolak:
   - barrel project (`index.ts`/`index.tsx` re-export);
   - direct Moodle call dari UI/presentation/domain;
   - import infrastructure dari domain.
-- [ ] Tambahkan path alias `@/` → `src/` (dan alias lain bila diperlukan) di `tsconfig.json`.
-- [ ] Root `src/app/page.tsx` hanya melakukan redirect berdasarkan auth state; tidak ada feature bisnis.
-- [ ] Root `src/app/layout.tsx` mendefinisikan layout global (font, metadata, provider minimal).
+- [x] Tambahkan path alias `@/` → `src/` (dan alias lain bila diperlukan) di `tsconfig.json`.
+- [x] Root `src/app/page.tsx` hanya melakukan redirect berdasarkan auth state; tidak ada feature bisnis.
+- [x] Root `src/app/layout.tsx` mendefinisikan layout global (font, metadata, provider minimal).
 
 ## Out of Scope
 
@@ -75,32 +75,32 @@ src/
 
 ### RED
 
-- [ ] Architecture test gagal ketika fixture membuat barrel `index.ts` yang meng-re-export project files.
-- [ ] Architecture test gagal ketika fixture domain mengimport dari `infrastructure/`.
-- [ ] Architecture test gagal ketika fixture UI mengimport Moodle adapter langsung.
-- [ ] Route-group expectation test gagal sebelum folder `(public)` dan `(protected)` tersedia.
+- [x] Architecture test gagal ketika fixture membuat barrel `index.ts` yang meng-re-export project files.
+- [x] Architecture test gagal ketika fixture domain mengimport dari `infrastructure/`.
+- [x] Architecture test gagal ketika fixture UI mengimport Moodle adapter langsung.
+- [x] Route-group expectation test gagal sebelum folder `(public)` dan `(protected)` tersedia.
 
 ### GREEN
 
-- [ ] Buat struktur folder dan config minimum sampai semua architecture tests hijau.
-- [ ] Pastikan `npm run typecheck`, `npm run lint`, `npm run test`, dan `npm run build` lulus.
+- [x] Buat struktur folder dan config minimum sampai semua architecture tests hijau.
+- [x] Pastikan `npm run typecheck`, `npm run lint`, `npm run test`, dan `npm run build` lulus.
 
 ### REFACTOR
 
-- [ ] Rapikan config dan alias tanpa melemahkan architecture rules; seluruh test tetap hijau.
-- [ ] Hapus folder/file kosong yang tidak memiliki tanggung jawab nyata.
+- [x] Rapikan config dan alias tanpa melemahkan architecture rules; seluruh test tetap hijau.
+- [x] Hapus folder/file kosong yang tidak memiliki tanggung jawab nyata.
 
 ## Acceptance Criteria
 
-- [ ] `npm run typecheck` lulus tanpa error.
-- [ ] `npm run lint` lulus tanpa error.
-- [ ] `npm run test` lulus; architecture guard tests ada dan hijau.
-- [ ] `npm run build` berhasil.
-- [ ] Tidak ada feature business prematur.
-- [ ] `(public)` dan `(protected)` menjadi satu-satunya page route-group utama pada issue ini.
-- [ ] Architecture guard dapat menangkap minimal: barrel export, forbidden domain→infrastructure import, dan UI→Moodle direct call.
-- [ ] Prisma client ter-generate dan `prisma.config.ts` valid.
-- [ ] Tidak ada `index.ts`/`index.tsx` project-authored barrel di `src/`.
+- [x] `npm run typecheck` lulus tanpa error.
+- [x] `npm run lint` lulus tanpa error.
+- [x] `npm run test` lulus; architecture guard tests ada dan hijau.
+- [x] `npm run build` berhasil.
+- [x] Tidak ada feature business prematur.
+- [x] `(public)` dan `(protected)` menjadi satu-satunya page route-group utama pada issue ini.
+- [x] Architecture guard dapat menangkap minimal: barrel export, forbidden domain→infrastructure import, dan UI→Moodle direct call.
+- [x] Prisma client ter-generate dan `prisma.config.ts` valid.
+- [x] Tidak ada `index.ts`/`index.tsx` project-authored barrel di `src/`.
 
 ## Global Constraints
 

@@ -1,0 +1,8 @@
+# Bootstrap placeholder — protected route group
+#
+# This directory is the foundation boundary for authenticated pages
+# established in Issue 01 (Bootstrap & Architecture Guardrails).
+#
+# Issue 03 (RBAC) further splits this into (admin)/(tenant)/(student)
+# sub-groups with layout guards. The placeholder itself remains as
+# the canonical bootstrap boundary marker.
