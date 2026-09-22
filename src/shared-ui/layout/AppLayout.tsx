@@ -1,5 +1,8 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { ROUTES } from "@/libs/routes";
 
 export interface AppLayoutProps {
   userRole?: string;
@@ -12,34 +15,41 @@ export default function AppLayout({
   username = "User",
   children,
 }: AppLayoutProps) {
-  const getRolePrefix = (r: string) => {
+  const router = useRouter();
+
+  const getDashboardRoute = (r: string) => {
     switch (r.toUpperCase()) {
       case "ADMIN":
       case "SUPERADMIN":
-        return "/admin";
+        return ROUTES.ADMIN.DASHBOARD;
       case "TENANT":
       case "TENANT_ADMIN":
-        return "/tenant";
+        return ROUTES.TENANT.DASHBOARD;
       case "STUDENT":
-        return "/student";
+        return ROUTES.STUDENT.DASHBOARD;
       default:
-        return "/dashboard";
+        return ROUTES.HOME;
     }
   };
 
-  const prefix = getRolePrefix(userRole);
+  const dashboardRoute = getDashboardRoute(userRole);
+
+  const handleLogout = () => {
+    router.push(ROUTES.AUTH.LOGIN);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1e1e2d] text-gray-200">
       {/* App Header Navigation */}
       <header className="h-16 border-b border-slate-800 bg-[#151521] px-6 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link
-            href={`${prefix}/dashboard`}
-            className="text-lg font-bold text-white tracking-wide"
+          <button
+            type="button"
+            onClick={() => router.push(dashboardRoute)}
+            className="text-lg font-bold text-white tracking-wide hover:text-indigo-300 transition-colors"
           >
             Exam SaaS
-          </Link>
+          </button>
           <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
             {userRole}
           </span>
@@ -48,12 +58,13 @@ export default function AppLayout({
           <span className="text-sm text-gray-400">
             Hai, <strong className="text-gray-200">{username}</strong>
           </span>
-          <Link
-            href="/login"
+          <button
+            type="button"
+            onClick={handleLogout}
             className="text-xs text-red-400 hover:text-red-300 transition-colors"
           >
             Keluar
-          </Link>
+          </button>
         </div>
       </header>
 

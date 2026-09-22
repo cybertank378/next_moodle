@@ -1,6 +1,11 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/libs/routes";
 
 export default function ForbiddenPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#1e1e2d] text-gray-200 p-6 text-center">
       <div className="max-w-md w-full p-8 rounded-xl bg-[#151521] border border-slate-800 shadow-2xl">
@@ -11,18 +16,20 @@ export default function ForbiddenPage() {
           masuk dengan akun yang memiliki hak akses yang sesuai.
         </p>
         <div className="flex justify-center gap-4">
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={() => router.push(ROUTES.HOME)}
             className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors"
           >
             Kembali ke Beranda
-          </Link>
-          <Link
-            href="/login"
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push(ROUTES.AUTH.LOGIN)}
             className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors"
           >
             Login Ulang
-          </Link>
+          </button>
         </div>
       </div>
     </div>
