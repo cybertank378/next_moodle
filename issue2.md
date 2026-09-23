@@ -14,13 +14,13 @@ Issue 01 selesai.
 
 ## Scope Pengerjaan
 
-- [ ] Implement `src/core/base/*` yang benar-benar digunakan.
-- [ ] Implement standard `ApiResponse`, `ApiErrorResponse`, `withApiHandler`.
-- [ ] Implement request/correlation ID.
-- [ ] Implement logger dengan secret redaction.
-- [ ] Implement `CurrentActor` dan session contracts tingkat core.
-- [ ] Implement common pagination types/helpers.
-- [ ] Unit test setiap primitive dan error mapping generik.
+- [x] Implement `src/core/base/*` yang benar-benar digunakan.
+- [x] Implement standard `ApiResponse`, `ApiErrorResponse`, `withApiHandler`.
+- [x] Implement request/correlation ID.
+- [x] Implement logger dengan secret redaction.
+- [x] Implement `CurrentActor` dan session contracts tingkat core.
+- [x] Implement common pagination types/helpers.
+- [x] Unit test setiap primitive dan error mapping generik.
 
 ## Out of Scope
 
