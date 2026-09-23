@@ -1,0 +1,1 @@
+export const TERMS_CONTENT = `Dengan menggunakan platform ini, Anda menyetujui untuk menjaga keamanan akun, memberikan data yang benar, dan menggunakan layanan sesuai peraturan yang berlaku.\n\nData akademik dan akun hanya boleh digunakan untuk tujuan pembelajaran, ujian, dan administrasi yang sah.`;
