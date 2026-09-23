@@ -1,7 +1,7 @@
-import { requireTenantsAdmin } from "@/modules/tenants/presentation/server/requireTenantsAdmin";
+import { requireTenantAdmin } from "@/modules/tenant/presentation/server/requireTenantAdmin";
 import TenantCreateView from "@/sections/tenants/organisms/TenantCreateView";
 
 export default async function CreateTenantPage() {
-  await requireTenantsAdmin();
+  await requireTenantAdmin();
   return <TenantCreateView />;
 }

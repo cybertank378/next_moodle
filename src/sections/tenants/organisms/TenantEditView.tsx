@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
+import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {
   type TenantFormValue,
 } from "@/sections/tenants/molecules/TenantForm";
@@ -12,7 +12,7 @@ export default function TenantEditView() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { detailState, mutationState, getTenant, updateTenant } =
-    useTenantsApi();
+    useTenantApi();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

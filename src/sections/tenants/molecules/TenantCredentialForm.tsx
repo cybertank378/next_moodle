@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import type { ConfigureTenantCredentialRequestDTO } from "@/modules/tenants/domain/dto/TenantDTOs";
+import type { ConfigureTenantCredentialRequestDTO } from "@/modules/tenant/domain/dto/TenantRequestDto";
 import Button from "@/shared-ui/component/Button";
 import TextField from "@/shared-ui/component/TextField";
 

@@ -2,14 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
+import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {
   type TenantFormValue,
 } from "@/sections/tenants/molecules/TenantForm";
 
 export default function TenantCreateView() {
   const router = useRouter();
-  const { createTenant, mutationState } = useTenantsApi();
+  const { createTenant, mutationState } = useTenantApi();
   const [error, setError] = useState<string | null>(null);
 
   async function submit(value: TenantFormValue) {

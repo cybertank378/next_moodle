@@ -2,8 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { TenantStatus } from "@/modules/tenants/domain/types/TenantTypes";
-import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantMetadata";
+import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantStatusBadge from "@/sections/tenants/atoms/TenantStatusBadge";
 import TenantCredentialForm from "@/sections/tenants/molecules/TenantCredentialForm";
 import Button from "@/shared-ui/component/Button";
@@ -21,7 +21,7 @@ export default function TenantDetailView() {
     configureCredential,
     updateTenantStatus,
     deleteTenant,
-  } = useTenantsApi();
+  } = useTenantApi();
   const [status, setStatus] = useState<TenantStatus>("ACTIVE");
   const [message, setMessage] = useState<string | null>(null);
 
