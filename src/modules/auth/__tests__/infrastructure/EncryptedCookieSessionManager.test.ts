@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
-import { EncryptedCookieSessionManager } from "@/modules/auth/infrastructure/providers/EncryptedCookieSessionManager";
+import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 
-describe("EncryptedCookieSessionManager", () => {
-  const manager = new EncryptedCookieSessionManager({
+describe("AuthRepository session persistence", () => {
+  const manager = new AuthRepository({
     secret: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     now: () => new Date("2026-09-23T07:00:00.000Z"),
   });
@@ -33,7 +33,7 @@ describe("EncryptedCookieSessionManager", () => {
   });
 
   it("rejects expired sessions", async () => {
-    const shortLived = new EncryptedCookieSessionManager({
+    const shortLived = new AuthRepository({
       secret:
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       now: () => new Date("2026-09-23T07:00:00.000Z"),
@@ -44,7 +44,7 @@ describe("EncryptedCookieSessionManager", () => {
       moodleToken: "raw-moodle-token",
     });
 
-    const expiredReader = new EncryptedCookieSessionManager({
+    const expiredReader = new AuthRepository({
       secret:
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       now: () => new Date("2026-09-23T07:00:02.000Z"),

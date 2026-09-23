@@ -7,31 +7,27 @@ import { LogoutAllUseCase } from "@/modules/auth/application/usecases/LogoutAllU
 import { LogoutUseCase } from "@/modules/auth/application/usecases/LogoutUseCase";
 import { RefreshSessionUseCase } from "@/modules/auth/application/usecases/RefreshSessionUseCase";
 import { AuthController } from "@/modules/auth/infrastructure/http/AuthController";
-import { EncryptedCookieSessionManager } from "@/modules/auth/infrastructure/providers/EncryptedCookieSessionManager";
-import { MoodleStudentAuthProvider } from "@/modules/auth/infrastructure/providers/MoodleStudentAuthProvider";
-import { PrismaTenantAuthResolver } from "@/modules/auth/infrastructure/providers/PrismaTenantAuthResolver";
+import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 
 let controller: AuthController | null = null;
-let sessionManager: EncryptedCookieSessionManager | null = null;
+let sessionManager: AuthRepository | null = null;
 
-export function getAuthSessionManager(): EncryptedCookieSessionManager {
-  sessionManager ??= new EncryptedCookieSessionManager();
+export function getAuthSessionManager(): AuthRepository {
+  sessionManager ??= new AuthRepository({}, prisma);
   return sessionManager;
 }
 
 export function getAuthController(): AuthController {
   if (controller) return controller;
 
-  const tenantResolver = new PrismaTenantAuthResolver(prisma);
-  const moodleAuth = new MoodleStudentAuthProvider();
-  const sessions = getAuthSessionManager();
+  const repository = getAuthSessionManager();
 
   controller = new AuthController({
-    login: new LoginUseCase(tenantResolver, moodleAuth, sessions),
-    getCurrentSession: new GetCurrentSessionUseCase(sessions),
-    logout: new LogoutUseCase(sessions),
-    logoutAll: new LogoutAllUseCase(sessions),
-    refresh: new RefreshSessionUseCase(sessions),
+    login: new LoginUseCase(repository, repository, repository),
+    getCurrentSession: new GetCurrentSessionUseCase(repository),
+    logout: new LogoutUseCase(repository),
+    logoutAll: new LogoutAllUseCase(repository),
+    refresh: new RefreshSessionUseCase(repository),
   });
   return controller;
 }

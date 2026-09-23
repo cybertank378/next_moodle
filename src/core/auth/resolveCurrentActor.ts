@@ -1,5 +1,5 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { EncryptedCookieSessionManager } from "@/modules/auth/infrastructure/providers/EncryptedCookieSessionManager";
+import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 import type { CurrentActor } from "./CurrentActor";
 import type { SessionRepository } from "./SessionRepository";
 
@@ -39,8 +39,7 @@ export async function resolveCurrentActor(
   }
 
   if (!sessionRepository) {
-    return (await new EncryptedCookieSessionManager().resolveSession(token))
-      .actor;
+    return (await new AuthRepository().resolveSession(token)).actor;
   }
 
   const session = await sessionRepository.findByToken(token);
