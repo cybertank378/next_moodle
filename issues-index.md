@@ -37,6 +37,7 @@ Foundation issue yang tidak memiliki business feature tidak dipaksa membuat modu
 | 20 | `issue20.md` | Security Hardening |
 | 21 | `issue21.md` | Performance & Resilience |
 | 22 | `issue22.md` | E2E, CI & Release Gate |
+| 23 | `issue23.md` | Auth Module Structural Refactor |
 
 ## Execution Rule
 
