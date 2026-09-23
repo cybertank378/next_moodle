@@ -1,38 +1,34 @@
 import "server-only";
 
+import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { prisma } from "@/libs/prisma";
-import { CreateTenantUseCase } from "@/modules/tenant/application/usecases/CreateTenantUseCase";
-import { GetTenantsUseCase } from "@/modules/tenant/application/usecases/GetTenantsUseCase";
-import { GetTenantUseCase } from "@/modules/tenant/application/usecases/GetTenantUseCase";
-import { UpdateTenantStatusUseCase } from "@/modules/tenant/application/usecases/UpdateTenantStatusUseCase";
-import { UpdateTenantUseCase } from "@/modules/tenant/application/usecases/UpdateTenantUseCase";
-import { TenantController } from "@/modules/tenant/infrastructure/http/TenantController";
-import { PrismaTenantRepository } from "@/modules/tenant/infrastructure/PrismaTenantRepository";
+import { ConfigureTenantCredentialUseCase } from "@/modules/tenants/application/usecases/ConfigureTenantCredentialUseCase";
+import { CreateTenantUseCase } from "@/modules/tenants/application/usecases/CreateTenantUseCase";
+import { DeleteTenantUseCase } from "@/modules/tenants/application/usecases/DeleteTenantUseCase";
+import { GetTenantUseCase } from "@/modules/tenants/application/usecases/GetTenantUseCase";
+import { ListTenantsUseCase } from "@/modules/tenants/application/usecases/ListTenantsUseCase";
+import { UpdateTenantStatusUseCase } from "@/modules/tenants/application/usecases/UpdateTenantStatusUseCase";
+import { UpdateTenantUseCase } from "@/modules/tenants/application/usecases/UpdateTenantUseCase";
+import { AesTenantCredentialCipher } from "@/modules/tenants/infrastructure/AesTenantCredentialCipher";
+import { TenantsController } from "@/modules/tenants/infrastructure/http/TenantsController";
+import { PrismaTenantsRepository } from "@/modules/tenants/infrastructure/PrismaTenantsRepository";
 
-function buildTenantController(): TenantController {
-  const repo = new PrismaTenantRepository(prisma);
+let controller: TenantsController | null = null;
 
-  const getTenantsUseCase = new GetTenantsUseCase(repo);
-  const getTenantUseCase = new GetTenantUseCase(repo);
-  const createTenantUseCase = new CreateTenantUseCase(repo);
-  const updateTenantUseCase = new UpdateTenantUseCase(repo);
-  const updateTenantStatusUseCase = new UpdateTenantStatusUseCase(repo);
+export function getTenantsController(): TenantsController {
+  if (controller) return controller;
 
-  return new TenantController(
-    getTenantsUseCase,
-    getTenantUseCase,
-    createTenantUseCase,
-    updateTenantUseCase,
-    updateTenantStatusUseCase,
+  const repository = new PrismaTenantsRepository(prisma);
+  const cipher = new AesTenantCredentialCipher(new AesHkdfEncryptionProvider());
+
+  controller = new TenantsController(
+    new ListTenantsUseCase(repository),
+    new GetTenantUseCase(repository),
+    new CreateTenantUseCase(repository),
+    new UpdateTenantUseCase(repository),
+    new UpdateTenantStatusUseCase(repository),
+    new DeleteTenantUseCase(repository),
+    new ConfigureTenantCredentialUseCase(repository, cipher),
   );
-}
-
-// Singleton per request lifecycle (Next.js module caching)
-let _controller: TenantController | null = null;
-
-export function getTenantController(): TenantController {
-  if (!_controller) {
-    _controller = buildTenantController();
-  }
-  return _controller;
+  return controller;
 }
