@@ -14,12 +14,12 @@ Issue 02 selesai.
 
 ## Scope Pengerjaan
 
-- [ ] Implement `AppRole`, `Permission`, `RolePermissionMap`, authorization helpers.
-- [ ] Implement `src/app/(protected)/layout.tsx` sebagai authentication boundary.
-- [ ] TENANT/STUDENT wajib memiliki `tenantId` pada actor.
-- [ ] Tambahkan reusable server permission guard untuk resource pages.
-- [ ] Pastikan unauthorized API tetap 401/403 dan UI redirect tidak menggantikan API auth.
-- [ ] Test tenant spoofing dan ownership guard primitives.
+- [x] Implement `AppRole`, `Permission`, `RolePermissionMap`, authorization helpers.
+- [x] Implement `src/app/(protected)/layout.tsx` sebagai authentication boundary.
+- [x] TENANT/STUDENT wajib memiliki `tenantId` pada actor.
+- [x] Tambahkan reusable server permission guard untuk resource pages.
+- [x] Pastikan unauthorized API tetap 401/403 dan UI redirect tidak menggantikan API auth.
+- [x] Test tenant spoofing dan ownership guard primitives.
 
 ## Out of Scope
 
@@ -37,21 +37,21 @@ Issue 02 selesai.
 
 ### RED
 
-- [ ] Test role/permission matrix, tenant isolation, unauthenticated protected access harus gagal.
+- [x] Test role/permission matrix, tenant isolation, unauthenticated protected access harus gagal.
 
 ### GREEN
 
-- [ ] Implement guards minimum sampai test hijau.
+- [x] Implement guards minimum sampai test hijau.
 
 ### REFACTOR
 
-- [ ] Sederhanakan authorization helpers tanpa menyatukan authentication, authorization, tenant isolation, dan ownership menjadi satu fungsi besar.
+- [x] Sederhanakan authorization helpers tanpa menyatukan authentication, authorization, tenant isolation, dan ownership menjadi satu fungsi besar.
 
 ## Acceptance Criteria
 
-- [ ] `(protected)` hanya authentication shell.
-- [ ] Page/API tetap melakukan permission guard spesifik.
-- [ ] TENANT/STUDENT tidak dapat override tenant dari payload.
+- [x] `(protected)` hanya authentication shell.
+- [x] Page/API tetap melakukan permission guard spesifik.
+- [x] TENANT/STUDENT tidak dapat override tenant dari payload.
 
 ## Global Constraints
 
