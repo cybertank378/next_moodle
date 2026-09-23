@@ -90,7 +90,9 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     ];
 
     for (const page of pages) {
-      expect(exists(page), `Required dashboard page missing: ${page}`).toBe(true);
+      expect(exists(page), `Required dashboard page missing: ${page}`).toBe(
+        true,
+      );
     }
   });
 

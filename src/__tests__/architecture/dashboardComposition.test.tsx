@@ -22,9 +22,9 @@ vi.mock("@/app/(protected)/dashboard/component/StudentDashboard", () => ({
 }));
 
 import AdminDashboard from "@/app/(protected)/dashboard/component/AdminDashboard";
-import DashboardPage from "@/app/(protected)/dashboard/page";
 import StudentDashboard from "@/app/(protected)/dashboard/component/StudentDashboard";
 import TenantDashboard from "@/app/(protected)/dashboard/component/TenantDashboard";
+import DashboardPage from "@/app/(protected)/dashboard/page";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
 
 describe("DashboardPage role composition", () => {
