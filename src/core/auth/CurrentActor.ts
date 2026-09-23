@@ -1,20 +1,16 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-
-export type ActorRole =
-  | "ADMIN"
-  | "TENANT"
-  | "STUDENT"
-  | "SUPERADMIN"
-  | "TENANT_ADMIN"
-  | "TEACHER"
-  | string;
+import { AppRole } from "@/core/rbac/AppRole";
 
 export interface CurrentActor {
-  userId: string;
-  username: string;
-  role: ActorRole;
-  tenantId: string;
-  email?: string;
+  readonly id?: string;
+  readonly userId: string;
+  readonly username: string;
+  readonly role: AppRole | string;
+  readonly tenantId: string | null;
+  readonly moodleUserId?: number | null;
+  readonly permissions?: readonly string[];
+  readonly email?: string;
+  readonly displayName?: string;
 }
 
 export function validateCurrentActor(actor: unknown): CurrentActor {
@@ -25,14 +21,16 @@ export function validateCurrentActor(actor: unknown): CurrentActor {
   }
 
   const candidate = actor as Partial<CurrentActor>;
+  const actorId =
+    typeof candidate.id === "string" && candidate.id.trim()
+      ? candidate.id.trim()
+      : typeof candidate.userId === "string" && candidate.userId.trim()
+        ? candidate.userId.trim()
+        : "";
 
-  if (
-    !candidate.userId ||
-    typeof candidate.userId !== "string" ||
-    candidate.userId.trim().length === 0
-  ) {
+  if (!actorId) {
     throw new ValidationError(
-      "Invalid actor: userId is required and cannot be empty.",
+      "Invalid actor: id is required and cannot be empty.",
     );
   }
 
@@ -46,26 +44,38 @@ export function validateCurrentActor(actor: unknown): CurrentActor {
     );
   }
 
-  // Cross-tenant platform superadmins may have global scope, but all tenant/student roles must have tenantId
-  const isGlobalSuperadmin = candidate.role === "SUPERADMIN";
-  if (
-    !isGlobalSuperadmin &&
-    (!candidate.tenantId ||
-      typeof candidate.tenantId !== "string" ||
-      candidate.tenantId.trim().length === 0)
-  ) {
+  if (!Object.values(AppRole).includes(candidate.role as AppRole)) {
+    throw new ValidationError("Invalid actor: unsupported role.");
+  }
+
+  const role = candidate.role as AppRole;
+  if (role !== AppRole.ADMIN && !candidate.tenantId) {
     throw new ValidationError(
       `Invalid actor: tenantId is required for actor role '${candidate.role}'.`,
     );
   }
 
   return {
-    userId: candidate.userId.trim(),
-    username: candidate.username
-      ? String(candidate.username).trim()
-      : candidate.userId.trim(),
-    role: candidate.role.trim(),
-    tenantId: candidate.tenantId ? candidate.tenantId.trim() : "",
+    id: actorId,
+    userId:
+      typeof candidate.userId === "string" && candidate.userId.trim()
+        ? candidate.userId.trim()
+        : actorId,
+    username: candidate.username ? String(candidate.username).trim() : actorId,
+    role,
+    tenantId: candidate.tenantId ? candidate.tenantId.trim() : null,
+    moodleUserId:
+      typeof candidate.moodleUserId === "number"
+        ? candidate.moodleUserId
+        : null,
+    permissions: Array.isArray(candidate.permissions)
+      ? candidate.permissions.filter(
+          (permission): permission is string => typeof permission === "string",
+        )
+      : [],
     email: candidate.email ? String(candidate.email).trim() : undefined,
+    displayName: candidate.displayName
+      ? String(candidate.displayName).trim()
+      : undefined,
   };
 }
