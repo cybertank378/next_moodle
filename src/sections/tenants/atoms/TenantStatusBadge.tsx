@@ -1,4 +1,4 @@
-import type { TenantStatus } from "@/modules/tenants/domain/types/TenantTypes";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantMetadata";
 
 const styles: Record<TenantStatus, string> = {
   ACTIVE: "bg-emerald-100 text-emerald-700",

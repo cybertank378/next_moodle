@@ -7,27 +7,29 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { HttpStatus } from "@/core/http/HttpStatus";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
-import type { AppRole } from "@/core/rbac/AppRole";
+import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import type { ConfigureTenantCredentialUseCase } from "@/modules/tenant/application/usecases/ConfigureTenantCredentialUseCase";
 import type { CreateTenantUseCase } from "@/modules/tenant/application/usecases/CreateTenantUseCase";
-import type { GetTenantsUseCase } from "@/modules/tenant/application/usecases/GetTenantsUseCase";
-import type { GetTenantUseCase } from "@/modules/tenant/application/usecases/GetTenantUseCase";
+import type { DeleteTenantUseCase } from "@/modules/tenant/application/usecases/DeleteTenantUseCase";
+import type { GetAllTenantsUseCase } from "@/modules/tenant/application/usecases/GetAllTenantsUseCase";
+import type { GetTenantByIdUseCase } from "@/modules/tenant/application/usecases/GetTenantByIdUseCase";
 import type { UpdateTenantStatusUseCase } from "@/modules/tenant/application/usecases/UpdateTenantStatusUseCase";
 import type { UpdateTenantUseCase } from "@/modules/tenant/application/usecases/UpdateTenantUseCase";
-import type { TenantDomainStatus } from "@/modules/tenant/domain/TenantTypes";
 import {
-  type ListTenantsQuery,
-  parseListTenantsQuery,
-  validateCreateTenantBody,
-  validateUpdateTenantBody,
-  validateUpdateTenantStatusBody,
-} from "@/modules/tenant/infrastructure/validators/tenantValidator";
+  parseCreateTenantBody,
+  parseCredentialBody,
+  parseListTenantQuery,
+  parseStatusBody,
+  parseUpdateTenantBody,
+} from "@/modules/tenant/infrastructure/validators/tenant.validator";
 
-/**
- * Adapts CurrentActor (session) to AuthorizationActor (RBAC).
- * ADMIN role maps to null tenantId in AuthorizationActor (platform-level actor).
- */
-function toAuthorizationActor(actor: CurrentActor): AuthorizationActor {
+function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
+  if (!Object.values(AppRole).includes(actor.role as AppRole)) {
+    throw new ValidationError(
+      "Role sesi tidak didukung oleh authorization layer.",
+    );
+  }
   return {
     id: actor.userId,
     role: actor.role as AppRole,
@@ -35,95 +37,77 @@ function toAuthorizationActor(actor: CurrentActor): AuthorizationActor {
   };
 }
 
-function toNextResponse(apiResponse: ApiResponse): NextResponse {
-  return NextResponse.json(apiResponse.body, { status: apiResponse.status });
+function respond(response: ApiResponse): NextResponse {
+  return NextResponse.json(response.body, { status: response.status });
+}
+
+async function parseJson(req: NextRequest): Promise<unknown> {
+  try {
+    return await req.json();
+  } catch {
+    throw new ValidationError("Body permintaan harus berupa JSON valid.");
+  }
 }
 
 export class TenantController {
   constructor(
-    private readonly getTenantsUseCase: GetTenantsUseCase,
-    private readonly getTenantUseCase: GetTenantUseCase,
-    private readonly createTenantUseCase: CreateTenantUseCase,
-    private readonly updateTenantUseCase: UpdateTenantUseCase,
-    private readonly updateTenantStatusUseCase: UpdateTenantStatusUseCase,
+    private readonly listTenants: GetAllTenantsUseCase,
+    private readonly getTenant: GetTenantByIdUseCase,
+    private readonly createTenant: CreateTenantUseCase,
+    private readonly updateTenant: UpdateTenantUseCase,
+    private readonly updateTenantStatus: UpdateTenantStatusUseCase,
+    private readonly deleteTenant: DeleteTenantUseCase,
+    private readonly configureCredential: ConfigureTenantCredentialUseCase,
   ) {}
 
   async list(actor: CurrentActor, req: NextRequest): Promise<NextResponse> {
     try {
-      const { searchParams } = req.nextUrl;
-      const queryParams: ListTenantsQuery = {
-        status: searchParams.get("status") ?? undefined,
-        search: searchParams.get("search") ?? undefined,
-        page: searchParams.get("page") ?? undefined,
-        pageSize: searchParams.get("pageSize") ?? undefined,
-      };
-      const filter = parseListTenantsQuery(queryParams);
-
-      const result = await this.getTenantsUseCase.execute({
-        actor: toAuthorizationActor(actor),
-        filter,
+      const result = await this.listTenants.execute({
+        actor: actorToAuthorization(actor),
+        filter: parseListTenantQuery(req.nextUrl.searchParams),
       });
-
-      if (result.isFailure) {
-        return toNextResponse(mapErrorToHttpResponse(result.getError()));
-      }
-
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
       const data = result.getValue();
-      return toNextResponse(
+      return respond(
         ApiResponse.success(data, {
           total: data.total,
           page: data.page,
           pageSize: data.pageSize,
         }),
       );
-    } catch (err) {
-      return toNextResponse(mapErrorToHttpResponse(err));
-    }
-  }
-
-  async create(actor: CurrentActor, req: NextRequest): Promise<NextResponse> {
-    try {
-      let body: unknown;
-      try {
-        body = await req.json();
-      } catch {
-        throw new ValidationError(
-          "Body permintaan harus berupa JSON yang valid.",
-        );
-      }
-
-      const data = validateCreateTenantBody(body);
-      const result = await this.createTenantUseCase.execute({
-        actor: toAuthorizationActor(actor),
-        data,
-      });
-
-      if (result.isFailure) {
-        return toNextResponse(mapErrorToHttpResponse(result.getError()));
-      }
-
-      return toNextResponse(
-        ApiResponse.success(result.getValue(), undefined, HttpStatus.CREATED),
-      );
-    } catch (err) {
-      return toNextResponse(mapErrorToHttpResponse(err));
+    } catch (error) {
+      return respond(mapErrorToHttpResponse(error));
     }
   }
 
   async getOne(actor: CurrentActor, tenantId: string): Promise<NextResponse> {
+    const result = await this.getTenant.execute({
+      actor: actorToAuthorization(actor),
+      tenantId,
+    });
+    return result.isFailure
+      ? respond(mapErrorToHttpResponse(result.getError()))
+      : respond(ApiResponse.success(result.getValue()));
+  }
+
+  async create(actor: CurrentActor, req: NextRequest): Promise<NextResponse> {
     try {
-      const result = await this.getTenantUseCase.execute({
-        actor: toAuthorizationActor(actor),
-        tenantId,
+      const result = await this.createTenant.execute({
+        actor: actorToAuthorization(actor),
+        data: parseCreateTenantBody(await parseJson(req)),
       });
-
-      if (result.isFailure) {
-        return toNextResponse(mapErrorToHttpResponse(result.getError()));
-      }
-
-      return toNextResponse(ApiResponse.success(result.getValue()));
-    } catch (err) {
-      return toNextResponse(mapErrorToHttpResponse(err));
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(
+            ApiResponse.success(
+              result.getValue(),
+              undefined,
+              HttpStatus.CREATED,
+            ),
+          );
+    } catch (error) {
+      return respond(mapErrorToHttpResponse(error));
     }
   }
 
@@ -133,29 +117,16 @@ export class TenantController {
     req: NextRequest,
   ): Promise<NextResponse> {
     try {
-      let body: unknown;
-      try {
-        body = await req.json();
-      } catch {
-        throw new ValidationError(
-          "Body permintaan harus berupa JSON yang valid.",
-        );
-      }
-
-      const data = validateUpdateTenantBody(body);
-      const result = await this.updateTenantUseCase.execute({
-        actor: toAuthorizationActor(actor),
+      const result = await this.updateTenant.execute({
+        actor: actorToAuthorization(actor),
         tenantId,
-        data,
+        data: parseUpdateTenantBody(await parseJson(req)),
       });
-
-      if (result.isFailure) {
-        return toNextResponse(mapErrorToHttpResponse(result.getError()));
-      }
-
-      return toNextResponse(ApiResponse.success(result.getValue()));
-    } catch (err) {
-      return toNextResponse(mapErrorToHttpResponse(err));
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(ApiResponse.success(result.getValue()));
+    } catch (error) {
+      return respond(mapErrorToHttpResponse(error));
     }
   }
 
@@ -165,29 +136,45 @@ export class TenantController {
     req: NextRequest,
   ): Promise<NextResponse> {
     try {
-      let body: unknown;
-      try {
-        body = await req.json();
-      } catch {
-        throw new ValidationError(
-          "Body permintaan harus berupa JSON yang valid.",
-        );
-      }
-
-      const { status } = validateUpdateTenantStatusBody(body);
-      const result = await this.updateTenantStatusUseCase.execute({
-        actor: toAuthorizationActor(actor),
+      const result = await this.updateTenantStatus.execute({
+        actor: actorToAuthorization(actor),
         tenantId,
-        status: status as TenantDomainStatus,
+        status: parseStatusBody(await parseJson(req)),
       });
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(ApiResponse.success(result.getValue()));
+    } catch (error) {
+      return respond(mapErrorToHttpResponse(error));
+    }
+  }
 
-      if (result.isFailure) {
-        return toNextResponse(mapErrorToHttpResponse(result.getError()));
-      }
+  async remove(actor: CurrentActor, tenantId: string): Promise<NextResponse> {
+    const result = await this.deleteTenant.execute({
+      actor: actorToAuthorization(actor),
+      tenantId,
+    });
+    return result.isFailure
+      ? respond(mapErrorToHttpResponse(result.getError()))
+      : respond(ApiResponse.success(result.getValue()));
+  }
 
-      return toNextResponse(ApiResponse.success(result.getValue()));
-    } catch (err) {
-      return toNextResponse(mapErrorToHttpResponse(err));
+  async configureCredentials(
+    actor: CurrentActor,
+    tenantId: string,
+    req: NextRequest,
+  ): Promise<NextResponse> {
+    try {
+      const result = await this.configureCredential.execute({
+        actor: actorToAuthorization(actor),
+        tenantId,
+        data: parseCredentialBody(await parseJson(req)),
+      });
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(ApiResponse.success(result.getValue()));
+    } catch (error) {
+      return respond(mapErrorToHttpResponse(error));
     }
   }
 }

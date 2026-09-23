@@ -2,160 +2,159 @@
 
 import { useCallback, useState } from "react";
 import type {
+  ConfigureTenantCredentialRequestDTO,
   CreateTenantRequestDTO,
-  ListTenantsResponseDTO,
-  TenantResponseDTO,
   UpdateTenantRequestDTO,
   UpdateTenantStatusRequestDTO,
-} from "@/modules/tenant/domain/TenantDTOs";
+} from "@/modules/tenant/domain/dto/TenantRequestDto";
+import type {
+  ListTenantsResponseDTO,
+  TenantResponseDTO,
+} from "@/modules/tenant/domain/dto/TenantResponseDto";
 
-interface ApiResult<T> {
+interface RequestState<T> {
   data: T | null;
   error: string | null;
   loading: boolean;
 }
 
-type FetchState<T> = {
-  data: T | null;
-  error: string | null;
-  loading: boolean;
-};
-
-function initState<T>(): FetchState<T> {
-  return { data: null, error: null, loading: false };
+interface ApiEnvelope<T> {
+  success: boolean;
+  data?: T;
+  error?: { message?: string };
 }
 
-async function apiFetch<T>(
+async function request<T>(
   url: string,
   options?: RequestInit,
 ): Promise<{ data: T | null; error: string | null }> {
-  const res = await fetch(url, {
+  const response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,
     },
   });
-
-  const json = await res.json();
-
-  if (!json.success) {
-    return { data: null, error: json.error?.message ?? "Request gagal." };
+  const body = (await response.json()) as ApiEnvelope<T>;
+  if (!response.ok || !body.success || body.data === undefined) {
+    return { data: null, error: body.error?.message ?? "Permintaan gagal." };
   }
-
-  return { data: json.data as T, error: null };
+  return { data: body.data, error: null };
 }
 
-/**
- * useTenantApi — client-side hook for tenant CRUD operations.
- * Calls the internal Next.js BFF API only; never calls Moodle directly.
- */
 export function useTenantApi() {
   const [listState, setListState] = useState<
-    FetchState<ListTenantsResponseDTO>
-  >(initState());
-  const [detailState, setDetailState] = useState<FetchState<TenantResponseDTO>>(
-    initState(),
-  );
+    RequestState<ListTenantsResponseDTO>
+  >({
+    data: null,
+    error: null,
+    loading: false,
+  });
+  const [detailState, setDetailState] = useState<
+    RequestState<TenantResponseDTO>
+  >({
+    data: null,
+    error: null,
+    loading: false,
+  });
   const [mutationState, setMutationState] = useState<
-    FetchState<TenantResponseDTO>
-  >(initState());
+    RequestState<TenantResponseDTO>
+  >({
+    data: null,
+    error: null,
+    loading: false,
+  });
 
   const listTenants = useCallback(
-    async (params?: {
-      status?: string;
+    async (params: {
+      page: number;
+      pageSize: number;
       search?: string;
-      page?: number;
-      pageSize?: number;
+      status?: string;
     }) => {
       setListState({ data: null, error: null, loading: true });
-
-      const query = new URLSearchParams();
-      if (params?.status) query.set("status", params.status);
-      if (params?.search) query.set("search", params.search);
-      if (params?.page != null) query.set("page", String(params.page));
-      if (params?.pageSize != null)
-        query.set("pageSize", String(params.pageSize));
-
-      const url = `/api/tenants${query.toString() ? `?${query}` : ""}`;
-      const { data, error } = await apiFetch<ListTenantsResponseDTO>(url);
-
-      setListState({ data, error, loading: false });
-      return { data, error };
+      const query = new URLSearchParams({
+        page: String(params.page),
+        pageSize: String(params.pageSize),
+      });
+      if (params.search) query.set("search", params.search);
+      if (params.status) query.set("status", params.status);
+      const result = await request<ListTenantsResponseDTO>(
+        `/api/tenants?${query}`,
+      );
+      setListState({ ...result, loading: false });
+      return result;
     },
     [],
   );
 
-  const getTenant = useCallback(
-    async (tenantId: string): Promise<ApiResult<TenantResponseDTO>> => {
-      setDetailState({ data: null, error: null, loading: true });
-      const { data, error } = await apiFetch<TenantResponseDTO>(
-        `/api/tenants/${tenantId}`,
-      );
-      setDetailState({ data, error, loading: false });
-      return { data, error, loading: false };
+  const getTenant = useCallback(async (tenantId: string) => {
+    setDetailState({ data: null, error: null, loading: true });
+    const result = await request<TenantResponseDTO>(`/api/tenants/${tenantId}`);
+    setDetailState({ ...result, loading: false });
+    return result;
+  }, []);
+
+  const mutate = useCallback(
+    async (url: string, method: string, body?: unknown) => {
+      setMutationState({ data: null, error: null, loading: true });
+      const result = await request<TenantResponseDTO>(url, {
+        method,
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+      setMutationState({ ...result, loading: false });
+      return result;
     },
     [],
   );
 
   const createTenant = useCallback(
-    async (
-      body: CreateTenantRequestDTO,
-    ): Promise<ApiResult<TenantResponseDTO>> => {
-      setMutationState({ data: null, error: null, loading: true });
-      const { data, error } = await apiFetch<TenantResponseDTO>(
-        "/api/tenants",
-        {
-          method: "POST",
-          body: JSON.stringify(body),
-        },
-      );
-      setMutationState({ data, error, loading: false });
-      return { data, error, loading: false };
-    },
-    [],
+    (body: CreateTenantRequestDTO) => mutate("/api/tenants", "POST", body),
+    [mutate],
   );
 
   const updateTenant = useCallback(
-    async (
-      tenantId: string,
-      body: UpdateTenantRequestDTO,
-    ): Promise<ApiResult<TenantResponseDTO>> => {
-      setMutationState({ data: null, error: null, loading: true });
-      const { data, error } = await apiFetch<TenantResponseDTO>(
-        `/api/tenants/${tenantId}`,
-        { method: "PATCH", body: JSON.stringify(body) },
-      );
-      setMutationState({ data, error, loading: false });
-      return { data, error, loading: false };
-    },
-    [],
+    (tenantId: string, body: UpdateTenantRequestDTO) =>
+      mutate(`/api/tenants/${tenantId}`, "PATCH", body),
+    [mutate],
   );
 
   const updateTenantStatus = useCallback(
-    async (
-      tenantId: string,
-      body: UpdateTenantStatusRequestDTO,
-    ): Promise<ApiResult<TenantResponseDTO>> => {
-      setMutationState({ data: null, error: null, loading: true });
-      const { data, error } = await apiFetch<TenantResponseDTO>(
-        `/api/tenants/${tenantId}/status`,
-        { method: "PATCH", body: JSON.stringify(body) },
-      );
-      setMutationState({ data, error, loading: false });
-      return { data, error, loading: false };
-    },
-    [],
+    (tenantId: string, body: UpdateTenantStatusRequestDTO) =>
+      mutate(`/api/tenants/${tenantId}/status`, "PATCH", body),
+    [mutate],
   );
 
+  const configureCredential = useCallback(
+    (tenantId: string, body: ConfigureTenantCredentialRequestDTO) =>
+      mutate(`/api/tenants/${tenantId}/credentials`, "PUT", body),
+    [mutate],
+  );
+
+  const deleteTenant = useCallback(async (tenantId: string) => {
+    const response = await fetch(`/api/tenants/${tenantId}`, {
+      method: "DELETE",
+    });
+    const body = (await response.json()) as ApiEnvelope<{ id: string }>;
+    return {
+      data: response.ok && body.success ? (body.data ?? null) : null,
+      error:
+        response.ok && body.success
+          ? null
+          : (body.error?.message ?? "Gagal menghapus tenant."),
+    };
+  }, []);
+
   return {
+    listState,
+    detailState,
+    mutationState,
     listTenants,
     getTenant,
     createTenant,
     updateTenant,
     updateTenantStatus,
-    listState,
-    detailState,
-    mutationState,
+    configureCredential,
+    deleteTenant,
   };
 }

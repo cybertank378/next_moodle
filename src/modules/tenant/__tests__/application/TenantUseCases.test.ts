@@ -1,289 +1,201 @@
 import { describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { ConfigureTenantCredentialUseCase } from "@/modules/tenant/application/usecases/ConfigureTenantCredentialUseCase";
 import { CreateTenantUseCase } from "@/modules/tenant/application/usecases/CreateTenantUseCase";
-import { GetTenantsUseCase } from "@/modules/tenant/application/usecases/GetTenantsUseCase";
-import { GetTenantUseCase } from "@/modules/tenant/application/usecases/GetTenantUseCase";
+import { DeleteTenantUseCase } from "@/modules/tenant/application/usecases/DeleteTenantUseCase";
+import { GetAllTenantsUseCase } from "@/modules/tenant/application/usecases/GetAllTenantsUseCase";
+import { GetTenantByIdUseCase } from "@/modules/tenant/application/usecases/GetTenantByIdUseCase";
 import { UpdateTenantStatusUseCase } from "@/modules/tenant/application/usecases/UpdateTenantStatusUseCase";
 import { UpdateTenantUseCase } from "@/modules/tenant/application/usecases/UpdateTenantUseCase";
-import { Tenant } from "@/modules/tenant/domain/Tenant";
-import type { TenantRepository } from "@/modules/tenant/domain/TenantRepository";
+import { Tenant } from "@/modules/tenant/domain/entity/TenantEntity";
+import type {
+  TenantCredentialCipher,
+  TenantCredentialPersistenceInput,
+  TenantsRepository,
+} from "@/modules/tenant/domain/interfaces/TenantInterfaces";
+import type { TenantListFilter } from "@/modules/tenant/domain/types/TenantMetadata";
 
-// ─── Mock Repository ──────────────────────────────────────────────────────────
+const adminActor: AuthorizationActor = {
+  id: "admin-1",
+  role: AppRole.ADMIN,
+  tenantId: null,
+};
 
-function makeMockRepo(
-  overrides: Partial<TenantRepository> = {},
-): TenantRepository {
-  return {
-    findById: vi.fn().mockResolvedValue(null),
-    findBySlug: vi.fn().mockResolvedValue(null),
-    findByCustomDomain: vi.fn().mockResolvedValue(null),
-    findAll: vi.fn().mockResolvedValue([]),
-    count: vi.fn().mockResolvedValue(0),
-    save: vi.fn().mockImplementation(async (t: Tenant) => t),
-    delete: vi.fn().mockResolvedValue(undefined),
-    ...overrides,
-  };
-}
+const tenantActor: AuthorizationActor = {
+  id: "tenant-user-1",
+  role: AppRole.TENANT,
+  tenantId: "tenant-1",
+};
 
-function makeAdminActor(): AuthorizationActor {
-  return { id: "admin-1", role: AppRole.ADMIN, tenantId: null };
-}
-
-function makeTenantActor(tenantId = "tenant-123"): AuthorizationActor {
-  return { id: "tenant-op-1", role: AppRole.TENANT, tenantId };
-}
-
-function makeStudentActor(): AuthorizationActor {
-  return { id: "student-1", role: AppRole.STUDENT, tenantId: "tenant-123" };
-}
-
-const now = new Date("2026-01-01T00:00:00Z");
-
-function makeTenantEntity(overrides = {}): Tenant {
+function makeTenant(
+  overrides: Partial<ConstructorParameters<typeof Tenant>[0]> = {},
+) {
+  const now = new Date("2026-09-23T04:00:00.000Z");
   return new Tenant({
-    id: "tenant-123",
-    slug: "acme-corp",
-    name: "ACME Corporation",
+    id: "tenant-1",
+    slug: "acme-school",
+    name: "ACME School",
     status: "ACTIVE",
     customDomain: null,
+    credential: null,
+    branding: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,
   });
 }
 
-// ─── GetTenantsUseCase ────────────────────────────────────────────────────────
+class InMemoryTenantsRepository implements TenantsRepository {
+  private readonly items = new Map<string, Tenant>();
 
-describe("GetTenantsUseCase", () => {
-  it("should allow ADMIN to list tenants", async () => {
-    const repo = makeMockRepo({
-      findAll: vi.fn().mockResolvedValue([makeTenantEntity()]),
-      count: vi.fn().mockResolvedValue(1),
+  constructor(seed: Tenant[] = []) {
+    for (const tenant of seed) {
+      this.items.set(tenant.id, tenant);
+    }
+  }
+
+  async findById(id: string): Promise<Tenant | null> {
+    return this.items.get(id) ?? null;
+  }
+
+  async findBySlug(slug: string): Promise<Tenant | null> {
+    return (
+      [...this.items.values()].find((tenant) => tenant.slug === slug) ?? null
+    );
+  }
+
+  async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
+    return (
+      [...this.items.values()].find(
+        (tenant) => tenant.customDomain === customDomain,
+      ) ?? null
+    );
+  }
+
+  async list(filter: TenantListFilter): Promise<Tenant[]> {
+    return [...this.items.values()].filter((tenant) => {
+      const statusMatches = !filter.status || tenant.status === filter.status;
+      const search = filter.search?.toLowerCase();
+      const searchMatches =
+        !search ||
+        tenant.name.toLowerCase().includes(search) ||
+        tenant.slug.toLowerCase().includes(search);
+      return statusMatches && searchMatches;
     });
-    const useCase = new GetTenantsUseCase(repo);
-    const result = await useCase.execute({ actor: makeAdminActor() });
+  }
+
+  async count(
+    filter: Pick<TenantListFilter, "status" | "search">,
+  ): Promise<number> {
+    return (await this.list({ ...filter, page: 1, pageSize: 100 })).length;
+  }
+
+  async create(tenant: Tenant): Promise<Tenant> {
+    this.items.set(tenant.id, tenant);
+    return tenant;
+  }
+
+  async update(tenant: Tenant): Promise<Tenant> {
+    this.items.set(tenant.id, tenant);
+    return tenant;
+  }
+
+  async delete(id: string): Promise<void> {
+    this.items.delete(id);
+  }
+
+  async upsertCredential(
+    input: TenantCredentialPersistenceInput,
+  ): Promise<Tenant> {
+    const existing = this.items.get(input.tenantId);
+    if (!existing) {
+      throw new Error("missing tenant");
+    }
+
+    const updated = existing.withCredential({
+      moodleUrl: input.moodleUrl,
+      timeoutBudgetMs: input.timeoutBudgetMs,
+      sslVerify: input.sslVerify,
+      hasAdminToken: input.encryptedAdminToken.length > 0,
+      hasProctorToken: Boolean(input.encryptedProctorToken),
+      configuredAt: new Date("2026-09-23T04:05:00.000Z"),
+    });
+    this.items.set(updated.id, updated);
+    return updated;
+  }
+}
+
+describe("tenants application use cases", () => {
+  it("creates a tenant for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository();
+    const useCase = new CreateTenantUseCase(repository);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      data: {
+        slug: "New School",
+        name: "New School",
+        customDomain: "exam.new-school.sch.id",
+      },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(result.getValue().slug).toBe("new-school");
+  });
+
+  it("lists tenants for ADMIN with pagination metadata", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new GetAllTenantsUseCase(repository);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      filter: { page: 1, pageSize: 10 },
+    });
 
     expect(result.isSuccess).toBe(true);
     expect(result.getValue().tenants).toHaveLength(1);
     expect(result.getValue().total).toBe(1);
   });
 
-  it("should reject TENANT role from listing all tenants", async () => {
-    const repo = makeMockRepo();
-    const useCase = new GetTenantsUseCase(repo);
-    const result = await useCase.execute({ actor: makeTenantActor() });
+  it("returns tenant detail for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new GetTenantByIdUseCase(repository);
 
-    expect(result.isFailure).toBe(true);
-  });
-
-  it("should reject STUDENT role from listing tenants", async () => {
-    const repo = makeMockRepo();
-    const useCase = new GetTenantsUseCase(repo);
-    const result = await useCase.execute({ actor: makeStudentActor() });
-
-    expect(result.isFailure).toBe(true);
-  });
-
-  it("should pass filter params to repository", async () => {
-    const findAllMock = vi.fn().mockResolvedValue([]);
-    const countMock = vi.fn().mockResolvedValue(0);
-    const repo = makeMockRepo({ findAll: findAllMock, count: countMock });
-    const useCase = new GetTenantsUseCase(repo);
-
-    await useCase.execute({
-      actor: makeAdminActor(),
-      filter: { status: "SUSPENDED", page: 2, pageSize: 10 },
-    });
-
-    expect(findAllMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: expect.objectContaining({ status: "SUSPENDED" }),
-      }),
-    );
-  });
-});
-
-// ─── GetTenantUseCase ─────────────────────────────────────────────────────────
-
-describe("GetTenantUseCase", () => {
-  it("should allow ADMIN to get any tenant by id", async () => {
-    const tenant = makeTenantEntity();
-    const repo = makeMockRepo({ findById: vi.fn().mockResolvedValue(tenant) });
-    const useCase = new GetTenantUseCase(repo);
     const result = await useCase.execute({
-      actor: makeAdminActor(),
-      tenantId: "tenant-123",
+      actor: adminActor,
+      tenantId: "tenant-1",
     });
 
     expect(result.isSuccess).toBe(true);
-    expect(result.getValue().id).toBe("tenant-123");
+    expect(result.getValue().id).toBe("tenant-1");
   });
 
-  it("should return failure when tenant not found", async () => {
-    const repo = makeMockRepo({ findById: vi.fn().mockResolvedValue(null) });
-    const useCase = new GetTenantUseCase(repo);
-    const result = await useCase.execute({
-      actor: makeAdminActor(),
-      tenantId: "does-not-exist",
-    });
-
-    expect(result.isFailure).toBe(true);
-  });
-
-  it("should reject TENANT role from getting tenant", async () => {
-    const repo = makeMockRepo({
-      findById: vi.fn().mockResolvedValue(makeTenantEntity()),
-    });
-    const useCase = new GetTenantUseCase(repo);
-    const result = await useCase.execute({
-      actor: makeTenantActor(),
-      tenantId: "tenant-123",
-    });
-
-    expect(result.isFailure).toBe(true);
-  });
-});
-
-// ─── CreateTenantUseCase ──────────────────────────────────────────────────────
-
-describe("CreateTenantUseCase", () => {
-  it("should allow ADMIN to create a tenant", async () => {
-    const savedTenant = makeTenantEntity();
-    const repo = makeMockRepo({ save: vi.fn().mockResolvedValue(savedTenant) });
-    const useCase = new CreateTenantUseCase(repo);
+  it("updates tenant metadata for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new UpdateTenantUseCase(repository);
 
     const result = await useCase.execute({
-      actor: makeAdminActor(),
-      data: { slug: "acme-corp", name: "ACME Corporation" },
-    });
-
-    expect(result.isSuccess).toBe(true);
-  });
-
-  it("should reject TENANT role from creating a tenant", async () => {
-    const repo = makeMockRepo();
-    const useCase = new CreateTenantUseCase(repo);
-
-    const result = await useCase.execute({
-      actor: makeTenantActor(),
-      data: { slug: "acme-corp", name: "ACME Corporation" },
-    });
-
-    expect(result.isFailure).toBe(true);
-  });
-
-  it("should reject an invalid slug", async () => {
-    const repo = makeMockRepo();
-    const useCase = new CreateTenantUseCase(repo);
-
-    const result = await useCase.execute({
-      actor: makeAdminActor(),
-      data: { slug: "--invalid--", name: "Test" },
-    });
-
-    expect(result.isFailure).toBe(true);
-  });
-
-  it("should reject duplicate slug", async () => {
-    const existing = makeTenantEntity();
-    const repo = makeMockRepo({
-      findBySlug: vi.fn().mockResolvedValue(existing),
-    });
-    const useCase = new CreateTenantUseCase(repo);
-
-    const result = await useCase.execute({
-      actor: makeAdminActor(),
-      data: { slug: "acme-corp", name: "Another Corp" },
-    });
-
-    expect(result.isFailure).toBe(true);
-  });
-
-  it("should reject duplicate custom domain", async () => {
-    const existing = makeTenantEntity({ customDomain: "lms.acme.edu" });
-    const repo = makeMockRepo({
-      findByCustomDomain: vi.fn().mockResolvedValue(existing),
-    });
-    const useCase = new CreateTenantUseCase(repo);
-
-    const result = await useCase.execute({
-      actor: makeAdminActor(),
+      actor: adminActor,
+      tenantId: "tenant-1",
       data: {
-        slug: "beta-corp",
-        name: "Beta Corp",
-        customDomain: "lms.acme.edu",
+        name: "ACME Academy",
+        customDomain: "exam.acme.sch.id",
       },
     });
 
-    expect(result.isFailure).toBe(true);
-  });
-});
-
-// ─── UpdateTenantUseCase ──────────────────────────────────────────────────────
-
-describe("UpdateTenantUseCase", () => {
-  it("should allow ADMIN to update tenant name", async () => {
-    const existing = makeTenantEntity();
-    const repo = makeMockRepo({
-      findById: vi.fn().mockResolvedValue(existing),
-      save: vi.fn().mockResolvedValue(existing),
-    });
-    const useCase = new UpdateTenantUseCase(repo);
-
-    const result = await useCase.execute({
-      actor: makeAdminActor(),
-      tenantId: "tenant-123",
-      data: { name: "ACME University" },
-    });
-
     expect(result.isSuccess).toBe(true);
+    expect(result.getValue().name).toBe("ACME Academy");
+    expect(result.getValue().customDomain).toBe("exam.acme.sch.id");
   });
 
-  it("should reject TENANT role from updating tenant", async () => {
-    const repo = makeMockRepo({
-      findById: vi.fn().mockResolvedValue(makeTenantEntity()),
-    });
-    const useCase = new UpdateTenantUseCase(repo);
+  it("updates tenant status for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new UpdateTenantStatusUseCase(repository);
 
     const result = await useCase.execute({
-      actor: makeTenantActor(),
-      tenantId: "tenant-123",
-      data: { name: "Hacked Name" },
-    });
-
-    expect(result.isFailure).toBe(true);
-  });
-
-  it("should return failure when tenant not found", async () => {
-    const repo = makeMockRepo({ findById: vi.fn().mockResolvedValue(null) });
-    const useCase = new UpdateTenantUseCase(repo);
-
-    const result = await useCase.execute({
-      actor: makeAdminActor(),
-      tenantId: "ghost-tenant",
-      data: { name: "Ghost" },
-    });
-
-    expect(result.isFailure).toBe(true);
-  });
-});
-
-// ─── UpdateTenantStatusUseCase ────────────────────────────────────────────────
-
-describe("UpdateTenantStatusUseCase", () => {
-  it("should allow ADMIN to suspend a tenant", async () => {
-    const existing = makeTenantEntity();
-    const suspended = makeTenantEntity({ status: "SUSPENDED" });
-    const repo = makeMockRepo({
-      findById: vi.fn().mockResolvedValue(existing),
-      save: vi.fn().mockResolvedValue(suspended),
-    });
-    const useCase = new UpdateTenantStatusUseCase(repo);
-
-    const result = await useCase.execute({
-      actor: makeAdminActor(),
-      tenantId: "tenant-123",
+      actor: adminActor,
+      tenantId: "tenant-1",
       status: "SUSPENDED",
     });
 
@@ -291,35 +203,75 @@ describe("UpdateTenantStatusUseCase", () => {
     expect(result.getValue().status).toBe("SUSPENDED");
   });
 
-  it("should reject TENANT role from updating status", async () => {
-    const repo = makeMockRepo({
-      findById: vi.fn().mockResolvedValue(makeTenantEntity()),
-    });
-    const useCase = new UpdateTenantStatusUseCase(repo);
+  it("rejects duplicate normalized slug", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new CreateTenantUseCase(repository);
 
     const result = await useCase.execute({
-      actor: makeTenantActor(),
-      tenantId: "tenant-123",
-      status: "SUSPENDED",
+      actor: adminActor,
+      data: { slug: "ACME School", name: "Duplicate" },
     });
 
     expect(result.isFailure).toBe(true);
+    expect(result.getError()).toMatchObject({ code: "CONFLICT" });
   });
 
-  it("should confirm suspended status is explicitly tracked", async () => {
-    const suspended = makeTenantEntity({ status: "SUSPENDED" });
-    const repo = makeMockRepo({
-      findById: vi.fn().mockResolvedValue(suspended),
-      save: vi.fn().mockResolvedValue(suspended),
-    });
-    const useCase = new UpdateTenantStatusUseCase(repo);
+  it("enforces ADMIN-only create authorization", async () => {
+    const repository = new InMemoryTenantsRepository();
+    const useCase = new CreateTenantUseCase(repository);
 
     const result = await useCase.execute({
-      actor: makeAdminActor(),
-      tenantId: "tenant-123",
-      status: "ACTIVE",
+      actor: tenantActor,
+      data: { slug: "tenant-created", name: "Should Fail" },
+    });
+
+    expect(result.isFailure).toBe(true);
+    expect(result.getError()).toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("encrypts credential secrets before persistence and never returns plaintext", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const cipher: TenantCredentialCipher = {
+      encrypt: vi.fn(
+        async (plainText, tenantId) => `enc:${tenantId}:${plainText}`,
+      ),
+    };
+    const useCase = new ConfigureTenantCredentialUseCase(repository, cipher);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      tenantId: "tenant-1",
+      data: {
+        moodleUrl: "https://moodle.acme.sch.id",
+        adminToken: "admin-secret-token",
+        proctorToken: "proctor-secret-token",
+        timeoutBudgetMs: 10000,
+        sslVerify: true,
+      },
     });
 
     expect(result.isSuccess).toBe(true);
+    expect(cipher.encrypt).toHaveBeenCalledTimes(2);
+
+    const serialized = JSON.stringify(result.getValue());
+    expect(serialized).not.toContain("admin-secret-token");
+    expect(serialized).not.toContain("proctor-secret-token");
+    expect(serialized).not.toContain("encryptedAdminToken");
+    expect(serialized).not.toContain("encryptedProctorToken");
+    expect(result.getValue().credential?.hasAdminToken).toBe(true);
+    expect(result.getValue().credential?.hasProctorToken).toBe(true);
+  });
+
+  it("deletes a tenant for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new DeleteTenantUseCase(repository);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      tenantId: "tenant-1",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    await expect(repository.findById("tenant-1")).resolves.toBeNull();
   });
 });

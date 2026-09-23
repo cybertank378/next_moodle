@@ -56,6 +56,15 @@ Issue 04 selesai.
 - [x] Token Tenant A tidak dapat dipakai untuk Tenant B.
 - [x] Missing required Moodle function menghasilkan incompatible state, bukan silent fallback.
 
+## Review Follow-up — Tenant Module Structure
+
+- [x] Konsolidasikan modul duplikat `tenant`/`tenants` menjadi `src/modules/tenant`.
+- [x] Susun application ke `services` dan `usecases` dengan nama use case eksplisit.
+- [x] Susun domain ke `builder`, `dto`, `entity`, `interfaces`, `mapper`, `normalizers`, `types`, dan `validators`.
+- [x] Susun infrastructure ke `http`, `providers`, `repo`, dan `validators`.
+- [x] Pertahankan presentation hook dan test tree pada modul tenant kanonis.
+- [x] Tambahkan architecture regression test untuk mencegah struktur plural/flat kembali.
+
 ## Global Constraints
 
 - **1 issue = 1 bounded engineering objective.** Jangan mengerjakan objective issue berikutnya untuk menyelesaikan issue aktif.

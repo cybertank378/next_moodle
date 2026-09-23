@@ -1,86 +1,46 @@
-import { randomUUID } from "node:crypto";
 import { Result } from "@/core/base/Result";
 import { ConflictError } from "@/core/errors/ConflictError";
-import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { ValidationError } from "@/core/errors/ValidationError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
-import { AuthorizationError } from "@/core/rbac/AuthorizationError";
-import { authorize } from "@/core/rbac/authorize";
 import { Permission } from "@/core/rbac/Permission";
-import { Tenant } from "@/modules/tenant/domain/Tenant";
-import type {
-  CreateTenantRequestDTO,
-  TenantResponseDTO,
-} from "@/modules/tenant/domain/TenantDTOs";
-import { TenantMapper } from "@/modules/tenant/domain/TenantMapper";
-import type { TenantRepository } from "@/modules/tenant/domain/TenantRepository";
-import { TenantSlug } from "@/modules/tenant/domain/TenantSlug";
-
-export interface CreateTenantInput {
-  actor: AuthorizationActor | null | undefined;
-  data: CreateTenantRequestDTO;
-}
+import { authorizeTenantOperation } from "@/modules/tenant/application/services/TenantAuthorizationService";
+import { TenantBuilder } from "@/modules/tenant/domain/builder/TenantBuilder";
+import type { CreateTenantRequestDTO } from "@/modules/tenant/domain/dto/TenantRequestDto";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
+import type { TenantsRepository } from "@/modules/tenant/domain/interfaces/TenantInterfaces";
+import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
+import { TenantNormalizer } from "@/modules/tenant/domain/normalizers/TenantNormalizer";
 
 export class CreateTenantUseCase {
-  constructor(private readonly repo: TenantRepository) {}
+  constructor(private readonly repository: TenantsRepository) {}
 
-  async execute(input: CreateTenantInput): Promise<Result<TenantResponseDTO>> {
-    try {
-      authorize(input.actor, Permission.TENANT_CREATE);
-    } catch (err) {
-      if (
-        err instanceof AuthorizationError ||
-        err instanceof UnauthorizedError
-      ) {
-        return Result.fail(err);
-      }
-      throw err;
+  async execute(input: {
+    actor: AuthorizationActor | null | undefined;
+    data: CreateTenantRequestDTO;
+  }): Promise<Result<TenantResponseDTO, Error>> {
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_CREATE,
+    );
+    if (authError) return Result.fail(authError);
+
+    const slug = TenantNormalizer.slug(input.data.slug);
+    if (await this.repository.findBySlug(slug)) {
+      return Result.fail(new ConflictError(`Slug '${slug}' sudah digunakan.`));
     }
 
-    // Validate slug
-    const slugResult = TenantSlug.create(input.data.slug);
-    if (!slugResult.ok) {
-      return Result.fail(new ValidationError(slugResult.error));
-    }
-
-    const normalizedSlug = slugResult.slug.toString();
-
-    // Uniqueness check — slug
-    const existingBySlug = await this.repo.findBySlug(normalizedSlug);
-    if (existingBySlug) {
+    const customDomain = TenantNormalizer.customDomain(input.data.customDomain);
+    if (
+      customDomain &&
+      (await this.repository.findByCustomDomain(customDomain))
+    ) {
       return Result.fail(
-        new ConflictError(
-          `Slug '${normalizedSlug}' sudah digunakan oleh tenant lain.`,
-        ),
+        new ConflictError(`Domain '${customDomain}' sudah digunakan.`),
       );
     }
 
-    // Uniqueness check — customDomain (if provided)
-    if (input.data.customDomain) {
-      const existingByDomain = await this.repo.findByCustomDomain(
-        input.data.customDomain,
-      );
-      if (existingByDomain) {
-        return Result.fail(
-          new ConflictError(
-            `Custom domain '${input.data.customDomain}' sudah digunakan oleh tenant lain.`,
-          ),
-        );
-      }
-    }
-
-    const now = new Date();
-    const tenant = new Tenant({
-      id: randomUUID(),
-      slug: normalizedSlug,
-      name: input.data.name.trim(),
-      status: "ACTIVE",
-      customDomain: input.data.customDomain ?? null,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    const saved = await this.repo.save(tenant);
-    return Result.ok<TenantResponseDTO>(TenantMapper.toResponseDTO(saved));
+    const saved = await this.repository.create(
+      TenantBuilder.create({ ...input.data, slug, customDomain }),
+    );
+    return Result.ok(TenantMapper.toDetailResponse(saved));
   }
 }

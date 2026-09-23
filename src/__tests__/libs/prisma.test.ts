@@ -8,7 +8,6 @@ import {
   withIsolatedPrisma,
   withPrisma,
 } from "@/libs/prisma";
-import { prisma as tenantPrisma } from "@/modules/tenant/infrastructure/prismaClient";
 
 describe("libs/prisma singleton & lifecycle", () => {
   afterEach(async () => {
@@ -76,10 +75,5 @@ describe("libs/prisma singleton & lifecycle", () => {
     expect(prisma).toBeDefined();
     expect(typeof prisma.$connect).toBe("function");
     expect(typeof prisma.$disconnect).toBe("function");
-  });
-
-  it("tenant prismaClient should delegate to libs/prisma", () => {
-    expect(tenantPrisma).toBeDefined();
-    expect(typeof tenantPrisma.$connect).toBe("function");
   });
 });

@@ -1,83 +1,66 @@
 import { Result } from "@/core/base/Result";
 import { ConflictError } from "@/core/errors/ConflictError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+import { ValidationError } from "@/core/errors/ValidationError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
-import { AuthorizationError } from "@/core/rbac/AuthorizationError";
-import { authorize } from "@/core/rbac/authorize";
 import { Permission } from "@/core/rbac/Permission";
-import { Tenant } from "@/modules/tenant/domain/Tenant";
-import type {
-  TenantResponseDTO,
-  UpdateTenantRequestDTO,
-} from "@/modules/tenant/domain/TenantDTOs";
-import { TenantMapper } from "@/modules/tenant/domain/TenantMapper";
-import type { TenantRepository } from "@/modules/tenant/domain/TenantRepository";
-
-export interface UpdateTenantInput {
-  actor: AuthorizationActor | null | undefined;
-  tenantId: string;
-  data: UpdateTenantRequestDTO;
-}
+import { authorizeTenantOperation } from "@/modules/tenant/application/services/TenantAuthorizationService";
+import type { UpdateTenantRequestDTO } from "@/modules/tenant/domain/dto/TenantRequestDto";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
+import type { TenantsRepository } from "@/modules/tenant/domain/interfaces/TenantInterfaces";
+import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
+import { TenantNormalizer } from "@/modules/tenant/domain/normalizers/TenantNormalizer";
+import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
 
 export class UpdateTenantUseCase {
-  constructor(private readonly repo: TenantRepository) {}
+  constructor(private readonly repository: TenantsRepository) {}
 
-  async execute(input: UpdateTenantInput): Promise<Result<TenantResponseDTO>> {
-    try {
-      authorize(input.actor, Permission.TENANT_UPDATE);
-    } catch (err) {
-      if (
-        err instanceof AuthorizationError ||
-        err instanceof UnauthorizedError
-      ) {
-        return Result.fail(err);
-      }
-      throw err;
-    }
+  async execute(input: {
+    actor: AuthorizationActor | null | undefined;
+    tenantId: string;
+    data: UpdateTenantRequestDTO;
+  }): Promise<Result<TenantResponseDTO, Error>> {
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_UPDATE,
+    );
+    if (authError) return Result.fail(authError);
 
-    const existing = await this.repo.findById(input.tenantId);
-    if (!existing) {
-      return Result.fail(
-        new NotFoundError(`Tenant '${input.tenantId}' tidak ditemukan.`),
-      );
-    }
-
-    // Uniqueness check for customDomain if changing it
+    const tenant = await this.repository.findById(input.tenantId);
+    if (!tenant)
+      return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
     if (
-      input.data.customDomain !== undefined &&
-      input.data.customDomain !== null &&
-      input.data.customDomain !== existing.customDomain
+      input.data.name === undefined &&
+      input.data.customDomain === undefined
     ) {
-      const byDomain = await this.repo.findByCustomDomain(
-        input.data.customDomain,
+      return Result.fail(
+        new ValidationError("Tidak ada perubahan tenant yang diberikan."),
       );
-      if (byDomain && byDomain.id !== existing.id) {
+    }
+
+    const name =
+      input.data.name !== undefined
+        ? TenantNormalizer.name(input.data.name)
+        : undefined;
+    if (name !== undefined) TenantValidator.name(name);
+
+    const customDomain =
+      input.data.customDomain !== undefined
+        ? TenantNormalizer.customDomain(input.data.customDomain)
+        : undefined;
+
+    if (customDomain && customDomain !== tenant.customDomain) {
+      const duplicate = await this.repository.findByCustomDomain(customDomain);
+      if (duplicate && duplicate.id !== tenant.id) {
         return Result.fail(
-          new ConflictError(
-            `Custom domain '${input.data.customDomain}' sudah digunakan tenant lain.`,
-          ),
+          new ConflictError(`Domain '${customDomain}' sudah digunakan.`),
         );
       }
     }
 
-    const updated = new Tenant({
-      id: existing.id,
-      slug: existing.slug,
-      name:
-        input.data.name !== undefined ? input.data.name.trim() : existing.name,
-      status: existing.status,
-      customDomain:
-        input.data.customDomain !== undefined
-          ? input.data.customDomain
-          : existing.customDomain,
-      createdAt: existing.createdAt,
-      updatedAt: new Date(),
-      credential: existing.credential,
-      branding: existing.branding,
-    });
-
-    const saved = await this.repo.save(updated);
-    return Result.ok<TenantResponseDTO>(TenantMapper.toResponseDTO(saved));
+    const saved = await this.repository.update(
+      tenant.withUpdate({ name, customDomain }),
+    );
+    return Result.ok(TenantMapper.toDetailResponse(saved));
   }
 }
