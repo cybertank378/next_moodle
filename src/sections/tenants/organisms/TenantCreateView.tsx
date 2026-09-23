@@ -30,14 +30,12 @@ export default function TenantCreateView() {
       <div>
         <h1 className="text-2xl font-semibold">Tambah tenant</h1>
         <p className="text-sm text-slate-500">
-          Buat metadata tenant terlebih dahulu. Credential dikonfigurasi setelah tenant tersedia.
+          Buat metadata tenant terlebih dahulu. Credential dikonfigurasi setelah
+          tenant tersedia.
         </p>
       </div>
       {error && <p className="text-sm text-rose-600">{error}</p>}
-      <TenantForm
-        loading={mutationState.loading}
-        onSubmitAction={submit}
-      />
+      <TenantForm loading={mutationState.loading} onSubmitAction={submit} />
     </section>
   );
 }

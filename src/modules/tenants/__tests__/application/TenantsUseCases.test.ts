@@ -14,10 +14,7 @@ import type {
   TenantCredentialPersistenceInput,
   TenantsRepository,
 } from "@/modules/tenants/domain/interfaces/TenantsInterfaces";
-import type {
-  TenantListFilter,
-  TenantStatus,
-} from "@/modules/tenants/domain/types/TenantTypes";
+import type { TenantListFilter } from "@/modules/tenants/domain/types/TenantTypes";
 
 const adminActor: AuthorizationActor = {
   id: "admin-1",
@@ -31,7 +28,9 @@ const tenantActor: AuthorizationActor = {
   tenantId: "tenant-1",
 };
 
-function makeTenant(overrides: Partial<ConstructorParameters<typeof Tenant>[0]> = {}) {
+function makeTenant(
+  overrides: Partial<ConstructorParameters<typeof Tenant>[0]> = {},
+) {
   const now = new Date("2026-09-23T04:00:00.000Z");
   return new Tenant({
     id: "tenant-1",
@@ -61,7 +60,9 @@ class InMemoryTenantsRepository implements TenantsRepository {
   }
 
   async findBySlug(slug: string): Promise<Tenant | null> {
-    return [...this.items.values()].find((tenant) => tenant.slug === slug) ?? null;
+    return (
+      [...this.items.values()].find((tenant) => tenant.slug === slug) ?? null
+    );
   }
 
   async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
@@ -84,7 +85,9 @@ class InMemoryTenantsRepository implements TenantsRepository {
     });
   }
 
-  async count(filter: Pick<TenantListFilter, "status" | "search">): Promise<number> {
+  async count(
+    filter: Pick<TenantListFilter, "status" | "search">,
+  ): Promise<number> {
     return (await this.list({ ...filter, page: 1, pageSize: 100 })).length;
   }
 
@@ -210,7 +213,7 @@ describe("tenants application use cases", () => {
     });
 
     expect(result.isFailure).toBe(true);
-    expect(result.getError().code).toBe("CONFLICT");
+    expect(result.getError()).toMatchObject({ code: "CONFLICT" });
   });
 
   it("enforces ADMIN-only create authorization", async () => {
@@ -223,13 +226,15 @@ describe("tenants application use cases", () => {
     });
 
     expect(result.isFailure).toBe(true);
-    expect(result.getError().code).toBe("FORBIDDEN");
+    expect(result.getError()).toMatchObject({ code: "FORBIDDEN" });
   });
 
   it("encrypts credential secrets before persistence and never returns plaintext", async () => {
     const repository = new InMemoryTenantsRepository([makeTenant()]);
     const cipher: TenantCredentialCipher = {
-      encrypt: vi.fn(async (plainText, tenantId) => `enc:${tenantId}:${plainText}`),
+      encrypt: vi.fn(
+        async (plainText, tenantId) => `enc:${tenantId}:${plainText}`,
+      ),
     };
     const useCase = new ConfigureTenantCredentialUseCase(repository, cipher);
 

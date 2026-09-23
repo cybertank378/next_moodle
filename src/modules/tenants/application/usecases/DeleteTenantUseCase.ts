@@ -12,11 +12,15 @@ export class DeleteTenantUseCase {
     actor: AuthorizationActor | null | undefined;
     tenantId: string;
   }): Promise<Result<{ id: string }, Error>> {
-    const authError = authorizeTenantOperation(input.actor, Permission.TENANT_UPDATE);
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_UPDATE,
+    );
     if (authError) return Result.fail(authError);
 
     const tenant = await this.repository.findById(input.tenantId);
-    if (!tenant) return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
+    if (!tenant)
+      return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
 
     await this.repository.delete(input.tenantId);
     return Result.ok({ id: input.tenantId });

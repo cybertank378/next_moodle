@@ -1,8 +1,8 @@
-import type { Tenant } from "@/modules/tenants/domain/entities/Tenant";
 import type {
   TenantResponseDTO,
   TenantSummaryResponseDTO,
 } from "@/modules/tenants/domain/dto/TenantDTOs";
+import type { Tenant } from "@/modules/tenants/domain/entities/Tenant";
 
 export const TenantMapper = {
   toDetailResponse(tenant: Tenant): TenantResponseDTO {

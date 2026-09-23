@@ -2,16 +2,17 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Skeleton from "@/shared-ui/component/Skeleton";
 import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
 import TenantForm, {
   type TenantFormValue,
 } from "@/sections/tenants/molecules/TenantForm";
+import Skeleton from "@/shared-ui/component/Skeleton";
 
 export default function TenantEditView() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { detailState, mutationState, getTenant, updateTenant } = useTenantsApi();
+  const { detailState, mutationState, getTenant, updateTenant } =
+    useTenantsApi();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,7 +41,11 @@ export default function TenantEditView() {
   }
 
   if (!detailState.data) {
-    return <p className="p-6 text-rose-600">{detailState.error ?? "Tenant tidak ditemukan."}</p>;
+    return (
+      <p className="p-6 text-rose-600">
+        {detailState.error ?? "Tenant tidak ditemukan."}
+      </p>
+    );
   }
 
   return (

@@ -41,39 +41,50 @@ async function request<T>(
 }
 
 export function useTenantsApi() {
-  const [listState, setListState] = useState<RequestState<ListTenantsResponseDTO>>({
+  const [listState, setListState] = useState<
+    RequestState<ListTenantsResponseDTO>
+  >({
     data: null,
     error: null,
     loading: false,
   });
-  const [detailState, setDetailState] = useState<RequestState<TenantResponseDTO>>({
+  const [detailState, setDetailState] = useState<
+    RequestState<TenantResponseDTO>
+  >({
     data: null,
     error: null,
     loading: false,
   });
-  const [mutationState, setMutationState] = useState<RequestState<TenantResponseDTO>>({
+  const [mutationState, setMutationState] = useState<
+    RequestState<TenantResponseDTO>
+  >({
     data: null,
     error: null,
     loading: false,
   });
 
-  const listTenants = useCallback(async (params: {
-    page: number;
-    pageSize: number;
-    search?: string;
-    status?: string;
-  }) => {
-    setListState({ data: null, error: null, loading: true });
-    const query = new URLSearchParams({
-      page: String(params.page),
-      pageSize: String(params.pageSize),
-    });
-    if (params.search) query.set("search", params.search);
-    if (params.status) query.set("status", params.status);
-    const result = await request<ListTenantsResponseDTO>(`/api/tenants?${query}`);
-    setListState({ ...result, loading: false });
-    return result;
-  }, []);
+  const listTenants = useCallback(
+    async (params: {
+      page: number;
+      pageSize: number;
+      search?: string;
+      status?: string;
+    }) => {
+      setListState({ data: null, error: null, loading: true });
+      const query = new URLSearchParams({
+        page: String(params.page),
+        pageSize: String(params.pageSize),
+      });
+      if (params.search) query.set("search", params.search);
+      if (params.status) query.set("status", params.status);
+      const result = await request<ListTenantsResponseDTO>(
+        `/api/tenants?${query}`,
+      );
+      setListState({ ...result, loading: false });
+      return result;
+    },
+    [],
+  );
 
   const getTenant = useCallback(async (tenantId: string) => {
     setDetailState({ data: null, error: null, loading: true });

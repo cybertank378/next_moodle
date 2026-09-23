@@ -41,7 +41,9 @@ interface SiteInfoRawResponse {
 
 interface PluginStatusRawResponse {
   status?: string;
-  version?: string;
+  component?: string;
+  apiversion?: number;
+  pluginversion?: number;
   [key: string]: unknown;
 }
 
@@ -85,6 +87,8 @@ export class TestMoodleConnectionUseCase {
     try {
       siteInfoPayload = await adminClient.call<SiteInfoRawResponse>(
         "core_webservice_get_site_info",
+        {},
+        { requestKind: "safe-read", maxRetries: 1 },
       );
     } catch {
       return {
@@ -111,6 +115,8 @@ export class TestMoodleConnectionUseCase {
       try {
         await proctorClient.call<SiteInfoRawResponse>(
           "core_webservice_get_site_info",
+          {},
+          { requestKind: "safe-read", maxRetries: 1 },
         );
         proctorTokenValid = true;
       } catch {
@@ -125,13 +131,16 @@ export class TestMoodleConnectionUseCase {
 
     try {
       const pluginRes = await adminClient.call<PluginStatusRawResponse>(
-        "local_examapi_get_system_status",
+        "local_examapi_get_health",
+        {},
+        { requestKind: "safe-read", maxRetries: 1 },
       );
       pluginStatus = {
-        installed: true,
+        installed:
+          pluginRes.component === "local_examapi" && pluginRes.apiversion === 1,
         version:
-          pluginRes && typeof pluginRes.version === "string"
-            ? pluginRes.version
+          typeof pluginRes.pluginversion === "number"
+            ? String(pluginRes.pluginversion)
             : "installed",
       };
     } catch {

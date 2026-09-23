@@ -2,9 +2,24 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import type { TenantStatus } from "@/modules/tenants/domain/types/TenantTypes";
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const STATUSES: readonly TenantStatus[] = ["ACTIVE", "MAINTENANCE", "SUSPENDED"];
+const STATUSES: readonly TenantStatus[] = [
+  "ACTIVE",
+  "MAINTENANCE",
+  "SUSPENDED",
+];
 
-export const TenantValidator = {
+interface TenantValidatorContract {
+  slug(value: string): void;
+  name(value: string): void;
+  status(value: string): asserts value is TenantStatus;
+  credential(input: {
+    moodleUrl: string;
+    adminToken: string;
+    timeoutBudgetMs: number;
+  }): void;
+}
+
+export const TenantValidator: TenantValidatorContract = {
   slug(value: string): void {
     if (value.length < 3 || value.length > 63 || !SLUG_PATTERN.test(value)) {
       throw new ValidationError(
@@ -37,7 +52,9 @@ export const TenantValidator = {
       throw new ValidationError("Moodle URL tidak valid.");
     }
     if (url.protocol !== "https:" && url.protocol !== "http:") {
-      throw new ValidationError("Moodle URL harus menggunakan HTTP atau HTTPS.");
+      throw new ValidationError(
+        "Moodle URL harus menggunakan HTTP atau HTTPS.",
+      );
     }
     if (input.adminToken.trim().length < 8) {
       throw new ValidationError("Admin token wajib diisi.");
@@ -47,7 +64,9 @@ export const TenantValidator = {
       input.timeoutBudgetMs < 1000 ||
       input.timeoutBudgetMs > 60000
     ) {
-      throw new ValidationError("Timeout harus berada pada rentang 1000-60000 ms.");
+      throw new ValidationError(
+        "Timeout harus berada pada rentang 1000-60000 ms.",
+      );
     }
   },
-} as const;
+};

@@ -37,7 +37,7 @@ describe("MoodleErrorMapper", () => {
     });
 
     expect(error).toBeInstanceOf(UnauthorizedError);
-    expect(error.message).toContain("token not found");
+    expect(error.message).toBe("Moodle credentials were rejected.");
   });
 
   it("should map invalidlogin errorcode to UnauthorizedError", () => {
@@ -48,7 +48,7 @@ describe("MoodleErrorMapper", () => {
     });
 
     expect(error).toBeInstanceOf(UnauthorizedError);
-    expect(error.message).toContain("Invalid login");
+    expect(error.message).toBe("Moodle credentials were rejected.");
   });
 
   it("should map nopermissions or accessdenied to ForbiddenError", () => {
@@ -59,7 +59,7 @@ describe("MoodleErrorMapper", () => {
     });
 
     expect(error).toBeInstanceOf(ForbiddenError);
-    expect(error.message).toContain("permissions");
+    expect(error.message).toBe("Moodle denied this operation.");
   });
 
   it("should map unknown Moodle exception to MoodleError with status 502", () => {
@@ -73,6 +73,8 @@ describe("MoodleErrorMapper", () => {
     expect(error.code).toBe("MOODLE_ERROR");
     expect(error.statusCode).toBe(502);
     expect((error as MoodleError).moodleErrorCode).toBe("dmlreadexception");
+    expect(error.message).toBe("Moodle returned an upstream error.");
+    expect(JSON.stringify(error.details ?? {})).not.toContain("database");
   });
 
   it("should map HTTP non-200 status to InfrastructureError", () => {
@@ -82,5 +84,6 @@ describe("MoodleErrorMapper", () => {
     );
     expect(error).toBeInstanceOf(InfrastructureError);
     expect(error.statusCode).toBe(500);
+    expect(error.message).not.toContain("reverse proxy");
   });
 });

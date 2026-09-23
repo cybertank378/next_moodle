@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
+import TenantTable from "@/sections/tenants/molecules/TenantTable";
 import LinkButton from "@/shared-ui/component/LinkButton";
 import Pagination from "@/shared-ui/component/Pagination";
 import SelectField from "@/shared-ui/component/SelectField";
 import TextField from "@/shared-ui/component/TextField";
-import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
-import TenantTable from "@/sections/tenants/molecules/TenantTable";
 
 export default function TenantsManagementView() {
   const { listState, listTenants } = useTenantsApi();
@@ -63,10 +63,7 @@ export default function TenantsManagementView() {
         </p>
       )}
 
-      <TenantTable
-        tenants={data?.tenants ?? []}
-        loading={listState.loading}
-      />
+      <TenantTable tenants={data?.tenants ?? []} loading={listState.loading} />
 
       <Pagination
         currentPage={data?.page ?? page}

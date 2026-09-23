@@ -26,7 +26,9 @@ import {
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   if (!Object.values(AppRole).includes(actor.role as AppRole)) {
-    throw new ValidationError("Role sesi tidak didukung oleh authorization layer.");
+    throw new ValidationError(
+      "Role sesi tidak didukung oleh authorization layer.",
+    );
   }
   return {
     id: actor.userId,
@@ -64,7 +66,8 @@ export class TenantsController {
         actor: actorToAuthorization(actor),
         filter: parseListTenantQuery(req.nextUrl.searchParams),
       });
-      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
       const data = result.getValue();
       return respond(
         ApiResponse.success(data, {
@@ -96,7 +99,13 @@ export class TenantsController {
       });
       return result.isFailure
         ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(ApiResponse.success(result.getValue(), undefined, HttpStatus.CREATED));
+        : respond(
+            ApiResponse.success(
+              result.getValue(),
+              undefined,
+              HttpStatus.CREATED,
+            ),
+          );
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }

@@ -14,11 +14,15 @@ export class GetTenantUseCase {
     actor: AuthorizationActor | null | undefined;
     tenantId: string;
   }): Promise<Result<TenantResponseDTO, Error>> {
-    const authError = authorizeTenantOperation(input.actor, Permission.TENANT_READ);
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_READ,
+    );
     if (authError) return Result.fail(authError);
 
     const tenant = await this.repository.findById(input.tenantId);
-    if (!tenant) return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
+    if (!tenant)
+      return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
     return Result.ok(TenantMapper.toDetailResponse(tenant));
   }
 }

@@ -93,4 +93,25 @@ describe("Architecture Guard: Moodle Client & UI Boundary", () => {
       `UI files must not reference Moodle endpoints or wsfunctions directly:\n${violatingFiles.join("\n")}`,
     ).toEqual([]);
   });
+
+  it("keeps direct Moodle fetch transport inside MoodleRestClient", () => {
+    const srcDir = path.resolve(process.cwd(), "src");
+    const allowedClient = path.resolve(
+      process.cwd(),
+      "src/core/moodle/MoodleRestClient.ts",
+    );
+    const violatingFiles = getFilesRecursively(srcDir)
+      .filter((file) => /\.(ts|tsx)$/.test(file) && file !== allowedClient)
+      .filter((file) => {
+        const content = fs.readFileSync(file, "utf-8");
+        return (
+          /fetch\s*\([^)]*webservice\/rest\/server\.php/s.test(content) ||
+          (/\bfetch\s*\(/.test(content) &&
+            /moodlewsrestformat|wstoken/.test(content))
+        );
+      })
+      .map((file) => path.relative(process.cwd(), file).replace(/\\/g, "/"));
+
+    expect(violatingFiles).toEqual([]);
+  });
 });
