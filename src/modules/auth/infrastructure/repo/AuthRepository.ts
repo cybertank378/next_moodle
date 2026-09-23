@@ -76,10 +76,7 @@ export class AuthRepository
     options: AuthRepositoryOptions = {},
     private readonly prisma?: PrismaClient,
   ) {
-    const secret =
-      options.secret ||
-      process.env.AUTH_SESSION_SECRET ||
-      process.env.NEXTAUTH_SECRET;
+    const secret = options.secret || process.env.AUTH_SESSION_SECRET;
     if (!secret || secret.length < 32)
       throw new Error(
         "AUTH_SESSION_SECRET must contain at least 32 characters.",

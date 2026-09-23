@@ -1,4 +1,4 @@
-import { LoginForm } from "@/sections/auth/molecules/LoginForm";
+import LoginForm from "@/sections/auth/organisms/LoginForm";
 
 export default function LoginPageSection() {
   return <LoginForm />;

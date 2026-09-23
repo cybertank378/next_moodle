@@ -50,4 +50,22 @@ describe("AuthRepository", () => {
       "Session has expired",
     );
   });
+
+  it("does not use a NextAuth environment variable for the application session", () => {
+    const authSessionSecret = process.env.AUTH_SESSION_SECRET;
+    const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+
+    delete process.env.AUTH_SESSION_SECRET;
+    process.env.NEXTAUTH_SECRET = secret;
+
+    try {
+      expect(() => new AuthRepository()).toThrow("AUTH_SESSION_SECRET");
+    } finally {
+      if (authSessionSecret === undefined)
+        delete process.env.AUTH_SESSION_SECRET;
+      else process.env.AUTH_SESSION_SECRET = authSessionSecret;
+      if (nextAuthSecret === undefined) delete process.env.NEXTAUTH_SECRET;
+      else process.env.NEXTAUTH_SECRET = nextAuthSecret;
+    }
+  });
 });
