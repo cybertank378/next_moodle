@@ -77,7 +77,9 @@ function buildWhere(filter: Pick<TenantListFilter, "status" | "search">) {
           OR: [
             { name: { contains: search, mode: "insensitive" as const } },
             { slug: { contains: search, mode: "insensitive" as const } },
-            { customDomain: { contains: search, mode: "insensitive" as const } },
+            {
+              customDomain: { contains: search, mode: "insensitive" as const },
+            },
           ],
         }
       : {}),

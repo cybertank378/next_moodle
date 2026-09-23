@@ -26,7 +26,10 @@ export class ConfigureTenantCredentialUseCase {
     tenantId: string;
     data: ConfigureTenantCredentialRequestDTO;
   }): Promise<Result<TenantResponseDTO, Error>> {
-    const authError = authorizeTenantOperation(input.actor, Permission.TENANT_UPDATE);
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_UPDATE,
+    );
     if (authError) return Result.fail(authError);
 
     if (!(await this.repository.findById(input.tenantId))) {
@@ -45,10 +48,9 @@ export class ConfigureTenantCredentialUseCase {
       input.data.adminToken,
       input.tenantId,
     );
-    const encryptedProctorToken =
-      input.data.proctorToken?.trim()
-        ? await this.cipher.encrypt(input.data.proctorToken, input.tenantId)
-        : null;
+    const encryptedProctorToken = input.data.proctorToken?.trim()
+      ? await this.cipher.encrypt(input.data.proctorToken, input.tenantId)
+      : null;
 
     const saved = await this.repository.upsertCredential({
       tenantId: input.tenantId,

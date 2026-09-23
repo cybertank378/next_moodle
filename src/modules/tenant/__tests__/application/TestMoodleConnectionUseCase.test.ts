@@ -18,12 +18,17 @@ describe("TestMoodleConnectionUseCase", () => {
         if (wsfunction === "core_webservice_get_site_info") {
           return Promise.resolve(adminResponse);
         }
-        if (wsfunction === "local_examapi_get_system_status") {
+        if (wsfunction === "local_examapi_get_health") {
           if (pluginResponse instanceof Error) {
             return Promise.reject(pluginResponse);
           }
           return Promise.resolve(
-            pluginResponse ?? { status: "ok", version: "1.0.0" },
+            pluginResponse ?? {
+              status: "ok",
+              component: "local_examapi",
+              apiversion: 1,
+              pluginversion: 2026092101,
+            },
           );
         }
         return Promise.resolve({});

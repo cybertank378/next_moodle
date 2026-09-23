@@ -25,7 +25,8 @@ export class UpdateTenantStatusUseCase {
 
     TenantValidator.status(input.status);
     const tenant = await this.repository.findById(input.tenantId);
-    if (!tenant) return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
+    if (!tenant)
+      return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
 
     const saved = await this.repository.update(tenant.withStatus(input.status));
     return Result.ok(TenantMapper.toDetailResponse(saved));

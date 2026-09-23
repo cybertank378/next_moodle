@@ -6,9 +6,15 @@ const styles: Record<TenantStatus, string> = {
   SUSPENDED: "bg-rose-100 text-rose-700",
 };
 
-export default function TenantStatusBadge({ status }: { status: TenantStatus }) {
+export default function TenantStatusBadge({
+  status,
+}: {
+  status: TenantStatus;
+}) {
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}>
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}
+    >
       {status}
     </span>
   );

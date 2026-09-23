@@ -23,12 +23,9 @@ export function isMoodleException(
 export function fromMoodleException(exception: MoodleRawException): AppError {
   const errorcode = exception.errorcode?.toLowerCase();
   const exceptionName = exception.exception?.toLowerCase();
-  const message = exception.message || "Moodle upstream error";
-
   if (errorcode === "invalidtoken" || errorcode === "invalidlogin") {
-    return new UnauthorizedError(message, {
+    return new UnauthorizedError("Moodle credentials were rejected.", {
       moodleErrorCode: exception.errorcode,
-      exception: exception.exception,
     });
   }
 
@@ -38,24 +35,24 @@ export function fromMoodleException(exception: MoodleRawException): AppError {
     exceptionName === "required_capability_exception" ||
     exceptionName === "moodle_nopermissions_exception"
   ) {
-    return new ForbiddenError(message, {
+    return new ForbiddenError("Moodle denied this operation.", {
       moodleErrorCode: exception.errorcode,
-      exception: exception.exception,
     });
   }
 
-  return new MoodleError(exception.errorcode, message, {
-    exception: exception.exception,
-    debuginfo: exception.debuginfo,
-  });
+  return new MoodleError(
+    exception.errorcode,
+    "Moodle returned an upstream error.",
+  );
 }
 
-export function fromHttpStatus(status: number, message?: string): AppError {
-  const detailsMessage = message
-    ? `Moodle HTTP error (${status}): ${message}`
-    : `Moodle upstream HTTP request failed with status ${status}`;
-
-  return new InfrastructureError(detailsMessage, { status });
+export function fromHttpStatus(
+  status: number,
+  _upstreamBody?: string,
+): AppError {
+  return new InfrastructureError("Moodle transport request failed.", {
+    status,
+  });
 }
 
 export const MoodleErrorMapper = {

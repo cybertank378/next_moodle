@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import type { TenantSummaryResponseDTO } from "@/modules/tenants/domain/dto/TenantDTOs";
+import TenantEmptyState from "@/sections/tenants/atoms/TenantEmptyState";
+import TenantStatusBadge from "@/sections/tenants/atoms/TenantStatusBadge";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import {
   Table,
@@ -11,8 +13,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import TenantEmptyState from "@/sections/tenants/atoms/TenantEmptyState";
-import TenantStatusBadge from "@/sections/tenants/atoms/TenantStatusBadge";
+
+const SKELETON_ROWS = ["one", "two", "three", "four", "five"] as const;
 
 export default function TenantTable({
   tenants,
@@ -35,8 +37,8 @@ export default function TenantTable({
       </TableHead>
       <TableBody>
         {loading &&
-          Array.from({ length: 5 }, (_, index) => (
-            <TableRow key={`tenant-skeleton-${index + 1}`}>
+          SKELETON_ROWS.map((row) => (
+            <TableRow key={`tenant-skeleton-${row}`}>
               <TableCell colSpan={6}>
                 <Skeleton height={24} />
               </TableCell>

@@ -3,11 +3,11 @@ import { ConflictError } from "@/core/errors/ConflictError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { Permission } from "@/core/rbac/Permission";
 import { authorizeTenantOperation } from "@/modules/tenants/application/TenantAuthorization";
+import { TenantBuilder } from "@/modules/tenants/domain/builders/TenantBuilder";
 import type {
   CreateTenantRequestDTO,
   TenantResponseDTO,
 } from "@/modules/tenants/domain/dto/TenantDTOs";
-import { TenantBuilder } from "@/modules/tenants/domain/builders/TenantBuilder";
 import type { TenantsRepository } from "@/modules/tenants/domain/interfaces/TenantsInterfaces";
 import { TenantMapper } from "@/modules/tenants/domain/mappers/TenantMapper";
 import { TenantNormalizer } from "@/modules/tenants/domain/normalizers/TenantNormalizer";
@@ -19,7 +19,10 @@ export class CreateTenantUseCase {
     actor: AuthorizationActor | null | undefined;
     data: CreateTenantRequestDTO;
   }): Promise<Result<TenantResponseDTO, Error>> {
-    const authError = authorizeTenantOperation(input.actor, Permission.TENANT_CREATE);
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_CREATE,
+    );
     if (authError) return Result.fail(authError);
 
     const slug = TenantNormalizer.slug(input.data.slug);
@@ -28,8 +31,13 @@ export class CreateTenantUseCase {
     }
 
     const customDomain = TenantNormalizer.customDomain(input.data.customDomain);
-    if (customDomain && (await this.repository.findByCustomDomain(customDomain))) {
-      return Result.fail(new ConflictError(`Domain '${customDomain}' sudah digunakan.`));
+    if (
+      customDomain &&
+      (await this.repository.findByCustomDomain(customDomain))
+    ) {
+      return Result.fail(
+        new ConflictError(`Domain '${customDomain}' sudah digunakan.`),
+      );
     }
 
     const saved = await this.repository.create(

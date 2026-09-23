@@ -14,7 +14,10 @@ export class ListTenantsUseCase {
     actor: AuthorizationActor | null | undefined;
     filter: Partial<TenantListFilter>;
   }): Promise<Result<ListTenantsResponseDTO, Error>> {
-    const authError = authorizeTenantOperation(input.actor, Permission.TENANT_READ);
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_READ,
+    );
     if (authError) return Result.fail(authError);
 
     const page = Math.max(1, input.filter.page ?? 1);

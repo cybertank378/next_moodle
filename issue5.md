@@ -14,15 +14,15 @@ Issue 04 selesai.
 
 ## Scope Pengerjaan
 
-- [ ] Implement `src/core/moodle/MoodleRestClient.ts` server-only.
-- [ ] Implement nested Moodle parameter encoder.
-- [ ] Implement timeout budget dan retry hanya untuk safe/idempotent reads.
-- [ ] Implement Moodle error mapper tanpa raw exception leak.
-- [ ] Implement `MoodleCredentialProvider` tenant-aware dari encrypted SaaS store.
-- [ ] Implement `MoodleClientFactory` yang menerima validated tenant context.
-- [ ] Implement health/API version/capabilities preflight terhadap `local_examapi`.
-- [ ] SSRF/base URL validation dan TLS policy.
-- [ ] Contract tests untuk `local_examapi` apiVersion/component.
+- [x] Implement `src/core/moodle/MoodleRestClient.ts` server-only.
+- [x] Implement nested Moodle parameter encoder.
+- [x] Implement timeout budget dan retry hanya untuk safe/idempotent reads.
+- [x] Implement Moodle error mapper tanpa raw exception leak.
+- [x] Implement `MoodleCredentialProvider` tenant-aware dari encrypted SaaS store.
+- [x] Implement `MoodleClientFactory` yang menerima validated tenant context.
+- [x] Implement health/API version/capabilities preflight terhadap `local_examapi`.
+- [x] SSRF/base URL validation dan TLS policy.
+- [x] Contract tests untuk `local_examapi` apiVersion/component.
 
 ## Out of Scope
 
@@ -40,21 +40,21 @@ Issue 04 selesai.
 
 ### RED
 
-- [ ] RED tests untuk nested encoding, invalid token mapping, timeout, retry mutation prohibition, tenant token isolation, SSRF rejection, redaction.
+- [x] RED tests untuk nested encoding, invalid token mapping, timeout, retry mutation prohibition, tenant token isolation, SSRF rejection, redaction.
 
 ### GREEN
 
-- [ ] Implement minimum client/factory/provider sampai hijau.
+- [x] Implement minimum client/factory/provider sampai hijau.
 
 ### REFACTOR
 
-- [ ] Refactor transport, mapping, and secret handling; no feature-specific logic in core client.
+- [x] Refactor transport, mapping, and secret handling; no feature-specific logic in core client.
 
 ## Acceptance Criteria
 
-- [ ] Tidak ada direct Moodle `fetch` di module lain.
-- [ ] Token Tenant A tidak dapat dipakai untuk Tenant B.
-- [ ] Missing required Moodle function menghasilkan incompatible state, bukan silent fallback.
+- [x] Tidak ada direct Moodle `fetch` di module lain.
+- [x] Token Tenant A tidak dapat dipakai untuk Tenant B.
+- [x] Missing required Moodle function menghasilkan incompatible state, bukan silent fallback.
 
 ## Global Constraints
 

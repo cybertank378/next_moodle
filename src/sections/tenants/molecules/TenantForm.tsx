@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import type { TenantResponseDTO } from "@/modules/tenants/domain/dto/TenantDTOs";
 import Button from "@/shared-ui/component/Button";
 import TextField from "@/shared-ui/component/TextField";

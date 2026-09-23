@@ -22,17 +22,28 @@ export class UpdateTenantUseCase {
     tenantId: string;
     data: UpdateTenantRequestDTO;
   }): Promise<Result<TenantResponseDTO, Error>> {
-    const authError = authorizeTenantOperation(input.actor, Permission.TENANT_UPDATE);
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_UPDATE,
+    );
     if (authError) return Result.fail(authError);
 
     const tenant = await this.repository.findById(input.tenantId);
-    if (!tenant) return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
-    if (input.data.name === undefined && input.data.customDomain === undefined) {
-      return Result.fail(new ValidationError("Tidak ada perubahan tenant yang diberikan."));
+    if (!tenant)
+      return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
+    if (
+      input.data.name === undefined &&
+      input.data.customDomain === undefined
+    ) {
+      return Result.fail(
+        new ValidationError("Tidak ada perubahan tenant yang diberikan."),
+      );
     }
 
     const name =
-      input.data.name !== undefined ? TenantNormalizer.name(input.data.name) : undefined;
+      input.data.name !== undefined
+        ? TenantNormalizer.name(input.data.name)
+        : undefined;
     if (name !== undefined) TenantValidator.name(name);
 
     const customDomain =
@@ -43,7 +54,9 @@ export class UpdateTenantUseCase {
     if (customDomain && customDomain !== tenant.customDomain) {
       const duplicate = await this.repository.findByCustomDomain(customDomain);
       if (duplicate && duplicate.id !== tenant.id) {
-        return Result.fail(new ConflictError(`Domain '${customDomain}' sudah digunakan.`));
+        return Result.fail(
+          new ConflictError(`Domain '${customDomain}' sudah digunakan.`),
+        );
       }
     }
 

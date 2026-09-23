@@ -2,14 +2,14 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { TenantStatus } from "@/modules/tenants/domain/types/TenantTypes";
+import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
+import TenantStatusBadge from "@/sections/tenants/atoms/TenantStatusBadge";
+import TenantCredentialForm from "@/sections/tenants/molecules/TenantCredentialForm";
 import Button from "@/shared-ui/component/Button";
 import LinkButton from "@/shared-ui/component/LinkButton";
 import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import { useTenantsApi } from "@/modules/tenants/presentation/hooks/useTenantsApi";
-import TenantCredentialForm from "@/sections/tenants/molecules/TenantCredentialForm";
-import TenantStatusBadge from "@/sections/tenants/atoms/TenantStatusBadge";
-import type { TenantStatus } from "@/modules/tenants/domain/types/TenantTypes";
 
 export default function TenantDetailView() {
   const params = useParams<{ id: string }>();
@@ -44,7 +44,11 @@ export default function TenantDetailView() {
 
   const tenant = detailState.data;
   if (!tenant) {
-    return <p className="p-6 text-rose-600">{detailState.error ?? "Tenant tidak ditemukan."}</p>;
+    return (
+      <p className="p-6 text-rose-600">
+        {detailState.error ?? "Tenant tidak ditemukan."}
+      </p>
+    );
   }
 
   return (
@@ -57,21 +61,46 @@ export default function TenantDetailView() {
           </div>
           <p className="text-sm text-slate-500">{tenant.slug}</p>
         </div>
-        <LinkButton href={`/dashboard/tenants/${tenant.id}/edit`} variant="outline">
+        <LinkButton
+          href={`/dashboard/tenants/${tenant.id}/edit`}
+          variant="outline"
+        >
           Edit metadata
         </LinkButton>
       </div>
 
-      {message && <p className="rounded-lg bg-slate-50 p-3 text-sm">{message}</p>}
+      {message && (
+        <p className="rounded-lg bg-slate-50 p-3 text-sm">{message}</p>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border bg-white p-5">
           <h2 className="mb-4 font-semibold">Metadata</h2>
           <dl className="space-y-3 text-sm">
-            <div><dt className="text-slate-500">Custom domain</dt><dd>{tenant.customDomain ?? "—"}</dd></div>
-            <div><dt className="text-slate-500">Moodle URL</dt><dd>{tenant.credential?.moodleUrl ?? "Belum dikonfigurasi"}</dd></div>
-            <div><dt className="text-slate-500">Admin token</dt><dd>{tenant.credential?.hasAdminToken ? "Tersimpan terenkripsi" : "Belum"}</dd></div>
-            <div><dt className="text-slate-500">Proctor token</dt><dd>{tenant.credential?.hasProctorToken ? "Tersimpan terenkripsi" : "Belum"}</dd></div>
+            <div>
+              <dt className="text-slate-500">Custom domain</dt>
+              <dd>{tenant.customDomain ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Moodle URL</dt>
+              <dd>{tenant.credential?.moodleUrl ?? "Belum dikonfigurasi"}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Admin token</dt>
+              <dd>
+                {tenant.credential?.hasAdminToken
+                  ? "Tersimpan terenkripsi"
+                  : "Belum"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Proctor token</dt>
+              <dd>
+                {tenant.credential?.hasProctorToken
+                  ? "Tersimpan terenkripsi"
+                  : "Belum"}
+              </dd>
+            </div>
           </dl>
         </div>
 
@@ -80,7 +109,9 @@ export default function TenantDetailView() {
           <div className="space-y-3">
             <SelectField
               value={status}
-              onChange={(event) => setStatus(event.target.value as TenantStatus)}
+              onChange={(event) =>
+                setStatus(event.target.value as TenantStatus)
+              }
             >
               <option value="ACTIVE">ACTIVE</option>
               <option value="MAINTENANCE">MAINTENANCE</option>
@@ -103,7 +134,8 @@ export default function TenantDetailView() {
       <div className="rounded-xl border bg-white p-5">
         <h2 className="mb-1 font-semibold">Credential Moodle</h2>
         <p className="mb-4 text-sm text-slate-500">
-          Issue ini hanya menyimpan credential terenkripsi; tidak melakukan test koneksi Moodle.
+          Issue ini hanya menyimpan credential terenkripsi; tidak melakukan test
+          koneksi Moodle.
         </p>
         <TenantCredentialForm
           loading={mutationState.loading}
@@ -118,7 +150,8 @@ export default function TenantDetailView() {
       <div className="rounded-xl border border-rose-200 p-5">
         <h2 className="font-semibold text-rose-700">Hapus tenant</h2>
         <p className="mb-3 text-sm text-slate-500">
-          Menghapus metadata tenant beserta credential/branding terkait melalui cascade.
+          Menghapus metadata tenant beserta credential/branding terkait melalui
+          cascade.
         </p>
         <Button
           color="error"

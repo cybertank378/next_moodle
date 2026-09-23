@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { SecurityError } from "@/core/errors/SecurityError";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 
@@ -102,6 +103,92 @@ describe("MoodleRestClient", () => {
     await expect(
       client.call("core_course_get_courses", {}, { timeoutMs: 100 }),
     ).rejects.toThrow(InfrastructureError);
+  });
+
+  it("retries transient failures only for explicitly safe reads", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new TypeError("temporary network failure"))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ status: "ok" }), { status: 200 }),
+      );
+
+    const client = new MoodleRestClient(credentials);
+    await expect(
+      client.call(
+        "local_examapi_get_health",
+        {},
+        {
+          requestKind: "safe-read",
+          maxRetries: 1,
+          retryDelayMs: 0,
+        },
+      ),
+    ).resolves.toEqual({ status: "ok" });
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("never retries mutations even when retry options are supplied", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValue(new TypeError("temporary network failure"));
+
+    const client = new MoodleRestClient(credentials);
+    await expect(
+      client.call(
+        "local_examapi_lock_attempt",
+        { attemptid: 10 },
+        {
+          requestKind: "mutation",
+          maxRetries: 3,
+          retryDelayMs: 0,
+        },
+      ),
+    ).rejects.toThrow(InfrastructureError);
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
+  it("rejects SSRF targets and disabled TLS verification before fetch", () => {
+    expect(
+      () =>
+        new MoodleRestClient({
+          baseUrl: "http://169.254.169.254/latest/meta-data",
+          token: "secret",
+        }),
+    ).toThrow(SecurityError);
+
+    expect(
+      () =>
+        new MoodleRestClient({
+          baseUrl: "https://moodle.example.edu",
+          token: "secret",
+          sslVerify: false,
+        }),
+    ).toThrow(SecurityError);
+  });
+
+  it("does not expose raw Moodle messages, debug info, or response bodies", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          exception: "dml_read_exception",
+          errorcode: "dmlreadexception",
+          message: "SQL failed for token super-secret-token",
+          debuginfo: "SELECT * FROM mdl_user",
+        }),
+        { status: 200 },
+      ),
+    );
+
+    const client = new MoodleRestClient(credentials);
+    const error = await client
+      .call("local_examapi_get_health", {}, { requestKind: "safe-read" })
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(JSON.stringify(error)).not.toContain("SELECT * FROM mdl_user");
+    expect((error as Error).message).not.toContain("super-secret-token");
+    expect((error as Error).message).not.toContain("SQL failed");
   });
 
   it("should never log the secret wstoken to stdout or stderr", async () => {

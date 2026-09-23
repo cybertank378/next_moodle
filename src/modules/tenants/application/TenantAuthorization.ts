@@ -12,7 +12,10 @@ export function authorizeTenantOperation(
     authorize(actor, permission);
     return null;
   } catch (error) {
-    if (error instanceof AuthorizationError || error instanceof UnauthorizedError) {
+    if (
+      error instanceof AuthorizationError ||
+      error instanceof UnauthorizedError
+    ) {
       return error;
     }
     throw error;

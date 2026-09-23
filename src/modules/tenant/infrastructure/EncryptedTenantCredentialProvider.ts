@@ -1,11 +1,18 @@
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { MoodleCredentialProvider } from "@/core/moodle/MoodleCredentialProvider";
+import type {
+  MoodleCredentialProvider,
+  MoodleServiceCredential,
+} from "@/core/moodle/MoodleCredentialProvider";
 import type { MoodleCredentials } from "@/core/moodle/types";
 import type { TenantEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import {
   type SsrfValidator,
   ssrfValidator,
 } from "@/core/security/SsrfValidator";
+import {
+  type TenantContext,
+  validateTenantContext,
+} from "@/core/tenant/TenantContext";
 import type { TenantRepository } from "@/modules/tenant/domain/TenantRepository";
 
 export interface RawCredentialsToEncrypt {
@@ -34,7 +41,14 @@ export class EncryptedTenantCredentialProvider
   /**
    * Retrieves decrypted Moodle credentials for the specified tenantId.
    */
-  async getCredentials(tenantId: string): Promise<MoodleCredentials> {
+  async getCredentials(
+    tenantInput: string | TenantContext,
+    service: MoodleServiceCredential = "admin",
+  ): Promise<MoodleCredentials> {
+    const tenantId =
+      typeof tenantInput === "string"
+        ? tenantInput
+        : validateTenantContext(tenantInput).tenantId;
     const tenant = await this.tenantRepository.findById(tenantId);
 
     if (!tenant?.credential) {
@@ -61,10 +75,16 @@ export class EncryptedTenantCredentialProvider
       );
     }
 
+    if (service === "proctor" && !proctorToken) {
+      throw new NotFoundError("Tenant proctor credentials not found", {
+        tenantId,
+      });
+    }
+
     return {
       baseUrl: credential.moodleUrl,
       moodleUrl: credential.moodleUrl,
-      token: adminToken,
+      token: service === "proctor" ? (proctorToken as string) : adminToken,
       proctorToken,
       timeoutMs: credential.timeoutBudgetMs,
       sslVerify: credential.sslVerify,
