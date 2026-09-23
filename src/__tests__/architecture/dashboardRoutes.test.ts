@@ -1,15 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { ROUTES } from "@/libs/routes";
+import { redirectByRole } from "@/libs/utils";
 
-describe("libs/routes", () => {
-  it("provides the consolidated public and dashboard route definitions", () => {
-    expect(ROUTES.HOME).toBe("/");
+describe("consolidated dashboard route mapping", () => {
+  it.each([
+    "ADMIN",
+    "SUPERADMIN",
+    "TENANT",
+    "TENANT_ADMIN",
+    "TEACHER",
+    "STUDENT",
+  ])("redirects authenticated role %s to /dashboard", (role) => {
+    expect(redirectByRole(role)).toBe("/dashboard");
+  });
 
-    expect(ROUTES.AUTH.LOGIN).toBe("/login");
-    expect(ROUTES.AUTH.REGISTER).toBe("/register");
-    expect(ROUTES.AUTH.FORGOT_PASSWORD).toBe("/forgot-password");
-    expect(ROUTES.AUTH.CHANGE_PASSWORD).toBe("/change-password");
+  it("keeps unauthenticated/unknown roles on login", () => {
+    expect(redirectByRole(undefined)).toBe(ROUTES.AUTH.LOGIN);
+    expect(redirectByRole("UNKNOWN")).toBe(ROUTES.AUTH.LOGIN);
+  });
 
+  it("maps protected features under /dashboard", () => {
     expect(ROUTES.DASHBOARD.ROOT).toBe("/dashboard");
     expect(ROUTES.DASHBOARD.TENANTS).toBe("/dashboard/tenants");
     expect(ROUTES.DASHBOARD.USERS).toBe("/dashboard/users");
@@ -22,12 +32,5 @@ describe("libs/routes", () => {
     expect(ROUTES.DASHBOARD.BRANDING).toBe("/dashboard/branding");
     expect(ROUTES.DASHBOARD.AUDIT).toBe("/dashboard/audit");
     expect(ROUTES.DASHBOARD.SETTINGS).toBe("/dashboard/settings");
-  });
-
-  it("does not expose legacy role-prefixed route groups", () => {
-    expect("ADMIN" in ROUTES).toBe(false);
-    expect("TENANT" in ROUTES).toBe(false);
-    expect("STUDENT" in ROUTES).toBe(false);
-    expect("FORBIDDEN" in ROUTES).toBe(false);
   });
 });

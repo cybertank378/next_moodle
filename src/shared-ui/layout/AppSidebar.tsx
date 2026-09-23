@@ -36,12 +36,12 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.ADMIN.DASHBOARD,
+              path: ROUTES.DASHBOARD.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Manajemen Tenant",
-              path: ROUTES.ADMIN.TENANTS,
+              path: ROUTES.DASHBOARD.TENANTS,
               icon: Users,
             },
           ],
@@ -51,12 +51,12 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Log Audit",
-              path: ROUTES.ADMIN.AUDIT,
+              path: ROUTES.DASHBOARD.AUDIT,
               icon: ShieldCheck,
             },
             {
               label: "Pengaturan",
-              path: ROUTES.ADMIN.SETTINGS,
+              path: ROUTES.DASHBOARD.SETTINGS,
               icon: Settings,
             },
           ],
@@ -70,35 +70,56 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.TENANT.DASHBOARD,
+              path: ROUTES.DASHBOARD.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Pengguna & Grup",
-              path: ROUTES.TENANT.USERS,
+              path: ROUTES.DASHBOARD.USERS,
               icon: Users,
               children: [
-                { label: "Daftar Pengguna", path: ROUTES.TENANT.USERS },
-                { label: "Enrolment Manual", path: ROUTES.TENANT.ENROLMENTS },
-                { label: "Rombel & Grup", path: ROUTES.TENANT.GROUPS },
+                {
+                  label: "Daftar Pengguna",
+                  path: ROUTES.DASHBOARD.USERS,
+                },
+                {
+                  label: "Enrolment Manual",
+                  path: ROUTES.DASHBOARD.ENROLMENTS,
+                },
+                {
+                  label: "Rombel & Grup",
+                  path: ROUTES.DASHBOARD.GROUPS,
+                },
               ],
             },
             {
               label: "Kursus & Bank Soal",
-              path: ROUTES.TENANT.COURSES,
+              path: ROUTES.DASHBOARD.COURSES,
               icon: BookOpen,
               children: [
-                { label: "Mata Pelajaran", path: ROUTES.TENANT.COURSES },
-                { label: "Bank Soal", path: ROUTES.TENANT.QUESTIONS },
+                {
+                  label: "Mata Pelajaran",
+                  path: ROUTES.DASHBOARD.COURSES,
+                },
+                {
+                  label: "Bank Soal",
+                  path: ROUTES.DASHBOARD.QUESTIONS,
+                },
               ],
             },
             {
               label: "Ujian & Hasil",
-              path: ROUTES.TENANT.EXAMS,
+              path: ROUTES.DASHBOARD.EXAMS,
               icon: FileText,
               children: [
-                { label: "Jadwal Ujian", path: ROUTES.TENANT.EXAMS },
-                { label: "Hasil & Nilai", path: ROUTES.TENANT.RESULTS },
+                {
+                  label: "Jadwal Ujian",
+                  path: ROUTES.DASHBOARD.EXAMS,
+                },
+                {
+                  label: "Hasil & Nilai",
+                  path: ROUTES.DASHBOARD.RESULTS,
+                },
               ],
             },
           ],
@@ -108,12 +129,12 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Branding",
-              path: ROUTES.TENANT.BRANDING,
+              path: ROUTES.DASHBOARD.BRANDING,
               icon: Palette,
             },
             {
               label: "Log Audit",
-              path: ROUTES.TENANT.AUDIT,
+              path: ROUTES.DASHBOARD.AUDIT,
               icon: ShieldCheck,
             },
           ],
@@ -127,22 +148,22 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.STUDENT.DASHBOARD,
+              path: ROUTES.DASHBOARD.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Mata Pelajaran",
-              path: ROUTES.STUDENT.COURSES,
+              path: ROUTES.DASHBOARD.COURSES,
               icon: BookOpen,
             },
             {
               label: "Jadwal Ujian",
-              path: ROUTES.STUDENT.EXAMS,
+              path: ROUTES.DASHBOARD.EXAMS,
               icon: FileText,
             },
             {
               label: "Hasil & Nilai",
-              path: ROUTES.STUDENT.RESULTS,
+              path: ROUTES.DASHBOARD.RESULTS,
               icon: Award,
             },
           ],
@@ -164,19 +185,16 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
   const groups = getSidebarMenu(role);
   const [openKey, setOpenKey] = useState<string | null>(null);
 
-  const SidebarContent = (
+  const sidebarContent = (
     <div className="flex h-screen w-72 flex-col bg-sky-950 text-slate-200">
-      {/* ================================================= */}
-      {/* HEADER */}
-      {/* ================================================= */}
       <div className="border-b border-slate-700 px-5 py-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 shadow-md text-white">
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-white shadow-md">
             <GraduationCap size={28} />
           </div>
 
           <div>
-            <h1 className="text-base font-bold text-white tracking-wide">
+            <h1 className="text-base font-bold tracking-wide text-white">
               Exam SaaS
             </h1>
             <p className="mt-0.5 text-xs text-slate-400">
@@ -185,7 +203,6 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
           </div>
         </div>
 
-        {/* ACTIVE ROLE */}
         <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-sky-900/60 px-4 py-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow">
             <LayoutDashboard size={18} />
@@ -202,9 +219,6 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </div>
 
-      {/* ================================================= */}
-      {/* NAVIGATION */}
-      {/* ================================================= */}
       <nav className="flex-1 overflow-y-auto bg-sky-950 px-3 py-5">
         <div className="space-y-7">
           {groups.map((group, index) => (
@@ -237,9 +251,6 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </nav>
 
-      {/* ================================================= */}
-      {/* FOOTER */}
-      {/* ================================================= */}
       <div className="border-t border-slate-700 bg-sky-950 px-5 py-4">
         <div className="rounded-2xl px-4 py-2">
           <p className="text-xs font-medium text-slate-400">
@@ -252,10 +263,8 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
 
   return (
     <>
-      {/* DESKTOP */}
-      <aside className="hidden md:flex">{SidebarContent}</aside>
+      <aside className="hidden md:flex">{sidebarContent}</aside>
 
-      {/* MOBILE */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -278,7 +287,7 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
                 damping: 26,
               }}
             >
-              {SidebarContent}
+              {sidebarContent}
             </motion.aside>
           </>
         )}

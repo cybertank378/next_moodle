@@ -9,12 +9,13 @@ import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
 
 export async function requireTenantAdmin(): Promise<void> {
   const actor = await getCurrentUser();
+
   if (!actor) {
     redirect(ROUTES.AUTH.LOGIN);
   }
 
   if (actor.role !== AppRole.ADMIN) {
-    redirect("/");
+    redirect(ROUTES.DASHBOARD.ROOT);
   }
 
   requirePermission(
