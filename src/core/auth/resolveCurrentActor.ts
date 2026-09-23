@@ -1,4 +1,5 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+import { EncryptedCookieSessionManager } from "@/modules/auth/infrastructure/providers/EncryptedCookieSessionManager";
 import type { CurrentActor } from "./CurrentActor";
 import type { SessionRepository } from "./SessionRepository";
 
@@ -29,12 +30,17 @@ function extractTokenFromRequest(request: Request): string | null {
 
 export async function resolveCurrentActor(
   request: Request,
-  sessionRepository: SessionRepository,
+  sessionRepository?: SessionRepository,
 ): Promise<CurrentActor> {
   const token = extractTokenFromRequest(request);
 
   if (!token) {
     throw new UnauthorizedError("Authentication token is missing");
+  }
+
+  if (!sessionRepository) {
+    return (await new EncryptedCookieSessionManager().resolveSession(token))
+      .actor;
   }
 
   const session = await sessionRepository.findByToken(token);

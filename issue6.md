@@ -32,13 +32,13 @@ Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, 
 
 ## Scope Pengerjaan
 
-- [ ] Domain auth contracts berada hanya di `AuthInterfaces.ts`.
-- [ ] Login use case resolve tenant, panggil Moodle `/login/token.php`, lalu `core_webservice_get_site_info`.
-- [ ] Raw Moodle user token dibungkus dalam signed/encrypted app session dan tidak dikirim ke JS browser.
-- [ ] Implement current-session/logout/logout-all/refresh sesuai session strategy yang dipilih.
-- [ ] Controller, API routes, hooks, login/register/forgot/change-password UI sesuai planning support.
-- [ ] Integrasikan `(protected)/layout.tsx` dengan `resolveCurrentActor()`.
-- [ ] Root page redirect ke `/login` atau `/dashboard` sesuai auth state.
+- [x] Domain auth contracts berada hanya di `AuthInterfaces.ts`.
+- [x] Login use case resolve tenant, panggil Moodle `/login/token.php`, lalu `core_webservice_get_site_info`.
+- [x] Raw Moodle user token dibungkus dalam signed/encrypted app session dan tidak dikirim ke JS browser.
+- [x] Implement current-session/logout/logout-all/refresh sesuai session strategy yang dipilih.
+- [x] Controller, API routes, hooks, login/register/forgot/change-password UI sesuai planning support.
+- [x] Integrasikan `(protected)/layout.tsx` dengan `resolveCurrentActor()`.
+- [x] Root page redirect ke `/login` atau `/dashboard` sesuai auth state.
 
 ## Out of Scope
 
@@ -54,22 +54,22 @@ Jika salah satu boundary di atas belum diperlukan untuk suatu operasi spesifik, 
 
 ### RED
 
-- [ ] RED tests login success/failure, token non-exposure, tenant mismatch, session expiry, unauthorized protected access.
+- [x] RED tests login success/failure, token non-exposure, tenant mismatch, session expiry, unauthorized protected access.
 
 ### GREEN
 
-- [ ] Implement flow minimum sampai test hijau.
+- [x] Implement flow minimum sampai test hijau.
 
 ### REFACTOR
 
-- [ ] Refactor session/actor mapping dan UI state tanpa membocorkan Moodle transport detail.
+- [x] Refactor session/actor mapping dan UI state tanpa membocorkan Moodle transport detail.
 
 ## Acceptance Criteria
 
-- [ ] Login menghasilkan app session aman.
-- [ ] Browser tidak menerima raw Moodle token.
-- [ ] Protected route dapat resolve actor.
-- [ ] Semua boundary auth yang relevan tercakup.
+- [x] Login menghasilkan app session aman.
+- [x] Browser tidak menerima raw Moodle token.
+- [x] Protected route dapat resolve actor.
+- [x] Semua boundary auth yang relevan tercakup.
 
 ## Global Constraints
 

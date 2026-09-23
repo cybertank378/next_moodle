@@ -4,19 +4,26 @@ import {
   validateCurrentActor,
 } from "@/core/auth/CurrentActor";
 import { ValidationError } from "@/core/errors/ValidationError";
+import { AppRole } from "@/core/rbac/AppRole";
 
 describe("CurrentActor", () => {
   it("should validate and return a valid CurrentActor", () => {
     const validActor: CurrentActor = {
       userId: "usr-1",
       username: "john_doe",
-      role: "STUDENT",
+      role: AppRole.STUDENT,
       tenantId: "tenant-123",
+      moodleUserId: null,
+      permissions: [],
       email: "john@example.com",
     };
 
     const validated = validateCurrentActor(validActor);
-    expect(validated).toEqual(validActor);
+    expect(validated).toEqual({
+      ...validActor,
+      id: "usr-1",
+      displayName: undefined,
+    });
   });
 
   it("should throw ValidationError if actor is null or undefined", () => {

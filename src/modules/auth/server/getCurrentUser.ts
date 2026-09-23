@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { getAuthSessionManager } from "@/app/api/auth/_factory";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 
 export async function getCurrentUser(): Promise<CurrentActor | null> {
@@ -12,9 +13,8 @@ export async function getCurrentUser(): Promise<CurrentActor | null> {
       return null;
     }
 
-    // In full session implementation, sessionRepository.findByToken is invoked here.
-    // For initial bootstrap, parse or return unauthenticated if invalid.
-    return null;
+    const session = await getAuthSessionManager().resolveSession(sessionToken);
+    return session.actor;
   } catch {
     return null;
   }
