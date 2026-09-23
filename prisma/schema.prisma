@@ -25,6 +25,8 @@ model Tenant {
   branding     TenantBranding?
   auditLogs    SaasAuditLog[]
 
+  @@index([status])
+  @@index([name])
   @@map("tenants")
 }
 

@@ -5,10 +5,21 @@ import { NextResponse } from "next/server";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { HttpStatus } from "@/core/http/HttpStatus";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
-import { getTenantController } from "../_factory";
+import { getTenantsController } from "@/app/api/tenants/_factory";
 
 interface RouteContext {
   params: Promise<{ tenantId: string }>;
+}
+
+function unauthorized(): NextResponse {
+  return NextResponse.json(
+    ApiResponse.error(
+      "UNAUTHORIZED",
+      "Sesi tidak valid atau telah berakhir.",
+      HttpStatus.UNAUTHORIZED,
+    ).body,
+    { status: HttpStatus.UNAUTHORIZED },
+  );
 }
 
 export async function GET(
@@ -16,19 +27,9 @@ export async function GET(
   context: RouteContext,
 ): Promise<NextResponse> {
   const actor = await getCurrentUser();
-  if (!actor) {
-    return NextResponse.json(
-      ApiResponse.error(
-        "UNAUTHORIZED",
-        "Sesi tidak valid atau telah berakhir.",
-        HttpStatus.UNAUTHORIZED,
-      ).body,
-      { status: HttpStatus.UNAUTHORIZED },
-    );
-  }
-
+  if (!actor) return unauthorized();
   const { tenantId } = await context.params;
-  return getTenantController().getOne(actor, tenantId);
+  return getTenantsController().getOne(actor, tenantId);
 }
 
 export async function PATCH(
@@ -36,17 +37,17 @@ export async function PATCH(
   context: RouteContext,
 ): Promise<NextResponse> {
   const actor = await getCurrentUser();
-  if (!actor) {
-    return NextResponse.json(
-      ApiResponse.error(
-        "UNAUTHORIZED",
-        "Sesi tidak valid atau telah berakhir.",
-        HttpStatus.UNAUTHORIZED,
-      ).body,
-      { status: HttpStatus.UNAUTHORIZED },
-    );
-  }
-
+  if (!actor) return unauthorized();
   const { tenantId } = await context.params;
-  return getTenantController().update(actor, tenantId, req);
+  return getTenantsController().update(actor, tenantId, req);
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  context: RouteContext,
+): Promise<NextResponse> {
+  const actor = await getCurrentUser();
+  if (!actor) return unauthorized();
+  const { tenantId } = await context.params;
+  return getTenantsController().remove(actor, tenantId);
 }

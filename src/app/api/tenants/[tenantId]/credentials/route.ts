@@ -11,7 +11,7 @@ interface RouteContext {
   params: Promise<{ tenantId: string }>;
 }
 
-export async function PATCH(
+export async function PUT(
   req: NextRequest,
   context: RouteContext,
 ): Promise<NextResponse> {
@@ -28,5 +28,5 @@ export async function PATCH(
   }
 
   const { tenantId } = await context.params;
-  return getTenantsController().updateStatus(actor, tenantId, req);
+  return getTenantsController().configureCredentials(actor, tenantId, req);
 }
