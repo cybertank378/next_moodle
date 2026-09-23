@@ -2,30 +2,32 @@ import { describe, expect, it } from "vitest";
 import { ROUTES } from "@/libs/routes";
 
 describe("libs/routes", () => {
-  it("should provide consistent and structured route definitions", () => {
+  it("provides the consolidated public and dashboard route definitions", () => {
     expect(ROUTES.HOME).toBe("/");
-    expect(ROUTES.FORBIDDEN).toBe("/403");
 
-    // Auth
     expect(ROUTES.AUTH.LOGIN).toBe("/login");
+    expect(ROUTES.AUTH.REGISTER).toBe("/register");
     expect(ROUTES.AUTH.FORGOT_PASSWORD).toBe("/forgot-password");
     expect(ROUTES.AUTH.CHANGE_PASSWORD).toBe("/change-password");
 
-    // Admin
-    expect(ROUTES.ADMIN.ROOT).toBe("/admin");
-    expect(ROUTES.ADMIN.DASHBOARD).toBe("/admin/dashboard");
-    expect(ROUTES.ADMIN.TENANTS).toBe("/admin/tenants");
+    expect(ROUTES.DASHBOARD.ROOT).toBe("/dashboard");
+    expect(ROUTES.DASHBOARD.TENANTS).toBe("/dashboard/tenants");
+    expect(ROUTES.DASHBOARD.USERS).toBe("/dashboard/users");
+    expect(ROUTES.DASHBOARD.ENROLMENTS).toBe("/dashboard/enrolments");
+    expect(ROUTES.DASHBOARD.GROUPS).toBe("/dashboard/groups");
+    expect(ROUTES.DASHBOARD.COURSES).toBe("/dashboard/courses");
+    expect(ROUTES.DASHBOARD.QUESTIONS).toBe("/dashboard/questions");
+    expect(ROUTES.DASHBOARD.EXAMS).toBe("/dashboard/exams");
+    expect(ROUTES.DASHBOARD.RESULTS).toBe("/dashboard/results");
+    expect(ROUTES.DASHBOARD.BRANDING).toBe("/dashboard/branding");
+    expect(ROUTES.DASHBOARD.AUDIT).toBe("/dashboard/audit");
+    expect(ROUTES.DASHBOARD.SETTINGS).toBe("/dashboard/settings");
+  });
 
-    // Tenant
-    expect(ROUTES.TENANT.ROOT).toBe("/tenant");
-    expect(ROUTES.TENANT.DASHBOARD).toBe("/tenant/dashboard");
-    expect(ROUTES.TENANT.COURSES).toBe("/tenant/courses");
-    expect(ROUTES.TENANT.EXAMS).toBe("/tenant/exams");
-
-    // Student
-    expect(ROUTES.STUDENT.ROOT).toBe("/student");
-    expect(ROUTES.STUDENT.DASHBOARD).toBe("/student/dashboard");
-    expect(ROUTES.STUDENT.COURSES).toBe("/student/courses");
-    expect(ROUTES.STUDENT.EXAMS).toBe("/student/exams");
+  it("does not expose legacy role-prefixed route groups", () => {
+    expect("ADMIN" in ROUTES).toBe(false);
+    expect("TENANT" in ROUTES).toBe(false);
+    expect("STUDENT" in ROUTES).toBe(false);
+    expect("FORBIDDEN" in ROUTES).toBe(false);
   });
 });

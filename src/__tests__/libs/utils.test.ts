@@ -1,32 +1,45 @@
 import { describe, expect, it } from "vitest";
-import { cn, redirectByRole } from "@/libs/utils";
+import { cn, redirectByRole, resolveUserRole } from "@/libs/utils";
 
 describe("libs/utils", () => {
   describe("cn", () => {
-    it("should merge class names correctly", () => {
+    it("merges class names correctly", () => {
       expect(cn("px-2", "py-1")).toBe("px-2 py-1");
       expect(cn("px-2", false && "hidden", "py-1")).toBe("px-2 py-1");
       expect(cn("px-2", "px-4")).toBe("px-4");
     });
   });
 
+  describe("resolveUserRole", () => {
+    it("normalizes platform and tenant aliases", () => {
+      expect(resolveUserRole("ADMIN")).toBe("ADMIN");
+      expect(resolveUserRole("SUPERADMIN")).toBe("ADMIN");
+      expect(resolveUserRole("TENANT")).toBe("TENANT");
+      expect(resolveUserRole("TENANT_ADMIN")).toBe("TENANT");
+      expect(resolveUserRole("TEACHER")).toBe("TENANT");
+      expect(resolveUserRole("STUDENT")).toBe("STUDENT");
+    });
+
+    it("returns null for unsupported roles", () => {
+      expect(resolveUserRole(null)).toBeNull();
+      expect(resolveUserRole(undefined)).toBeNull();
+      expect(resolveUserRole("GUEST")).toBeNull();
+    });
+  });
+
   describe("redirectByRole", () => {
-    it("should redirect ADMIN to /admin/dashboard", () => {
-      expect(redirectByRole("ADMIN")).toBe("/admin/dashboard");
-      expect(redirectByRole("SUPERADMIN")).toBe("/admin/dashboard");
+    it.each([
+      "ADMIN",
+      "SUPERADMIN",
+      "TENANT",
+      "TENANT_ADMIN",
+      "TEACHER",
+      "STUDENT",
+    ])("redirects authenticated role %s to /dashboard", (role) => {
+      expect(redirectByRole(role)).toBe("/dashboard");
     });
 
-    it("should redirect TENANT to /tenant/dashboard", () => {
-      expect(redirectByRole("TENANT")).toBe("/tenant/dashboard");
-      expect(redirectByRole("TENANT_ADMIN")).toBe("/tenant/dashboard");
-      expect(redirectByRole("TEACHER")).toBe("/tenant/dashboard");
-    });
-
-    it("should redirect STUDENT to /student/dashboard", () => {
-      expect(redirectByRole("STUDENT")).toBe("/student/dashboard");
-    });
-
-    it("should redirect unknown or null role to /login", () => {
+    it("redirects unknown or null role to /login", () => {
       expect(redirectByRole(null)).toBe("/login");
       expect(redirectByRole(undefined)).toBe("/login");
       expect(redirectByRole("GUEST")).toBe("/login");
