@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+import { createAuthSessionManagerTestDouble } from "@/modules/auth/__tests__/helpers/AuthSessionManagerTestDouble";
 import { GetCurrentSessionUseCase } from "@/modules/auth/application/usecases/GetCurrentSessionUseCase";
 import { LogoutAllUseCase } from "@/modules/auth/application/usecases/LogoutAllUseCase";
 import { LogoutUseCase } from "@/modules/auth/application/usecases/LogoutUseCase";
 import { RefreshSessionUseCase } from "@/modules/auth/application/usecases/RefreshSessionUseCase";
-import { createAuthSessionManagerTestDouble } from "@/modules/auth/__tests__/helpers/AuthSessionManagerTestDouble";
 
 describe("auth session use cases", () => {
   it("gets and refreshes a session through the domain session port", async () => {
