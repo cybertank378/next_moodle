@@ -1,15 +1,15 @@
+import "server-only";
+
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
+import type { CurrentActor } from "@/core/auth/CurrentActor";
+import type { UserRole } from "@/libs/enums";
 import { ROUTES } from "@/libs/routes";
 import { resolveUserRole } from "@/libs/utils";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
-import AppLayout from "@/shared-ui/layout/AppLayout";
 
-export default async function ProtectedLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export async function requireDashboardRoles(
+  allowedRoles: readonly UserRole[],
+): Promise<CurrentActor | null> {
   const actor = await getCurrentUser();
 
   if (!actor) {
@@ -19,14 +19,15 @@ export default async function ProtectedLayout({
 
   const role = resolveUserRole(actor.role);
 
-  if (!role || (role !== "ADMIN" && !actor.tenantId)) {
+  if (!role || !allowedRoles.includes(role)) {
+    redirect(ROUTES.DASHBOARD.ROOT);
+    return null;
+  }
+
+  if (role !== "ADMIN" && !actor.tenantId) {
     redirect(ROUTES.AUTH.LOGIN);
     return null;
   }
 
-  return (
-    <AppLayout userRole={role} username={actor.username}>
-      {children}
-    </AppLayout>
-  );
+  return actor;
 }
