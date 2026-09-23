@@ -96,33 +96,47 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     }
   });
 
-  it("removes every legacy role/auth/forbidden route folder", () => {
-    const legacyDirs = [
-      // Legacy role route groups.
-      "src/app/(admin)",
-      "src/app/(tenant)",
-      "src/app/(student)",
-      "src/app/(auth)",
+  it("allows only the consolidated App Router roots", () => {
+    const appRoot = path.resolve(process.cwd(), "src/app");
+    const entries = fs.readdirSync(appRoot, { withFileTypes: true });
 
-      // Legacy ungrouped role routes must not reappear.
-      "src/app/admin",
-      "src/app/tenant",
-      "src/app/student",
-      "src/app/auth",
+    const allowedDirectories = new Set([
+      "(protected)",
+      "(public)",
+      "api",
+    ]);
 
-      // Dashboard UI must live only below (protected).
-      "src/app/dashboard",
+    const allowedFiles = new Set([
+      "favicon.ico",
+      "layout.tsx",
+      "page.tsx",
+    ]);
 
-      // Legacy standalone forbidden page.
-      "src/app/403",
-    ];
+    for (const entry of entries) {
+      const allowed = entry.isDirectory()
+        ? allowedDirectories.has(entry.name)
+        : allowedFiles.has(entry.name);
 
-    for (const legacyDir of legacyDirs) {
       expect(
-        exists(legacyDir),
-        `Legacy App Router folder must not exist: ${legacyDir}. Protected UI belongs under src/app/(protected)/dashboard.`,
-      ).toBe(false);
+        allowed,
+        `Unexpected App Router root: src/app/${entry.name}. Protected UI must live under src/app/(protected)/dashboard.`,
+      ).toBe(true);
     }
+  });
+
+  it("keeps all protected UI below dashboard", () => {
+    const protectedRoot = path.resolve(process.cwd(), "src/app/(protected)");
+    const entries = fs.readdirSync(protectedRoot, { withFileTypes: true });
+
+    expect(entries.map((entry) => entry.name)).toEqual(
+      expect.arrayContaining(["dashboard", "layout.tsx"]),
+    );
+
+    const uiDirectories = entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+
+    expect(uiDirectories).toEqual(["dashboard"]);
   });
 
   it("keeps internal API routes outside the UI route consolidation", () => {
