@@ -94,15 +94,32 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     }
   });
 
-  it("removes legacy role/auth/forbidden route folders", () => {
-    for (const legacyDir of [
+  it("removes every legacy role/auth/forbidden route folder", () => {
+    const legacyDirs = [
+      // Legacy role route groups.
       "src/app/(admin)",
       "src/app/(tenant)",
       "src/app/(student)",
       "src/app/(auth)",
+
+      // Legacy ungrouped role routes must not reappear.
+      "src/app/admin",
+      "src/app/tenant",
+      "src/app/student",
+      "src/app/auth",
+
+      // Dashboard UI must live only below (protected).
+      "src/app/dashboard",
+
+      // Legacy standalone forbidden page.
       "src/app/403",
-    ]) {
-      expect(exists(legacyDir), `Legacy route must be removed: ${legacyDir}`).toBe(false);
+    ];
+
+    for (const legacyDir of legacyDirs) {
+      expect(
+        exists(legacyDir),
+        `Legacy App Router folder must not exist: ${legacyDir}. Protected UI belongs under src/app/(protected)/dashboard.`,
+      ).toBe(false);
     }
   });
 
