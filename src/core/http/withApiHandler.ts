@@ -1,100 +1,73 @@
-import { type NextRequest, NextResponse } from "next/server";
-import type { CurrentActor } from "@/core/auth/CurrentActor";
-import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
-import { createLogger, type Logger } from "@/core/logger";
-import { getOrGenerateRequestId } from "@/core/security/RequestId";
-import { resolveCurrentTenant } from "@/core/tenant/resolveCurrentTenant";
-import type { TenantContext } from "@/core/tenant/TenantContext";
+import { AppError } from "@/core/errors/AppError";
+import { createLogger } from "@/core/logger/createLogger";
+import type { Logger } from "@/core/logger/Logger";
+import { resolveRequestId } from "@/core/security/RequestId";
 import { ApiResponse } from "./ApiResponse";
-import { HttpStatus } from "./HttpStatus";
 import { mapErrorToHttpResponse } from "./mapErrorToHttpResponse";
 
 export interface ApiHandlerContext {
-  readonly requestId: string;
-  readonly tenant: TenantContext;
-  readonly actor: CurrentActor | null;
-  readonly logger: Logger;
-  readonly params: Record<string, string | string[]>;
+  requestId: string;
+  logger: Logger;
+  params?:
+    | Promise<Record<string, string | string[]>>
+    | Record<string, string | string[]>;
 }
 
 export type ApiRouteHandler<T = unknown> = (
-  request: NextRequest,
-  context: ApiHandlerContext,
-) => Promise<T | NextResponse>;
+  req: Request,
+  ctx: ApiHandlerContext,
+) => Promise<T | ApiResponse<T>> | T | ApiResponse<T>;
 
-export interface WithApiHandlerOptions {
-  requireAuth?: boolean;
-}
-
-export function withApiHandler<T>(
-  handler: ApiRouteHandler<T>,
-  options: WithApiHandlerOptions = {},
-) {
+export function withApiHandler<T = unknown>(handler: ApiRouteHandler<T>) {
   return async (
-    request: NextRequest,
-    routeSegmentContext: {
-      params: Promise<Record<string, string | string[] | undefined>>;
-    } = {
-      params: Promise.resolve({}),
+    req: Request,
+    routeParams?: {
+      params?:
+        | Promise<Record<string, string | string[]>>
+        | Record<string, string | string[]>;
     },
-  ): Promise<NextResponse> => {
-    const requestId = getOrGenerateRequestId(request);
-    let logger: Logger = createLogger({ requestId });
+  ): Promise<Response> => {
+    const requestId = resolveRequestId(req);
+    const logger = createLogger("ApiHandler", { requestId });
+    const context: ApiHandlerContext = {
+      requestId,
+      logger,
+      params: routeParams?.params,
+    };
 
     try {
-      const tenant = await resolveCurrentTenant(request);
+      const result = await handler(req, context);
 
-      let actor: CurrentActor | null = null;
-      try {
-        actor = await resolveCurrentActor(request, undefined, tenant);
-      } catch (authErr) {
-        if (options.requireAuth) {
-          throw authErr;
-        }
-      }
+      const apiResponse: ApiResponse<unknown> =
+        result instanceof ApiResponse
+          ? result
+          : ApiResponse.success(result, { requestId });
 
-      logger = logger.child({
-        tenantId: tenant.tenantId,
-        actorId: actor?.userId,
+      return Response.json(apiResponse.body, {
+        status: apiResponse.status,
+        headers: {
+          "x-request-id": requestId,
+          "content-type": "application/json",
+        },
       });
-
-      const resolvedParams = routeSegmentContext?.params
-        ? ((await routeSegmentContext.params) as Record<
-            string,
-            string | string[]
-          >)
-        : {};
-
-      const handlerContext: ApiHandlerContext = {
-        requestId,
-        tenant,
-        actor,
-        logger,
-        params: resolvedParams,
-      };
-
-      const result = await handler(request, handlerContext);
-
-      // If handler returned a raw NextResponse (e.g. redirect or custom headers), return it
-      if (result instanceof NextResponse) {
-        result.headers.set("x-request-id", requestId);
-        return result;
-      }
-
-      // Format as standard ApiResponse.success
-      const responseBody = ApiResponse.success(result);
-      const response = NextResponse.json(responseBody, {
-        status: HttpStatus.OK,
-      });
-      response.headers.set("x-request-id", requestId);
-      return response;
     } catch (error) {
-      logger.error("API handler execution error", error, { requestId });
+      if (error instanceof AppError && error.isOperational) {
+        logger.warn(`Operational request error: ${error.message}`, {
+          code: error.code,
+          statusCode: error.statusCode,
+        });
+      } else {
+        logger.error("API handler execution failed", error);
+      }
+      const apiResponse = mapErrorToHttpResponse(error, requestId);
 
-      const { status, body } = mapErrorToHttpResponse(error, requestId);
-      const response = NextResponse.json(body, { status });
-      response.headers.set("x-request-id", requestId);
-      return response;
+      return Response.json(apiResponse.body, {
+        status: apiResponse.status,
+        headers: {
+          "x-request-id": requestId,
+          "content-type": "application/json",
+        },
+      });
     }
   };
 }

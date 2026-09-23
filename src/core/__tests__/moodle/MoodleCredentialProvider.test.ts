@@ -1,60 +1,70 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
-  DefaultMoodleCredentialProvider,
-  type MoodleCredentialProvider,
+  EncryptedMoodleCredentialProvider,
+  type MoodleCredentialStore,
 } from "@/core/moodle/MoodleCredentialProvider";
+import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import type { TenantContext } from "@/core/tenant/TenantContext";
 
-describe("MoodleCredentialProvider", () => {
+describe("EncryptedMoodleCredentialProvider", () => {
   const tenantA: TenantContext = {
-    tenantId: "tenant_a",
-    slug: "tenant-a",
-    name: "Tenant A",
+    tenantId: "tenant-a",
+    tenantSlug: "tenant-a",
     status: "ACTIVE",
   };
+  const tenantB: TenantContext = {
+    tenantId: "tenant-b",
+    tenantSlug: "tenant-b",
+    status: "ACTIVE",
+  };
+  const encryption = new AesHkdfEncryptionProvider(
+    "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  );
 
-  it("should implement MoodleCredentialProvider interface", async () => {
-    const provider: MoodleCredentialProvider =
-      new DefaultMoodleCredentialProvider();
+  it("selects and decrypts only the requested tenant service token", async () => {
+    const admin = await encryption.encrypt("admin-a", tenantA.tenantId);
+    const proctor = await encryption.encrypt("proctor-a", tenantA.tenantId);
+    const store: MoodleCredentialStore = {
+      findByTenantId: vi.fn().mockResolvedValue({
+        tenantId: tenantA.tenantId,
+        moodleUrl: "https://moodle-a.example.edu",
+        encryptedAdminToken: admin,
+        encryptedProctorToken: proctor,
+        timeoutBudgetMs: 8_000,
+        sslVerify: true,
+      }),
+    };
+    const provider = new EncryptedMoodleCredentialProvider(store, encryption);
 
-    const creds = await provider.getCredential(tenantA);
-    expect(creds).toBeDefined();
-    expect(creds.baseUrl).toBeDefined();
-    expect(typeof creds.baseUrl).toBe("string");
-    expect(creds.token).toBeDefined();
-    expect(typeof creds.token).toBe("string");
+    await expect(
+      provider.getCredentials(tenantA, "admin"),
+    ).resolves.toMatchObject({
+      token: "admin-a",
+      baseUrl: "https://moodle-a.example.edu",
+    });
+    await expect(
+      provider.getCredentials(tenantA, "proctor"),
+    ).resolves.toMatchObject({
+      token: "proctor-a",
+    });
   });
 
-  it("should support custom in-memory multi-tenant credential provider", async () => {
-    const customProvider: MoodleCredentialProvider = {
-      getCredential: async (tenant) => {
-        if (tenant.tenantId === "tenant_a") {
-          return {
-            baseUrl: "https://moodle-a.example.test",
-            token: "token_a_123",
-          };
-        }
-        if (tenant.tenantId === "tenant_b") {
-          return {
-            baseUrl: "https://moodle-b.example.test",
-            token: "token_b_456",
-          };
-        }
-        throw new Error(`Tenant not found: ${tenant.tenantId}`);
-      },
+  it("rejects a record or ciphertext belonging to another tenant", async () => {
+    const encryptedForA = await encryption.encrypt("admin-a", tenantA.tenantId);
+    const store: MoodleCredentialStore = {
+      findByTenantId: vi.fn().mockResolvedValue({
+        tenantId: tenantA.tenantId,
+        moodleUrl: "https://moodle-a.example.edu",
+        encryptedAdminToken: encryptedForA,
+        encryptedProctorToken: null,
+        timeoutBudgetMs: 5_000,
+        sslVerify: true,
+      }),
     };
+    const provider = new EncryptedMoodleCredentialProvider(store, encryption);
 
-    const credA = await customProvider.getCredential(tenantA);
-    expect(credA.baseUrl).toBe("https://moodle-a.example.test");
-    expect(credA.token).toBe("token_a_123");
-
-    const credB = await customProvider.getCredential({
-      tenantId: "tenant_b",
-      slug: "tenant-b",
-      name: "Tenant B",
-      status: "ACTIVE",
-    });
-    expect(credB.baseUrl).toBe("https://moodle-b.example.test");
-    expect(credB.token).toBe("token_b_456");
+    await expect(provider.getCredentials(tenantB, "admin")).rejects.toThrow(
+      /tenant/i,
+    );
   });
 });

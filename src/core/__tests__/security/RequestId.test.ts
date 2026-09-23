@@ -1,30 +1,27 @@
 import { describe, expect, it } from "vitest";
-import {
-  generateRequestId,
-  getOrGenerateRequestId,
-} from "@/core/security/RequestId";
+import { generateRequestId, resolveRequestId } from "@/core/security/RequestId";
 
 describe("RequestId", () => {
-  it("generateRequestId should return valid UUIDv4 string", () => {
+  it("should generate a valid request ID starting with req_", () => {
     const id = generateRequestId();
-    expect(id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-    );
+    expect(id).toMatch(/^req_[a-zA-Z0-9_-]+$/);
   });
 
-  it("getOrGenerateRequestId should use incoming x-request-id if present", () => {
-    const req = new Request("http://localhost/test", {
-      headers: { "x-request-id": "custom-uuid-1234" },
+  it("should resolve existing x-request-id from Request headers", () => {
+    const request = new Request("http://localhost:3000/api/v1/health", {
+      headers: {
+        "x-request-id": "client-provided-req-id-123",
+      },
     });
-    const id = getOrGenerateRequestId(req);
-    expect(id).toBe("custom-uuid-1234");
+
+    const id = resolveRequestId(request);
+    expect(id).toBe("client-provided-req-id-123");
   });
 
-  it("getOrGenerateRequestId should generate new UUID if header missing", () => {
-    const req = new Request("http://localhost/test");
-    const id = getOrGenerateRequestId(req);
-    expect(id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-    );
+  it("should generate new request ID if header is missing", () => {
+    const request = new Request("http://localhost:3000/api/v1/health");
+    const id = resolveRequestId(request);
+
+    expect(id).toMatch(/^req_[a-zA-Z0-9_-]+$/);
   });
 });

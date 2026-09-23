@@ -1,49 +1,69 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
-export interface IEncryptionProvider {
-  encrypt(plainText: string): string;
-  decrypt(cipherText: string): string;
+export interface EncryptionProvider {
+  encrypt(plainText: string): Promise<string>;
+  decrypt(cipherText: string): Promise<string>;
 }
 
-export class AesEncryptionProvider implements IEncryptionProvider {
-  private readonly algorithm = "aes-256-gcm";
+export class AesEncryptionProvider implements EncryptionProvider {
   private readonly key: Buffer;
 
-  constructor(secretKeyHexOrString: string) {
-    if (!secretKeyHexOrString) {
-      throw new Error("Encryption key must not be empty");
+  constructor(secretKey: string | Buffer) {
+    if (typeof secretKey === "string") {
+      // If 64 hex characters, parse as hex (32 bytes); otherwise handle buffer
+      if (secretKey.length === 64 && /^[0-9a-fA-F]+$/.test(secretKey)) {
+        this.key = Buffer.from(secretKey, "hex");
+      } else {
+        // Pad or truncate to 32 bytes
+        const buf = Buffer.alloc(32);
+        buf.write(secretKey, "utf-8");
+        this.key = buf;
+      }
+    } else {
+      this.key = secretKey;
     }
-    // Derive 32-byte key
-    const rawBuffer = Buffer.from(secretKeyHexOrString, "utf-8");
-    this.key = Buffer.alloc(32);
-    rawBuffer.copy(this.key, 0, 0, Math.min(rawBuffer.length, 32));
+
+    if (this.key.length !== 32) {
+      throw new Error(
+        "AesEncryptionProvider requires a 32-byte (256-bit) secret key",
+      );
+    }
   }
 
-  public encrypt(plainText: string): string {
-    const iv = randomBytes(12);
-    const cipher = createCipheriv(this.algorithm, this.key, iv);
-    let encrypted = cipher.update(plainText, "utf8", "hex");
-    encrypted += cipher.final("hex");
-    const tag = cipher.getAuthTag();
+  async encrypt(plainText: string): Promise<string> {
+    const iv = randomBytes(12); // 96-bit IV recommended for GCM
+    const cipher = createCipheriv("aes-256-gcm", this.key, iv);
 
-    // Format: iv:tag:encrypted
-    return `${iv.toString("hex")}:${tag.toString("hex")}:${encrypted}`;
+    const encrypted = Buffer.concat([
+      cipher.update(plainText, "utf8"),
+      cipher.final(),
+    ]);
+
+    const authTag = cipher.getAuthTag();
+
+    // Format: iv:authTag:encrypted (hex)
+    return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted.toString("hex")}`;
   }
 
-  public decrypt(cipherText: string): string {
+  async decrypt(cipherText: string): Promise<string> {
     const parts = cipherText.split(":");
     if (parts.length !== 3) {
-      throw new Error("Invalid encrypted format. Expected iv:tag:content");
+      throw new Error("Invalid cipherText format");
     }
 
-    const [ivHex, tagHex, encryptedHex] = parts as [string, string, string];
+    const [ivHex, authTagHex, encryptedHex] = parts;
     const iv = Buffer.from(ivHex, "hex");
-    const tag = Buffer.from(tagHex, "hex");
-    const decipher = createDecipheriv(this.algorithm, this.key, iv);
-    decipher.setAuthTag(tag);
+    const authTag = Buffer.from(authTagHex, "hex");
+    const encrypted = Buffer.from(encryptedHex, "hex");
 
-    let decrypted = decipher.update(encryptedHex, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-    return decrypted;
+    const decipher = createDecipheriv("aes-256-gcm", this.key, iv);
+    decipher.setAuthTag(authTag);
+
+    const decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final(),
+    ]);
+
+    return decrypted.toString("utf8");
   }
 }

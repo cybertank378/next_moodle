@@ -1,74 +1,44 @@
-import "server-only";
-import { InfrastructureError } from "@/core/errors/InfrastructureError";
-import type { ILogger } from "@/core/logger";
-import type { TenantContext } from "@/core/tenant/TenantContext";
 import {
-  DefaultMoodleCredentialProvider,
-  type MoodleCredentialProvider,
+  type TenantContext,
+  validateTenantContext,
+} from "@/core/tenant/TenantContext";
+import type {
+  MoodleCredentialProvider,
+  MoodleServiceCredential,
 } from "./MoodleCredentialProvider";
 import { MoodleRestClient } from "./MoodleRestClient";
+import type { MoodleCredentials } from "./types";
 
-export interface CreateMoodleClientOptions {
-  readonly tenant: TenantContext;
-  readonly requestId?: string;
-  readonly logger?: ILogger;
+export interface MoodleClientFactory {
+  createClient(credentials: MoodleCredentials): MoodleRestClient;
+  createClientForTenant(
+    tenant: TenantContext,
+    service: MoodleServiceCredential,
+  ): Promise<MoodleRestClient>;
 }
 
-export class MoodleClientFactory {
-  constructor(
-    private readonly credentialProvider: MoodleCredentialProvider = new DefaultMoodleCredentialProvider(),
-  ) {}
+export class DefaultMoodleClientFactory implements MoodleClientFactory {
+  constructor(private readonly credentialProvider?: MoodleCredentialProvider) {}
 
-  public async create(
-    options: CreateMoodleClientOptions,
+  createClient(credentials: MoodleCredentials): MoodleRestClient {
+    return new MoodleRestClient(credentials);
+  }
+
+  async createClientForTenant(
+    tenantInput: TenantContext,
+    service: MoodleServiceCredential,
   ): Promise<MoodleRestClient> {
-    try {
-      const getCredMethod =
-        this.credentialProvider.getCredential ??
-        (
-          this.credentialProvider as unknown as {
-            getCredentialsForTenant: (
-              t: TenantContext,
-            ) => Promise<{ baseUrl?: string; url?: string; token: string }>;
-          }
-        ).getCredentialsForTenant;
-
-      const creds = await getCredMethod.call(
-        this.credentialProvider,
-        options.tenant,
-      );
-
-      const baseUrl = creds.baseUrl ?? (creds as { url?: string }).url;
-      if (!baseUrl || !creds.token) {
-        throw new Error(
-          `Incomplete Moodle credentials for tenant ${options.tenant.tenantId}`,
-        );
-      }
-
-      return new MoodleRestClient({
-        baseUrl,
-        token: creds.token,
-        tenantId: options.tenant.tenantId,
-        requestId: options.requestId,
-        logger: options.logger,
-      });
-    } catch (error) {
-      if (error instanceof InfrastructureError) {
-        throw error;
-      }
-      throw new InfrastructureError(
-        `Failed to resolve credentials or instantiate Moodle client for tenant ${options.tenant.tenantId}: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error },
+    if (!this.credentialProvider) {
+      throw new Error(
+        "MoodleCredentialProvider is required to create a client for a tenant",
       );
     }
-  }
 
-  public async getClientForTenant(
-    tenant: TenantContext,
-    logger?: ILogger,
-  ): Promise<MoodleRestClient> {
-    return this.create({ tenant, logger });
+    const tenant = validateTenantContext(tenantInput);
+    const credentials = await this.credentialProvider.getCredentials(
+      tenant,
+      service,
+    );
+    return this.createClient(credentials);
   }
 }
-
-export const moodleClientFactory = new MoodleClientFactory();

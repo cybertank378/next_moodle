@@ -1,39 +1,52 @@
-import { ValidationError } from "@/core/errors/ValidationError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import type {
-  LoginRequestDTO,
-  LoginResponseDTO,
-} from "@/modules/auth/domain/dto";
-import type { AuthRepository } from "@/modules/auth/domain/interfaces/AuthRepository";
+  AuthSessionManager,
+  LoginCredentials,
+  MoodleAuthProvider,
+  TenantAuthResolver,
+} from "@/modules/auth/domain/interfaces/AuthInterfaces";
+import { mapMoodleStudentToActor } from "@/modules/auth/domain/mapper/AuthMapper";
+import { validateLoginRequest } from "@/modules/auth/domain/validators/AuthValidator";
 
 export class LoginUseCase {
-  constructor(private readonly authRepository: AuthRepository) {}
+  constructor(
+    private readonly tenantResolver: TenantAuthResolver,
+    private readonly moodleAuth: MoodleAuthProvider,
+    private readonly sessionManager: AuthSessionManager,
+  ) {}
 
-  public async execute(
-    dto: LoginRequestDTO,
-    tenantId: string,
-  ): Promise<LoginResponseDTO> {
-    if (!dto.username?.trim()) {
-      throw new ValidationError("Username wajib diisi");
-    }
-    if (!dto.password) {
-      throw new ValidationError("Password wajib diisi");
-    }
-
-    const user = await this.authRepository.authenticate(
-      dto.username,
-      dto.password,
-      tenantId,
+  async execute(input: LoginCredentials) {
+    const credentials = validateLoginRequest(input);
+    const tenant = await this.tenantResolver.resolveLoginTenant(
+      credentials.tenant,
     );
+    const moodleResult = await this.moodleAuth.authenticateStudent({
+      tenant,
+      username: credentials.username,
+      password: credentials.password,
+    });
 
-    // In full production, SessionRepository creates HttpOnly session cookie
+    if (
+      moodleResult.siteInfo.username.toLowerCase() !==
+      credentials.username.toLowerCase()
+    ) {
+      throw new UnauthorizedError(
+        "Moodle identity does not match login username.",
+      );
+    }
+
+    const actor = mapMoodleStudentToActor(tenant, moodleResult.siteInfo);
+    const session = await this.sessionManager.createSession({
+      actor,
+      moodleToken: moodleResult.token,
+    });
+
     return {
-      token: `sess_${user.id}_${Date.now()}`,
-      user: {
-        id: user.id,
-        username: user.username,
-        fullName: user.fullName,
-        email: user.email,
-        roles: user.roles,
+      actor,
+      sessionCookie: {
+        name: "session_token",
+        value: session.cookieValue,
+        expiresAt: session.expiresAt,
       },
     };
   }

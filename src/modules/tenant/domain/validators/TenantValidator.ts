@@ -1,63 +1,72 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { TenantStatus } from "@/modules/tenant/domain/types/TenantStatus";
-import { TenantSlug } from "@/modules/tenant/domain/value-objects/TenantSlug";
+import type { TenantStatus } from "@/modules/tenant/domain/types/TenantMetadata";
 
-// biome-ignore lint/complexity/noStaticOnlyClass: domain validator utility
-export class TenantValidator {
-  public static validateSlug(slug: string): string {
-    return TenantSlug.create(slug).value;
-  }
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const STATUSES: readonly TenantStatus[] = [
+  "ACTIVE",
+  "MAINTENANCE",
+  "SUSPENDED",
+];
 
-  public static validateName(name: string): string {
-    if (!name || typeof name !== "string" || !name.trim()) {
-      throw new ValidationError("Nama tenant wajib diisi.", {
-        code: "TENANT_NAME_REQUIRED",
-        field: "name",
-      });
+interface TenantValidatorContract {
+  slug(value: string): void;
+  name(value: string): void;
+  status(value: string): asserts value is TenantStatus;
+  credential(input: {
+    moodleUrl: string;
+    adminToken: string;
+    timeoutBudgetMs: number;
+  }): void;
+}
+
+export const TenantValidator: TenantValidatorContract = {
+  slug(value: string): void {
+    if (value.length < 3 || value.length > 63 || !SLUG_PATTERN.test(value)) {
+      throw new ValidationError(
+        "Slug tenant harus 3-63 karakter dan hanya berisi huruf kecil, angka, atau tanda hubung.",
+      );
     }
-    return name.trim();
-  }
+  },
 
-  public static validateMoodleBaseUrl(url: string): string {
-    if (!url || typeof url !== "string" || !url.trim()) {
-      throw new ValidationError("Moodle Base URL wajib diisi.", {
-        code: "TENANT_MOODLE_URL_REQUIRED",
-        field: "moodleBaseUrl",
-      });
+  name(value: string): void {
+    if (value.length < 2 || value.length > 120) {
+      throw new ValidationError("Nama tenant harus 2-120 karakter.");
     }
+  },
 
-    const trimmed = url.trim();
-    let parsedUrl: URL;
+  status(value: string): asserts value is TenantStatus {
+    if (!STATUSES.includes(value as TenantStatus)) {
+      throw new ValidationError("Status tenant tidak valid.");
+    }
+  },
+
+  credential(input: {
+    moodleUrl: string;
+    adminToken: string;
+    timeoutBudgetMs: number;
+  }): void {
+    let url: URL;
     try {
-      parsedUrl = new URL(trimmed);
+      url = new URL(input.moodleUrl);
     } catch {
+      throw new ValidationError("Moodle URL tidak valid.");
+    }
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
       throw new ValidationError(
-        `Format Moodle Base URL '${url}' tidak valid.`,
-        { code: "TENANT_CONFIGURATION_INVALID", field: "moodleBaseUrl" },
+        "Moodle URL harus menggunakan HTTP atau HTTPS.",
       );
     }
-
-    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-      throw new ValidationError(
-        `Skema protokol '${parsedUrl.protocol}' tidak diizinkan. Hanya http dan https yang didukung.`,
-        { code: "TENANT_CONFIGURATION_INVALID", field: "moodleBaseUrl" },
-      );
+    if (input.adminToken.trim().length < 8) {
+      throw new ValidationError("Admin token wajib diisi.");
     }
-
-    return trimmed.replace(/\/+$/, "");
-  }
-
-  public static validateStatus(status: unknown): TenantStatus {
-    const validStatuses: TenantStatus[] = ["ACTIVE", "INACTIVE", "SUSPENDED"];
     if (
-      typeof status !== "string" ||
-      !validStatuses.includes(status as TenantStatus)
+      !Number.isInteger(input.timeoutBudgetMs) ||
+      input.timeoutBudgetMs < 1000 ||
+      input.timeoutBudgetMs > 60000
     ) {
       throw new ValidationError(
-        `Status '${String(status)}' tidak valid. Gunakan salah satu dari: ${validStatuses.join(", ")}`,
-        { code: "TENANT_STATUS_INVALID", field: "status" },
+        "Timeout harus berada pada rentang 1000-60000 ms.",
       );
     }
-    return status as TenantStatus;
-  }
-}
+  },
+};

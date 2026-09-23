@@ -1,393 +1,229 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MoodleError } from "@/core/errors/MoodleError";
-import type { ILogger } from "@/core/logger";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { SecurityError } from "@/core/errors/SecurityError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 
 describe("MoodleRestClient", () => {
-  const dummyBaseUrl = "https://moodle.example.test";
-  const dummyToken = "secret_moodle_token_xyz987";
-  const tenantId = "tenant_alpha";
-  const requestId = "req_12345";
-
-  let mockLogger: ILogger;
-  let loggedEntries: Array<{
-    message: string;
-    context?: Record<string, unknown>;
-    error?: unknown;
-  }>;
+  const credentials = {
+    baseUrl: "https://moodle.example.edu",
+    token: "super_secret_wstoken_12345",
+  };
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    loggedEntries = [];
-    mockLogger = {
-      debug: vi.fn((msg, ctx) => {
-        loggedEntries.push({ message: msg, context: ctx });
-      }),
-      info: vi.fn((msg, ctx) => {
-        loggedEntries.push({ message: msg, context: ctx });
-      }),
-      warn: vi.fn((msg, ctx) => {
-        loggedEntries.push({ message: msg, context: ctx });
-      }),
-      error: vi.fn((msg, err, ctx) => {
-        loggedEntries.push({ message: msg, error: err, context: ctx });
-      }),
-      child: vi.fn().mockImplementation(() => mockLogger),
-    };
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
-  describe("Constructor & URL Security / Normalization", () => {
-    it("should reject invalid or dangerous URL schemes", () => {
-      expect(
-        () =>
-          new MoodleRestClient({
-            baseUrl: "ftp://moodle.example.test",
-            token: dummyToken,
-          }),
-      ).toThrow(/invalid.*scheme/i);
-
-      expect(
-        () =>
-          new MoodleRestClient({
-            baseUrl: "javascript:alert(1)",
-            token: dummyToken,
-          }),
-      ).toThrow(/invalid.*scheme/i);
-
-      expect(
-        () =>
-          new MoodleRestClient({
-            baseUrl: "file:///etc/passwd",
-            token: dummyToken,
-          }),
-      ).toThrow(/invalid.*scheme/i);
-    });
-
-    it("should normalize trailing slashes on base URL to avoid double slash", async () => {
-      let capturedUrl = "";
-      const mockFetcher = vi.fn().mockImplementation(async (url: string) => {
-        capturedUrl = url;
-        return new Response(JSON.stringify({ sitename: "Test Moodle" }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
-      });
-
-      const client = new MoodleRestClient({
-        baseUrl: "https://moodle.example.test///",
-        token: dummyToken,
-        fetcher: mockFetcher,
-      });
-
-      await client.call("core_webservice_get_site_info");
-      expect(capturedUrl).toBe(
-        "https://moodle.example.test/webservice/rest/server.php",
-      );
-    });
-
-    it("should throw if baseUrl or token is missing", () => {
-      expect(
-        () => new MoodleRestClient({ baseUrl: "", token: dummyToken }),
-      ).toThrow();
-      expect(
-        () => new MoodleRestClient({ baseUrl: dummyBaseUrl, token: "" }),
-      ).toThrow();
-    });
-  });
-
-  describe("REST Request Contract", () => {
-    it("should execute POST with urlencoded body, internal token, wsfunction, and json format", async () => {
-      let capturedInit: RequestInit | undefined;
-      let capturedUrl = "";
-
-      const mockFetcher = vi
-        .fn()
-        .mockImplementation(async (url: string, init?: RequestInit) => {
-          capturedUrl = url;
-          capturedInit = init;
-          return new Response(JSON.stringify({ status: "success" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
-        });
-
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        fetcher: mockFetcher,
-        requestId,
-        tenantId,
-      });
-
-      const result = await client.call<{ status: string }>(
-        "mod_quiz_get_quizzes_by_courses",
+  it("should make POST request with correct URL, format, token, and parameters", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify([{ id: 1, fullname: "Introduction to CS" }]),
         {
-          courseids: [10, 20],
-          finishattempt: true,
-          preview: false,
-          offset: 0,
-        },
-      );
-
-      expect(result).toEqual({ status: "success" });
-      expect(capturedInit?.method).toBe("POST");
-      expect(capturedUrl).toBe(
-        "https://moodle.example.test/webservice/rest/server.php",
-      );
-
-      // Verify Headers
-      const headers = capturedInit?.headers as Record<string, string>;
-      expect(headers["Content-Type"]).toBe("application/x-www-form-urlencoded");
-      expect(headers.Accept).toBe("application/json");
-      expect(headers["X-Request-Id"]).toBe(requestId);
-
-      // Verify Body parameters
-      const body = new URLSearchParams(capturedInit?.body as string);
-      expect(body.get("wstoken")).toBe(dummyToken);
-      expect(body.get("wsfunction")).toBe("mod_quiz_get_quizzes_by_courses");
-      expect(body.get("moodlewsrestformat")).toBe("json");
-      expect(body.get("courseids[0]")).toBe("10");
-      expect(body.get("courseids[1]")).toBe("20");
-      expect(body.get("finishattempt")).toBe("1");
-      expect(body.get("preview")).toBe("0");
-      expect(body.get("offset")).toBe("0");
-    });
-  });
-
-  describe("Response & Error Normalization", () => {
-    it("should detect Moodle exception payload even when HTTP status is 200", async () => {
-      const moodleException = {
-        exception: "moodle_exception",
-        errorcode: "invalidtoken",
-        message: "Invalid token - token not found",
-        debuginfo: "Sensitive server stack trace",
-      };
-
-      const mockFetcher = vi.fn().mockImplementation(
-        async () =>
-          new Response(JSON.stringify(moodleException), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          }),
-      );
-
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        fetcher: mockFetcher,
-      });
-
-      await expect(client.call("core_user_get_users")).rejects.toThrow(
-        MoodleError,
-      );
-
-      try {
-        await client.call("core_user_get_users");
-      } catch (err) {
-        expect(err).toBeInstanceOf(MoodleError);
-        const moodleErr = err as MoodleError;
-        expect(moodleErr.code).toBe("MOODLE_INVALID_TOKEN");
-        expect(moodleErr.statusCode).toBe(401);
-        expect(moodleErr.moodleErrorCode).toBe("invalidtoken");
-        // Must NOT expose debuginfo
-        expect(JSON.stringify(moodleErr)).not.toContain(
-          "Sensitive server stack trace",
-        );
-      }
-    });
-
-    it("should normalize HTTP non-200 responses to safe MoodleError", async () => {
-      const mockFetcher = vi.fn().mockImplementation(
-        async () =>
-          new Response("Bad Gateway from Cloudflare", {
-            status: 502,
-            statusText: "Bad Gateway",
-          }),
-      );
-
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        fetcher: mockFetcher,
-      });
-
-      await expect(client.call("core_course_get_courses")).rejects.toThrow(
-        MoodleError,
-      );
-
-      try {
-        await client.call("core_course_get_courses");
-      } catch (err) {
-        const moodleErr = err as MoodleError;
-        expect(moodleErr.code).toBe("MOODLE_BAD_GATEWAY");
-        expect(moodleErr.statusCode).toBe(502);
-      }
-    });
-
-    it("should abort on timeout and normalize to MOODLE_TIMEOUT", async () => {
-      const mockFetcher = vi.fn().mockImplementation((_url, options) => {
-        return new Promise((_resolve, reject) => {
-          options?.signal?.addEventListener("abort", () => {
-            const abortErr = new Error("The operation was aborted");
-            abortErr.name = "AbortError";
-            reject(abortErr);
-          });
-        });
-      });
-
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        timeoutMs: 50,
-        fetcher: mockFetcher,
-      });
-
-      try {
-        await client.call("core_course_get_courses");
-        expect.fail("Expected call to throw");
-      } catch (err) {
-        expect(err).toBeInstanceOf(MoodleError);
-        const moodleErr = err as MoodleError;
-        expect(moodleErr.code).toBe("MOODLE_TIMEOUT");
-        expect(moodleErr.statusCode).toBe(504);
-        expect(moodleErr.message).toContain("50ms");
-      }
-    });
-
-    it("should normalize invalid JSON responses to MOODLE_INVALID_RESPONSE", async () => {
-      const mockFetcher = vi.fn().mockResolvedValue(
-        new Response("<html><body>502 Bad Gateway Nginx</body></html>", {
-          status: 200,
-          headers: { "Content-Type": "text/html" },
-        }),
-      );
-
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        fetcher: mockFetcher,
-      });
-
-      try {
-        await client.call("core_course_get_courses");
-        expect.fail("Expected call to throw");
-      } catch (err) {
-        expect(err).toBeInstanceOf(MoodleError);
-        const moodleErr = err as MoodleError;
-        expect(moodleErr.code).toBe("MOODLE_INVALID_RESPONSE");
-        expect(moodleErr.statusCode).toBe(502);
-      }
-    });
-
-    it("should normalize network connection failures to MOODLE_NETWORK_ERROR", async () => {
-      const mockFetcher = vi
-        .fn()
-        .mockRejectedValue(new TypeError("fetch failed: connect ECONNREFUSED"));
-
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        fetcher: mockFetcher,
-      });
-
-      try {
-        await client.call("core_course_get_courses");
-        expect.fail("Expected call to throw");
-      } catch (err) {
-        expect(err).toBeInstanceOf(MoodleError);
-        const moodleErr = err as MoodleError;
-        expect(moodleErr.code).toBe("MOODLE_NETWORK_ERROR");
-        expect(moodleErr.statusCode).toBe(502);
-      }
-    });
-  });
-
-  describe("Secret-Safe Structured Logging", () => {
-    it("should log request lifecycle events with duration and safe metadata", async () => {
-      const mockFetcher = vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ result: true }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+
+    const client = new MoodleRestClient(credentials);
+    const result = await client.call("core_course_get_courses", {
+      options: { ids: [1] },
+    });
+
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [url, requestInit] = fetchSpy.mock.calls[0];
+
+    expect(url.toString()).toBe(
+      "https://moodle.example.edu/webservice/rest/server.php",
+    );
+    expect(requestInit).toBeDefined();
+    expect(requestInit?.method).toBe("POST");
+    const headers = requestInit?.headers as Record<string, string>;
+    expect(headers["content-type"]).toBe("application/x-www-form-urlencoded");
+
+    const bodyParams = new URLSearchParams(requestInit?.body as string);
+    expect(bodyParams.get("wstoken")).toBe("super_secret_wstoken_12345");
+    expect(bodyParams.get("moodlewsrestformat")).toBe("json");
+    expect(bodyParams.get("wsfunction")).toBe("core_course_get_courses");
+    expect(bodyParams.get("options[ids][0]")).toBe("1");
+
+    expect(result).toEqual([{ id: 1, fullname: "Introduction to CS" }]);
+  });
+
+  it("should throw mapped AppError when Moodle returns an exception payload", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          exception: "moodle_exception",
+          errorcode: "invalidtoken",
+          message: "Invalid token - token not found",
         }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+
+    const client = new MoodleRestClient(credentials);
+
+    await expect(client.call("core_course_get_courses", {})).rejects.toThrow(
+      UnauthorizedError,
+    );
+  });
+
+  it("should throw InfrastructureError when HTTP status is not 2xx", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("Internal Server Error on LMS Web Server", {
+        status: 500,
+      }),
+    );
+
+    const client = new MoodleRestClient(credentials);
+
+    await expect(client.call("core_course_get_courses", {})).rejects.toThrow(
+      InfrastructureError,
+    );
+  });
+
+  it("should throw InfrastructureError when request times out", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(
+      new DOMException(
+        "The operation was aborted due to timeout",
+        "TimeoutError",
+      ),
+    );
+
+    const client = new MoodleRestClient(credentials);
+
+    await expect(
+      client.call("core_course_get_courses", {}, { timeoutMs: 100 }),
+    ).rejects.toThrow(InfrastructureError);
+  });
+
+  it("retries transient failures only for explicitly safe reads", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new TypeError("temporary network failure"))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ status: "ok" }), { status: 200 }),
       );
 
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        fetcher: mockFetcher,
-        logger: mockLogger,
-        tenantId,
-        requestId,
-      });
+    const client = new MoodleRestClient(credentials);
+    await expect(
+      client.call(
+        "local_examapi_get_health",
+        {},
+        {
+          requestKind: "safe-read",
+          maxRetries: 1,
+          retryDelayMs: 0,
+        },
+      ),
+    ).resolves.toEqual({ status: "ok" });
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
 
-      await client.call("core_webservice_get_site_info");
+  it("never retries mutations even when retry options are supplied", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValue(new TypeError("temporary network failure"));
 
-      const eventNames = loggedEntries.map((e) => e.message);
-      expect(eventNames).toContain("moodle_request_started");
-      expect(eventNames).toContain("moodle_request_completed");
+    const client = new MoodleRestClient(credentials);
+    await expect(
+      client.call(
+        "local_examapi_lock_attempt",
+        { attemptid: 10 },
+        {
+          requestKind: "mutation",
+          maxRetries: 3,
+          retryDelayMs: 0,
+        },
+      ),
+    ).rejects.toThrow(InfrastructureError);
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
 
-      const completedEntry = loggedEntries.find(
-        (e) => e.message === "moodle_request_completed",
-      );
-      expect(completedEntry?.context).toMatchObject({
-        wsfunction: "core_webservice_get_site_info",
-        tenantId,
-        requestId,
-        httpStatus: 200,
-      });
-      expect(typeof completedEntry?.context?.durationMs).toBe("number");
+  it("rejects SSRF targets and disabled TLS verification before fetch", () => {
+    expect(
+      () =>
+        new MoodleRestClient({
+          baseUrl: "http://169.254.169.254/latest/meta-data",
+          token: "secret",
+        }),
+    ).toThrow(SecurityError);
 
-      // Verify token NEVER appears in any log entry
-      for (const entry of loggedEntries) {
-        const serialized = JSON.stringify(entry);
-        expect(serialized).not.toContain(dummyToken);
-        expect(serialized).not.toContain("wstoken");
-      }
+    expect(
+      () =>
+        new MoodleRestClient({
+          baseUrl: "https://moodle.example.edu",
+          token: "secret",
+          sslVerify: false,
+        }),
+    ).toThrow(SecurityError);
+  });
+
+  it("does not expose raw Moodle messages, debug info, or response bodies", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          exception: "dml_read_exception",
+          errorcode: "dmlreadexception",
+          message: "SQL failed for token super-secret-token",
+          debuginfo: "SELECT * FROM mdl_user",
+        }),
+        { status: 200 },
+      ),
+    );
+
+    const client = new MoodleRestClient(credentials);
+    const error = await client
+      .call("local_examapi_get_health", {}, { requestKind: "safe-read" })
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(JSON.stringify(error)).not.toContain("SELECT * FROM mdl_user");
+    expect((error as Error).message).not.toContain("super-secret-token");
+    expect((error as Error).message).not.toContain("SQL failed");
+  });
+
+  it("should never log the secret wstoken to stdout or stderr", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const client = new MoodleRestClient(credentials);
+    await client.call("core_webservice_get_site_info", {
+      secretParam: "confidential_password",
     });
 
-    it("should log moodle_request_failed on error without exposing raw secrets", async () => {
-      const mockFetcher = vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            exception: "moodle_exception",
-            errorcode: "invalidtoken",
-            message: "Invalid token",
-            debuginfo: `Sensitive info with token ${dummyToken}`,
-          }),
-          {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          },
-        ),
-      );
+    const allOutput = [
+      ...logSpy.mock.calls,
+      ...infoSpy.mock.calls,
+      ...warnSpy.mock.calls,
+      ...errorSpy.mock.calls,
+    ]
+      .map((c) => JSON.stringify(c))
+      .join(" ");
 
-      const client = new MoodleRestClient({
-        baseUrl: dummyBaseUrl,
-        token: dummyToken,
-        fetcher: mockFetcher,
-        logger: mockLogger,
-        tenantId,
-        requestId,
-      });
+    expect(allOutput).not.toContain("super_secret_wstoken_12345");
+    expect(allOutput).not.toContain("confidential_password");
 
-      await expect(client.call("core_course_get_courses")).rejects.toThrow();
-
-      const failedEntry = loggedEntries.find(
-        (e) => e.message === "moodle_request_failed",
-      );
-      expect(failedEntry).toBeDefined();
-      expect(failedEntry?.context?.errorCode).toBe("invalidtoken");
-      expect(typeof failedEntry?.context?.durationMs).toBe("number");
-
-      // Verify token is never in logs
-      for (const entry of loggedEntries) {
-        const serialized = JSON.stringify(entry);
-        expect(serialized).not.toContain(dummyToken);
-      }
-    });
+    logSpy.mockRestore();
+    infoSpy.mockRestore();
+    warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 });

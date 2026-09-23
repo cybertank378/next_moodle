@@ -1,86 +1,46 @@
-import crypto from "node:crypto";
+import { Result } from "@/core/base/Result";
 import { ConflictError } from "@/core/errors/ConflictError";
-import { ValidationError } from "@/core/errors/ValidationError";
-import type { CreateTenantRequestDTO } from "@/modules/tenant/domain/dto/CreateTenantRequestDTO";
-import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
-import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
-import type { TenantCredentialRepository } from "@/modules/tenant/domain/interfaces/TenantCredentialRepository";
-import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
-import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
-import {
-  type AesGcmEncryptionProvider,
-  defaultEncryptionProvider,
-} from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
+import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { Permission } from "@/core/rbac/Permission";
+import { authorizeTenantOperation } from "@/modules/tenant/application/services/TenantAuthorizationService";
+import { TenantBuilder } from "@/modules/tenant/domain/builder/TenantBuilder";
+import type { CreateTenantRequestDTO } from "@/modules/tenant/domain/dto/TenantRequestDto";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
+import type { TenantsRepository } from "@/modules/tenant/domain/interfaces/TenantInterfaces";
+import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
+import { TenantNormalizer } from "@/modules/tenant/domain/normalizers/TenantNormalizer";
 
 export class CreateTenantUseCase {
-  constructor(
-    private readonly tenantRepository: TenantRepository,
-    private readonly credentialRepository: TenantCredentialRepository,
-    private readonly encryptionProvider: AesGcmEncryptionProvider = defaultEncryptionProvider,
-  ) {}
+  constructor(private readonly repository: TenantsRepository) {}
 
-  public async execute(
-    dto: CreateTenantRequestDTO,
-  ): Promise<TenantResponseDTO> {
-    const slug = TenantValidator.validateSlug(dto.slug);
-    const name = TenantValidator.validateName(dto.name);
-    const moodleBaseUrl = TenantValidator.validateMoodleBaseUrl(
-      dto.moodleBaseUrl,
+  async execute(input: {
+    actor: AuthorizationActor | null | undefined;
+    data: CreateTenantRequestDTO;
+  }): Promise<Result<TenantResponseDTO, Error>> {
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_CREATE,
     );
+    if (authError) return Result.fail(authError);
 
-    if (!dto.moodleToken || typeof dto.moodleToken !== "string") {
-      throw new ValidationError("Moodle token wajib diisi untuk tenant baru.", {
-        code: "TENANT_CONFIGURATION_INVALID",
-        field: "moodleToken",
-      });
+    const slug = TenantNormalizer.slug(input.data.slug);
+    if (await this.repository.findBySlug(slug)) {
+      return Result.fail(new ConflictError(`Slug '${slug}' sudah digunakan.`));
     }
 
-    const exists = await this.tenantRepository.existsBySlug(slug);
-    if (exists) {
-      throw new ConflictError(`Tenant dengan slug '${slug}' sudah ada.`, {
-        code: "TENANT_SLUG_EXISTS",
-      });
+    const customDomain = TenantNormalizer.customDomain(input.data.customDomain);
+    if (
+      customDomain &&
+      (await this.repository.findByCustomDomain(customDomain))
+    ) {
+      return Result.fail(
+        new ConflictError(`Domain '${customDomain}' sudah digunakan.`),
+      );
     }
 
-    const tenantId = `tenant_${crypto.randomUUID()}`;
-    const status = dto.status ?? "ACTIVE";
-
-    const tenant = new Tenant({
-      id: tenantId,
-      slug,
-      name,
-      status,
-      moodleBaseUrl,
-      moodleServiceShortname: dto.moodleServiceShortname ?? null,
-      createdAt: new Date(),
-    });
-
-    // 1. Encrypt and save credential
-    const encrypted = this.encryptionProvider.encrypt(dto.moodleToken);
-    await this.credentialRepository.save({
-      id: `cred_${crypto.randomUUID()}`,
-      tenantId,
-      encryptedToken: encrypted.encryptedValue,
-      iv: encrypted.iv,
-      authTag: encrypted.authTag,
-      keyVersion: encrypted.keyVersion,
-    });
-
-    // 2. Persist tenant metadata
-    await this.tenantRepository.create(tenant);
-
-    return {
-      id: tenant.id,
-      slug: tenant.slug,
-      name: tenant.name,
-      status: tenant.status,
-      moodle: {
-        baseUrl: tenant.moodleBaseUrl,
-        serviceShortname: tenant.moodleServiceShortname,
-        configured: true,
-      },
-      createdAt: tenant.createdAt.toISOString(),
-      updatedAt: tenant.updatedAt.toISOString(),
-    };
+    const saved = await this.repository.create(
+      TenantBuilder.create({ ...input.data, slug, customDomain }),
+    );
+    return Result.ok(TenantMapper.toDetailResponse(saved));
   }
 }

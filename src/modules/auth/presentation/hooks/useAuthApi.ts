@@ -1,72 +1,50 @@
-import { useCallback, useState } from "react";
-import type { ApiErrorResponse } from "@/core/http/ApiErrorResponse";
-import type { ApiResponse } from "@/core/http/ApiResponse";
-import type {
-  CurrentUserResponseDTO,
-  LoginRequestDTO,
-  LoginResponseDTO,
-} from "@/modules/auth/domain/dto";
+"use client";
+
+import { useState } from "react";
 
 export function useAuthApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const login = useCallback(
-    async (credentials: LoginRequestDTO): Promise<LoginResponseDTO | null> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/v1/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentials),
-        });
-        const data: ApiResponse<LoginResponseDTO> | ApiErrorResponse =
-          await res.json();
-        if (!res.ok || !data.success) {
-          const errorMsg =
-            (data as ApiErrorResponse).error?.message || "Gagal masuk";
-          setError(errorMsg);
-          return null;
-        }
-        return data.data;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Kesalahan koneksi";
-        setError(msg);
-        return null;
-      } finally {
-        setLoading(false);
+  const login = async (input: {
+    tenant: string;
+    username: string;
+    password: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        throw new Error(body.error?.message || "Login gagal.");
       }
-    },
-    [],
-  );
+      return body.data;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login gagal.";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const getMe =
-    useCallback(async (): Promise<CurrentUserResponseDTO | null> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/v1/auth/me");
-        const data: ApiResponse<CurrentUserResponseDTO> | ApiErrorResponse =
-          await res.json();
-        if (!res.ok || !data.success) {
-          setError(
-            (data as ApiErrorResponse).error?.message || "Tidak terautentikasi",
-          );
-          return null;
-        }
-        return data.data;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Kesalahan koneksi");
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    }, []);
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     login,
-    getMe,
+    logout,
     loading,
     error,
   };

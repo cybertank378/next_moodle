@@ -1,17 +1,10 @@
-import { AppError, type AppErrorOptions } from "./AppError";
+import { AppError } from "./AppError";
 
 export class ValidationError extends AppError {
-  public readonly code: string;
-  public readonly statusCode: number = 422;
+  public readonly code = "VALIDATION_ERROR";
+  public readonly statusCode = 400;
 
-  constructor(message: string, options?: AppErrorOptions | unknown) {
-    super(message, options);
-    this.code =
-      options &&
-      typeof options === "object" &&
-      "code" in options &&
-      typeof options.code === "string"
-        ? options.code
-        : "VALIDATION_ERROR";
+  constructor(message = "Validation failed", details?: unknown) {
+    super(message, details);
   }
 }

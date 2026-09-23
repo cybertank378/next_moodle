@@ -1,89 +1,66 @@
-import crypto from "node:crypto";
+import { Result } from "@/core/base/Result";
+import { ConflictError } from "@/core/errors/ConflictError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDTO";
-import type { UpdateTenantRequestDTO } from "@/modules/tenant/domain/dto/UpdateTenantRequestDTO";
-import { Tenant } from "@/modules/tenant/domain/entities/Tenant";
-import type { TenantCredentialRepository } from "@/modules/tenant/domain/interfaces/TenantCredentialRepository";
-import type { TenantRepository } from "@/modules/tenant/domain/interfaces/TenantRepository";
+import { ValidationError } from "@/core/errors/ValidationError";
+import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { Permission } from "@/core/rbac/Permission";
+import { authorizeTenantOperation } from "@/modules/tenant/application/services/TenantAuthorizationService";
+import type { UpdateTenantRequestDTO } from "@/modules/tenant/domain/dto/TenantRequestDto";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
+import type { TenantsRepository } from "@/modules/tenant/domain/interfaces/TenantInterfaces";
+import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
+import { TenantNormalizer } from "@/modules/tenant/domain/normalizers/TenantNormalizer";
 import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
-import {
-  type AesGcmEncryptionProvider,
-  defaultEncryptionProvider,
-} from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
 
 export class UpdateTenantUseCase {
-  constructor(
-    private readonly tenantRepository: TenantRepository,
-    private readonly credentialRepository: TenantCredentialRepository,
-    private readonly encryptionProvider: AesGcmEncryptionProvider = defaultEncryptionProvider,
-  ) {}
+  constructor(private readonly repository: TenantsRepository) {}
 
-  public async execute(
-    tenantId: string,
-    dto: UpdateTenantRequestDTO,
-  ): Promise<TenantResponseDTO> {
-    const existing = await this.tenantRepository.findById(tenantId);
-    if (!existing) {
-      throw new NotFoundError(`Tenant '${tenantId}' tidak ditemukan.`, {
-        code: "TENANT_NOT_FOUND",
-      });
+  async execute(input: {
+    actor: AuthorizationActor | null | undefined;
+    tenantId: string;
+    data: UpdateTenantRequestDTO;
+  }): Promise<Result<TenantResponseDTO, Error>> {
+    const authError = authorizeTenantOperation(
+      input.actor,
+      Permission.TENANT_UPDATE,
+    );
+    if (authError) return Result.fail(authError);
+
+    const tenant = await this.repository.findById(input.tenantId);
+    if (!tenant)
+      return Result.fail(new NotFoundError("Tenant tidak ditemukan."));
+    if (
+      input.data.name === undefined &&
+      input.data.customDomain === undefined
+    ) {
+      return Result.fail(
+        new ValidationError("Tidak ada perubahan tenant yang diberikan."),
+      );
     }
 
     const name =
-      dto.name !== undefined
-        ? TenantValidator.validateName(dto.name)
-        : existing.name;
-    const moodleBaseUrl =
-      dto.moodleBaseUrl !== undefined
-        ? TenantValidator.validateMoodleBaseUrl(dto.moodleBaseUrl)
-        : existing.moodleBaseUrl;
-    const status =
-      dto.status !== undefined
-        ? TenantValidator.validateStatus(dto.status)
-        : existing.status;
-    const moodleServiceShortname =
-      dto.moodleServiceShortname !== undefined
-        ? dto.moodleServiceShortname
-        : existing.moodleServiceShortname;
+      input.data.name !== undefined
+        ? TenantNormalizer.name(input.data.name)
+        : undefined;
+    if (name !== undefined) TenantValidator.name(name);
 
-    const updated = new Tenant({
-      id: existing.id,
-      slug: existing.slug,
-      name,
-      status,
-      moodleBaseUrl,
-      moodleServiceShortname,
-      createdAt: existing.createdAt,
-      updatedAt: new Date(),
-    });
+    const customDomain =
+      input.data.customDomain !== undefined
+        ? TenantNormalizer.customDomain(input.data.customDomain)
+        : undefined;
 
-    // Update credential only if explicitly supplied
-    if (dto.moodleToken?.trim()) {
-      const encrypted = this.encryptionProvider.encrypt(dto.moodleToken.trim());
-      await this.credentialRepository.save({
-        id: `cred_${crypto.randomUUID()}`,
-        tenantId,
-        encryptedToken: encrypted.encryptedValue,
-        iv: encrypted.iv,
-        authTag: encrypted.authTag,
-        keyVersion: encrypted.keyVersion,
-      });
+    if (customDomain && customDomain !== tenant.customDomain) {
+      const duplicate = await this.repository.findByCustomDomain(customDomain);
+      if (duplicate && duplicate.id !== tenant.id) {
+        return Result.fail(
+          new ConflictError(`Domain '${customDomain}' sudah digunakan.`),
+        );
+      }
     }
 
-    await this.tenantRepository.update(updated);
-
-    return {
-      id: updated.id,
-      slug: updated.slug,
-      name: updated.name,
-      status: updated.status,
-      moodle: {
-        baseUrl: updated.moodleBaseUrl,
-        serviceShortname: updated.moodleServiceShortname,
-        configured: true,
-      },
-      createdAt: updated.createdAt.toISOString(),
-      updatedAt: updated.updatedAt.toISOString(),
-    };
+    const saved = await this.repository.update(
+      tenant.withUpdate({ name, customDomain }),
+    );
+    return Result.ok(TenantMapper.toDetailResponse(saved));
   }
 }
