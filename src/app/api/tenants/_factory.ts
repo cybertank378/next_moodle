@@ -1,6 +1,5 @@
 import "server-only";
 
-import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { prisma } from "@/libs/prisma";
 import { ConfigureTenantCredentialUseCase } from "@/modules/tenants/application/usecases/ConfigureTenantCredentialUseCase";
 import { CreateTenantUseCase } from "@/modules/tenants/application/usecases/CreateTenantUseCase";
@@ -19,7 +18,7 @@ export function getTenantsController(): TenantsController {
   if (controller) return controller;
 
   const repository = new PrismaTenantsRepository(prisma);
-  const cipher = new AesTenantCredentialCipher(new AesHkdfEncryptionProvider());
+  const cipher = new AesTenantCredentialCipher();
 
   controller = new TenantsController(
     new ListTenantsUseCase(repository),
