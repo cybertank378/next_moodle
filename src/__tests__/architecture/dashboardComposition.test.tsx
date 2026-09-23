@@ -21,7 +21,10 @@ vi.mock("@/app/(protected)/dashboard/component/StudentDashboard", () => ({
   default: () => "STUDENT_DASHBOARD",
 }));
 
+import AdminDashboard from "@/app/(protected)/dashboard/component/AdminDashboard";
 import DashboardPage from "@/app/(protected)/dashboard/page";
+import StudentDashboard from "@/app/(protected)/dashboard/component/StudentDashboard";
+import TenantDashboard from "@/app/(protected)/dashboard/component/TenantDashboard";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
 
 describe("DashboardPage role composition", () => {
@@ -38,7 +41,7 @@ describe("DashboardPage role composition", () => {
     });
 
     const result = await DashboardPage();
-    expect(result.type()).toBe("ADMIN_DASHBOARD");
+    expect(result?.type).toBe(AdminDashboard);
   });
 
   it("selects TenantDashboard for TENANT", async () => {
@@ -50,7 +53,7 @@ describe("DashboardPage role composition", () => {
     });
 
     const result = await DashboardPage();
-    expect(result.type()).toBe("TENANT_DASHBOARD");
+    expect(result?.type).toBe(TenantDashboard);
   });
 
   it("selects StudentDashboard for STUDENT", async () => {
@@ -62,6 +65,6 @@ describe("DashboardPage role composition", () => {
     });
 
     const result = await DashboardPage();
-    expect(result.type()).toBe("STUDENT_DASHBOARD");
+    expect(result?.type).toBe(StudentDashboard);
   });
 });
