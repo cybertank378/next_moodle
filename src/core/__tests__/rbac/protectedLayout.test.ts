@@ -11,20 +11,7 @@ vi.mock("@/modules/auth/server/getCurrentUser", () => ({
 }));
 
 vi.mock("@/shared-ui/layout/AppLayout", () => ({
-  default: ({
-    children,
-    userRole,
-    username,
-  }: {
-    children: React.ReactNode;
-    userRole: string;
-    username?: string;
-  }) => ({
-    shell: "AppLayout",
-    children,
-    userRole,
-    username,
-  }),
+  default: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 import { redirect } from "next/navigation";
@@ -59,8 +46,8 @@ describe("ProtectedLayout — unified authenticated application shell", () => {
     const result = await ProtectedLayout({ children: "content" });
 
     expect(redirect).not.toHaveBeenCalled();
-    expect(result).toMatchObject({
-      shell: "AppLayout",
+    expect(result).toBeDefined();
+    expect(result?.props).toMatchObject({
       children: "content",
       userRole: role,
       username,

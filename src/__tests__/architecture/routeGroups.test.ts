@@ -19,6 +19,12 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     }
   });
 
+  it("keeps the required App Router root files", () => {
+    expect(exists("src/app/layout.tsx")).toBe(true);
+    expect(exists("src/app/page.tsx")).toBe(true);
+    expect(exists("src/app/favicon.ico")).toBe(true);
+  });
+
   it("has one public and one protected UI route group", () => {
     expect(exists("src/app/(public)/layout.tsx")).toBe(true);
     expect(exists("src/app/(protected)/layout.tsx")).toBe(true);
