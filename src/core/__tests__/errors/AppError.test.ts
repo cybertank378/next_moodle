@@ -1,72 +1,72 @@
 import { describe, expect, it } from "vitest";
-import {
-  AppError,
-  ConflictError,
-  DomainError,
-  ForbiddenError,
-  InfrastructureError,
-  NotFoundError,
-  UnauthorizedError,
-  ValidationError,
-} from "@/core/errors";
+import { AppError } from "@/core/errors/AppError";
+import { ConflictError } from "@/core/errors/ConflictError";
+import { DomainError } from "@/core/errors/DomainError";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { MoodleError } from "@/core/errors/MoodleError";
+import { NotFoundError } from "@/core/errors/NotFoundError";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+import { ValidationError } from "@/core/errors/ValidationError";
 
-describe("Application Error Hierarchy", () => {
-  it("ValidationError should have status 422 and default code VALIDATION_ERROR", () => {
-    const error = new ValidationError("Invalid payload", { field: "username" });
+describe("AppError Hierarchy", () => {
+  it("should instantiate DomainError with 400 status code", () => {
+    const error = new DomainError("Invalid domain state");
     expect(error).toBeInstanceOf(AppError);
-    expect(error.statusCode).toBe(422);
-    expect(error.code).toBe("VALIDATION_ERROR");
-    expect(error.message).toBe("Invalid payload");
-    expect(error.details).toEqual({ field: "username" });
+    expect(error.statusCode).toBe(400);
+    expect(error.code).toBe("DOMAIN_ERROR");
+    expect(error.message).toBe("Invalid domain state");
   });
 
-  it("UnauthorizedError should have status 401 and default code UNAUTHORIZED", () => {
-    const error = new UnauthorizedError("Session expired");
+  it("should instantiate ValidationError with 400 status code and details", () => {
+    const details = [{ field: "email", message: "Invalid format" }];
+    const error = new ValidationError("Validation failed", details);
+    expect(error).toBeInstanceOf(AppError);
+    expect(error.statusCode).toBe(400);
+    expect(error.code).toBe("VALIDATION_ERROR");
+    expect(error.details).toEqual(details);
+  });
+
+  it("should instantiate UnauthorizedError with 401 status code", () => {
+    const error = new UnauthorizedError();
     expect(error).toBeInstanceOf(AppError);
     expect(error.statusCode).toBe(401);
     expect(error.code).toBe("UNAUTHORIZED");
   });
 
-  it("ForbiddenError should have status 403 and default code FORBIDDEN", () => {
-    const error = new ForbiddenError("Permission denied");
+  it("should instantiate ForbiddenError with 403 status code", () => {
+    const error = new ForbiddenError("Cross-tenant access forbidden");
     expect(error).toBeInstanceOf(AppError);
     expect(error.statusCode).toBe(403);
     expect(error.code).toBe("FORBIDDEN");
   });
 
-  it("NotFoundError should have status 404 and default code NOT_FOUND", () => {
-    const error = new NotFoundError("Resource missing");
+  it("should instantiate NotFoundError with 404 status code", () => {
+    const error = new NotFoundError("Quiz not found");
     expect(error).toBeInstanceOf(AppError);
     expect(error.statusCode).toBe(404);
     expect(error.code).toBe("NOT_FOUND");
   });
 
-  it("ConflictError should have status 409 and default code CONFLICT", () => {
-    const error = new ConflictError("Resource already exists");
+  it("should instantiate ConflictError with 409 status code", () => {
+    const error = new ConflictError("Domain already registered");
     expect(error).toBeInstanceOf(AppError);
     expect(error.statusCode).toBe(409);
     expect(error.code).toBe("CONFLICT");
   });
 
-  it("InfrastructureError should have status 502 and default code INFRASTRUCTURE_ERROR", () => {
-    const error = new InfrastructureError("Upstream timeout");
+  it("should instantiate InfrastructureError with 500 status code", () => {
+    const error = new InfrastructureError("Database connection lost");
     expect(error).toBeInstanceOf(AppError);
-    expect(error.statusCode).toBe(502);
+    expect(error.statusCode).toBe(500);
     expect(error.code).toBe("INFRASTRUCTURE_ERROR");
   });
 
-  it("DomainError should have status 400 and default code DOMAIN_ERROR", () => {
-    const error = new DomainError("Domain rule violated", "QUIZ_RULE_FAILED");
+  it("should instantiate MoodleError with 502 status code and errorcode", () => {
+    const error = new MoodleError("invalidtoken", "Invalid token supplied");
     expect(error).toBeInstanceOf(AppError);
-    expect(error.statusCode).toBe(400);
-    expect(error.code).toBe("QUIZ_RULE_FAILED");
-  });
-
-  it("should preserve error cause when provided", () => {
-    const originalError = new Error("Database timeout");
-    const error = new InfrastructureError("Gateway failure", {
-      cause: originalError,
-    });
-    expect(error.cause).toBe(originalError);
+    expect(error.statusCode).toBe(502);
+    expect(error.code).toBe("MOODLE_ERROR");
+    expect(error.moodleErrorCode).toBe("invalidtoken");
   });
 });

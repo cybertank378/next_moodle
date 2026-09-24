@@ -1,67 +1,56 @@
-export interface ApiErrorDetail {
-  readonly code: string;
-  readonly message: string;
-  readonly details?: unknown;
+import type { ApiErrorDetail, ApiErrorResponseBody } from "./ApiErrorResponse";
+import { HttpStatus, type HttpStatusCode } from "./HttpStatus";
+
+export type { ApiErrorDetail, ApiErrorResponseBody };
+
+export interface ApiSuccessResponseBody<T = unknown> {
+  success: true;
+  data: T;
+  meta?: Record<string, unknown>;
 }
 
-export interface ApiSuccessResponse<T = unknown, M = Record<string, unknown>> {
-  readonly success: true;
-  readonly data: T;
-  readonly meta?: M;
-}
+export type ApiResponseBody<T = unknown> =
+  | ApiSuccessResponseBody<T>
+  | ApiErrorResponseBody;
 
-export interface ApiFailureResponse {
-  readonly success: false;
-  readonly error: ApiErrorDetail;
-  readonly requestId?: string;
-}
+export class ApiResponse<T = unknown> {
+  public readonly status: HttpStatusCode;
+  public readonly body: ApiResponseBody<T>;
 
-export type ApiResponse<T = unknown, M = Record<string, unknown>> =
-  | ApiSuccessResponse<T, M>
-  | ApiFailureResponse;
+  private constructor(status: HttpStatusCode, body: ApiResponseBody<T>) {
+    this.status = status;
+    this.body = body;
+  }
 
-export const ApiResponse = {
-  success<T, M = Record<string, unknown>>(
-    data: T,
-    meta?: M,
-  ): ApiSuccessResponse<T, M> {
-    return {
+  public static success<U>(
+    data: U,
+    meta?: Record<string, unknown>,
+    status: HttpStatusCode = HttpStatus.OK,
+  ): ApiResponse<U> {
+    const body: ApiSuccessResponseBody<U> = {
       success: true,
       data,
-      ...(meta ? { meta } : {}),
+      ...(meta && { meta }),
     };
-  },
+    return new ApiResponse<U>(status, body);
+  }
 
-  failure(
+  public static error(
     code: string,
     message: string,
+    status: HttpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR,
     details?: unknown,
-    requestId?: string,
-  ): ApiFailureResponse {
-    return {
+    meta?: Record<string, unknown>,
+  ): ApiResponse<never> {
+    const body: ApiErrorResponseBody = {
       success: false,
       error: {
         code,
         message,
-        ...(details !== undefined ? { details } : {}),
+        ...(details !== undefined && { details }),
       },
-      ...(requestId ? { requestId } : {}),
+      ...(meta && { meta }),
     };
-  },
-};
-
-export function createSuccessResponse<T, M = Record<string, unknown>>(
-  data: T,
-  meta?: M,
-): ApiSuccessResponse<T, M> {
-  return ApiResponse.success(data, meta);
-}
-
-export function createErrorResponse(
-  code: string,
-  message: string,
-  details?: unknown,
-  requestId?: string,
-): ApiFailureResponse {
-  return ApiResponse.failure(code, message, details, requestId);
+    return new ApiResponse<never>(status, body);
+  }
 }

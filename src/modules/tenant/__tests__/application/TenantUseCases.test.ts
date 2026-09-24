@@ -1,232 +1,277 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { ConflictError } from "@/core/errors/ConflictError";
-import { NotFoundError } from "@/core/errors/NotFoundError";
-import { ChangeTenantStatusUseCase } from "@/modules/tenant/application/usecases/ChangeTenantStatusUseCase";
+import { describe, expect, it, vi } from "vitest";
+import { AppRole } from "@/core/rbac/AppRole";
+import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { ConfigureTenantCredentialUseCase } from "@/modules/tenant/application/usecases/ConfigureTenantCredentialUseCase";
 import { CreateTenantUseCase } from "@/modules/tenant/application/usecases/CreateTenantUseCase";
-import { GetTenantBySlugUseCase } from "@/modules/tenant/application/usecases/GetTenantBySlugUseCase";
-import { GetTenantUseCase } from "@/modules/tenant/application/usecases/GetTenantUseCase";
-import { TestTenantMoodleConnectionUseCase } from "@/modules/tenant/application/usecases/TestTenantMoodleConnectionUseCase";
+import { DeleteTenantUseCase } from "@/modules/tenant/application/usecases/DeleteTenantUseCase";
+import { GetAllTenantsUseCase } from "@/modules/tenant/application/usecases/GetAllTenantsUseCase";
+import { GetTenantByIdUseCase } from "@/modules/tenant/application/usecases/GetTenantByIdUseCase";
+import { UpdateTenantStatusUseCase } from "@/modules/tenant/application/usecases/UpdateTenantStatusUseCase";
 import { UpdateTenantUseCase } from "@/modules/tenant/application/usecases/UpdateTenantUseCase";
-import { AesGcmEncryptionProvider } from "@/modules/tenant/infrastructure/providers/AesGcmEncryptionProvider";
-import { DatabaseTenantCredentialRepository } from "@/modules/tenant/infrastructure/repositories/DatabaseTenantCredentialRepository";
-import { DatabaseTenantRepository } from "@/modules/tenant/infrastructure/repositories/DatabaseTenantRepository";
+import { Tenant } from "@/modules/tenant/domain/entity/TenantEntity";
+import type {
+  TenantCredentialCipher,
+  TenantCredentialPersistenceInput,
+  TenantsRepository,
+} from "@/modules/tenant/domain/interfaces/TenantInterfaces";
+import type { TenantListFilter } from "@/modules/tenant/domain/types/TenantMetadata";
 
-describe("Tenant Application Use Cases", () => {
-  let tenantRepo: DatabaseTenantRepository;
-  let credRepo: DatabaseTenantCredentialRepository;
-  let encryptionProvider: AesGcmEncryptionProvider;
+const adminActor: AuthorizationActor = {
+  id: "admin-1",
+  role: AppRole.ADMIN,
+  tenantId: null,
+};
 
-  beforeEach(() => {
-    encryptionProvider = new AesGcmEncryptionProvider(
-      "test-secret-encryption-key-application-suite-32!",
+const tenantActor: AuthorizationActor = {
+  id: "tenant-user-1",
+  role: AppRole.TENANT,
+  tenantId: "tenant-1",
+};
+
+function makeTenant(
+  overrides: Partial<ConstructorParameters<typeof Tenant>[0]> = {},
+) {
+  const now = new Date("2026-09-23T04:00:00.000Z");
+  return new Tenant({
+    id: "tenant-1",
+    slug: "acme-school",
+    name: "ACME School",
+    status: "ACTIVE",
+    customDomain: null,
+    credential: null,
+    branding: null,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  });
+}
+
+class InMemoryTenantsRepository implements TenantsRepository {
+  private readonly items = new Map<string, Tenant>();
+
+  constructor(seed: Tenant[] = []) {
+    for (const tenant of seed) {
+      this.items.set(tenant.id, tenant);
+    }
+  }
+
+  async findById(id: string): Promise<Tenant | null> {
+    return this.items.get(id) ?? null;
+  }
+
+  async findBySlug(slug: string): Promise<Tenant | null> {
+    return (
+      [...this.items.values()].find((tenant) => tenant.slug === slug) ?? null
     );
-    tenantRepo = new DatabaseTenantRepository();
-    credRepo = new DatabaseTenantCredentialRepository(encryptionProvider);
+  }
+
+  async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
+    return (
+      [...this.items.values()].find(
+        (tenant) => tenant.customDomain === customDomain,
+      ) ?? null
+    );
+  }
+
+  async list(filter: TenantListFilter): Promise<Tenant[]> {
+    return [...this.items.values()].filter((tenant) => {
+      const statusMatches = !filter.status || tenant.status === filter.status;
+      const search = filter.search?.toLowerCase();
+      const searchMatches =
+        !search ||
+        tenant.name.toLowerCase().includes(search) ||
+        tenant.slug.toLowerCase().includes(search);
+      return statusMatches && searchMatches;
+    });
+  }
+
+  async count(
+    filter: Pick<TenantListFilter, "status" | "search">,
+  ): Promise<number> {
+    return (await this.list({ ...filter, page: 1, pageSize: 100 })).length;
+  }
+
+  async create(tenant: Tenant): Promise<Tenant> {
+    this.items.set(tenant.id, tenant);
+    return tenant;
+  }
+
+  async update(tenant: Tenant): Promise<Tenant> {
+    this.items.set(tenant.id, tenant);
+    return tenant;
+  }
+
+  async delete(id: string): Promise<void> {
+    this.items.delete(id);
+  }
+
+  async upsertCredential(
+    input: TenantCredentialPersistenceInput,
+  ): Promise<Tenant> {
+    const existing = this.items.get(input.tenantId);
+    if (!existing) {
+      throw new Error("missing tenant");
+    }
+
+    const updated = existing.withCredential({
+      moodleUrl: input.moodleUrl,
+      timeoutBudgetMs: input.timeoutBudgetMs,
+      sslVerify: input.sslVerify,
+      hasAdminToken: input.encryptedAdminToken.length > 0,
+      hasProctorToken: Boolean(input.encryptedProctorToken),
+      configuredAt: new Date("2026-09-23T04:05:00.000Z"),
+    });
+    this.items.set(updated.id, updated);
+    return updated;
+  }
+}
+
+describe("tenants application use cases", () => {
+  it("creates a tenant for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository();
+    const useCase = new CreateTenantUseCase(repository);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      data: {
+        slug: "New School",
+        name: "New School",
+        customDomain: "exam.new-school.sch.id",
+      },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(result.getValue().slug).toBe("new-school");
   });
 
-  describe("CreateTenantUseCase", () => {
-    it("should create a new tenant and save encrypted credential without leaking secrets in response", async () => {
-      const useCase = new CreateTenantUseCase(
-        tenantRepo,
-        credRepo,
-        encryptionProvider,
-      );
+  it("lists tenants for ADMIN with pagination metadata", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new GetAllTenantsUseCase(repository);
 
-      const result = await useCase.execute({
-        slug: "smpn-1-jakarta",
-        name: "SMPN 1 Jakarta",
-        moodleBaseUrl: "https://moodle.smpn1.sch.id",
-        moodleToken: "super_secret_token_abc123",
-        moodleServiceShortname: "exam_service",
-      });
-
-      expect(result.id).toBeDefined();
-      expect(result.slug).toBe("smpn-1-jakarta");
-      expect(result.name).toBe("SMPN 1 Jakarta");
-      expect(result.status).toBe("ACTIVE");
-      expect(result.moodle?.configured).toBe(true);
-      expect(result.moodle?.baseUrl).toBe("https://moodle.smpn1.sch.id");
-
-      // Verify no secret leakage
-      // @ts-expect-error - token should not exist on response DTO
-      expect(result.moodleToken).toBeUndefined();
-      // @ts-expect-error - encryptedToken should not exist on response DTO
-      expect(result.encryptedToken).toBeUndefined();
-
-      // Verify credential is encrypted in repository
-      const savedCred = await credRepo.getByTenantId(result.id);
-      expect(savedCred).not.toBeNull();
-      if (!savedCred) throw new Error("Credential not found");
-      expect(savedCred.encryptedToken).not.toBe("super_secret_token_abc123");
-
-      const decrypted = encryptionProvider.decrypt({
-        encryptedValue: savedCred.encryptedToken,
-        iv: savedCred.iv,
-        authTag: savedCred.authTag,
-        keyVersion: savedCred.keyVersion,
-      });
-      expect(decrypted).toBe("super_secret_token_abc123");
+    const result = await useCase.execute({
+      actor: adminActor,
+      filter: { page: 1, pageSize: 10 },
     });
 
-    it("should reject duplicate tenant slug", async () => {
-      const useCase = new CreateTenantUseCase(
-        tenantRepo,
-        credRepo,
-        encryptionProvider,
-      );
-
-      await useCase.execute({
-        slug: "unique-school",
-        name: "Unique School",
-        moodleBaseUrl: "https://moodle.unique.test",
-        moodleToken: "token_1",
-      });
-
-      await expect(
-        useCase.execute({
-          slug: "unique-school",
-          name: "Another School with same slug",
-          moodleBaseUrl: "https://moodle.another.test",
-          moodleToken: "token_2",
-        }),
-      ).rejects.toThrow(ConflictError);
-    });
+    expect(result.isSuccess).toBe(true);
+    expect(result.getValue().tenants).toHaveLength(1);
+    expect(result.getValue().total).toBe(1);
   });
 
-  describe("UpdateTenantUseCase", () => {
-    it("should update metadata and preserve existing token when moodleToken is omitted", async () => {
-      const createUseCase = new CreateTenantUseCase(
-        tenantRepo,
-        credRepo,
-        encryptionProvider,
-      );
-      const created = await createUseCase.execute({
-        slug: "school-update-test",
-        name: "Initial Name",
-        moodleBaseUrl: "https://moodle.initial.test",
-        moodleToken: "original_secret_token",
-      });
+  it("returns tenant detail for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new GetTenantByIdUseCase(repository);
 
-      const updateUseCase = new UpdateTenantUseCase(
-        tenantRepo,
-        credRepo,
-        encryptionProvider,
-      );
-      const updated = await updateUseCase.execute(created.id, {
-        name: "Updated Name",
-      });
-
-      expect(updated.name).toBe("Updated Name");
-
-      // Credential must remain preserved
-      const cred = await credRepo.getByTenantId(created.id);
-      expect(cred).not.toBeNull();
-      if (!cred) throw new Error("Credential not found");
-      const decrypted = encryptionProvider.decrypt({
-        encryptedValue: cred.encryptedToken,
-        iv: cred.iv,
-        authTag: cred.authTag,
-        keyVersion: cred.keyVersion,
-      });
-      expect(decrypted).toBe("original_secret_token");
+    const result = await useCase.execute({
+      actor: adminActor,
+      tenantId: "tenant-1",
     });
 
-    it("should update credential when new moodleToken is provided", async () => {
-      const createUseCase = new CreateTenantUseCase(
-        tenantRepo,
-        credRepo,
-        encryptionProvider,
-      );
-      const created = await createUseCase.execute({
-        slug: "school-token-update",
-        name: "Token School",
-        moodleBaseUrl: "https://moodle.test",
-        moodleToken: "old_token",
-      });
-
-      const updateUseCase = new UpdateTenantUseCase(
-        tenantRepo,
-        credRepo,
-        encryptionProvider,
-      );
-      await updateUseCase.execute(created.id, {
-        moodleToken: "new_refreshed_token",
-      });
-
-      const cred = await credRepo.getByTenantId(created.id);
-      expect(cred).not.toBeNull();
-      if (!cred) throw new Error("Credential not found");
-      const decrypted = encryptionProvider.decrypt({
-        encryptedValue: cred.encryptedToken,
-        iv: cred.iv,
-        authTag: cred.authTag,
-        keyVersion: cred.keyVersion,
-      });
-      expect(decrypted).toBe("new_refreshed_token");
-    });
+    expect(result.isSuccess).toBe(true);
+    expect(result.getValue().id).toBe("tenant-1");
   });
 
-  describe("GetTenantUseCase & GetTenantBySlugUseCase", () => {
-    it("should return tenant by id and by slug", async () => {
-      const getUseCase = new GetTenantUseCase(tenantRepo);
-      const getBySlugUseCase = new GetTenantBySlugUseCase(tenantRepo);
+  it("updates tenant metadata for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new UpdateTenantUseCase(repository);
 
-      // Demo tenant was seeded
-      const tenantById = await getUseCase.execute("tenant_demo");
-      expect(tenantById.slug).toBe("demo");
-
-      const tenantBySlug = await getBySlugUseCase.execute("demo");
-      expect(tenantBySlug.id).toBe("tenant_demo");
+    const result = await useCase.execute({
+      actor: adminActor,
+      tenantId: "tenant-1",
+      data: {
+        name: "ACME Academy",
+        customDomain: "exam.acme.sch.id",
+      },
     });
 
-    it("should throw NotFoundError if tenant not found", async () => {
-      const getUseCase = new GetTenantUseCase(tenantRepo);
-      await expect(getUseCase.execute("non_existent")).rejects.toThrow(
-        NotFoundError,
-      );
-
-      const getBySlugUseCase = new GetTenantBySlugUseCase(tenantRepo);
-      await expect(
-        getBySlugUseCase.execute("non_existent_slug"),
-      ).rejects.toThrow(NotFoundError);
-    });
+    expect(result.isSuccess).toBe(true);
+    expect(result.getValue().name).toBe("ACME Academy");
+    expect(result.getValue().customDomain).toBe("exam.acme.sch.id");
   });
 
-  describe("ChangeTenantStatusUseCase", () => {
-    it("should successfully transition tenant status", async () => {
-      const changeStatusUseCase = new ChangeTenantStatusUseCase(tenantRepo);
+  it("updates tenant status for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new UpdateTenantStatusUseCase(repository);
 
-      const updated = await changeStatusUseCase.execute({
-        tenantId: "tenant_demo",
-        status: "SUSPENDED",
-      });
-
-      expect(updated.status).toBe("SUSPENDED");
-
-      const found = await tenantRepo.findById("tenant_demo");
-      expect(found?.status).toBe("SUSPENDED");
+    const result = await useCase.execute({
+      actor: adminActor,
+      tenantId: "tenant-1",
+      status: "SUSPENDED",
     });
+
+    expect(result.isSuccess).toBe(true);
+    expect(result.getValue().status).toBe("SUSPENDED");
   });
 
-  describe("TestTenantMoodleConnectionUseCase", () => {
-    it("should invoke tester and return safe report", async () => {
-      const mockTester = {
-        testConnection: async () => ({
-          success: true,
-          message: "Koneksi berhasil",
-          siteName: "Moodle Demo",
-          moodleVersion: "4.3",
-        }),
-      };
+  it("rejects duplicate normalized slug", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new CreateTenantUseCase(repository);
 
-      const useCase = new TestTenantMoodleConnectionUseCase(
-        tenantRepo,
-        mockTester,
-      );
-
-      const result = await useCase.execute("tenant_demo");
-      expect(result.success).toBe(true);
-      expect(result.siteName).toBe("Moodle Demo");
+    const result = await useCase.execute({
+      actor: adminActor,
+      data: { slug: "ACME School", name: "Duplicate" },
     });
+
+    expect(result.isFailure).toBe(true);
+    expect(result.getError()).toMatchObject({ code: "CONFLICT" });
+  });
+
+  it("enforces ADMIN-only create authorization", async () => {
+    const repository = new InMemoryTenantsRepository();
+    const useCase = new CreateTenantUseCase(repository);
+
+    const result = await useCase.execute({
+      actor: tenantActor,
+      data: { slug: "tenant-created", name: "Should Fail" },
+    });
+
+    expect(result.isFailure).toBe(true);
+    expect(result.getError()).toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("encrypts credential secrets before persistence and never returns plaintext", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const cipher: TenantCredentialCipher = {
+      encrypt: vi.fn(
+        async (plainText, tenantId) => `enc:${tenantId}:${plainText}`,
+      ),
+    };
+    const useCase = new ConfigureTenantCredentialUseCase(repository, cipher);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      tenantId: "tenant-1",
+      data: {
+        moodleUrl: "https://moodle.acme.sch.id",
+        adminToken: "admin-secret-token",
+        proctorToken: "proctor-secret-token",
+        timeoutBudgetMs: 10000,
+        sslVerify: true,
+      },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(cipher.encrypt).toHaveBeenCalledTimes(2);
+
+    const serialized = JSON.stringify(result.getValue());
+    expect(serialized).not.toContain("admin-secret-token");
+    expect(serialized).not.toContain("proctor-secret-token");
+    expect(serialized).not.toContain("encryptedAdminToken");
+    expect(serialized).not.toContain("encryptedProctorToken");
+    expect(result.getValue().credential?.hasAdminToken).toBe(true);
+    expect(result.getValue().credential?.hasProctorToken).toBe(true);
+  });
+
+  it("deletes a tenant for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository([makeTenant()]);
+    const useCase = new DeleteTenantUseCase(repository);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      tenantId: "tenant-1",
+    });
+
+    expect(result.isSuccess).toBe(true);
+    await expect(repository.findById("tenant-1")).resolves.toBeNull();
   });
 });

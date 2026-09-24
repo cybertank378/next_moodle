@@ -1,36 +1,29 @@
-import { AppError } from "@/core/errors/AppError";
-import { type ApiFailureResponse, ApiResponse } from "./ApiResponse";
-import { HttpStatus } from "./HttpStatus";
-
-export interface MappedHttpResponse {
-  readonly status: number;
-  readonly body: ApiFailureResponse;
-}
+import { AppError } from "../errors/AppError";
+import { ApiResponse } from "./ApiResponse";
+import { HttpStatus, type HttpStatusCode } from "./HttpStatus";
 
 export function mapErrorToHttpResponse(
   error: unknown,
   requestId?: string,
-): MappedHttpResponse {
+): ApiResponse<never> {
+  const meta = requestId ? { requestId } : undefined;
+
   if (error instanceof AppError) {
-    return {
-      status: error.statusCode,
-      body: ApiResponse.failure(
-        error.code,
-        error.message,
-        error.details,
-        requestId,
-      ),
-    };
+    return ApiResponse.error(
+      error.code,
+      error.message,
+      error.statusCode as HttpStatusCode,
+      error.details,
+      meta,
+    );
   }
 
-  // Unknown error sanitization: do not leak raw stack trace or internal message
-  return {
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    body: ApiResponse.failure(
-      "INTERNAL_SERVER_ERROR",
-      "Terjadi kesalahan pada server.",
-      undefined,
-      requestId,
-    ),
-  };
+  // Fallback for unknown / native errors — never leak raw stack or internal message
+  return ApiResponse.error(
+    "INTERNAL_ERROR",
+    "Internal server error",
+    HttpStatus.INTERNAL_SERVER_ERROR,
+    undefined,
+    meta,
+  );
 }

@@ -1,20 +1,10 @@
-import { AppError, type AppErrorOptions } from "./AppError";
+import { AppError } from "./AppError";
 
 export class ForbiddenError extends AppError {
-  public readonly code: string;
-  public readonly statusCode: number = 403;
+  public readonly code = "FORBIDDEN";
+  public readonly statusCode = 403;
 
-  constructor(
-    message = "Access forbidden",
-    options?: AppErrorOptions | unknown,
-  ) {
-    super(message, options);
-    this.code =
-      options &&
-      typeof options === "object" &&
-      "code" in options &&
-      typeof options.code === "string"
-        ? options.code
-        : "FORBIDDEN";
+  constructor(message = "Access forbidden", details?: unknown) {
+    super(message, details);
   }
 }

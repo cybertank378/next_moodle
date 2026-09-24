@@ -1,7 +1,10 @@
+import type { CurrentActor } from "./CurrentActor";
+
 export interface Session {
-  readonly id: string;
-  readonly userId: string;
-  readonly tenantId: string;
-  readonly expiresAt: Date;
-  readonly roles?: readonly string[];
+  id: string;
+  token: string;
+  actor: CurrentActor;
+  expiresAt: Date;
+  isRevoked: boolean;
+  createdAt: Date;
 }

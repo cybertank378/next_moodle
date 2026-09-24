@@ -1,59 +1,40 @@
 import { describe, expect, it } from "vitest";
 import { ApiResponse } from "@/core/http/ApiResponse";
+import { HttpStatus } from "@/core/http/HttpStatus";
 
 describe("ApiResponse", () => {
-  it("should create standardized success response without meta", () => {
-    const payload = { id: 1, name: "Sample" };
-    const res = ApiResponse.success(payload);
+  it("should create a formatted success response", () => {
+    const data = { id: "user_123", name: "John Doe" };
+    const meta = { requestId: "req_test123" };
+    const response = ApiResponse.success(data, meta, HttpStatus.OK);
 
-    expect(res).toEqual({
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
       success: true,
-      data: payload,
-    });
-  });
-
-  it("should create standardized success response with meta", () => {
-    const payload = ["item1", "item2"];
-    const meta = { total: 2, page: 1 };
-    const res = ApiResponse.success(payload, meta);
-
-    expect(res).toEqual({
-      success: true,
-      data: payload,
+      data,
       meta,
     });
   });
 
-  it("should create standardized failure response", () => {
-    const res = ApiResponse.failure(
-      "NOT_FOUND",
-      "Data tidak ditemukan.",
-      undefined,
-      "req_123",
+  it("should create a formatted error response without raw stack trace", () => {
+    const meta = { requestId: "req_err456" };
+    const response = ApiResponse.error(
+      "RESOURCE_NOT_FOUND",
+      "Item does not exist",
+      HttpStatus.NOT_FOUND,
+      { entity: "quiz", id: "10" },
+      meta,
     );
 
-    expect(res).toEqual({
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
       success: false,
       error: {
-        code: "NOT_FOUND",
-        message: "Data tidak ditemukan.",
+        code: "RESOURCE_NOT_FOUND",
+        message: "Item does not exist",
+        details: { entity: "quiz", id: "10" },
       },
-      requestId: "req_123",
-    });
-  });
-
-  it("should include details in failure response when provided", () => {
-    const res = ApiResponse.failure("VALIDATION_ERROR", "Invalid input", {
-      field: "email",
-    });
-
-    expect(res).toEqual({
-      success: false,
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "Invalid input",
-        details: { field: "email" },
-      },
+      meta,
     });
   });
 });

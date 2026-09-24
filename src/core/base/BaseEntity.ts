@@ -1,13 +1,27 @@
 export abstract class BaseEntity<TId = string> {
-  protected constructor(public readonly id: TId) {}
+  protected readonly _id: TId;
 
-  public equals(other?: BaseEntity<TId>): boolean {
+  constructor(id: TId) {
+    this._id = id;
+  }
+
+  public get id(): TId {
+    return this._id;
+  }
+
+  public equals(other?: BaseEntity<TId> | null): boolean {
     if (other === null || other === undefined) {
       return false;
     }
+
     if (this === other) {
       return true;
     }
-    return this.id === other.id;
+
+    if (!(other instanceof BaseEntity)) {
+      return false;
+    }
+
+    return this._id === other._id;
   }
 }

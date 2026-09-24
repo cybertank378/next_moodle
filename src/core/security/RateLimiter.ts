@@ -1,34 +1,53 @@
-export interface RateLimiterOptions {
-  windowMs: number;
-  maxRequests: number;
+export interface RateLimitResult {
+  success: boolean;
+  limit: number;
+  remaining: number;
+  resetAt: number;
 }
 
-export class InMemoryRateLimiter {
-  private readonly hits = new Map<string, { count: number; resetAt: number }>();
+export interface RateLimiterOptions {
+  limit: number;
+  windowMs: number;
+}
 
-  constructor(private readonly options: RateLimiterOptions) {}
+export interface RateLimiter {
+  limit(key: string): Promise<RateLimitResult>;
+}
 
-  public isAllowed(key: string): {
-    allowed: boolean;
-    remaining: number;
-    resetAt: number;
-  } {
+interface BucketEntry {
+  count: number;
+  resetAt: number;
+}
+
+export class InMemoryRateLimiter implements RateLimiter {
+  private readonly buckets = new Map<string, BucketEntry>();
+  private readonly maxLimit: number;
+  private readonly windowMs: number;
+
+  constructor(options: RateLimiterOptions) {
+    this.maxLimit = options.limit;
+    this.windowMs = options.windowMs;
+  }
+
+  async limit(key: string): Promise<RateLimitResult> {
     const now = Date.now();
-    const entry = this.hits.get(key);
+    const entry = this.buckets.get(key);
 
-    if (!entry || now > entry.resetAt) {
-      const resetAt = now + this.options.windowMs;
-      this.hits.set(key, { count: 1, resetAt });
+    if (!entry || now >= entry.resetAt) {
+      const resetAt = now + this.windowMs;
+      this.buckets.set(key, { count: 1, resetAt });
       return {
-        allowed: true,
-        remaining: this.options.maxRequests - 1,
+        success: true,
+        limit: this.maxLimit,
+        remaining: Math.max(0, this.maxLimit - 1),
         resetAt,
       };
     }
 
-    if (entry.count >= this.options.maxRequests) {
+    if (entry.count >= this.maxLimit) {
       return {
-        allowed: false,
+        success: false,
+        limit: this.maxLimit,
         remaining: 0,
         resetAt: entry.resetAt,
       };
@@ -36,13 +55,10 @@ export class InMemoryRateLimiter {
 
     entry.count += 1;
     return {
-      allowed: true,
-      remaining: this.options.maxRequests - entry.count,
+      success: true,
+      limit: this.maxLimit,
+      remaining: Math.max(0, this.maxLimit - entry.count),
       resetAt: entry.resetAt,
     };
-  }
-
-  public reset(key: string): void {
-    this.hits.delete(key);
   }
 }

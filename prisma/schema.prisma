@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantStatus {
+  ACTIVE
+  MAINTENANCE
+  SUSPENDED
+}
+
+model Tenant {
+  id           String            @id @default(uuid())
+  slug         String            @unique
+  name         String
+  status       TenantStatus      @default(ACTIVE)
+  customDomain String?           @unique
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  credential   TenantCredential?
+  branding     TenantBranding?
+  auditLogs    SaasAuditLog[]
+
+  @@index([status])
+  @@index([name])
+  @@map("tenants")
+}
+
+model TenantCredential {
+  id                    String   @id @default(uuid())
+  tenantId              String   @unique
+  moodleUrl             String
+  encryptedAdminToken   String
+  encryptedProctorToken String?
+  timeoutBudgetMs       Int      @default(10000)
+  sslVerify             Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_credentials")
+}
+
+model TenantBranding {
+  id           String   @id @default(uuid())
+  tenantId     String   @unique
+  logoUrl      String?
+  primaryColor String?
+  accentColor  String?
+  faviconUrl   String?
+  customCss    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_brandings")
+}
+
+model SaasAuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String
+  actorId    String
+  actorRole  String
+  action     String
+  resource   String
+  resourceId String?
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("saas_audit_logs")
+}

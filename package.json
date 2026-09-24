@@ -15,24 +15,34 @@
     "verify": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
-    "class-variance-authority": "^0.7.1",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "@types/react-datepicker": "^6.2.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "dotenv": "^17.4.2",
+    "framer-motion": "^13.4.0",
     "lucide-react": "^1.47.0",
     "next": "^16.3.5",
+    "pg": "^8.23.0",
     "react": "^19.3.0",
+    "react-datepicker": "^9.1.0",
     "react-dom": "^19.3.0",
+    "react-toastify": "^11.1.0",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@types/node": "^26.6.2",
+    "@types/pg": "^8.11.11",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.28",
+    "prisma": "^7.9.1",
     "tailwindcss": "^3.4.17",
-    "typescript": "^7.0.2",
-    "vitest": "^5.0.1"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
   }
 }

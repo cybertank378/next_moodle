@@ -1,56 +1,49 @@
-const SENSITIVE_KEYS = new Set([
-  "password",
-  "token",
-  "accesstoken",
-  "refreshtoken",
-  "wstoken",
-  "authorization",
-  "cookie",
-  "secret",
-  "clientsecret",
-  "apikey",
-]);
+const SENSITIVE_KEY_PATTERNS = [
+  /password/i,
+  /token/i,
+  /secret/i,
+  /authorization/i,
+  /cookie/i,
+  /api[_-]?key/i,
+  /credential/i,
+  /private[_-]?key/i,
+  /session[_-]?token/i,
+];
 
-// biome-ignore lint/complexity/noStaticOnlyClass: utility class with static helpers
-export class SensitiveData {
-  public static isSensitiveKey(key: string): boolean {
-    const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (SENSITIVE_KEYS.has(normalized)) {
-      return true;
-    }
-    for (const pattern of SENSITIVE_KEYS) {
-      if (normalized.includes(pattern)) {
-        return true;
-      }
-    }
-    return false;
+export function isSensitiveKey(key: string): boolean {
+  return SENSITIVE_KEY_PATTERNS.some((pattern) => pattern.test(key));
+}
+
+export function redactSensitiveData<T>(data: T, seen = new WeakSet()): T {
+  if (data === null || data === undefined) {
+    return data;
   }
 
-  public static redact(target: unknown): unknown {
-    if (target === null || target === undefined) {
-      return target;
-    }
-
-    if (typeof target !== "object") {
-      return target;
-    }
-
-    if (Array.isArray(target)) {
-      return target.map((item) => SensitiveData.redact(item));
-    }
-
-    const output: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(
-      target as Record<string, unknown>,
-    )) {
-      if (SensitiveData.isSensitiveKey(key)) {
-        output[key] = "[REDACTED]";
-      } else if (typeof value === "object" && value !== null) {
-        output[key] = SensitiveData.redact(value);
-      } else {
-        output[key] = value;
-      }
-    }
-    return output;
+  if (typeof data !== "object") {
+    return data;
   }
+
+  // Avoid circular references
+  if (seen.has(data as object)) {
+    return "[CIRCULAR]" as unknown as T;
+  }
+  seen.add(data as object);
+
+  if (Array.isArray(data)) {
+    return data.map((item) => redactSensitiveData(item, seen)) as unknown as T;
+  }
+
+  const redacted: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(data)) {
+    if (isSensitiveKey(key)) {
+      redacted[key] = "[REDACTED]";
+    } else if (typeof value === "object" && value !== null) {
+      redacted[key] = redactSensitiveData(value, seen);
+    } else {
+      redacted[key] = value;
+    }
+  }
+
+  return redacted as T;
 }

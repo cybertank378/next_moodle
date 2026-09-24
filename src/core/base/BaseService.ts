@@ -1,3 +1,11 @@
 export abstract class BaseService {
-  protected constructor() {}
+  protected readonly serviceName: string;
+
+  constructor(serviceName: string) {
+    this.serviceName = serviceName;
+  }
+
+  public getServiceName(): string {
+    return this.serviceName;
+  }
 }

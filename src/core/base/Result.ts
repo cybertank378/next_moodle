@@ -1,50 +1,56 @@
-export class Result<T, E extends Error = Error> {
-  private readonly _isSuccess: boolean;
+export class Result<T = void, E = unknown> {
+  public readonly isSuccess: boolean;
+  public readonly isFailure: boolean;
   private readonly _value?: T;
   private readonly _error?: E;
 
-  private constructor(isSuccess: boolean, value?: T, error?: E) {
-    this._isSuccess = isSuccess;
+  private constructor(isSuccess: boolean, error?: E, value?: T) {
+    if (isSuccess && error) {
+      throw new Error(
+        "InvalidOperation: A result cannot be successful and contain an error.",
+      );
+    }
+    if (!isSuccess && error === undefined) {
+      throw new Error(
+        "InvalidOperation: A failing result must contain an error.",
+      );
+    }
+
+    this.isSuccess = isSuccess;
+    this.isFailure = !isSuccess;
     this._value = value;
     this._error = error;
+
     Object.freeze(this);
   }
 
-  public get isSuccess(): boolean {
-    return this._isSuccess;
-  }
-
-  public get isFailure(): boolean {
-    return !this._isSuccess;
-  }
-
-  public get value(): T {
-    if (!this._isSuccess) {
-      throw new Error("Cannot get value from a failed Result.");
+  public getValue(): T {
+    if (!this.isSuccess) {
+      throw new Error("Cannot retrieve value from a failed result.");
     }
     return this._value as T;
   }
 
-  public get error(): E {
-    if (this._isSuccess) {
-      throw new Error("Cannot get error from a successful Result.");
+  public getError(): E {
+    if (this.isSuccess) {
+      throw new Error("Cannot retrieve error from a successful result.");
     }
     return this._error as E;
   }
 
-  public getValue(): T {
-    return this.value;
+  public static ok<U = void, F = unknown>(value?: U): Result<U, F> {
+    return new Result<U, F>(true, undefined, value);
   }
 
-  public getError(): E {
-    return this.error;
+  public static success<U = void, F = unknown>(value?: U): Result<U, F> {
+    return Result.ok<U, F>(value);
   }
 
-  public static ok<T>(value: T): Result<T, never> {
-    return new Result<T, never>(true, value);
+  public static fail<U = void, F = unknown>(error: F): Result<U, F> {
+    return new Result<U, F>(false, error);
   }
 
-  public static fail<E extends Error>(error: E): Result<never, E> {
-    return new Result<never, E>(false, undefined, error);
+  public static failure<U = void, F = unknown>(error: F): Result<U, F> {
+    return Result.fail<U, F>(error);
   }
 }

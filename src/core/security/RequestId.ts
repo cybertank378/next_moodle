@@ -1,32 +1,20 @@
 import { randomUUID } from "node:crypto";
 
 export function generateRequestId(): string {
-  return randomUUID();
+  const uuid = randomUUID().replace(/-/g, "");
+  return `req_${uuid}`;
 }
 
-export function getOrGenerateRequestId(
-  requestOrHeaders?: Request | Headers | null,
-): string {
-  if (!requestOrHeaders) {
+export function resolveRequestId(request?: Request | Headers): string {
+  if (!request) {
     return generateRequestId();
   }
 
-  let incomingId: string | null = null;
-  if (
-    "headers" in requestOrHeaders &&
-    typeof requestOrHeaders.headers.get === "function"
-  ) {
-    incomingId = requestOrHeaders.headers.get("x-request-id");
-  } else if (typeof (requestOrHeaders as Headers).get === "function") {
-    incomingId = (requestOrHeaders as Headers).get("x-request-id");
-  }
+  const headers = request instanceof Request ? request.headers : request;
+  const existingId = headers.get("x-request-id");
 
-  if (incomingId && incomingId.trim().length > 0) {
-    // Sanitize incoming ID to ensure it is safe and does not contain line breaks or malicious characters
-    const sanitized = incomingId.trim().slice(0, 128);
-    if (/^[a-zA-Z0-9_-]+$/.test(sanitized)) {
-      return sanitized;
-    }
+  if (existingId && existingId.trim().length > 0) {
+    return existingId.trim();
   }
 
   return generateRequestId();

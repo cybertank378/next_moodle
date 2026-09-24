@@ -1,204 +1,184 @@
 import "server-only";
-import { MoodleError } from "@/core/errors/MoodleError";
-import { createLogger, type ILogger } from "@/core/logger";
-import type { MoodleClientConfig } from "./MoodleClientConfig";
+
+import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { SecurityError } from "@/core/errors/SecurityError";
+import { ValidationError } from "@/core/errors/ValidationError";
+import { createLogger } from "@/core/logger/createLogger";
+import type { Logger } from "@/core/logger/Logger";
+import { SsrfValidator } from "@/core/security/SsrfValidator";
+import { encodeMoodleParams } from "./MoodleEncoder";
 import { MoodleErrorMapper } from "./MoodleErrorMapper";
-import {
-  encodeMoodleParams,
-  MoodleRequestEncoder,
-} from "./MoodleRequestEncoder";
-import { isMoodleExceptionResponse } from "./types/MoodleExceptionResponse";
-import type { MoodleRequestParameters } from "./types/MoodleRequestParameters";
+import type {
+  MoodleClient,
+  MoodleCredentials,
+  MoodleRequestOptions,
+} from "./types";
 
-export type MoodleRestClientOptions = MoodleClientConfig;
+const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_RETRY_DELAY_MS = 100;
+const MAX_SAFE_READ_RETRIES = 2;
+const RETRYABLE_HTTP_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 
-export interface MoodleCallOptions {
-  readonly requestId?: string;
-  readonly timeoutMs?: number;
+function wait(milliseconds: number): Promise<void> {
+  if (milliseconds <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export { encodeMoodleParams };
+function isTimeout(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.name === "TimeoutError" || error.name === "AbortError")
+  );
+}
 
-export class MoodleRestClient {
-  private readonly baseUrl: string;
+export class MoodleRestClient implements MoodleClient {
+  private readonly endpoint: string;
   private readonly token: string;
-  private readonly defaultTimeoutMs: number;
-  private readonly logger: ILogger;
-  private readonly defaultRequestId?: string;
-  private readonly defaultTenantId?: string;
-  private readonly fetcher: typeof fetch;
+  private readonly timeoutMs: number;
+  private readonly logger: Logger;
 
-  constructor(options: MoodleClientConfig) {
-    if (!options.baseUrl) {
-      throw new Error("MoodleRestClient: baseUrl is required");
-    }
-    if (!options.token) {
-      throw new Error("MoodleRestClient: token is required");
-    }
+  constructor(
+    credentials: MoodleCredentials,
+    ssrfValidator = new SsrfValidator(),
+  ) {
+    const rawBaseUrl = credentials.baseUrl.trim();
+    const baseUrl = ssrfValidator.validateUrl(rawBaseUrl);
 
-    // Validate URL scheme for security
-    let parsedUrl: URL;
-    try {
-      parsedUrl = new URL(options.baseUrl);
-    } catch {
-      throw new Error(
-        `MoodleRestClient: Invalid baseUrl provided "${options.baseUrl}"`,
+    if (baseUrl.protocol !== "https:") {
+      throw new SecurityError("Moodle base URL must use HTTPS.");
+    }
+    if (baseUrl.username || baseUrl.password) {
+      throw new SecurityError("Moodle base URL must not contain credentials.");
+    }
+    if (baseUrl.search || baseUrl.hash) {
+      throw new ValidationError(
+        "Moodle base URL must not contain a query string or fragment.",
       );
     }
-
-    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-      throw new Error(
-        `MoodleRestClient: Invalid base URL scheme "${parsedUrl.protocol}". Only http: and https: are allowed.`,
+    if (credentials.sslVerify === false) {
+      throw new SecurityError(
+        "Moodle TLS certificate verification is required.",
       );
     }
+    if (!credentials.token.trim()) {
+      throw new ValidationError("Moodle service token is required.");
+    }
 
-    // Strip trailing slashes to normalize baseUrl
-    this.baseUrl = options.baseUrl.replace(/\/+$/, "");
-    this.token = options.token;
-    this.defaultTimeoutMs = options.timeoutMs ?? 10_000;
-    this.logger =
-      options.logger ?? createLogger({ module: "MoodleRestClient" });
-    this.defaultRequestId = options.requestId;
-    this.defaultTenantId = options.tenantId;
-    this.fetcher = options.fetcher ?? fetch;
+    const normalizedPath = baseUrl.pathname.replace(/\/+$/, "");
+    baseUrl.pathname = `${normalizedPath}/webservice/rest/server.php`;
+    this.endpoint = baseUrl.toString();
+    this.token = credentials.token.trim();
+    this.timeoutMs = credentials.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.logger = createLogger("MoodleRestClient");
   }
 
-  public async call<T>(
+  async call<T = unknown>(
     wsfunction: string,
-    params?: MoodleRequestParameters,
-    options?: MoodleCallOptions,
+    params: Record<string, unknown> = {},
+    options: MoodleRequestOptions = {},
   ): Promise<T> {
-    const endpoint = `${this.baseUrl}/webservice/rest/server.php`;
-    const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
-    const requestId = options?.requestId ?? this.defaultRequestId;
-    const tenantId = this.defaultTenantId;
+    const requestKind = options.requestKind ?? "mutation";
+    const retries =
+      requestKind === "safe-read"
+        ? Math.min(Math.max(options.maxRetries ?? 0, 0), MAX_SAFE_READ_RETRIES)
+        : 0;
+    const requestLogger = options.requestId
+      ? this.logger.child({ requestId: options.requestId })
+      : this.logger;
 
-    const controller = new AbortController();
-    const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
-    const startTime = Date.now();
-
-    const bodyParams = {
-      wstoken: this.token,
-      wsfunction,
-      moodlewsrestformat: "json",
-      ...(params ?? {}),
-    };
-
-    const encodedBody = MoodleRequestEncoder.encode(bodyParams);
-
-    this.logger.debug("moodle_request_started", {
-      wsfunction,
-      requestId,
-      tenantId,
-    });
-
-    try {
-      const response = await this.fetcher(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-          ...(requestId ? { "X-Request-Id": requestId } : {}),
-        },
-        body: encodedBody.toString(),
-        signal: controller.signal,
-      });
-
-      const durationMs = Date.now() - startTime;
-
-      if (!response.ok) {
-        this.logger.warn("moodle_request_failed", {
-          wsfunction,
-          requestId,
-          tenantId,
-          durationMs,
-          httpStatus: response.status,
-          errorCode: `HTTP_${response.status}`,
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
+      try {
+        const response = await fetch(this.endpoint, {
+          method: "POST",
+          headers: {
+            "content-type": "application/x-www-form-urlencoded",
+            ...options.headers,
+          },
+          body: encodeMoodleParams({
+            wstoken: this.token,
+            moodlewsrestformat: "json",
+            wsfunction,
+            ...params,
+          }),
+          signal: AbortSignal.timeout(options.timeoutMs ?? this.timeoutMs),
         });
-        throw MoodleErrorMapper.mapHttpError(
-          response.status,
-          response.statusText,
-          { requestId, tenantId },
+
+        if (!response.ok) {
+          if (
+            attempt < retries &&
+            RETRYABLE_HTTP_STATUSES.has(response.status)
+          ) {
+            requestLogger.warn("Retrying safe Moodle read after HTTP failure", {
+              wsfunction,
+              status: response.status,
+              attempt: attempt + 1,
+            });
+            await wait(options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS);
+            continue;
+          }
+          throw MoodleErrorMapper.fromHttpStatus(response.status);
+        }
+
+        let responseData: unknown;
+        try {
+          responseData = await response.json();
+        } catch {
+          throw new InfrastructureError(
+            "Moodle returned an invalid response.",
+            {
+              wsfunction,
+            },
+          );
+        }
+
+        if (MoodleErrorMapper.isMoodleException(responseData)) {
+          requestLogger.warn("Moodle returned a normalized upstream error", {
+            wsfunction,
+            moodleErrorCode: responseData.errorcode,
+          });
+          throw MoodleErrorMapper.fromMoodleException(responseData);
+        }
+
+        return responseData as T;
+      } catch (error: unknown) {
+        if (error instanceof InfrastructureError && !isTimeout(error)) {
+          throw error;
+        }
+        if (
+          error instanceof Error &&
+          "isOperational" in error &&
+          !isTimeout(error)
+        ) {
+          throw error;
+        }
+
+        if (attempt < retries) {
+          requestLogger.warn(
+            "Retrying safe Moodle read after transport failure",
+            {
+              wsfunction,
+              attempt: attempt + 1,
+            },
+          );
+          await wait(options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS);
+          continue;
+        }
+
+        const timedOut = isTimeout(error);
+        requestLogger.error(
+          timedOut ? "Moodle request timed out" : "Moodle transport failed",
+          undefined,
+          { wsfunction },
+        );
+        throw new InfrastructureError(
+          timedOut
+            ? "Moodle request exceeded its timeout budget."
+            : "Moodle transport request failed.",
+          { wsfunction },
         );
       }
-
-      const rawText = await response.text();
-      let rawData: unknown;
-      try {
-        rawData = JSON.parse(rawText);
-      } catch (parseError) {
-        this.logger.error("moodle_request_failed", parseError, {
-          wsfunction,
-          requestId,
-          tenantId,
-          durationMs,
-          httpStatus: response.status,
-          errorCode: "INVALID_JSON",
-        });
-        throw MoodleErrorMapper.mapInvalidResponse(parseError, {
-          requestId,
-          tenantId,
-        });
-      }
-
-      if (isMoodleExceptionResponse(rawData)) {
-        this.logger.warn("moodle_request_failed", {
-          wsfunction,
-          requestId,
-          tenantId,
-          durationMs,
-          httpStatus: response.status,
-          errorCode: rawData.errorcode,
-        });
-        throw MoodleErrorMapper.mapException(rawData, {
-          requestId,
-          tenantId,
-        });
-      }
-
-      this.logger.debug("moodle_request_completed", {
-        wsfunction,
-        requestId,
-        tenantId,
-        durationMs,
-        httpStatus: response.status,
-      });
-
-      return rawData as T;
-    } catch (error) {
-      const durationMs = Date.now() - startTime;
-
-      if (error instanceof Error && error.name === "AbortError") {
-        this.logger.error("moodle_request_timeout", error, {
-          wsfunction,
-          requestId,
-          tenantId,
-          durationMs,
-          timeoutMs,
-        });
-        throw MoodleErrorMapper.mapTimeoutError(timeoutMs, {
-          requestId,
-          tenantId,
-        });
-      }
-
-      if (error instanceof MoodleError) {
-        throw error;
-      }
-
-      this.logger.error("moodle_request_failed", error, {
-        wsfunction,
-        requestId,
-        tenantId,
-        durationMs,
-        errorCode: "NETWORK_ERROR",
-      });
-      throw MoodleErrorMapper.mapNetworkError(error, {
-        requestId,
-        tenantId,
-      });
-    } finally {
-      clearTimeout(timeoutHandle);
     }
+
+    throw new InfrastructureError("Moodle transport request failed.");
   }
 }
