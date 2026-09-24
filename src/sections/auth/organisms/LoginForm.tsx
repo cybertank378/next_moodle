@@ -13,7 +13,6 @@ import Button from "@/shared-ui/component/Button";
 export default function LoginForm() {
   const router = useRouter();
   const auth = useAuthApi();
-  const [tenant, setTenant] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -24,9 +23,9 @@ export default function LoginForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
-    if (!tenant.trim() || identifierError || passwordError) return;
+    if (identifierError || passwordError) return;
     try {
-      await auth.login({ tenant, username: identifier, password });
+      await auth.login({ username: identifier, password });
       router.push(ROUTES.DASHBOARD.ROOT);
       router.refresh();
     } catch {
@@ -39,15 +38,6 @@ export default function LoginForm() {
       description="Masuk untuk melanjutkan ke platform ujian."
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
-        <AuthTextField
-          error={submitted && !tenant.trim() ? "Tenant wajib diisi" : ""}
-          label="Tenant"
-          onChangeAction={setTenant}
-          placeholder="contoh: acme"
-          required
-          touched={submitted}
-          value={tenant}
-        />
         <AuthTextField
           error={identifierError}
           label="Username / Email"

@@ -21,6 +21,19 @@ export interface AuthControllerDependencies {
 
 const SESSION_COOKIE = "session_token";
 
+function tenantIdentifierFromRequest(req: Request): string {
+  const hostHeader = req.headers.get("host");
+  const hostname = hostHeader
+    ? hostHeader.split(":")[0].trim()
+    : new URL(req.url).hostname;
+
+  if (!hostname) {
+    throw new UnauthorizedError("Tenant tidak dapat ditentukan dari domain.");
+  }
+
+  return hostname;
+}
+
 function respond(response: ApiResponse): NextResponse {
   return NextResponse.json(response.body, { status: response.status });
 }
@@ -77,9 +90,10 @@ export class AuthController {
 
   async login(req: Request): Promise<NextResponse> {
     try {
-      const result = await this.deps.login.execute(
-        parseLoginBody(await parseJson(req)),
-      );
+      const result = await this.deps.login.execute({
+        ...parseLoginBody(await parseJson(req)),
+        tenant: tenantIdentifierFromRequest(req),
+      });
       const response = respond(
         ApiResponse.success(
           {

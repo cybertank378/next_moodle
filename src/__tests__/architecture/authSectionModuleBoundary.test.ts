@@ -21,6 +21,8 @@ describe("Architecture Guard: auth section and module boundary", () => {
         path.join(authSectionsDirectory, "molecules/LoginForm.tsx"),
       ),
     ).toBe(false);
+    expect(loginForm).not.toContain('label="Tenant"');
+    expect(loginForm).not.toContain("setTenant");
   });
 
   it("does not present unsupported auth operations as completed", () => {
