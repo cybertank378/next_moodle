@@ -9,6 +9,7 @@ export function validateServerEnvironment(environment) {
   const databaseUrl = environment.DATABASE_URL;
   const sessionSecret = environment.AUTH_SESSION_SECRET;
   const encryptionKey = environment.TENANT_ENCRYPTION_MASTER_KEY;
+  const appSecret = environment.APP_SECRET;
 
   if (!databaseUrl || PLACEHOLDER_PATTERN.test(databaseUrl)) {
     errors.push("DATABASE_URL wajib dikonfigurasi.");
@@ -32,6 +33,14 @@ export function validateServerEnvironment(environment) {
     errors.push(
       "TENANT_ENCRYPTION_MASTER_KEY wajib berisi tepat 64 karakter heksadesimal.",
     );
+  }
+
+  if (
+    !appSecret ||
+    PLACEHOLDER_PATTERN.test(appSecret) ||
+    appSecret.length < 32
+  ) {
+    errors.push("APP_SECRET wajib berisi minimal 32 karakter.");
   }
 
   return errors;

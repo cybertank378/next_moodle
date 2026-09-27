@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
 import { LoginUseCase } from "@/modules/auth/application/usecases/LoginUseCase";
 import type {
-  AuthSessionManager,
-  MoodleAuthProvider,
+  IAuthRepository,
+  IMoodleClient,
   TenantAuthResolver,
 } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
@@ -16,8 +16,8 @@ describe("LoginUseCase", () => {
   };
 
   let tenantResolver: TenantAuthResolver;
-  let moodleAuth: MoodleAuthProvider;
-  let sessionManager: AuthSessionManager;
+  let moodleAuth: IMoodleClient;
+  let sessionManager: IAuthRepository;
 
   beforeEach(() => {
     tenantResolver = {

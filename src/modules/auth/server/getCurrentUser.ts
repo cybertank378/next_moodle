@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { getAuthSessionManager } from "@/app/api/auth/_factory";
+import { getAuthRepository } from "@/app/api/auth/_factory";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 
 export async function getCurrentUser(): Promise<CurrentActor | null> {
@@ -13,7 +13,7 @@ export async function getCurrentUser(): Promise<CurrentActor | null> {
       return null;
     }
 
-    const session = await getAuthSessionManager().resolveSession(sessionToken);
+    const session = await getAuthRepository().resolveSession(sessionToken);
     return session.actor;
   } catch {
     return null;

@@ -8,11 +8,13 @@ import { LogoutUseCase } from "@/modules/auth/application/usecases/LogoutUseCase
 import { RefreshSessionUseCase } from "@/modules/auth/application/usecases/RefreshSessionUseCase";
 import { AuthController } from "@/modules/auth/infrastructure/http/AuthController";
 import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
+import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
+import type { IMoodleClient, LoginTenant } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
 let controller: AuthController | null = null;
 let sessionManager: AuthRepository | null = null;
 
-export function getAuthSessionManager(): AuthRepository {
+export function getAuthRepository(): AuthRepository {
   sessionManager ??= new AuthRepository({}, prisma);
   return sessionManager;
 }
@@ -20,10 +22,20 @@ export function getAuthSessionManager(): AuthRepository {
 export function getAuthController(): AuthController {
   if (controller) return controller;
 
-  const repository = getAuthSessionManager();
+  const repository = getAuthRepository();
+
+  const moodleClient: IMoodleClient = {
+    authenticateStudent: async (input: { tenant: LoginTenant; username: string; password: string; }) => {
+      return MoodleRestClient.authenticate(
+        input.tenant.moodleUrl,
+        input.username,
+        input.password
+      );
+    }
+  };
 
   controller = new AuthController({
-    login: new LoginUseCase(repository, repository, repository),
+    login: new LoginUseCase(repository, moodleClient, repository),
     getCurrentSession: new GetCurrentSessionUseCase(repository),
     logout: new LogoutUseCase(repository),
     logoutAll: new LogoutAllUseCase(repository),

@@ -31,6 +31,22 @@ function isTimeout(error: unknown): boolean {
   );
 }
 
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+
+interface MoodleTokenResponse {
+  readonly token?: string;
+  readonly error?: string;
+}
+
+interface MoodleSiteInfoResponse {
+  readonly userid?: number;
+  readonly username?: string;
+  readonly fullname?: string;
+  readonly firstname?: string;
+  readonly lastname?: string;
+  readonly useremail?: string;
+}
+
 export class MoodleRestClient implements MoodleClient {
   private readonly endpoint: string;
   private readonly token: string;
@@ -70,6 +86,67 @@ export class MoodleRestClient implements MoodleClient {
     this.token = credentials.token.trim();
     this.timeoutMs = credentials.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.logger = createLogger("MoodleRestClient");
+  }
+
+  static async authenticate(
+    baseUrl: string,
+    username: string,
+    password: string,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+  ): Promise<{
+    token: string;
+    siteInfo: {
+      userId: number;
+      username: string;
+      fullName?: string;
+      email?: string;
+    };
+  }> {
+    const endpoint = new URL("/login/token.php", baseUrl).toString();
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        username,
+        password,
+        service: "nextjs_student",
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+
+    const tokenPayload = (await response.json()) as MoodleTokenResponse;
+    if (!response.ok || !tokenPayload.token) {
+      throw new UnauthorizedError(tokenPayload.error || "Login Moodle gagal.");
+    }
+
+    const client = new MoodleRestClient({
+      baseUrl,
+      token: tokenPayload.token,
+      timeoutMs,
+    });
+
+    const siteInfo = await client.call<MoodleSiteInfoResponse>(
+      "core_webservice_get_site_info",
+      {},
+      { requestKind: "safe-read" },
+    );
+
+    if (!siteInfo.userid || !siteInfo.username) {
+      throw new InfrastructureError("Moodle site info response is incomplete.");
+    }
+
+    return {
+      token: tokenPayload.token,
+      siteInfo: {
+        userId: siteInfo.userid,
+        username: siteInfo.username,
+        fullName:
+          siteInfo.fullname ||
+          [siteInfo.firstname, siteInfo.lastname].filter(Boolean).join(" "),
+        email: siteInfo.useremail,
+      },
+    };
   }
 
   async call<T = unknown>(
