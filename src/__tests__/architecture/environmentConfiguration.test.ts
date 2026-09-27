@@ -24,7 +24,7 @@ describe("Environment configuration contract", () => {
       ]),
     );
     expect(keys).not.toContain("NEXTAUTH_SECRET");
-    expect(keys).not.toContain("APP_SECRET");
+    expect(keys).toContain("APP_SECRET");
   });
 
   it("fails preflight when a required server variable is absent or a placeholder", () => {
@@ -33,9 +33,18 @@ describe("Environment configuration contract", () => {
         DATABASE_URL: "postgresql://localhost:5432/next_moodle",
         AUTH_SESSION_SECRET: "a".repeat(32),
         TENANT_ENCRYPTION_MASTER_KEY: "replace_with_64_hexadecimal_characters",
+        APP_SECRET: "a".repeat(32),
       }),
     ).toContain(
       "TENANT_ENCRYPTION_MASTER_KEY wajib berisi tepat 64 karakter heksadesimal.",
     );
+
+    expect(
+      validateServerEnvironment({
+        DATABASE_URL: "postgresql://localhost:5432/next_moodle",
+        AUTH_SESSION_SECRET: "a".repeat(32),
+        TENANT_ENCRYPTION_MASTER_KEY: "a".repeat(64),
+      }),
+    ).toContain("APP_SECRET wajib berisi minimal 32 karakter.");
   });
 });

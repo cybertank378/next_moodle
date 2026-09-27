@@ -1,8 +1,8 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import type {
-  AuthSessionManager,
+  IAuthRepository,
   LoginCredentials,
-  MoodleAuthProvider,
+  IMoodleClient,
   TenantAuthResolver,
 } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 import { mapMoodleStudentToActor } from "@/modules/auth/domain/mapper/AuthMapper";
@@ -11,8 +11,8 @@ import { validateLoginRequest } from "@/modules/auth/domain/validators/AuthValid
 export class LoginUseCase {
   constructor(
     private readonly tenantResolver: TenantAuthResolver,
-    private readonly moodleAuth: MoodleAuthProvider,
-    private readonly sessionManager: AuthSessionManager,
+    private readonly moodleClient: IMoodleClient,
+    private readonly authRepository: IAuthRepository,
   ) {}
 
   async execute(input: LoginCredentials) {
@@ -20,7 +20,7 @@ export class LoginUseCase {
     const tenant = await this.tenantResolver.resolveLoginTenant(
       credentials.tenant,
     );
-    const moodleResult = await this.moodleAuth.authenticateStudent({
+    const moodleResult = await this.moodleClient.authenticateStudent({
       tenant,
       username: credentials.username,
       password: credentials.password,
@@ -36,7 +36,7 @@ export class LoginUseCase {
     }
 
     const actor = mapMoodleStudentToActor(tenant, moodleResult.siteInfo);
-    const session = await this.sessionManager.createSession({
+    const session = await this.authRepository.createSession({
       actor,
       moodleToken: moodleResult.token,
     });

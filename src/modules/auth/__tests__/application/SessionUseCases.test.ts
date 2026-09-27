@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createAuthSessionManagerTestDouble } from "@/modules/auth/__tests__/helpers/AuthSessionManagerTestDouble";
+import { createIAuthRepositoryTestDouble } from "@/modules/auth/__tests__/helpers/IAuthRepositoryTestDouble";
 import { GetCurrentSessionUseCase } from "@/modules/auth/application/usecases/GetCurrentSessionUseCase";
 import { LogoutAllUseCase } from "@/modules/auth/application/usecases/LogoutAllUseCase";
 import { LogoutUseCase } from "@/modules/auth/application/usecases/LogoutUseCase";
@@ -7,7 +7,7 @@ import { RefreshSessionUseCase } from "@/modules/auth/application/usecases/Refre
 
 describe("auth session use cases", () => {
   it("gets and refreshes a session through the domain session port", async () => {
-    const sessions = createAuthSessionManagerTestDouble();
+    const sessions = createIAuthRepositoryTestDouble();
     const payload = { actor: { id: "actor-1" }, moodleToken: "token" };
     const refreshed = {
       cookieValue: "new-cookie",
@@ -26,7 +26,7 @@ describe("auth session use cases", () => {
   });
 
   it("revokes one session or every session for an actor through the domain session port", async () => {
-    const sessions = createAuthSessionManagerTestDouble();
+    const sessions = createIAuthRepositoryTestDouble();
     await new LogoutUseCase(sessions).execute("cookie");
     await new LogoutAllUseCase(sessions).execute("actor-1");
     expect(sessions.revokeSession).toHaveBeenCalledWith("cookie");

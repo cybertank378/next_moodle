@@ -1,7 +1,7 @@
 import { vi } from "vitest";
-import type { AuthSessionManager } from "@/modules/auth/domain/interfaces/AuthInterfaces";
+import type { IAuthRepository } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
-export function createAuthSessionManagerTestDouble(): AuthSessionManager {
+export function createIAuthRepositoryTestDouble(): IAuthRepository {
   return {
     createSession: vi.fn(),
     resolveSession: vi.fn(),

@@ -15,11 +15,9 @@ import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 import type {
   AppSessionPayload,
-  AuthSessionManager,
   CreatedAppSession,
+  IAuthRepository,
   LoginTenant,
-  MoodleAuthProvider,
-  MoodleLoginResult,
   TenantAuthResolver,
 } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
@@ -27,18 +25,6 @@ interface SessionEnvelope {
   readonly actor: unknown;
   readonly moodleToken: string;
   readonly expiresAt: string;
-}
-interface MoodleTokenResponse {
-  readonly token?: string;
-  readonly error?: string;
-}
-interface MoodleSiteInfoResponse {
-  readonly userid?: number;
-  readonly username?: string;
-  readonly fullname?: string;
-  readonly firstname?: string;
-  readonly lastname?: string;
-  readonly useremail?: string;
 }
 export interface AuthRepositoryOptions {
   readonly secret?: string;
@@ -64,7 +50,7 @@ function decode(input: string): Buffer {
 }
 
 export class AuthRepository
-  implements TenantAuthResolver, MoodleAuthProvider, AuthSessionManager
+  implements TenantAuthResolver, IAuthRepository
 {
   private readonly key: Buffer;
   private readonly ttlSeconds: number;
@@ -109,49 +95,7 @@ export class AuthRepository
     };
   }
 
-  async authenticateStudent(input: {
-    readonly tenant: LoginTenant;
-    readonly username: string;
-    readonly password: string;
-  }): Promise<MoodleLoginResult> {
-    const response = await fetch(
-      new URL("/login/token.php", input.tenant.moodleUrl),
-      {
-        method: "POST",
-        headers: { "content-type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          username: input.username,
-          password: input.password,
-          service: "nextjs_student",
-        }),
-        cache: "no-store",
-      },
-    );
-    const tokenPayload = (await response.json()) as MoodleTokenResponse;
-    if (!response.ok || !tokenPayload.token)
-      throw new UnauthorizedError(tokenPayload.error || "Login Moodle gagal.");
-    const siteInfo = await new MoodleRestClient({
-      baseUrl: input.tenant.moodleUrl,
-      token: tokenPayload.token,
-    }).call<MoodleSiteInfoResponse>(
-      "core_webservice_get_site_info",
-      {},
-      { requestKind: "safe-read" },
-    );
-    if (!siteInfo.userid || !siteInfo.username)
-      throw new InfrastructureError("Moodle site info response is incomplete.");
-    return {
-      token: tokenPayload.token,
-      siteInfo: {
-        userId: siteInfo.userid,
-        username: siteInfo.username,
-        fullName:
-          siteInfo.fullname ||
-          [siteInfo.firstname, siteInfo.lastname].filter(Boolean).join(" "),
-        email: siteInfo.useremail,
-      },
-    };
-  }
+
 
   async createSession(payload: AppSessionPayload): Promise<CreatedAppSession> {
     const expiresAt = new Date(this.now().getTime() + this.ttlSeconds * 1000);
