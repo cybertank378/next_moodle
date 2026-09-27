@@ -36,9 +36,9 @@ describe("MoodleDynamicAuthenticator", () => {
 
   it("uses provided service directly if specified", async () => {
     (MoodleRestClient.authenticate as any).mockResolvedValue({ token: "token-123", siteInfo: {} });
-    
+
     const result = await authenticator.authenticateStudent({ ...input, service: "nextjs_student" });
-    
+
     expect(MoodleRestClient.authenticate).toHaveBeenCalledWith(
       "https://moodle.test", "user01", "pwd", 10000, "nextjs_student"
     );
@@ -48,7 +48,7 @@ describe("MoodleDynamicAuthenticator", () => {
   it("bypasses capability probe for admin user and uses nextjs_admin directly", async () => {
     (MoodleRestClient.authenticate as any)
       .mockResolvedValueOnce({ token: "admin-token", siteInfo: {} });
-    
+
     const module = await import("@/core/moodle/MoodleRestClient");
     const { mockCall } = module as any;
     mockCall.mockResolvedValueOnce({ can_manage: true });
@@ -64,7 +64,7 @@ describe("MoodleDynamicAuthenticator", () => {
     (MoodleRestClient.authenticate as any)
       .mockResolvedValueOnce({ token: "probe-token", siteInfo: {} })
       .mockResolvedValueOnce({ token: "tenant-token", siteInfo: {} });
-    
+
     const module = await import("@/core/moodle/MoodleRestClient");
     const { mockCall } = module as any;
     mockCall.mockResolvedValueOnce({ can_manage: true });
@@ -81,7 +81,7 @@ describe("MoodleDynamicAuthenticator", () => {
     (MoodleRestClient.authenticate as any)
       .mockResolvedValueOnce({ token: "probe-token", siteInfo: {} })
       .mockResolvedValueOnce({ token: "tenant-token", siteInfo: {} });
-    
+
     const module = await import("@/core/moodle/MoodleRestClient");
     const { mockCall } = module as any;
     mockCall.mockResolvedValueOnce({ can_view_reports: true });
@@ -97,7 +97,7 @@ describe("MoodleDynamicAuthenticator", () => {
     (MoodleRestClient.authenticate as any)
       .mockResolvedValueOnce({ token: "probe-token", siteInfo: {} })
       .mockResolvedValueOnce({ token: "proctor-token", siteInfo: {} });
-    
+
     const module = await import("@/core/moodle/MoodleRestClient");
     const { mockCall } = module as any;
     mockCall.mockResolvedValueOnce({ can_monitor: true });
@@ -112,7 +112,7 @@ describe("MoodleDynamicAuthenticator", () => {
   it("maps to nextjs_student if capabilities do not grant higher privileges without re-authenticating", async () => {
     (MoodleRestClient.authenticate as any)
       .mockResolvedValueOnce({ token: "student-token", siteInfo: {} });
-    
+
     const module = await import("@/core/moodle/MoodleRestClient");
     const { mockCall } = module as any;
     mockCall.mockResolvedValueOnce({ can_manage: false, can_view_reports: false, can_monitor: false, can_manage_attempts: false });
