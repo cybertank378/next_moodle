@@ -60,8 +60,8 @@ export class MoodleRestClient implements MoodleClient {
     const rawBaseUrl = credentials.baseUrl.trim();
     const baseUrl = ssrfValidator.validateUrl(rawBaseUrl);
 
-    if (baseUrl.protocol !== "https:") {
-      throw new SecurityError("Moodle base URL must use HTTPS.");
+    if (baseUrl.protocol !== "https:" && baseUrl.protocol !== "http:") {
+      throw new SecurityError("Moodle base URL must use HTTP or HTTPS.");
     }
     if (baseUrl.username || baseUrl.password) {
       throw new SecurityError("Moodle base URL must not contain credentials.");
@@ -93,6 +93,7 @@ export class MoodleRestClient implements MoodleClient {
     username: string,
     password: string,
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    service = "nextjs_student",
   ): Promise<{
     token: string;
     siteInfo: {
@@ -102,23 +103,30 @@ export class MoodleRestClient implements MoodleClient {
       email?: string;
     };
   }> {
-    const endpoint = new URL("/login/token.php", baseUrl).toString();
+    const authLogger = createLogger("MoodleAuthenticate");
+    authLogger.info("Initiating Moodle authentication", { baseUrl, username });
+    
+    try {
+      const endpoint = new URL("/login/token.php", baseUrl).toString();
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         username,
         password,
-        service: "nextjs_student",
+        service,
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(timeoutMs),
     });
 
-    const tokenPayload = (await response.json()) as MoodleTokenResponse;
-    if (!response.ok || !tokenPayload.token) {
-      throw new UnauthorizedError(tokenPayload.error || "Login Moodle gagal.");
-    }
+      const tokenPayload = (await response.json()) as MoodleTokenResponse;
+      if (!response.ok || !tokenPayload.token) {
+        authLogger.warn("Moodle authentication rejected by server", { status: response.status, error: tokenPayload.error });
+        throw new UnauthorizedError(tokenPayload.error || "Login Moodle gagal.");
+      }
+      
+      authLogger.debug("Token obtained, fetching site info");
 
     const client = new MoodleRestClient({
       baseUrl,
@@ -132,21 +140,27 @@ export class MoodleRestClient implements MoodleClient {
       { requestKind: "safe-read" },
     );
 
-    if (!siteInfo.userid || !siteInfo.username) {
-      throw new InfrastructureError("Moodle site info response is incomplete.");
-    }
+      if (!siteInfo.userid || !siteInfo.username) {
+        authLogger.error("Moodle site info incomplete", undefined, { siteInfo });
+        throw new InfrastructureError("Moodle site info response is incomplete.");
+      }
 
-    return {
-      token: tokenPayload.token,
-      siteInfo: {
-        userId: siteInfo.userid,
-        username: siteInfo.username,
-        fullName:
-          siteInfo.fullname ||
-          [siteInfo.firstname, siteInfo.lastname].filter(Boolean).join(" "),
-        email: siteInfo.useremail,
-      },
-    };
+      authLogger.info("Moodle authentication complete", { userid: siteInfo.userid, username: siteInfo.username });
+      return {
+        token: tokenPayload.token,
+        siteInfo: {
+          userId: siteInfo.userid,
+          username: siteInfo.username,
+          fullName:
+            siteInfo.fullname ||
+            [siteInfo.firstname, siteInfo.lastname].filter(Boolean).join(" "),
+          email: siteInfo.useremail,
+        },
+      };
+    } catch (error) {
+      authLogger.error("Moodle authentication failed with an exception", error instanceof Error ? error : undefined, { baseUrl, username });
+      throw error;
+    }
   }
 
   async call<T = unknown>(

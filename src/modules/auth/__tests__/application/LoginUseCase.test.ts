@@ -32,6 +32,7 @@ describe("LoginUseCase", () => {
           fullName: "Student One",
           email: "student@example.test",
         },
+        serviceUsed: "nextjs_student"
       }),
     };
     sessionManager = {
@@ -88,6 +89,7 @@ describe("LoginUseCase", () => {
         username: "another-user",
         fullName: "Another User",
       },
+      serviceUsed: "nextjs_student"
     });
     const useCase = new LoginUseCase(
       tenantResolver,

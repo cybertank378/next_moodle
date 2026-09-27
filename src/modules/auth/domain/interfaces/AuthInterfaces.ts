@@ -23,6 +23,8 @@ export interface MoodleSiteInfo {
 export interface MoodleLoginResult {
   readonly token: string;
   readonly siteInfo: MoodleSiteInfo;
+  readonly serviceUsed: string;
+  readonly capabilities?: any;
 }
 
 export interface TenantAuthResolver {
@@ -34,6 +36,7 @@ export interface IMoodleClient {
     readonly tenant: LoginTenant;
     readonly username: string;
     readonly password: string;
+    readonly service?: string;
   }): Promise<MoodleLoginResult>;
 }
 
