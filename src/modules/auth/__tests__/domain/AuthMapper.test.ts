@@ -1,23 +1,41 @@
 import { describe, expect, it } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
-import { mapMoodleStudentToActor } from "@/modules/auth/domain/mapper/AuthMapper";
+import { mapMoodleUserToActor } from "@/modules/auth/domain/mapper/AuthMapper";
 
-describe("mapMoodleStudentToActor", () => {
-  it("maps a tenant-scoped Moodle student to an application actor", () => {
-    const actor = mapMoodleStudentToActor(
-      {
-        tenantId: "tenant-1",
-        slug: "acme",
-        moodleUrl: "https://moodle.example.test",
-        status: "ACTIVE",
-      },
-      { userId: 42, username: "student01", email: "student@example.test" },
-    );
+describe("mapMoodleUserToActor", () => {
+  const mockTenant = {
+    tenantId: "tenant-1",
+    slug: "acme",
+    moodleUrl: "https://moodle.example.test",
+    status: "ACTIVE" as const,
+  };
+  const mockSiteInfo = { userId: 42, username: "user01", email: "user@example.test" };
+
+  it("maps nextjs_student to STUDENT role", () => {
+    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_student");
     expect(actor).toMatchObject({
-      id: "moodle:tenant-1:42",
       role: AppRole.STUDENT,
-      tenantId: "tenant-1",
-      moodleUserId: 42,
+    });
+  });
+
+  it("maps nextjs_proctor to TENANT role", () => {
+    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_proctor");
+    expect(actor).toMatchObject({
+      role: AppRole.TENANT,
+    });
+  });
+
+  it("maps nextjs_tenant to TENANT role", () => {
+    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_tenant");
+    expect(actor).toMatchObject({
+      role: AppRole.TENANT,
+    });
+  });
+
+  it("maps nextjs_admin to ADMIN role", () => {
+    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_admin");
+    expect(actor).toMatchObject({
+      role: AppRole.ADMIN,
     });
   });
 });

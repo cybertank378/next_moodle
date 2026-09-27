@@ -10,6 +10,7 @@ import { AuthController } from "@/modules/auth/infrastructure/http/AuthControlle
 import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 import type { IMoodleClient, LoginTenant } from "@/modules/auth/domain/interfaces/AuthInterfaces";
+import { MoodleDynamicAuthenticator } from "@/modules/auth/infrastructure/providers/MoodleDynamicAuthenticator";
 
 let controller: AuthController | null = null;
 let sessionManager: AuthRepository | null = null;
@@ -24,15 +25,7 @@ export function getAuthController(): AuthController {
 
   const repository = getAuthRepository();
 
-  const moodleClient: IMoodleClient = {
-    authenticateStudent: async (input: { tenant: LoginTenant; username: string; password: string; }) => {
-      return MoodleRestClient.authenticate(
-        input.tenant.moodleUrl,
-        input.username,
-        input.password
-      );
-    }
-  };
+  const moodleClient = new MoodleDynamicAuthenticator();
 
   controller = new AuthController({
     login: new LoginUseCase(repository, moodleClient, repository),

@@ -7,8 +7,7 @@ export function parseLoginBody(body: unknown): LoginRequestDto {
   }
   const input = body as Record<string, unknown>;
   return {
-    tenant: typeof input.tenant === "string" ? input.tenant : "",
     username: typeof input.username === "string" ? input.username : "",
     password: typeof input.password === "string" ? input.password : "",
-  };
+  } as LoginRequestDto;
 }
