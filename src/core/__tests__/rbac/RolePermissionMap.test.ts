@@ -107,6 +107,9 @@ describe("RolePermissionMap & hasPermission", () => {
       expect(
         hasPermission(AppRole.STUDENT, Permission.EXAM_MONITOR_ACTION),
       ).toBe(false);
+      expect(hasPermission(AppRole.STUDENT, Permission.EXAM_MONITOR_READ)).toBe(
+        false,
+      );
       expect(hasPermission(AppRole.STUDENT, Permission.TENANT_CREATE)).toBe(
         false,
       );
