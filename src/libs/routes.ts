@@ -41,4 +41,11 @@ export class AppRouteConstants {
   static examDetail(id: number | string): string {
     return `${ROUTES.DASHBOARD.EXAMS}/${id}`;
   }
+
+  static examAttempt(
+    quizId: number | string,
+    attemptId: number | string,
+  ): string {
+    return `${ROUTES.DASHBOARD.EXAMS}/${quizId}/attempts/${attemptId}`;
+  }
 }

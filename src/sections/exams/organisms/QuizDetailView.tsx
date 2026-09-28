@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import { AppRouteConstants } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
+import { useQuizAttemptApi } from "@/modules/quiz-attempts/presentation/hooks/useQuizAttemptApi";
 import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import QuizStatusBadge from "../atoms/QuizStatusBadge";
@@ -27,6 +28,7 @@ export default function QuizDetailView({ quizId }: Props) {
   const router = useRouter();
   const { detailState, accessState, getQuizDetail, checkQuizAccess } =
     useQuizApi();
+  const { startState, startAttempt } = useQuizAttemptApi();
 
   useEffect(() => {
     if (quizId) {
@@ -178,6 +180,12 @@ export default function QuizDetailView({ quizId }: Props) {
                     </div>
                   )}
 
+                  {startState.error && (
+                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-400">
+                      {startState.error}
+                    </div>
+                  )}
+
                   <div className="pt-2">
                     <Button
                       size="md"
@@ -185,14 +193,22 @@ export default function QuizDetailView({ quizId }: Props) {
                       variant="filled"
                       fullWidth
                       leftIcon={Play}
-                      disabled={!access.canAttempt}
-                      onClick={() => {
-                        // Attempt lifecycle will be handled in subsequent exam session issues
+                      disabled={!access.canAttempt || startState.loading}
+                      loading={startState.loading}
+                      onClick={async () => {
+                        const res = await startAttempt({ quizId: quiz.id });
+                        if (res.data) {
+                          router.push(
+                            AppRouteConstants.examAttempt(quiz.id, res.data.id),
+                          );
+                        }
                       }}
                     >
-                      {access.canAttempt
-                        ? "Mulai Ujian Sekarang"
-                        : "Ujian Tidak Dapat Diakses"}
+                      {startState.loading
+                        ? "Menyiapkan Ujian..."
+                        : access.canAttempt
+                          ? "Mulai Ujian Sekarang"
+                          : "Ujian Tidak Dapat Diakses"}
                     </Button>
                   </div>
                 </div>
