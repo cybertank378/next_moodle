@@ -105,47 +105,59 @@ export class MoodleRestClient implements MoodleClient {
   }> {
     const authLogger = createLogger("MoodleAuthenticate");
     authLogger.info("Initiating Moodle authentication", { baseUrl, username });
-    
+
     try {
       const endpoint = new URL("/login/token.php", baseUrl).toString();
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        username,
-        password,
-        service,
-      }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(timeoutMs),
-    });
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          username,
+          password,
+          service,
+        }),
+        cache: "no-store",
+        signal: AbortSignal.timeout(timeoutMs),
+      });
 
       const tokenPayload = (await response.json()) as MoodleTokenResponse;
       if (!response.ok || !tokenPayload.token) {
-        authLogger.warn("Moodle authentication rejected by server", { status: response.status, error: tokenPayload.error });
-        throw new UnauthorizedError(tokenPayload.error || "Login Moodle gagal.");
+        authLogger.warn("Moodle authentication rejected by server", {
+          status: response.status,
+          error: tokenPayload.error,
+        });
+        throw new UnauthorizedError(
+          tokenPayload.error || "Login Moodle gagal.",
+        );
       }
-      
+
       authLogger.debug("Token obtained, fetching site info");
 
-    const client = new MoodleRestClient({
-      baseUrl,
-      token: tokenPayload.token,
-      timeoutMs,
-    });
+      const client = new MoodleRestClient({
+        baseUrl,
+        token: tokenPayload.token,
+        timeoutMs,
+      });
 
-    const siteInfo = await client.call<MoodleSiteInfoResponse>(
-      "core_webservice_get_site_info",
-      {},
-      { requestKind: "safe-read" },
-    );
+      const siteInfo = await client.call<MoodleSiteInfoResponse>(
+        "core_webservice_get_site_info",
+        {},
+        { requestKind: "safe-read" },
+      );
 
       if (!siteInfo.userid || !siteInfo.username) {
-        authLogger.error("Moodle site info incomplete", undefined, { siteInfo });
-        throw new InfrastructureError("Moodle site info response is incomplete.");
+        authLogger.error("Moodle site info incomplete", undefined, {
+          siteInfo,
+        });
+        throw new InfrastructureError(
+          "Moodle site info response is incomplete.",
+        );
       }
 
-      authLogger.info("Moodle authentication complete", { userid: siteInfo.userid, username: siteInfo.username });
+      authLogger.info("Moodle authentication complete", {
+        userid: siteInfo.userid,
+        username: siteInfo.username,
+      });
       return {
         token: tokenPayload.token,
         siteInfo: {
@@ -158,7 +170,11 @@ export class MoodleRestClient implements MoodleClient {
         },
       };
     } catch (error) {
-      authLogger.error("Moodle authentication failed with an exception", error instanceof Error ? error : undefined, { baseUrl, username });
+      authLogger.error(
+        "Moodle authentication failed with an exception",
+        error instanceof Error ? error : undefined,
+        { baseUrl, username },
+      );
       throw error;
     }
   }

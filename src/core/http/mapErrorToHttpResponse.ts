@@ -19,7 +19,10 @@ export function mapErrorToHttpResponse(
   }
 
   // Fallback for unknown / native errors — never leak raw stack or internal message
-  console.error("[mapErrorToHttpResponse] Trapped unexpected native error:", error);
+  console.error(
+    "[mapErrorToHttpResponse] Trapped unexpected native error:",
+    error,
+  );
   return ApiResponse.error(
     "INTERNAL_ERROR",
     "Internal server error",

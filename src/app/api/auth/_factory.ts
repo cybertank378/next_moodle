@@ -1,16 +1,19 @@
 import "server-only";
 
+import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 import { prisma } from "@/libs/prisma";
 import { GetCurrentSessionUseCase } from "@/modules/auth/application/usecases/GetCurrentSessionUseCase";
 import { LoginUseCase } from "@/modules/auth/application/usecases/LoginUseCase";
 import { LogoutAllUseCase } from "@/modules/auth/application/usecases/LogoutAllUseCase";
 import { LogoutUseCase } from "@/modules/auth/application/usecases/LogoutUseCase";
 import { RefreshSessionUseCase } from "@/modules/auth/application/usecases/RefreshSessionUseCase";
+import type {
+  IMoodleClient,
+  LoginTenant,
+} from "@/modules/auth/domain/interfaces/AuthInterfaces";
 import { AuthController } from "@/modules/auth/infrastructure/http/AuthController";
-import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
-import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
-import type { IMoodleClient, LoginTenant } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 import { MoodleDynamicAuthenticator } from "@/modules/auth/infrastructure/providers/MoodleDynamicAuthenticator";
+import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 
 let controller: AuthController | null = null;
 let sessionManager: AuthRepository | null = null;
