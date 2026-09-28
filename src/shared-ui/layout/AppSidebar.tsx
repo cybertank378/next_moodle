@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { UserRole } from "@/libs/enums";
+import { PERMISSIONS } from "@/libs/permissions";
 import { ROUTES } from "@/libs/routes";
 import {
   RecursiveSidebarItem,
@@ -43,6 +44,7 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               label: "Manajemen Tenant",
               path: ROUTES.DASHBOARD.TENANTS,
               icon: Users,
+              permission: PERMISSIONS.TENANT_MANAGE,
             },
           ],
         },
@@ -77,18 +79,22 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               label: "Pengguna & Grup",
               path: ROUTES.DASHBOARD.USERS,
               icon: Users,
+              permission: PERMISSIONS.USER_MANAGE,
               children: [
                 {
                   label: "Daftar Pengguna",
                   path: ROUTES.DASHBOARD.USERS,
+                  permission: PERMISSIONS.USER_MANAGE,
                 },
                 {
                   label: "Enrolment Manual",
                   path: ROUTES.DASHBOARD.ENROLMENTS,
+                  permission: PERMISSIONS.USER_MANAGE,
                 },
                 {
                   label: "Rombel & Grup",
                   path: ROUTES.DASHBOARD.GROUPS,
+                  permission: PERMISSIONS.USER_MANAGE,
                 },
               ],
             },
@@ -96,14 +102,17 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               label: "Kursus & Bank Soal",
               path: ROUTES.DASHBOARD.COURSES,
               icon: BookOpen,
+              permission: PERMISSIONS.EXAM_MANAGE,
               children: [
                 {
                   label: "Mata Pelajaran",
                   path: ROUTES.DASHBOARD.COURSES,
+                  permission: PERMISSIONS.EXAM_MANAGE,
                 },
                 {
                   label: "Bank Soal",
                   path: ROUTES.DASHBOARD.QUESTIONS,
+                  permission: PERMISSIONS.EXAM_MANAGE,
                 },
               ],
             },
@@ -111,14 +120,17 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               label: "Ujian & Hasil",
               path: ROUTES.DASHBOARD.EXAMS,
               icon: FileText,
+              permission: PERMISSIONS.EXAM_MANAGE,
               children: [
                 {
                   label: "Jadwal Ujian",
                   path: ROUTES.DASHBOARD.EXAMS,
+                  permission: PERMISSIONS.EXAM_MANAGE,
                 },
                 {
                   label: "Hasil & Nilai",
                   path: ROUTES.DASHBOARD.RESULTS,
+                  permission: PERMISSIONS.RESULT_VIEW_ALL,
                 },
               ],
             },
@@ -160,11 +172,13 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               label: "Jadwal Ujian",
               path: ROUTES.DASHBOARD.EXAMS,
               icon: FileText,
+              permission: PERMISSIONS.EXAM_TAKE,
             },
             {
               label: "Hasil & Nilai",
               path: ROUTES.DASHBOARD.RESULTS,
               icon: Award,
+              permission: PERMISSIONS.RESULT_VIEW_OWN,
             },
           ],
         },

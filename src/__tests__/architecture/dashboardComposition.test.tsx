@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
+import { redirect } from "next/navigation";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
@@ -42,6 +43,7 @@ describe("DashboardPage role composition", () => {
 
     const result = await DashboardPage();
     expect(result?.type).toBe(AdminDashboard);
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("selects TenantDashboard for TENANT", async () => {
@@ -54,6 +56,20 @@ describe("DashboardPage role composition", () => {
 
     const result = await DashboardPage();
     expect(result?.type).toBe(TenantDashboard);
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("selects TenantDashboard for TEACHER (mapped to TENANT)", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValueOnce({
+      userId: "teacher-1",
+      username: "teacher01",
+      role: "TEACHER" as unknown as AppRole,
+      tenantId: "tenant-1",
+    });
+
+    const result = await DashboardPage();
+    expect(result?.type).toBe(TenantDashboard);
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("selects StudentDashboard for STUDENT", async () => {
@@ -66,5 +82,27 @@ describe("DashboardPage role composition", () => {
 
     const result = await DashboardPage();
     expect(result?.type).toBe(StudentDashboard);
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("redirects to login when actor is not authenticated", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValueOnce(null);
+
+    const result = await DashboardPage();
+    expect(redirect).toHaveBeenCalledWith("/login");
+    expect(result).toBeNull();
+  });
+
+  it("redirects to login when actor role cannot be resolved", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValueOnce({
+      userId: "unknown-1",
+      username: "unknown",
+      role: "UNKNOWN_ROLE" as unknown as AppRole,
+      tenantId: "tenant-1",
+    });
+
+    const result = await DashboardPage();
+    expect(redirect).toHaveBeenCalledWith("/login");
+    expect(result).toBeNull();
   });
 });
