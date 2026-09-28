@@ -52,4 +52,22 @@ describe("tenant module structure", () => {
       requiredPaths.filter((requiredPath) => !exists(requiredPath)),
     ).toEqual([]);
   });
+
+  it("ensures domain and application layers do not import Prisma directly", () => {
+    const scanDirs = [
+      path.join(root, "src/modules/tenant/domain"),
+      path.join(root, "src/modules/tenant/application"),
+    ];
+
+    for (const dir of scanDirs) {
+      const files = fs.readdirSync(dir, { recursive: true }) as string[];
+      for (const file of files) {
+        if (file.endsWith(".ts") && !file.includes("__tests__")) {
+          const content = fs.readFileSync(path.join(dir, file), "utf8");
+          expect(content).not.toMatch(/from\s+['"]@prisma/);
+          expect(content).not.toMatch(/from\s+['"][^'"]*prisma['"]/);
+        }
+      }
+    }
+  });
 });
