@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 import { MoodleDynamicAuthenticator } from "@/modules/auth/infrastructure/providers/MoodleDynamicAuthenticator";
 
