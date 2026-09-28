@@ -23,3 +23,18 @@ export const ROUTES = {
 } as const;
 
 export type AppRoutes = typeof ROUTES;
+
+export class AppRouteConstants {
+  static readonly HOME = ROUTES.HOME;
+  static readonly LOGIN = ROUTES.AUTH.LOGIN;
+  static readonly REGISTER = ROUTES.AUTH.REGISTER;
+  static readonly DASHBOARD = ROUTES.DASHBOARD.ROOT;
+  static readonly COURSES = ROUTES.DASHBOARD.COURSES;
+  static readonly EXAMS = ROUTES.DASHBOARD.EXAMS;
+  static readonly USERS = ROUTES.DASHBOARD.USERS;
+  static readonly TENANTS = ROUTES.DASHBOARD.TENANTS;
+
+  static courseDetail(id: number | string): string {
+    return `${ROUTES.DASHBOARD.COURSES}/${id}`;
+  }
+}
