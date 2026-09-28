@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { type ApiEnvelope, type RequestState, request } from "@/libs/apiClient";
 import type {
   ConfigureTenantCredentialRequestDTO,
   CreateTenantRequestDTO,
@@ -11,36 +12,6 @@ import type {
   ListTenantsResponseDTO,
   TenantResponseDTO,
 } from "@/modules/tenant/domain/dto/TenantResponseDto";
-
-interface RequestState<T> {
-  data: T | null;
-  error: string | null;
-  loading: boolean;
-}
-
-interface ApiEnvelope<T> {
-  success: boolean;
-  data?: T;
-  error?: { message?: string };
-}
-
-async function request<T>(
-  url: string,
-  options?: RequestInit,
-): Promise<{ data: T | null; error: string | null }> {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
-  const body = (await response.json()) as ApiEnvelope<T>;
-  if (!response.ok || !body.success || body.data === undefined) {
-    return { data: null, error: body.error?.message ?? "Permintaan gagal." };
-  }
-  return { data: body.data, error: null };
-}
 
 export function useTenantApi() {
   const [listState, setListState] = useState<
