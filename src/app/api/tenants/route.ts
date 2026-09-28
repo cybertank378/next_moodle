@@ -1,29 +1,20 @@
 import "server-only";
 
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 import { getTenantsController } from "@/app/api/tenants/_factory";
-import { ApiResponse } from "@/core/http/ApiResponse";
-import { HttpStatus } from "@/core/http/HttpStatus";
+import { unauthorizedResponse } from "@/core/http/routeUtils";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
-
-function unauthorized(): NextResponse {
-  return NextResponse.json(
-    ApiResponse.error(
-      "UNAUTHORIZED",
-      "Sesi tidak valid atau telah berakhir.",
-      HttpStatus.UNAUTHORIZED,
-    ).body,
-    { status: HttpStatus.UNAUTHORIZED },
-  );
-}
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const actor = await getCurrentUser();
-  return actor ? getTenantsController().list(actor, req) : unauthorized();
+  return actor
+    ? getTenantsController().list(actor, req)
+    : unauthorizedResponse();
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const actor = await getCurrentUser();
-  return actor ? getTenantsController().create(actor, req) : unauthorized();
+  return actor
+    ? getTenantsController().create(actor, req)
+    : unauthorizedResponse();
 }

@@ -1,8 +1,3 @@
-import { TenantStatus } from "@prisma/client";
-import { getAuthRepository } from "./src/app/api/auth/_factory";
-import { MoodleRestClient } from "./src/core/moodle/MoodleRestClient";
-import { AppRole } from "./src/core/rbac/AppRole";
-
 async function test() {
   try {
     const { getAuthController } = await import("./src/app/api/auth/_factory");
