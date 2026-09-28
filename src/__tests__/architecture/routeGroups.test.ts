@@ -100,17 +100,9 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     const appRoot = path.resolve(process.cwd(), "src/app");
     const entries = fs.readdirSync(appRoot, { withFileTypes: true });
 
-    const allowedDirectories = new Set([
-      "(protected)",
-      "(public)",
-      "api",
-    ]);
+    const allowedDirectories = new Set(["(protected)", "(public)", "api"]);
 
-    const allowedFiles = new Set([
-      "favicon.ico",
-      "layout.tsx",
-      "page.tsx",
-    ]);
+    const allowedFiles = new Set(["favicon.ico", "layout.tsx", "page.tsx"]);
 
     for (const entry of entries) {
       const allowed = entry.isDirectory()

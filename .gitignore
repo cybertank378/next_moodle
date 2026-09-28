@@ -38,3 +38,7 @@ CLAUDE.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# git worktrees & tool caches
+.worktrees/
+.kilo/

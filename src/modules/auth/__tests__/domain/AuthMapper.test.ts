@@ -9,31 +9,51 @@ describe("mapMoodleUserToActor", () => {
     moodleUrl: "https://moodle.example.test",
     status: "ACTIVE" as const,
   };
-  const mockSiteInfo = { userId: 42, username: "user01", email: "user@example.test" };
+  const mockSiteInfo = {
+    userId: 42,
+    username: "user01",
+    email: "user@example.test",
+  };
 
   it("maps nextjs_student to STUDENT role", () => {
-    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_student");
+    const actor = mapMoodleUserToActor(
+      mockTenant,
+      mockSiteInfo,
+      "nextjs_student",
+    );
     expect(actor).toMatchObject({
       role: AppRole.STUDENT,
     });
   });
 
   it("maps nextjs_proctor to TENANT role", () => {
-    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_proctor");
+    const actor = mapMoodleUserToActor(
+      mockTenant,
+      mockSiteInfo,
+      "nextjs_proctor",
+    );
     expect(actor).toMatchObject({
       role: AppRole.TENANT,
     });
   });
 
   it("maps nextjs_tenant to TENANT role", () => {
-    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_tenant");
+    const actor = mapMoodleUserToActor(
+      mockTenant,
+      mockSiteInfo,
+      "nextjs_tenant",
+    );
     expect(actor).toMatchObject({
       role: AppRole.TENANT,
     });
   });
 
   it("maps nextjs_admin to ADMIN role", () => {
-    const actor = mapMoodleUserToActor(mockTenant, mockSiteInfo, "nextjs_admin");
+    const actor = mapMoodleUserToActor(
+      mockTenant,
+      mockSiteInfo,
+      "nextjs_admin",
+    );
     expect(actor).toMatchObject({
       role: AppRole.ADMIN,
     });

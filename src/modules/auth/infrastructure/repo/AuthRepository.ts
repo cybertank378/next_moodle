@@ -49,9 +49,7 @@ function decode(input: string): Buffer {
   );
 }
 
-export class AuthRepository
-  implements TenantAuthResolver, IAuthRepository
-{
+export class AuthRepository implements TenantAuthResolver, IAuthRepository {
   private readonly key: Buffer;
   private readonly ttlSeconds: number;
   private readonly now: () => Date;
@@ -94,8 +92,6 @@ export class AuthRepository
       moodleUrl: tenant.credential.moodleUrl,
     };
   }
-
-
 
   async createSession(payload: AppSessionPayload): Promise<CreatedAppSession> {
     const expiresAt = new Date(this.now().getTime() + this.ttlSeconds * 1000);

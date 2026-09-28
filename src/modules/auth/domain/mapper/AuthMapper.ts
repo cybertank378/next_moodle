@@ -12,7 +12,7 @@ export function mapMoodleUserToActor(
   serviceUsed: string,
 ): CurrentActor {
   const id = `moodle:${tenant.tenantId}:${siteInfo.userId}`;
-  
+
   let role = AppRole.STUDENT;
   if (serviceUsed === "nextjs_admin") {
     role = AppRole.ADMIN;
