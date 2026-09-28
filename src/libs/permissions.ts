@@ -22,6 +22,8 @@ export function canAccess(
   if (role === "ADMIN") return true;
 
   switch (permission) {
+    case PERMISSIONS.TENANT_MANAGE:
+      return false;
     case PERMISSIONS.USER_MANAGE:
     case PERMISSIONS.EXAM_MANAGE:
     case PERMISSIONS.EXAM_MONITOR:
@@ -31,6 +33,6 @@ export function canAccess(
     case PERMISSIONS.RESULT_VIEW_OWN:
       return role === "STUDENT";
     default:
-      return true;
+      return false;
   }
 }

@@ -56,6 +56,18 @@ describe("DashboardPage role composition", () => {
     expect(result?.type).toBe(TenantDashboard);
   });
 
+  it("selects TenantDashboard for TEACHER (mapped to TENANT)", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValueOnce({
+      userId: "teacher-1",
+      username: "teacher01",
+      role: "TEACHER" as unknown as AppRole,
+      tenantId: "tenant-1",
+    });
+
+    const result = await DashboardPage();
+    expect(result?.type).toBe(TenantDashboard);
+  });
+
   it("selects StudentDashboard for STUDENT", async () => {
     vi.mocked(getCurrentUser).mockResolvedValueOnce({
       userId: "student-1",
@@ -66,5 +78,24 @@ describe("DashboardPage role composition", () => {
 
     const result = await DashboardPage();
     expect(result?.type).toBe(StudentDashboard);
+  });
+
+  it("redirects to login when actor is not authenticated", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValueOnce(null);
+
+    const result = await DashboardPage();
+    expect(result).toBeNull();
+  });
+
+  it("redirects to login when actor role cannot be resolved", async () => {
+    vi.mocked(getCurrentUser).mockResolvedValueOnce({
+      userId: "unknown-1",
+      username: "unknown",
+      role: "UNKNOWN_ROLE" as unknown as AppRole,
+      tenantId: "tenant-1",
+    });
+
+    const result = await DashboardPage();
+    expect(result).toBeNull();
   });
 });
