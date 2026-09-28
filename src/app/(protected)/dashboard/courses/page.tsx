@@ -1,13 +1,8 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import CoursesView from "@/sections/courses/organisms/CoursesView";
 
 export default async function CoursesPage() {
   await requireDashboardRoles(["TENANT", "STUDENT"]);
 
-  return (
-    <DashboardRoutePlaceholder
-      title="Courses"
-      description="Route mata pelajaran/kursus."
-    />
-  );
+  return <CoursesView />;
 }
