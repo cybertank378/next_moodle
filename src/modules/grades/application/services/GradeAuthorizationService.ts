@@ -57,19 +57,8 @@ export class GradeAuthorizationService {
       };
     }
 
-    if (actor.role === AppRole.TENANT) {
+    if (actor.role === AppRole.TENANT || actor.role === AppRole.TEACHER) {
       authorize(actor, Permission.GRADE_READ, {
-        requestedTenantId: actor.tenantId,
-      });
-
-      return {
-        tenantId: actor.tenantId,
-        resolvedUserId: targetUserId ?? 0,
-      };
-    }
-
-    if (actor.role === AppRole.TEACHER) {
-      authorize(actor, Permission.TEACHER_GRADE_READ, {
         requestedTenantId: actor.tenantId,
       });
 
@@ -103,15 +92,8 @@ export class GradeAuthorizationService {
       );
     }
 
-    if (actor.role === AppRole.TENANT) {
+    if (actor.role === AppRole.TENANT || actor.role === AppRole.TEACHER) {
       authorize(actor, Permission.GRADE_READ, {
-        requestedTenantId: actor.tenantId,
-      });
-      return { tenantId: actor.tenantId };
-    }
-
-    if (actor.role === AppRole.TEACHER) {
-      authorize(actor, Permission.TEACHER_GRADE_READ, {
         requestedTenantId: actor.tenantId,
       });
       return { tenantId: actor.tenantId };

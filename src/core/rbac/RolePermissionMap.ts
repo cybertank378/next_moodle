@@ -53,18 +53,32 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
   ],
 
   [AppRole.TEACHER]: [
+    // Teacher-specific dashboard permission
     Permission.TEACHER_DASHBOARD_READ,
     Permission.TEACHER_COURSE_READ,
     Permission.TEACHER_QUIZ_READ,
     Permission.TEACHER_GRADE_READ,
-    // Read shared permissions (course/quiz/question/grade access)
+
+    // Same as TENANT — except USER_READ/CREATE/UPDATE/DEACTIVATE/IMPORT
+    Permission.TENANT_DASHBOARD_READ,
+    Permission.TENANT_BRANDING_READ,
+    Permission.TENANT_BRANDING_UPDATE,
+    Permission.ENROLMENT_READ,
+    Permission.ENROLMENT_MANAGE,
+    Permission.GROUP_READ,
+    Permission.GROUP_MANAGE,
     Permission.COURSE_READ,
     Permission.QUIZ_READ,
     Permission.QUESTION_READ,
     Permission.QUESTION_CREATE,
     Permission.QUESTION_UPDATE,
     Permission.QUESTION_DELETE,
+    Permission.EXAM_CREATE,
+    Permission.EXAM_UPDATE,
+    Permission.EXAM_DELETE,
     Permission.EXAM_MONITOR_READ,
+    Permission.EXAM_MONITOR_ACTION,
     Permission.GRADE_READ,
+    Permission.TENANT_AUDIT_READ,
   ],
 };

@@ -126,31 +126,41 @@ describe("RolePermissionMap & hasPermission", () => {
   });
 
   describe("TEACHER permissions", () => {
-    it("should allow course/quiz/question/grade read and exam monitoring", () => {
+    it("should allow all TENANT capabilities except user management", () => {
+      // Teacher-specific
       expect(hasPermission(AppRole.TEACHER, Permission.TEACHER_DASHBOARD_READ)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.TEACHER_COURSE_READ)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.TEACHER_QUIZ_READ)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.TEACHER_GRADE_READ)).toBe(true);
+      // Shared with TENANT
       expect(hasPermission(AppRole.TEACHER, Permission.COURSE_READ)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.QUIZ_READ)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_READ)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_CREATE)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_UPDATE)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_DELETE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_CREATE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_UPDATE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_DELETE)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.EXAM_MONITOR_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_MONITOR_ACTION)).toBe(true);
       expect(hasPermission(AppRole.TEACHER, Permission.GRADE_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.ENROLMENT_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.ENROLMENT_MANAGE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.GROUP_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.GROUP_MANAGE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.TENANT_AUDIT_READ)).toBe(true);
     });
 
-    it("should deny user management, enrolment, and exam creation", () => {
+    it("should deny user management (the only exclusion from TENANT)", () => {
+      expect(hasPermission(AppRole.TEACHER, Permission.USER_READ)).toBe(false);
       expect(hasPermission(AppRole.TEACHER, Permission.USER_CREATE)).toBe(false);
       expect(hasPermission(AppRole.TEACHER, Permission.USER_UPDATE)).toBe(false);
+      expect(hasPermission(AppRole.TEACHER, Permission.USER_DEACTIVATE)).toBe(false);
       expect(hasPermission(AppRole.TEACHER, Permission.USER_IMPORT)).toBe(false);
-      expect(hasPermission(AppRole.TEACHER, Permission.ENROLMENT_MANAGE)).toBe(false);
-      expect(hasPermission(AppRole.TEACHER, Permission.GROUP_MANAGE)).toBe(false);
-      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_CREATE)).toBe(false);
-      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_UPDATE)).toBe(false);
-      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_DELETE)).toBe(false);
-      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_MONITOR_ACTION)).toBe(false);
+    });
+
+    it("should deny platform-level admin permissions", () => {
       expect(hasPermission(AppRole.TEACHER, Permission.TENANT_CREATE)).toBe(false);
       expect(hasPermission(AppRole.TEACHER, Permission.PLATFORM_AUDIT_READ)).toBe(false);
       expect(hasPermission(AppRole.TEACHER, Permission.ATTEMPT_START)).toBe(false);

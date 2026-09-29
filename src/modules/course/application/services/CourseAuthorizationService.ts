@@ -33,26 +33,10 @@ export function authorizeCourseOperation(
     }
   }
 
-  // TENANT requires COURSE_READ permission and valid tenantId
-  if (actor.role === AppRole.TENANT) {
+  // TENANT and TEACHER share COURSE_READ permission
+  if (actor.role === AppRole.TENANT || actor.role === AppRole.TEACHER) {
     try {
       authorize(actor, Permission.COURSE_READ);
-      return null;
-    } catch (err) {
-      if (
-        err instanceof AuthorizationError ||
-        err instanceof UnauthorizedError
-      ) {
-        return err;
-      }
-      throw err;
-    }
-  }
-
-  // TEACHER requires TEACHER_COURSE_READ permission and valid tenantId
-  if (actor.role === AppRole.TEACHER) {
-    try {
-      authorize(actor, Permission.TEACHER_COURSE_READ);
       return null;
     } catch (err) {
       if (
