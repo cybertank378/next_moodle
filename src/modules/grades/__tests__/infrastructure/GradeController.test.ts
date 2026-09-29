@@ -232,4 +232,55 @@ describe("GradeController - Ownership & Access Validation (RED -> GREEN)", () =>
     const body = await response.json();
     expect(body.success).toBe(false);
   });
+
+  it("should export course grades as CSV with 200 and attachment header", async () => {
+    const mockGetUserGradesUseCase = {} as unknown as GetUserGradesUseCase;
+    const mockGetCourseGradesUseCase = {
+      execute: vi.fn().mockResolvedValue(mockCourseGrades),
+    } as unknown as GetCourseGradesUseCase;
+
+    const controller = new GradeController(
+      mockGetUserGradesUseCase,
+      mockGetCourseGradesUseCase,
+    );
+
+    const req = createMockRequest(
+      "http://localhost:3000/api/grades/export?courseId=10",
+    );
+    const response = await controller.exportGrades(teacherActor, req);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/csv");
+    expect(response.headers.get("content-disposition")).toContain(
+      'attachment; filename="nilai_kursus_10.csv"',
+    );
+    const buffer = Buffer.from(await response.arrayBuffer());
+    // UTF-8 BOM is 0xEF, 0xBB, 0xBF
+    expect(buffer[0]).toBe(0xef);
+    expect(buffer[1]).toBe(0xbb);
+    expect(buffer[2]).toBe(0xbf);
+    const text = buffer.toString("utf-8");
+    expect(text).toContain("John Student");
+  });
+
+  it("should return 400 Bad Request on exportGrades when courseId is invalid", async () => {
+    const mockGetUserGradesUseCase = {} as unknown as GetUserGradesUseCase;
+    const mockGetCourseGradesUseCase = {
+      execute: vi.fn(),
+    } as unknown as GetCourseGradesUseCase;
+
+    const controller = new GradeController(
+      mockGetUserGradesUseCase,
+      mockGetCourseGradesUseCase,
+    );
+
+    const req = createMockRequest(
+      "http://localhost:3000/api/grades/export?courseId=invalid",
+    );
+    const response = await controller.exportGrades(teacherActor, req);
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.success).toBe(false);
+  });
 });

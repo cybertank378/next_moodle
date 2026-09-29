@@ -1,11 +1,20 @@
 "use client";
 
-import { AlertCircle, CheckCircle, FileText, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Download,
+  FileText,
+  Upload,
+} from "lucide-react";
 import type React from "react";
 import { useId, useState } from "react";
 import type { BulkImportUsersRequestDto } from "@/modules/user/domain/dto/UserRequestDto";
 import type { BulkImportUsersResponseDto } from "@/modules/user/domain/dto/UserResponseDto";
-import { UserImportParser } from "@/modules/user/domain/mapper/UserImportParser";
+import {
+  USER_IMPORT_TEMPLATE_CSV,
+  UserImportParser,
+} from "@/modules/user/domain/mapper/UserImportParser";
 import { Modal } from "@/shared-ui/component/Modal";
 
 interface Props {
@@ -65,6 +74,20 @@ export default function UserImportModal({
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const blob = new Blob([USER_IMPORT_TEMPLATE_CSV], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "template_import_pengguna.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleClose = () => {
     setCsvText("");
     setFileName(null);
@@ -92,6 +115,28 @@ export default function UserImportModal({
         {errorMsg && (
           <div className="rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 p-3 text-sm text-rose-600 dark:text-rose-400">
             {errorMsg}
+          </div>
+        )}
+
+        {/* Template Download Banner */}
+        {!importResult && (
+          <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900/40 bg-indigo-50/50 dark:bg-indigo-950/20 text-xs">
+            <div>
+              <p className="font-semibold text-indigo-900 dark:text-indigo-300">
+                Butuh contoh format file?
+              </p>
+              <p className="text-slate-500 dark:text-slate-400">
+                Unduh template CSV/Excel yang sudah berisi header dan data sampel.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleDownloadTemplate}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium cursor-pointer transition-colors shadow-sm shrink-0"
+            >
+              <Download size={14} />
+              <span>Unduh Template</span>
+            </button>
           </div>
         )}
 

@@ -7,9 +7,9 @@ import type { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
-import type { PermissionType } from "@/core/rbac/Permission";
 import type { GetCourseGradesUseCase } from "../../application/usecases/GetCourseGradesUseCase";
 import type { GetUserGradesUseCase } from "../../application/usecases/GetUserGradesUseCase";
+import { GradeExportFormatter } from "../../domain/mapper/GradeExportFormatter";
 import { parseGetGradesQuery } from "../validators/grade.validator";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
@@ -79,6 +79,36 @@ export class GradeController {
         body: {
           success: true,
           data,
+        },
+      });
+    } catch (error) {
+      return respond(mapErrorToHttpResponse(error));
+    }
+  }
+
+  async exportGrades(
+    actor: CurrentActor,
+    req: NextRequest,
+  ): Promise<NextResponse> {
+    try {
+      const searchParams =
+        req.nextUrl?.searchParams ?? new URL(req.url).searchParams;
+      const query = parseGetGradesQuery(searchParams);
+      const authActor = actorToAuthorization(actor);
+
+      const data = await this.getCourseGradesUseCase.execute({
+        actor: authActor,
+        courseId: query.courseId,
+        activityId: query.activityId,
+      });
+
+      const csvContent = GradeExportFormatter.formatGradesToCsv(data.reports);
+
+      return new NextResponse(csvContent, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": `attachment; filename="nilai_kursus_${query.courseId}.csv"`,
         },
       });
     } catch (error) {

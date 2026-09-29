@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { UserImportParser } from "../../domain/mapper/UserImportParser";
+import {
+  USER_IMPORT_TEMPLATE_CSV,
+  UserImportParser,
+} from "../../domain/mapper/UserImportParser";
 
 describe("UserImportParser", () => {
   it("parses valid comma-separated CSV text into CreateUserRequestDto array", () => {
@@ -119,5 +122,36 @@ user03,Siti,Aminah,invalid-email-format`;
         groupname: "Kelas-10A",
       },
     ]);
+  });
+
+  it("auto-generates strong Moodle-compliant password if none is provided in CSV and no fallback", () => {
+    const csvContent = `username,firstname,lastname,email
+siswa_autopass,Rini,Suharto,rini@example.com`;
+
+    const result = UserImportParser.parseCsv(csvContent);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.users).toHaveLength(1);
+    const pwd = result.users[0].password;
+    expect(pwd).toBeDefined();
+    expect(typeof pwd).toBe("string");
+    expect(pwd!.length).toBeGreaterThanOrEqual(8);
+    expect(pwd).toMatch(/[a-z]/);
+    expect(pwd).toMatch(/[A-Z]/);
+    expect(pwd).toMatch(/[0-9]/);
+    expect(pwd).toMatch(/[!@#$%&*?]/);
+  });
+
+  it("successfully parses USER_IMPORT_TEMPLATE_CSV sample template without errors", () => {
+    const result = UserImportParser.parseCsv(USER_IMPORT_TEMPLATE_CSV);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.users).toHaveLength(3);
+    expect(result.users[0].username).toBe("siswa01");
+    expect(result.users[1].username).toBe("siswa02");
+    expect(result.users[2].username).toBe("guru01");
+    // Verify siswa02 got a secure auto-generated password since password column is empty
+    expect(result.users[1].password).toBeDefined();
+    expect(result.users[1].password!.length).toBeGreaterThanOrEqual(8);
   });
 });

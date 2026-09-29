@@ -1,8 +1,7 @@
-"use client";
-
-import { Award, CheckCircle, RefreshCw, Users } from "lucide-react";
+import { Award, CheckCircle, Download, RefreshCw, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
+import { GradeExportFormatter } from "@/modules/grades/domain/mapper/GradeExportFormatter";
 import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
 import Button from "@/shared-ui/component/Button";
 import SearchField from "@/shared-ui/component/SearchField";
@@ -25,6 +24,7 @@ export default function TeacherClassResultsView({
   const { courseGradesState, getCourseGrades } = useGradeApi();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
   const [selectedStudent, setSelectedStudent] =
     useState<UserGradeReportResponseDto | null>(null);
 
@@ -33,6 +33,46 @@ export default function TeacherClassResultsView({
       void getCourseGrades(courseId);
     }
   }, [courseId, getCourseGrades]);
+
+  const handleExportExcel = async () => {
+    if (exporting || reports.length === 0) return;
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/grades/export?courseId=${courseId}`);
+      if (!res.ok) {
+        const errJson = (await res.json().catch(() => ({}))) as {
+          error?: { message?: string };
+        };
+        throw new Error(
+          errJson.error?.message ?? `Export gagal (${res.status})`,
+        );
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, 19);
+      const safeCourseTitle = (courseTitle ?? `course-${courseId}`)
+        .replace(/[^a-zA-Z0-9-_]/g, "_")
+        .slice(0, 40);
+      a.href = url;
+      a.download = `rekap-nilai_${safeCourseTitle}_${timestamp}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      // Surface error briefly – a toast integration can be added later
+      console.error("[GradeExport]", err);
+      alert(
+        err instanceof Error ? err.message : "Gagal mengekspor rekap nilai.",
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const reports = courseGradesState.data?.reports ?? [];
   const loading = courseGradesState.loading;
@@ -106,16 +146,31 @@ export default function TeacherClassResultsView({
           </p>
         </div>
 
-        <Button
-          size="sm"
-          variant="outline"
-          color="secondary"
-          leftIcon={RefreshCw}
-          loading={loading}
-          onClick={() => void getCourseGrades(courseId)}
-        >
-          Muat Ulang
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            color="secondary"
+            leftIcon={RefreshCw}
+            loading={loading}
+            onClick={() => void getCourseGrades(courseId)}
+          >
+            Muat Ulang
+          </Button>
+
+          <Button
+            size="sm"
+            variant="solid"
+            color="primary"
+            leftIcon={Download}
+            loading={exporting}
+            disabled={reports.length === 0 || loading}
+            onClick={() => void handleExportExcel()}
+            data-testid="export-excel-btn"
+          >
+            Export Excel
+          </Button>
+        </div>
       </div>
 
       {error && (
