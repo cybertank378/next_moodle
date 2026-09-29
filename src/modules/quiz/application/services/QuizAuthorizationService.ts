@@ -33,8 +33,8 @@ export function authorizeQuizOperation(
     }
   }
 
-  // TENANT requires QUIZ_READ permission and valid tenantId
-  if (actor.role === AppRole.TENANT) {
+  // TENANT and TEACHER share QUIZ_READ permission
+  if (actor.role === AppRole.TENANT || actor.role === AppRole.TEACHER) {
     try {
       authorize(actor, Permission.QUIZ_READ);
       return null;

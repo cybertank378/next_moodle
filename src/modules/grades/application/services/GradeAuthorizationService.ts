@@ -57,7 +57,7 @@ export class GradeAuthorizationService {
       };
     }
 
-    if (actor.role === AppRole.TENANT) {
+    if (actor.role === AppRole.TENANT || actor.role === AppRole.TEACHER) {
       authorize(actor, Permission.GRADE_READ, {
         requestedTenantId: actor.tenantId,
       });
@@ -92,7 +92,7 @@ export class GradeAuthorizationService {
       );
     }
 
-    if (actor.role === AppRole.TENANT) {
+    if (actor.role === AppRole.TENANT || actor.role === AppRole.TEACHER) {
       authorize(actor, Permission.GRADE_READ, {
         requestedTenantId: actor.tenantId,
       });
