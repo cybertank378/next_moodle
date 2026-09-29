@@ -182,7 +182,7 @@ export default function SearchField({
   return (
     <div
       className={clsx(
-        "flex items-center gap-3 rounded-lg border border-gray-300 bg-white px-4",
+        "flex items-center gap-3 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-[#151521] px-4",
         "transition-colors duration-200",
         "focus-within:border-indigo-500",
         "focus-within:outline-none",
@@ -190,7 +190,10 @@ export default function SearchField({
         className,
       )}
     >
-      <Search size={18} className="shrink-0 text-gray-500" />
+      <Search
+        size={18}
+        className="shrink-0 text-gray-500 dark:text-slate-400"
+      />
 
       <input
         ref={inputRef}
@@ -201,8 +204,8 @@ export default function SearchField({
         placeholder={placeholder}
         className={clsx(
           "flex-1 border-0 bg-transparent outline-none ring-0",
-          "text-sm text-gray-800",
-          "placeholder:text-gray-400",
+          "text-sm text-gray-800 dark:text-slate-200",
+          "placeholder:text-gray-400 dark:placeholder:text-slate-500",
         )}
       />
 
@@ -213,7 +216,7 @@ export default function SearchField({
           color="secondary"
           iconOnly
           onClick={handleClear}
-          className="text-gray-400 hover:text-gray-600"
+          className="text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200"
         >
           <X size={16} />
         </Button>

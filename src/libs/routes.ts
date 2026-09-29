@@ -48,5 +48,4 @@ export class AppRouteConstants {
   ): string {
     return `${ROUTES.DASHBOARD.EXAMS}/${quizId}/attempt/${attemptId}`;
   }
-
 }

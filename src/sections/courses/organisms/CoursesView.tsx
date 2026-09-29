@@ -21,10 +21,10 @@ export default function CoursesView() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
           Mata Pelajaran & Kursus
         </h1>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-slate-500 dark:text-gray-400">
           Daftar mata pelajaran aktif yang terhubung dengan modul pembelajaran
           Moodle.
         </p>
@@ -43,7 +43,7 @@ export default function CoursesView() {
           {[1, 2, 3, 4, 5, 6].map((idx) => (
             <div
               key={`course-skeleton-${idx}`}
-              className="rounded-xl border border-slate-800 bg-[#151521] p-5 space-y-4"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-5 space-y-4 shadow-sm"
             >
               <div className="flex justify-between">
                 <Skeleton height={20} width={60} />
@@ -58,14 +58,14 @@ export default function CoursesView() {
       )}
 
       {!loading && courses.length === 0 && !coursesState.error && (
-        <div className="rounded-xl border border-slate-800 bg-[#151521] p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800 text-slate-400">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-12 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
             <BookOpen size={24} />
           </div>
-          <h3 className="mt-4 text-base font-semibold text-white">
+          <h3 className="mt-4 text-base font-semibold text-slate-900 dark:text-white">
             Belum ada kursus yang ditemukan
           </h3>
-          <p className="mt-1 text-xs text-slate-400 max-w-sm mx-auto">
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
             {search
               ? "Tidak ada kursus yang cocok dengan pencarian Anda."
               : "Anda belum terdaftar pada mata pelajaran apapun di Moodle saat ini."}

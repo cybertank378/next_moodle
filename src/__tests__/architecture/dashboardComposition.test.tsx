@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
-import { redirect } from "next/navigation";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),

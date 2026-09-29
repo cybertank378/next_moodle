@@ -57,10 +57,10 @@ export default function StudentGradeReportView({
     <div data-testid="student-grade-report-view" className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Rapor & Hasil Ujian
           </h1>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-slate-500 dark:text-gray-400">
             Penarikan hasil penilaian ujian dan rekaman kelulusan materi.
           </p>
         </div>
@@ -140,35 +140,35 @@ export default function StudentGradeReportView({
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-base font-semibold text-white">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
               Daftar Komponen Nilai & Kuis
             </h3>
 
             <div className="space-y-4">
               <Table
-                wrapperClassName="border-gray-800 bg-gray-900/60 shadow-sm"
-                className="text-gray-200"
+                wrapperClassName="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900/60 shadow-sm"
+                className="text-slate-700 dark:text-gray-200"
               >
-                <TableHead className="h-12 border-b border-gray-800 bg-gray-900/80 text-xs font-semibold uppercase text-gray-400">
+                <TableHead className="h-12 border-b border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-900/80 text-xs font-semibold uppercase text-slate-600 dark:text-gray-400">
                   <TableRow className="border-b-0 hover:bg-transparent even:bg-transparent">
-                    <TableHeaderCell className="text-gray-400">
+                    <TableHeaderCell className="text-slate-600 dark:text-gray-400">
                       Komponen Penilaian
                     </TableHeaderCell>
-                    <TableHeaderCell className="text-gray-400">
+                    <TableHeaderCell className="text-slate-600 dark:text-gray-400">
                       Tipe
                     </TableHeaderCell>
-                    <TableHeaderCell className="text-center text-gray-400">
+                    <TableHeaderCell className="text-center text-slate-600 dark:text-gray-400">
                       Batas Lulus
                     </TableHeaderCell>
-                    <TableHeaderCell className="text-right text-gray-400">
+                    <TableHeaderCell className="text-right text-slate-600 dark:text-gray-400">
                       Nilai / Skor
                     </TableHeaderCell>
-                    <TableHeaderCell className="text-center text-gray-400">
+                    <TableHeaderCell className="text-center text-slate-600 dark:text-gray-400">
                       Status
                     </TableHeaderCell>
                   </TableRow>
                 </TableHead>
-                <TableBody className="divide-y divide-gray-800/60">
+                <TableBody className="divide-y divide-slate-200 dark:divide-gray-800/60">
                   {report.items.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="py-8 text-center">
@@ -185,35 +185,35 @@ export default function StudentGradeReportView({
                     paginatedItems.map((item) => (
                       <TableRow
                         key={item.id}
-                        className="border-gray-800/60 hover:bg-gray-800/40 even:bg-gray-900/30 transition-colors"
+                        className="border-slate-200 dark:border-gray-800/60 hover:bg-slate-50 dark:hover:bg-gray-800/40 even:bg-slate-50/50 dark:even:bg-gray-900/30 transition-colors"
                       >
-                        <TableCell className="text-gray-200">
+                        <TableCell className="text-slate-800 dark:text-gray-200">
                           <div>
-                            <span className="font-medium text-white">
+                            <span className="font-medium text-slate-900 dark:text-white">
                               {item.itemName}
                             </span>
                             {item.feedback && (
-                              <p className="mt-0.5 text-xs italic text-sky-300">
+                              <p className="mt-0.5 text-xs italic text-sky-600 dark:text-sky-300">
                                 Catatan: &ldquo;{item.feedback}&rdquo;
                               </p>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-xs capitalize text-gray-400">
+                        <TableCell className="text-xs capitalize text-slate-500 dark:text-gray-400">
                           {item.itemModule || item.itemType}
                         </TableCell>
-                        <TableCell className="text-center text-gray-400">
+                        <TableCell className="text-center text-slate-500 dark:text-gray-400">
                           {item.gradePass !== null ? item.gradePass : "-"}
                         </TableCell>
-                        <TableCell className="text-right font-bold text-white">
+                        <TableCell className="text-right font-bold text-slate-900 dark:text-white">
                           <div className="flex items-baseline justify-end gap-1">
                             <span>{item.gradeFormatted}</span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-slate-500 dark:text-gray-400">
                               / {item.gradeMax}
                             </span>
                           </div>
                           {item.percentageFormatted && (
-                            <p className="text-xs font-medium text-gray-400">
+                            <p className="text-xs font-medium text-slate-500 dark:text-gray-400">
                               {item.percentageFormatted}
                             </p>
                           )}

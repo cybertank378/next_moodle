@@ -24,13 +24,13 @@ export const Table = ({
 }: TableProps) => (
   <div
     className={clsx(
-      "overflow-x-auto rounded-lg border border-gray-200 bg-white",
+      "overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521]",
       wrapperClassName,
     )}
   >
     <table
       className={clsx(
-        "w-full border-collapse text-sm text-gray-700",
+        "w-full border-collapse text-sm text-gray-700 dark:text-gray-200",
         className,
       )}
     >
@@ -53,7 +53,7 @@ export const TableHead = ({
 }) => (
   <thead
     className={clsx(
-      "h-16 border-b border-gray-200 bg-gray-100 text-sm font-semibold text-gray-700",
+      "h-16 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/60 text-sm font-semibold text-gray-700 dark:text-gray-300",
       className,
     )}
   >
@@ -73,7 +73,12 @@ export const TableBody = ({
 
   className?: string;
 }) => (
-  <tbody className={clsx("divide-y divide-gray-200", className)}>
+  <tbody
+    className={clsx(
+      "divide-y divide-gray-200 dark:divide-slate-800",
+      className,
+    )}
+  >
     {children}
   </tbody>
 );
@@ -113,9 +118,9 @@ export const TableRow = ({
 }) => (
   <tr
     className={clsx(
-      "border-b border-gray-200 last:border-b-0",
-      "even:bg-gray-50",
-      "transition-colors duration-200 hover:bg-indigo-50/60",
+      "border-b border-gray-200 dark:border-slate-800 last:border-b-0",
+      "even:bg-gray-50 dark:even:bg-slate-900/30",
+      "transition-colors duration-200 hover:bg-indigo-50/60 dark:hover:bg-slate-800/50",
       className,
     )}
     {...props}
@@ -137,7 +142,7 @@ export const TableCell = ({
 }) => (
   <td
     className={clsx(
-      "align-middle whitespace-nowrap px-4 py-3 text-sm text-gray-700",
+      "align-middle whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-200",
       className,
     )}
     {...props}
