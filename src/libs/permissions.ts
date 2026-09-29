@@ -6,6 +6,7 @@ export const PERMISSIONS = {
   ALL: "*",
   TENANT_MANAGE: "tenant.manage",
   USER_MANAGE: "user.manage",
+  ENROLMENT_MANAGE: "enrolment.manage",
   EXAM_MANAGE: "exam.manage",
   EXAM_MONITOR: "exam.monitor",
   EXAM_TAKE: "exam.take",
@@ -25,6 +26,7 @@ export function canAccess(
     case PERMISSIONS.TENANT_MANAGE:
       return false;
     case PERMISSIONS.USER_MANAGE:
+    case PERMISSIONS.ENROLMENT_MANAGE:
     case PERMISSIONS.EXAM_MANAGE:
     case PERMISSIONS.EXAM_MONITOR:
     case PERMISSIONS.RESULT_VIEW_ALL:
