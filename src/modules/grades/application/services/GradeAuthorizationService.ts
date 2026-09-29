@@ -68,6 +68,17 @@ export class GradeAuthorizationService {
       };
     }
 
+    if (actor.role === AppRole.TEACHER) {
+      authorize(actor, Permission.TEACHER_GRADE_READ, {
+        requestedTenantId: actor.tenantId,
+      });
+
+      return {
+        tenantId: actor.tenantId,
+        resolvedUserId: targetUserId ?? 0,
+      };
+    }
+
     throw new AuthorizationError(
       "Akses ditolak: role tidak memiliki izin untuk melihat nilai ujian.",
     );
@@ -94,6 +105,13 @@ export class GradeAuthorizationService {
 
     if (actor.role === AppRole.TENANT) {
       authorize(actor, Permission.GRADE_READ, {
+        requestedTenantId: actor.tenantId,
+      });
+      return { tenantId: actor.tenantId };
+    }
+
+    if (actor.role === AppRole.TEACHER) {
+      authorize(actor, Permission.TEACHER_GRADE_READ, {
         requestedTenantId: actor.tenantId,
       });
       return { tenantId: actor.tenantId };

@@ -45,6 +45,12 @@ export const Permission = {
   ATTEMPT_SUBMIT_OWN: "attempt.submit.own",
   ATTEMPT_REVIEW_OWN: "attempt.review.own",
   GRADE_READ_OWN: "grade.read.own",
+
+  // TEACHER
+  TEACHER_DASHBOARD_READ: "teacher.dashboard.read",
+  TEACHER_COURSE_READ: "teacher.course.read",
+  TEACHER_QUIZ_READ: "teacher.quiz.read",
+  TEACHER_GRADE_READ: "teacher.grade.read",
 } as const;
 
 export type PermissionType = (typeof Permission)[keyof typeof Permission];

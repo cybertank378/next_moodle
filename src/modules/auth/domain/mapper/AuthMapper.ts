@@ -34,14 +34,17 @@ export function mapMoodleUserToActor(
 
   let role = AppRole.STUDENT;
   if (serviceUsed === "nextjs_admin") {
-    role = AppRole.ADMIN;
-  } else if (
-    serviceUsed === "nextjs_tenant" ||
-    serviceUsed === "nextjs_proctor" ||
-    isTeacherUsername ||
-    hasStaffCapabilities
-  ) {
+    // Platform admin service — but if teacher signals present, it's a TEACHER
+    if (isTeacherUsername || hasStaffCapabilities) {
+      role = AppRole.TEACHER;
+    } else {
+      role = AppRole.ADMIN;
+    }
+  } else if (serviceUsed === "nextjs_tenant" || serviceUsed === "nextjs_proctor") {
     role = AppRole.TENANT;
+  } else if (isTeacherUsername || hasStaffCapabilities) {
+    // Teacher using student service token — promote to TEACHER
+    role = AppRole.TEACHER;
   }
 
   return {

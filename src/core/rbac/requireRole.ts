@@ -20,7 +20,11 @@ export function requireRole(
     );
   }
 
-  if (expectedRole === AppRole.TENANT || expectedRole === AppRole.STUDENT) {
+  if (
+    expectedRole === AppRole.TENANT ||
+    expectedRole === AppRole.STUDENT ||
+    expectedRole === AppRole.TEACHER
+  ) {
     if (!actor.tenantId || actor.tenantId.trim().length === 0) {
       throw new AuthorizationError(
         `Konteks tenant wajib ada untuk role '${expectedRole}'.`,

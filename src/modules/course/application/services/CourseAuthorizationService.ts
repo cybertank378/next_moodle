@@ -49,6 +49,22 @@ export function authorizeCourseOperation(
     }
   }
 
+  // TEACHER requires TEACHER_COURSE_READ permission and valid tenantId
+  if (actor.role === AppRole.TEACHER) {
+    try {
+      authorize(actor, Permission.TEACHER_COURSE_READ);
+      return null;
+    } catch (err) {
+      if (
+        err instanceof AuthorizationError ||
+        err instanceof UnauthorizedError
+      ) {
+        return err;
+      }
+      throw err;
+    }
+  }
+
   return new AuthorizationError(
     "Akses ditolak: role tidak memiliki akses ke course.",
   );
