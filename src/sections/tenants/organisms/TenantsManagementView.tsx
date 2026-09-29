@@ -1,12 +1,12 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
+import TenantFilterBar, {
+  type TenantFilterValue,
+} from "@/sections/tenants/molecules/TenantFilterBar";
 import TenantTable from "@/sections/tenants/molecules/TenantTable";
 import LinkButton from "@/shared-ui/component/LinkButton";
 import Pagination from "@/shared-ui/component/Pagination";
-import SelectField from "@/shared-ui/component/SelectField";
-import TextField from "@/shared-ui/component/TextField";
+import Typography from "@/shared-ui/component/Typography";
 
 export default function TenantsManagementView() {
   const { listState, listTenants } = useTenantApi();
@@ -18,44 +18,30 @@ export default function TenantsManagementView() {
     void listTenants({ page, pageSize: 10, search, status });
   }, [listTenants, page, search, status]);
 
+  const handleFilterChange = useCallback((filter: TenantFilterValue) => {
+    setPage(1);
+    setSearch(filter.search);
+    setStatus(filter.status);
+  }, []);
+
   const data = listState.data;
 
   return (
     <section className="space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Tenant SaaS</h1>
-          <p className="text-sm text-slate-500">
+          <Typography variant="h1">Tenant SaaS</Typography>
+          <Typography variant="subheading" className="mt-1">
             Kelola metadata tenant dan konfigurasi credential terenkripsi.
-          </p>
+          </Typography>
         </div>
         <LinkButton href="/dashboard/tenants/create">Tambah tenant</LinkButton>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <TextField
-          label="Cari"
-          value={search}
-          onChange={(event) => {
-            setPage(1);
-            setSearch(event.target.value);
-          }}
-          placeholder="Nama, slug, atau domain"
-        />
-        <SelectField
-          label="Status"
-          value={status}
-          onChange={(event) => {
-            setPage(1);
-            setStatus(event.target.value);
-          }}
-        >
-          <option value="">Semua status</option>
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="MAINTENANCE">MAINTENANCE</option>
-          <option value="SUSPENDED">SUSPENDED</option>
-        </SelectField>
-      </div>
+      <TenantFilterBar
+        initialValues={{ search, status }}
+        onFilterChangeAction={handleFilterChange}
+      />
 
       {listState.error && (
         <p className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">

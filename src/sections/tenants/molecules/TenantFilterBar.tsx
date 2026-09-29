@@ -1,7 +1,8 @@
+// File: src/sections/tenants/molecules/TenantFilterBar.tsx
+
 "use client";
 
 import { useCallback, useState } from "react";
-
 import Button from "@/shared-ui/component/Button";
 import SearchField from "@/shared-ui/component/SearchField";
 import SelectField from "@/shared-ui/component/SelectField";
@@ -13,17 +14,17 @@ const STATUS_OPTIONS = [
   { label: "Ditangguhkan", value: "SUSPENDED" },
 ] as const;
 
-interface FilterValue {
+export interface TenantFilterValue {
   status: string;
   search: string;
 }
 
 interface Props {
-  initialValues?: Partial<FilterValue>;
-  onFilterChangeAction: (value: FilterValue) => void;
+  initialValues?: Partial<TenantFilterValue>;
+  onFilterChangeAction: (value: TenantFilterValue) => void;
 }
 
-export function TenantFilterBar({
+export default function TenantFilterBar({
   initialValues,
   onFilterChangeAction,
 }: Props) {
