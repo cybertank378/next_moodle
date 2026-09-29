@@ -68,10 +68,16 @@ export class EncryptedMoodleCredentialProvider
       );
     }
 
-    const token = await this.encryption.decrypt(
-      encryptedToken,
-      tenant.tenantId,
-    );
+    let token: string;
+    try {
+      token = await this.encryption.decrypt(encryptedToken, tenant.tenantId);
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production" && encryptedToken) {
+        token = encryptedToken;
+      } else {
+        throw err;
+      }
+    }
 
     return {
       baseUrl: record.moodleUrl,

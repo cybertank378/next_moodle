@@ -10,16 +10,38 @@ export function mapMoodleUserToActor(
   tenant: LoginTenant,
   siteInfo: MoodleSiteInfo,
   serviceUsed: string,
+  capabilities?: Record<string, unknown> | null,
 ): CurrentActor {
   const id = `moodle:${tenant.tenantId}:${siteInfo.userId}`;
+
+  const usernameLower = siteInfo.username.toLowerCase();
+  const isTeacherUsername =
+    usernameLower.startsWith("teacher") ||
+    usernameLower.startsWith("guru") ||
+    usernameLower.startsWith("pengajar") ||
+    usernameLower.includes("teacher");
+
+  const hasStaffCapabilities = Boolean(
+    capabilities &&
+      (capabilities.can_manage ||
+        capabilities.can_manage_questions ||
+        capabilities.can_manage_quizzes ||
+        capabilities.can_view_reports ||
+        capabilities.can_monitor ||
+        capabilities.can_manage_attempts ||
+        capabilities.can_manage_incidents),
+  );
 
   let role = AppRole.STUDENT;
   if (serviceUsed === "nextjs_admin") {
     role = AppRole.ADMIN;
-  } else if (serviceUsed === "nextjs_tenant") {
+  } else if (
+    serviceUsed === "nextjs_tenant" ||
+    serviceUsed === "nextjs_proctor" ||
+    isTeacherUsername ||
+    hasStaffCapabilities
+  ) {
     role = AppRole.TENANT;
-  } else if (serviceUsed === "nextjs_proctor") {
-    role = AppRole.TENANT; // Assume proctors use TENANT interface with restricted permissions, or add PROCTOR if it exists
   }
 
   return {

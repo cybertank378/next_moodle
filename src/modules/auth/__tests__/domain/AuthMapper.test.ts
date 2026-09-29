@@ -58,4 +58,27 @@ describe("mapMoodleUserToActor", () => {
       role: AppRole.ADMIN,
     });
   });
+
+  it("maps teacher username to TENANT role even if service is nextjs_student", () => {
+    const actor = mapMoodleUserToActor(
+      mockTenant,
+      { ...mockSiteInfo, username: "teacher1" },
+      "nextjs_student",
+    );
+    expect(actor).toMatchObject({
+      role: AppRole.TENANT,
+    });
+  });
+
+  it("maps user with staff capabilities to TENANT role even if service is nextjs_student", () => {
+    const actor = mapMoodleUserToActor(
+      mockTenant,
+      mockSiteInfo,
+      "nextjs_student",
+      { can_manage_questions: true },
+    );
+    expect(actor).toMatchObject({
+      role: AppRole.TENANT,
+    });
+  });
 });
