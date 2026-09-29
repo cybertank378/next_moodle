@@ -12,6 +12,7 @@ import { ROUTES } from "@/libs/routes";
 import { useAuthApi } from "@/modules/auth/presentation/hooks/useAuthApi";
 import Button from "@/shared-ui/component/Button";
 import { DropdownItem } from "@/shared-ui/component/DropdownItem";
+import ThemeSwitch from "@/shared-ui/component/ThemeSwitch";
 
 interface Props {
   role: UserRole;
@@ -91,11 +92,14 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
         </div>
 
         {/* ================= RIGHT SECTION ================= */}
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Figma Design Light/Dark Mode Switch */}
+          <ThemeSwitch size="md" />
+
           <button
             type="button"
             aria-label="Notifikasi"
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <Bell size={18} />
           </button>

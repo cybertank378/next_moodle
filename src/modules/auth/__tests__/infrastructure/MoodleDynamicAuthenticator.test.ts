@@ -82,10 +82,10 @@ describe("MoodleDynamicAuthenticator", () => {
     );
   });
 
-  it("maps to nextjs_tenant if can_manage is true for non-admin user", async () => {
+  it("maps to nextjs_admin if can_manage is true for non-admin user", async () => {
     (MoodleRestClient.authenticate as any)
       .mockResolvedValueOnce({ token: "probe-token", siteInfo: {} })
-      .mockResolvedValueOnce({ token: "tenant-token", siteInfo: {} });
+      .mockResolvedValueOnce({ token: "admin-token", siteInfo: {} });
 
     const module = await import("@/core/moodle/MoodleRestClient");
     const { mockCall } = module as any;
@@ -93,7 +93,7 @@ describe("MoodleDynamicAuthenticator", () => {
 
     const result = await authenticator.authenticateStudent(input);
 
-    expect(result.serviceUsed).toBe("nextjs_tenant");
+    expect(result.serviceUsed).toBe("nextjs_admin");
     expect(MoodleRestClient.authenticate).toHaveBeenCalledTimes(2);
     expect(MoodleRestClient.authenticate).toHaveBeenNthCalledWith(
       1,
@@ -109,14 +109,14 @@ describe("MoodleDynamicAuthenticator", () => {
       "user01",
       "pwd",
       10000,
-      "nextjs_tenant",
+      "nextjs_admin",
     );
   });
 
-  it("maps to nextjs_tenant if can_view_reports is true", async () => {
+  it("falls back to nextjs_tenant with probeToken if nextjs_admin authentication fails for staff", async () => {
     (MoodleRestClient.authenticate as any)
       .mockResolvedValueOnce({ token: "probe-token", siteInfo: {} })
-      .mockResolvedValueOnce({ token: "tenant-token", siteInfo: {} });
+      .mockRejectedValueOnce(new Error("Service not available"));
 
     const module = await import("@/core/moodle/MoodleRestClient");
     const { mockCall } = module as any;
@@ -125,15 +125,27 @@ describe("MoodleDynamicAuthenticator", () => {
     const result = await authenticator.authenticateStudent(input);
 
     expect(result.serviceUsed).toBe("nextjs_tenant");
+    expect(result.token).toBe("probe-token");
     expect(MoodleRestClient.authenticate).toHaveBeenCalledTimes(2);
-    expect(MoodleRestClient.authenticate).toHaveBeenNthCalledWith(
-      2,
-      "https://moodle.test",
-      "user01",
-      "pwd",
-      10000,
-      "nextjs_tenant",
-    );
+  });
+
+  it("identifies teacher username and falls back to nextjs_tenant if capabilities probe fails", async () => {
+    (MoodleRestClient.authenticate as any).mockResolvedValueOnce({
+      token: "probe-token",
+      siteInfo: {},
+    });
+
+    const module = await import("@/core/moodle/MoodleRestClient");
+    const { mockCall } = module as any;
+    mockCall.mockRejectedValueOnce(new Error("Network error"));
+
+    const result = await authenticator.authenticateStudent({
+      ...input,
+      username: "teacher1",
+    });
+
+    expect(result.serviceUsed).toBe("nextjs_tenant");
+    expect(result.token).toBe("probe-token");
   });
 
   it("maps to nextjs_proctor if can_monitor or can_manage_attempts is true", async () => {

@@ -54,6 +54,7 @@ export class LoginUseCase {
       tenant,
       moodleResult.siteInfo,
       moodleResult.serviceUsed,
+      moodleResult.capabilities,
     );
     const session = await this.authRepository.createSession({
       actor,

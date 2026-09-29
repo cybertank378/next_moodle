@@ -34,19 +34,29 @@ export class MoodleDynamicAuthenticator implements IMoodleClient {
       );
 
       // Attempt to fetch capabilities if possible, but don't fail if it doesn't work
-      let caps = {};
+      let caps: Record<string, unknown> = {};
       try {
         const client = new MoodleRestClient({
           baseUrl: input.tenant.moodleUrl,
           token: adminToken.token,
           timeoutMs: 10000,
         });
-        caps = await client.call<any>("local_examapi_get_capabilities", {});
-      } catch (e) {
+        caps = await client.call<Record<string, unknown>>(
+          "local_examapi_get_capabilities",
+          {},
+        );
+      } catch (_e) {
         // ignore capability fetch errors for hardcoded admin
       }
       return { ...adminToken, serviceUsed: "nextjs_admin", capabilities: caps };
     }
+
+    const usernameLower = input.username.toLowerCase();
+    const isTeacherUsername =
+      usernameLower.startsWith("teacher") ||
+      usernameLower.startsWith("guru") ||
+      usernameLower.startsWith("pengajar") ||
+      usernameLower.includes("teacher");
 
     // Step 1: Request token for nextjs_student to test capabilities safely
     const probeToken = await MoodleRestClient.authenticate(
@@ -57,38 +67,86 @@ export class MoodleDynamicAuthenticator implements IMoodleClient {
       "nextjs_student",
     );
 
-    // Step 2: Determine role via capabilities
+    // Step 2: Determine role via capabilities or username heuristics
     try {
       const client = new MoodleRestClient({
         baseUrl: input.tenant.moodleUrl,
         token: probeToken.token,
         timeoutMs: 10000,
       });
-      const caps = await client.call<any>("local_examapi_get_capabilities", {});
-
-      let finalSvc = "nextjs_student";
-
-      if (caps.can_manage || caps.can_view_reports) {
-        finalSvc = "nextjs_tenant";
-      } else if (caps.can_monitor || caps.can_manage_attempts) {
-        finalSvc = "nextjs_proctor";
-      }
-
-      if (finalSvc === "nextjs_student") {
-        return { ...probeToken, serviceUsed: finalSvc, capabilities: caps };
-      }
-
-      // Re-authenticate with the correctly inferred service
-      const finalToken = await MoodleRestClient.authenticate(
-        input.tenant.moodleUrl,
-        input.username,
-        input.password,
-        10000,
-        finalSvc,
+      const caps = await client.call<Record<string, unknown>>(
+        "local_examapi_get_capabilities",
+        {},
       );
-      return { ...finalToken, serviceUsed: finalSvc, capabilities: caps };
-    } catch (e) {
-      // If capabilities fail, fallback to student
+
+      const isTeacherOrManager =
+        isTeacherUsername ||
+        Boolean(
+          caps &&
+            (caps.can_manage ||
+              caps.can_manage_questions ||
+              caps.can_manage_quizzes ||
+              caps.can_view_reports),
+        );
+
+      if (isTeacherOrManager) {
+        // Try authenticating with nextjs_admin if Moodle allows it for this staff account
+        try {
+          const adminToken = await MoodleRestClient.authenticate(
+            input.tenant.moodleUrl,
+            input.username,
+            input.password,
+            10000,
+            "nextjs_admin",
+          );
+          return {
+            ...adminToken,
+            serviceUsed: "nextjs_admin",
+            capabilities: caps,
+          };
+        } catch {
+          // If nextjs_admin service is restricted in Moodle for teachers,
+          // preserve teacher/tenant role with probeToken
+          return {
+            ...probeToken,
+            serviceUsed: "nextjs_tenant",
+            capabilities: caps,
+          };
+        }
+      }
+
+      if (caps && (caps.can_monitor || caps.can_manage_attempts)) {
+        try {
+          const proctorToken = await MoodleRestClient.authenticate(
+            input.tenant.moodleUrl,
+            input.username,
+            input.password,
+            10000,
+            "nextjs_proctor",
+          );
+          return {
+            ...proctorToken,
+            serviceUsed: "nextjs_proctor",
+            capabilities: caps,
+          };
+        } catch {
+          return {
+            ...probeToken,
+            serviceUsed: "nextjs_proctor",
+            capabilities: caps,
+          };
+        }
+      }
+
+      return {
+        ...probeToken,
+        serviceUsed: "nextjs_student",
+        capabilities: caps,
+      };
+    } catch (_e) {
+      if (isTeacherUsername) {
+        return { ...probeToken, serviceUsed: "nextjs_tenant" };
+      }
       return { ...probeToken, serviceUsed: "nextjs_student" };
     }
   }
