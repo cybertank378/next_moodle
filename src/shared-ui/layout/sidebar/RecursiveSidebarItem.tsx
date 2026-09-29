@@ -126,10 +126,10 @@ export function RecursiveSidebarItem({
   ////////////////////////////////////////////////////////////
 
   const itemClass = clsx(
-    "group flex h-11 w-full items-center justify-between rounded-2xl pr-3 transition-all duration-200",
+    "group flex h-10 w-full items-center justify-between rounded-xl pr-3 transition-all duration-200",
     isActive
-      ? "bg-indigo-600 text-white shadow-sm"
-      : "text-slate-300 hover:bg-sky-900 hover:text-white",
+      ? "bg-indigo-600 text-white shadow-sm font-semibold"
+      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white font-medium",
   );
 
   ////////////////////////////////////////////////////////////
@@ -165,13 +165,15 @@ export function RecursiveSidebarItem({
               <Icon
                 size={18}
                 className={clsx(
-                  "shrink-0",
-                  isActive ? "text-white" : "text-slate-400",
+                  "shrink-0 transition-colors",
+                  isActive
+                    ? "text-white"
+                    : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300",
                 )}
               />
             )}
 
-            <span className="truncate text-sm font-medium">{item.label}</span>
+            <span className="truncate text-sm">{item.label}</span>
           </div>
 
           {/* RIGHT */}
@@ -182,6 +184,12 @@ export function RecursiveSidebarItem({
             transition={{
               duration: 0.2,
             }}
+            className={clsx(
+              "shrink-0",
+              isActive
+                ? "text-white"
+                : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300",
+            )}
           >
             <ChevronDown size={15} />
           </motion.div>
@@ -203,13 +211,15 @@ export function RecursiveSidebarItem({
               <Icon
                 size={18}
                 className={clsx(
-                  "shrink-0",
-                  isActive ? "text-white" : "text-slate-400",
+                  "shrink-0 transition-colors",
+                  isActive
+                    ? "text-white"
+                    : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300",
                 )}
               />
             )}
 
-            <span className="truncate text-sm font-medium">{item.label}</span>
+            <span className="truncate text-sm">{item.label}</span>
           </div>
         </Link>
       )}
@@ -238,7 +248,7 @@ export function RecursiveSidebarItem({
             }}
             className="overflow-hidden"
           >
-            <div className="space-y-1 pt-1">
+            <div className="space-y-1 pt-1 ml-4 border-l border-slate-200 dark:border-slate-800/80 pl-1">
               {item.children?.map((child, childIdx) => (
                 <RecursiveSidebarItem
                   key={child.path ?? `${child.label}-${childIdx}`}

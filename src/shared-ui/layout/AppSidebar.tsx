@@ -200,46 +200,46 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
   const [openKey, setOpenKey] = useState<string | null>(null);
 
   const sidebarContent = (
-    <div className="flex h-screen w-72 flex-col bg-sky-950 text-slate-200">
-      <div className="border-b border-slate-700 px-5 py-5">
+    <div className="flex h-screen w-72 flex-col bg-white dark:bg-[#151521] text-slate-800 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
+      <div className="border-b border-slate-200 dark:border-slate-800 px-5 py-5">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-white shadow-md">
             <GraduationCap size={28} />
           </div>
 
           <div>
-            <h1 className="text-base font-bold tracking-wide text-white">
+            <h1 className="text-base font-bold tracking-wide text-slate-900 dark:text-white">
               Exam SaaS
             </h1>
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
               Platform Ujian Terpusat
             </p>
           </div>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-sky-900/60 px-4 py-3">
+        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#1e1e2d] px-4 py-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow">
             <LayoutDashboard size={18} />
           </div>
 
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               Role Aktif
             </p>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">
               {role.replaceAll("_", " ")}
             </p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto bg-sky-950 px-3 py-5">
+      <nav className="flex-1 overflow-y-auto bg-white dark:bg-[#151521] px-3 py-5">
         <div className="space-y-7">
           {groups.map((group, index) => (
             <div key={`group-${group.label ?? index}`}>
               {group.label && (
                 <div className="mb-3 px-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
                     {group.label}
                   </p>
                 </div>
@@ -265,9 +265,9 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </nav>
 
-      <div className="border-t border-slate-700 bg-sky-950 px-5 py-4">
+      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] px-5 py-4">
         <div className="rounded-2xl px-4 py-2">
-          <p className="text-xs font-medium text-slate-400">
+          <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
             © {new Date().getFullYear()} Exam SaaS Moodle
           </p>
         </div>
