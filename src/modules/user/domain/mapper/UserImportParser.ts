@@ -1,5 +1,12 @@
+import { generateSecureMoodlePassword } from "@/core/security/PasswordGenerator";
 import type { CreateUserRequestDto } from "../dto/UserRequestDto";
 import type { UserImportRowErrorDto } from "../dto/UserResponseDto";
+
+export const USER_IMPORT_TEMPLATE_CSV =
+  "\uFEFFusername,firstname,lastname,email,password,idnumber,role,department,institution\n" +
+  "siswa01,Ahmad,Dahlan,siswa01@sekolah.sch.id,SiswaPass123!#,1001,student,IPA,SMA 1\n" +
+  "siswa02,Budi,Santoso,siswa02@sekolah.sch.id,,1002,student,IPS,SMA 1\n" +
+  "guru01,Dewi,Sartika,dewi.sartika@sekolah.sch.id,GuruPass2026!#,2001,teacher,Matematika,SMA 1\n";
 
 export interface MoodleCreateUserPayloadItem {
   username: string;
@@ -63,7 +70,8 @@ function parseCsv(
     const firstname = rowRecord.firstname || "";
     const lastname = rowRecord.lastname || "";
     const email = rowRecord.email || "";
-    const password = rowRecord.password || fallbackPassword;
+    const password =
+      rowRecord.password || fallbackPassword || generateSecureMoodlePassword();
     const idnumber = rowRecord.idnumber || undefined;
     const role = rowRecord.role || "student";
     const department = rowRecord.department || undefined;
