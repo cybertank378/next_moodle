@@ -12,6 +12,17 @@ export interface MoodleCreateUserPayloadItem {
   createpassword: 0 | 1;
 }
 
+export interface LocalExamImportStudentPayloadItem {
+  username: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  password?: string;
+  idnumber?: string;
+  courseid?: number;
+  groupname?: string;
+}
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function parseCsv(
@@ -108,7 +119,24 @@ function toMoodleCreateUsersPayload(
   }));
 }
 
+function toLocalExamImportStudentsPayload(
+  users: CreateUserRequestDto[],
+  options?: { courseId?: number; groupName?: string },
+): LocalExamImportStudentPayloadItem[] {
+  return users.map((user) => ({
+    username: user.username,
+    firstname: user.firstname,
+    lastname: user.lastname,
+    email: user.email,
+    ...(user.password ? { password: user.password } : {}),
+    ...(user.idnumber ? { idnumber: user.idnumber } : {}),
+    ...(options?.courseId ? { courseid: options.courseId } : {}),
+    ...(options?.groupName ? { groupname: options.groupName } : {}),
+  }));
+}
+
 export const UserImportParser = {
   parseCsv,
   toMoodleCreateUsersPayload,
+  toLocalExamImportStudentsPayload,
 };
