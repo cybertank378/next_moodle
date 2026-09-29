@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Bell, LogOut, Menu, Search, User } from "lucide-react";
+import { Bell, LogOut, Menu, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { type AvatarMenuItem, getAvatarMenuByRole } from "@/libs/avatarMenu";
@@ -12,6 +12,7 @@ import { ROUTES } from "@/libs/routes";
 import { useAuthApi } from "@/modules/auth/presentation/hooks/useAuthApi";
 import Button from "@/shared-ui/component/Button";
 import { DropdownItem } from "@/shared-ui/component/DropdownItem";
+import SearchField from "@/shared-ui/component/SearchField";
 import ThemeSwitch from "@/shared-ui/component/ThemeSwitch";
 
 interface Props {
@@ -26,6 +27,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
 
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [topbarSearch, setTopbarSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Get dynamic avatar menu based on role
@@ -81,12 +83,12 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
             <Menu size={22} />
           </button>
 
-          <div className="flex items-center gap-2 px-3 h-10 border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-100/80 dark:bg-[#1e1e2d] focus-within:border-indigo-500 transition-colors flex-1 max-w-md min-w-0">
-            <Search size={16} className="text-slate-400 shrink-0" />
-            <input
-              type="text"
+          <div className="flex-1 max-w-md min-w-0">
+            <SearchField
+              value={topbarSearch}
+              onChange={setTopbarSearch}
               placeholder="Cari ujian, mata pelajaran, siswa..."
-              className="flex-1 bg-transparent outline-none text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 min-w-0"
+              size="sm"
             />
           </div>
         </div>
@@ -99,9 +101,10 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
           <button
             type="button"
             aria-label="Notifikasi"
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <Bell size={18} />
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-[#151521]" />
           </button>
 
           {/* ================= AVATAR ================= */}

@@ -12,13 +12,28 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 // TYPES
 //////////////////////////////////////////////////////////////
 
-type Variant = "filled" | "label" | "outline" | "text" | "ghost";
+type Variant =
+  | "filled"
+  | "label"
+  | "outline"
+  | "text"
+  | "ghost"
+  | "primary"
+  | "secondary"
+  | "danger";
 
 type Size = "lg" | "md" | "sm";
 
 type Shape = "rounded" | "circle";
 
-type Color = "primary" | "secondary" | "error" | "warning" | "info" | "success";
+type Color =
+  | "primary"
+  | "secondary"
+  | "error"
+  | "danger"
+  | "warning"
+  | "info"
+  | "success";
 
 //////////////////////////////////////////////////////////////
 // PROPS
@@ -103,91 +118,92 @@ const shapeStyles: Record<Shape, string> = {
 // COLOR MAP
 //////////////////////////////////////////////////////////////
 
-const colorMap: Record<Color, Record<Variant, string>> = {
+const colorMap: Record<
+  Color,
+  Record<"filled" | "label" | "outline" | "text" | "ghost", string>
+> = {
   primary: {
     filled:
-      "bg-indigo-500 text-white hover:bg-indigo-600 active:bg-indigo-700 focus:ring-indigo-400",
-
+      "bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 active:bg-indigo-800 focus:ring-indigo-400",
     label:
-      "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 active:bg-indigo-300",
-
+      "bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 active:bg-indigo-300",
     outline:
-      "border border-indigo-500 text-indigo-500 hover:bg-indigo-50 active:bg-indigo-100",
-
-    text: "text-indigo-500 hover:bg-indigo-50 active:bg-indigo-100",
-
-    ghost: "text-indigo-500 hover:bg-indigo-50 active:bg-indigo-100",
+      "border border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 active:bg-indigo-100",
+    text: "text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 active:bg-indigo-100",
+    ghost:
+      "text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 active:bg-indigo-100",
   },
 
   secondary: {
     filled:
-      "bg-gray-600 text-white hover:bg-gray-700 active:bg-gray-800 focus:ring-gray-400",
-
-    label: "bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400",
-
+      "bg-slate-700 dark:bg-slate-800 text-white hover:bg-slate-800 dark:hover:bg-slate-700 active:bg-slate-900 focus:ring-slate-400",
+    label:
+      "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300",
     outline:
-      "border border-gray-500 text-gray-600 hover:bg-gray-100 active:bg-gray-200",
-
-    text: "text-gray-600 hover:bg-gray-100 active:bg-gray-200",
-
-    ghost: "text-gray-600 hover:bg-gray-100 active:bg-gray-200",
+      "border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200",
+    text: "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200",
+    ghost:
+      "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200",
   },
 
   error: {
     filled:
       "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus:ring-red-400",
-
-    label: "bg-red-100 text-red-600 hover:bg-red-200 active:bg-red-300",
-
+    label:
+      "bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/60 active:bg-red-300",
     outline:
-      "border border-red-500 text-red-500 hover:bg-red-50 active:bg-red-100",
+      "border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 active:bg-red-100",
+    text: "text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 active:bg-red-100",
+    ghost:
+      "text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 active:bg-red-100",
+  },
 
-    text: "text-red-500 hover:bg-red-50 active:bg-red-100",
-
-    ghost: "text-red-500 hover:bg-red-50 active:bg-red-100",
+  danger: {
+    filled:
+      "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus:ring-red-400",
+    label:
+      "bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/60 active:bg-red-300",
+    outline:
+      "border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 active:bg-red-100",
+    text: "text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 active:bg-red-100",
+    ghost:
+      "text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 active:bg-red-100",
   },
 
   warning: {
     filled:
       "bg-yellow-500 text-white hover:bg-yellow-600 active:bg-yellow-700 focus:ring-yellow-400",
-
     label:
-      "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 active:bg-yellow-300",
-
+      "bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/60 active:bg-yellow-300",
     outline:
-      "border border-yellow-500 text-yellow-600 hover:bg-yellow-50 active:bg-yellow-100",
-
-    text: "text-yellow-600 hover:bg-yellow-50 active:bg-yellow-100",
-
-    ghost: "text-yellow-600 hover:bg-yellow-50 active:bg-yellow-100",
+      "border border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/30 active:bg-yellow-100",
+    text: "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/30 active:bg-yellow-100",
+    ghost:
+      "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/30 active:bg-yellow-100",
   },
 
   info: {
     filled:
       "bg-cyan-500 text-white hover:bg-cyan-600 active:bg-cyan-700 focus:ring-cyan-400",
-
-    label: "bg-cyan-100 text-cyan-600 hover:bg-cyan-200 active:bg-cyan-300",
-
+    label:
+      "bg-cyan-100 dark:bg-cyan-950/50 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-200 dark:hover:bg-cyan-900/60 active:bg-cyan-300",
     outline:
-      "border border-cyan-500 text-cyan-500 hover:bg-cyan-50 active:bg-cyan-100",
-
-    text: "text-cyan-500 hover:bg-cyan-50 active:bg-cyan-100",
-
-    ghost: "text-cyan-500 hover:bg-cyan-50 active:bg-cyan-100",
+      "border border-cyan-500 text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 active:bg-cyan-100",
+    text: "text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 active:bg-cyan-100",
+    ghost:
+      "text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 active:bg-cyan-100",
   },
 
   success: {
     filled:
       "bg-green-500 text-white hover:bg-green-600 active:bg-green-700 focus:ring-green-400",
-
-    label: "bg-green-100 text-green-600 hover:bg-green-200 active:bg-green-300",
-
+    label:
+      "bg-green-100 dark:bg-green-950/50 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/60 active:bg-green-300",
     outline:
-      "border border-green-500 text-green-500 hover:bg-green-50 active:bg-green-100",
-
-    text: "text-green-500 hover:bg-green-50 active:bg-green-100",
-
-    ghost: "text-green-500 hover:bg-green-50 active:bg-green-100",
+      "border border-green-500 text-green-500 hover:bg-green-50 dark:hover:bg-green-950/30 active:bg-green-100",
+    text: "text-green-500 hover:bg-green-50 dark:hover:bg-green-950/30 active:bg-green-100",
+    ghost:
+      "text-green-500 hover:bg-green-50 dark:hover:bg-green-950/30 active:bg-green-100",
   },
 };
 
@@ -227,6 +243,24 @@ export default function Button({
   ...props
 }: Props) {
   //////////////////////////////////////////////////////////////
+  // RESOLVE VARIANT & COLOR
+  //////////////////////////////////////////////////////////////
+
+  const resolvedColor: Color =
+    variant === "primary"
+      ? "primary"
+      : variant === "secondary"
+        ? "secondary"
+        : variant === "danger"
+          ? "danger"
+          : color;
+
+  const resolvedVariant =
+    variant === "primary" || variant === "secondary" || variant === "danger"
+      ? "filled"
+      : variant;
+
+  //////////////////////////////////////////////////////////////
   // COMPONENT
   //////////////////////////////////////////////////////////////
 
@@ -262,7 +296,7 @@ export default function Button({
 
         isIconOnly ? iconOnlySizeStyles[size] : sizeStyles[size],
 
-        colorMap[color][variant],
+        colorMap[resolvedColor][resolvedVariant],
 
         fullWidth && "w-full",
 

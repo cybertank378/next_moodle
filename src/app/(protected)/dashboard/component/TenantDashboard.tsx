@@ -1,42 +1,43 @@
+import Card from "@/shared-ui/component/Card";
+import Typography from "@/shared-ui/component/Typography";
+
 export default function TenantDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Dashboard Instansi
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-gray-400">
+        <Typography variant="h1">Dashboard Instansi</Typography>
+        <Typography variant="subheading" className="mt-1">
           Kelola ujian, peserta, bank soal, dan pemantauan sesi ujian Moodle.
-        </p>
+        </Typography>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-6 shadow-sm">
-          <h2 className="mb-1 text-sm font-semibold text-slate-500 dark:text-gray-400">
+        <Card>
+          <Typography variant="subheading" className="mb-1">
             Ujian Aktif
-          </h2>
+          </Typography>
           <p className="text-3xl font-extrabold text-slate-900 dark:text-white">
             0
           </p>
-        </div>
+        </Card>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-6 shadow-sm">
-          <h2 className="mb-1 text-sm font-semibold text-slate-500 dark:text-gray-400">
+        <Card>
+          <Typography variant="subheading" className="mb-1">
             Peserta Terdaftar
-          </h2>
+          </Typography>
           <p className="text-3xl font-extrabold text-slate-900 dark:text-white">
             0
           </p>
-        </div>
+        </Card>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-6 shadow-sm">
-          <h2 className="mb-1 text-sm font-semibold text-slate-500 dark:text-gray-400">
+        <Card>
+          <Typography variant="subheading" className="mb-1">
             Status Moodle
-          </h2>
+          </Typography>
           <p className="text-3xl font-extrabold text-emerald-600 dark:text-green-400">
             Belum diverifikasi
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   );
