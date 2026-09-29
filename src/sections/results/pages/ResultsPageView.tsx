@@ -3,7 +3,9 @@
 import { BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCourseApi } from "@/modules/course/presentation/hooks/useCourseApi";
+import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import ResultsEmptyState from "../atoms/ResultsEmptyState";
 import StudentGradeReportView from "../organisms/StudentGradeReportView";
 import TeacherClassResultsView from "../organisms/TeacherClassResultsView";
 
@@ -37,17 +39,22 @@ export default function ResultsPageView({ userRole }: ResultsPageViewProps) {
             <BookOpen size={16} className="text-sky-400" />
             <span>Pilih Kursus:</span>
           </div>
-          <select
+          <SelectField
             value={selectedCourseId ?? ""}
             onChange={(e) => setSelectedCourseId(Number(e.target.value))}
-            className="rounded-lg border border-gray-800 bg-gray-900 px-3 py-1.5 text-sm text-white focus:border-sky-500 focus:outline-none"
+            size="sm"
+            className="border-gray-800 bg-gray-900 text-white"
           >
             {courses.map((c) => (
-              <option key={c.id} value={c.id}>
+              <option
+                key={c.id}
+                value={c.id}
+                className="bg-gray-900 text-white"
+              >
                 {c.fullName}
               </option>
             ))}
-          </select>
+          </SelectField>
         </div>
       )}
 
@@ -69,9 +76,11 @@ export default function ResultsPageView({ userRole }: ResultsPageViewProps) {
           />
         )
       ) : (
-        <div className="rounded-xl border border-dashed border-gray-800 p-8 text-center text-sm text-gray-400">
-          Tidak ada kursus aktif yang ditemukan untuk melihat nilai ujian.
-        </div>
+        <ResultsEmptyState
+          title="Tidak ada kursus aktif"
+          description="Tidak ditemukan kursus yang terdaftar untuk melihat hasil penilaian."
+          onRetry={() => void listCourses()}
+        />
       )}
     </div>
   );

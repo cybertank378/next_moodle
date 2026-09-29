@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { type RequestState, request } from "@/libs/apiClient";
+import { showErrorToast, showSuccessToast } from "@/shared-ui/component/Toast";
 import type {
   CourseGradesResponseDto,
   UserGradeReportResponseDto,
@@ -28,6 +29,7 @@ export function useGradeApi() {
     async (
       courseId: number,
       userId?: number,
+      options?: { silent?: boolean },
     ): Promise<UserGradeReportResponseDto | null> => {
       setUserReportState({ data: null, error: null, loading: true });
 
@@ -40,14 +42,21 @@ export function useGradeApi() {
       });
 
       if (res.error || !res.data) {
+        const errorMsg = res.error ?? "Gagal memuat rapor nilai.";
+        if (!options?.silent) {
+          showErrorToast(errorMsg);
+        }
         setUserReportState({
           data: null,
-          error: res.error ?? "Gagal memuat rapor nilai.",
+          error: errorMsg,
           loading: false,
         });
         return null;
       }
 
+      if (!options?.silent) {
+        showSuccessToast("Rapor nilai berhasil diperbarui.");
+      }
       setUserReportState({
         data: res.data,
         error: null,
@@ -62,6 +71,7 @@ export function useGradeApi() {
     async (
       courseId: number,
       activityId?: number,
+      options?: { silent?: boolean },
     ): Promise<CourseGradesResponseDto | null> => {
       setCourseGradesState({ data: null, error: null, loading: true });
 
@@ -74,14 +84,21 @@ export function useGradeApi() {
       });
 
       if (res.error || !res.data) {
+        const errorMsg = res.error ?? "Gagal memuat rekap nilai kelas.";
+        if (!options?.silent) {
+          showErrorToast(errorMsg);
+        }
         setCourseGradesState({
           data: null,
-          error: res.error ?? "Gagal memuat rekap nilai kelas.",
+          error: errorMsg,
           loading: false,
         });
         return null;
       }
 
+      if (!options?.silent) {
+        showSuccessToast("Rekap nilai kelas berhasil diperbarui.");
+      }
       setCourseGradesState({
         data: res.data,
         error: null,

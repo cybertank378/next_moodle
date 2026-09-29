@@ -1,10 +1,11 @@
 "use client";
 
-import { Award, CheckCircle, RefreshCw, Search, Users } from "lucide-react";
+import { Award, CheckCircle, RefreshCw, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
 import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
 import Button from "@/shared-ui/component/Button";
+import SearchField from "@/shared-ui/component/SearchField";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import GradeScoreCard from "../atoms/GradeScoreCard";
 import CourseGradesTable from "../molecules/CourseGradesTable";
@@ -15,12 +16,15 @@ export interface TeacherClassResultsViewProps {
   courseTitle?: string;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export default function TeacherClassResultsView({
   courseId,
   courseTitle,
 }: TeacherClassResultsViewProps) {
   const { courseGradesState, getCourseGrades } = useGradeApi();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedStudent, setSelectedStudent] =
     useState<UserGradeReportResponseDto | null>(null);
 
@@ -43,6 +47,11 @@ export default function TeacherClassResultsView({
         String(r.userId).includes(q),
     );
   }, [reports, searchQuery]);
+
+  const paginatedReports = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredReports.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredReports, currentPage]);
 
   const stats = useMemo(() => {
     if (reports.length === 0) {
@@ -146,19 +155,16 @@ export default function TeacherClassResultsView({
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
-          <div className="relative w-full max-w-sm">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-            />
-            <input
-              type="text"
-              placeholder="Cari peserta berdasarkan nama / ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-gray-800 bg-gray-900/60 py-2 pl-9 pr-4 text-sm text-white placeholder-gray-500 transition-colors focus:border-sky-500 focus:outline-none"
-            />
-          </div>
+          <SearchField
+            value={searchQuery}
+            onChange={(val) => {
+              setSearchQuery(val);
+              setCurrentPage(1);
+            }}
+            placeholder="Cari peserta berdasarkan nama / ID..."
+            size="sm"
+            className="w-full max-w-sm"
+          />
         </div>
 
         {loading && reports.length === 0 ? (
@@ -169,8 +175,13 @@ export default function TeacherClassResultsView({
           </div>
         ) : (
           <CourseGradesTable
-            reports={filteredReports}
+            reports={paginatedReports}
             onSelectStudent={(s) => setSelectedStudent(s)}
+            currentPage={currentPage}
+            totalItems={filteredReports.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+            onRetry={() => void getCourseGrades(courseId)}
           />
         )}
       </div>

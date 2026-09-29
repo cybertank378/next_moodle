@@ -9,7 +9,7 @@ describe("CourseGradesTable", () => {
     expect(html).toContain("Belum ada rekap nilai peserta yang tersedia");
   });
 
-  it("renders student rows with names and total scores", () => {
+  it("renders student rows with names and total scores using Table component", () => {
     const mockReports: UserGradeReportResponseDto[] = [
       {
         courseId: 1,
@@ -41,5 +41,28 @@ describe("CourseGradesTable", () => {
     expect(html).toContain("#201");
     expect(html).toContain("92.00");
     expect(html).toContain("Rapor");
+  });
+
+  it("renders Pagination when pagination props are provided", () => {
+    const mockReports: UserGradeReportResponseDto[] = [
+      {
+        courseId: 1,
+        userId: 201,
+        userFullName: "Citra Lestari",
+        courseTotal: null,
+        items: [],
+      },
+    ];
+
+    const html = renderToStaticMarkup(
+      <CourseGradesTable
+        reports={mockReports}
+        currentPage={1}
+        totalItems={25}
+        itemsPerPage={10}
+        onPageChange={() => {}}
+      />,
+    );
+    expect(html).toContain("Menampilkan 1 hingga 10 dari total 25 data");
   });
 });
