@@ -66,7 +66,7 @@ export default function ExamAttemptPageView({
   if (loading && questions.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-slate-800 bg-[#151521] p-6 space-y-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-6 space-y-4 shadow-sm">
           <Skeleton height={32} width={260} />
           <Skeleton height={20} width={180} />
         </div>

@@ -12,7 +12,6 @@ import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { InfrastructureError } from "@/core/errors/InfrastructureError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 import type {
   AppSessionPayload,
   CreatedAppSession,

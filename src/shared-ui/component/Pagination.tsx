@@ -59,7 +59,7 @@ export default function Pagination({
   return (
     <div className="w-full flex items-center justify-between py-2">
       {/* INFO */}
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 dark:text-gray-400">
         {totalItems === 0
           ? "Tidak ada data"
           : `Menampilkan ${start} hingga ${end} dari total ${totalItems} data`}
@@ -77,9 +77,9 @@ export default function Pagination({
           disabled={isPrevDisabled}
           onClick={() => !isPrevDisabled && onPageChangeAction(currentPage - 1)}
           className={clsx(
-            "w-9 h-9 border",
+            "w-9 h-9 border border-gray-300 dark:border-slate-700",
             isPrevDisabled &&
-              "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed",
+              "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 border-gray-200 dark:border-slate-800 cursor-not-allowed",
           )}
           leftIcon={ChevronLeft}
         />
@@ -89,7 +89,7 @@ export default function Pagination({
           page === "..." ? (
             <span
               key={`ellipsis-${index === 1 ? "left" : "right"}`}
-              className="px-2 text-gray-400"
+              className="px-2 text-gray-400 dark:text-slate-600"
             >
               ...
             </span>
@@ -102,8 +102,8 @@ export default function Pagination({
               color="primary"
               onClick={() => onPageChangeAction(page)}
               className={clsx(
-                "w-9 h-9 border text-sm font-medium",
-                currentPage === page && "shadow-md",
+                "w-9 h-9 border border-gray-300 dark:border-slate-700 text-sm font-medium",
+                currentPage === page && "shadow-md dark:border-indigo-600",
               )}
             >
               {page}
@@ -121,9 +121,9 @@ export default function Pagination({
           disabled={isNextDisabled}
           onClick={() => !isNextDisabled && onPageChangeAction(currentPage + 1)}
           className={clsx(
-            "w-9 h-9 border",
+            "w-9 h-9 border border-gray-300 dark:border-slate-700",
             isNextDisabled &&
-              "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed",
+              "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 border-gray-200 dark:border-slate-800 cursor-not-allowed",
           )}
           rightIcon={ChevronRight}
         />

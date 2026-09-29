@@ -28,14 +28,17 @@ export default function QuestionNavigator({
   return (
     <div
       data-testid="question-navigator"
-      className={`rounded-xl border border-slate-800 bg-[#151521] p-5 shadow-sm space-y-4 ${className}`}
+      className={`rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-5 shadow-sm space-y-4 ${className}`}
     >
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-        <div className="flex items-center gap-2 text-white font-semibold text-sm">
-          <LayoutGrid size={16} className="text-indigo-400" />
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3">
+        <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold text-sm">
+          <LayoutGrid
+            size={16}
+            className="text-indigo-600 dark:text-indigo-400"
+          />
           <span>Navigasi Soal</span>
         </div>
-        <span className="text-xs text-slate-400 font-medium">
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
           {answeredCount} / {totalCount} Terjawab
         </span>
       </div>
@@ -69,7 +72,7 @@ export default function QuestionNavigator({
                 data-testid={`nav-slot-${q.slot}`}
                 className={`!h-9 !min-w-0 !px-0 font-bold text-xs ${
                   isActive
-                    ? "ring-2 ring-indigo-400 ring-offset-2 ring-offset-[#151521]"
+                    ? "ring-2 ring-indigo-500 ring-offset-2 ring-offset-white dark:ring-offset-[#151521]"
                     : ""
                 }`}
               >
@@ -89,20 +92,22 @@ export default function QuestionNavigator({
         })}
       </div>
 
-      <div className="border-t border-slate-800/80 pt-3 space-y-1.5 text-[11px] text-slate-400">
+      <div className="border-t border-slate-200 dark:border-slate-800/80 pt-3 space-y-1.5 text-[11px] text-slate-500 dark:text-slate-400">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
             <span>Sudah Dijawab</span>
           </div>
-          <span className="font-semibold text-slate-300">{answeredCount}</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
+            {answeredCount}
+          </span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full border border-slate-600 bg-transparent" />
+            <span className="h-2.5 w-2.5 rounded-full border border-slate-400 dark:border-slate-600 bg-transparent" />
             <span>Belum Dijawab</span>
           </div>
-          <span className="font-semibold text-slate-300">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
             {totalCount - answeredCount}
           </span>
         </div>
@@ -111,7 +116,7 @@ export default function QuestionNavigator({
             <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
             <span>Ditandai / Ragu</span>
           </div>
-          <span className="font-semibold text-slate-300">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
             {questions.filter((q) => q.isFlagged).length}
           </span>
         </div>

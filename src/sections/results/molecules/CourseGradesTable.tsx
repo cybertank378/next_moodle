@@ -39,32 +39,34 @@ export default function CourseGradesTable({
   return (
     <div data-testid="course-grades-table" className={`space-y-4 ${className}`}>
       <Table
-        wrapperClassName="border-gray-800 bg-gray-900/60 shadow-sm"
-        className="text-gray-200"
+        wrapperClassName="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900/60 shadow-sm"
+        className="text-slate-700 dark:text-gray-200"
       >
-        <TableHead className="h-12 border-b border-gray-800 bg-gray-900/80 text-xs font-semibold uppercase text-gray-400">
+        <TableHead className="h-12 border-b border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-900/80 text-xs font-semibold uppercase text-slate-600 dark:text-gray-400">
           <TableRow className="border-b-0 hover:bg-transparent even:bg-transparent">
-            <TableHeaderCell className="text-gray-400">Peserta</TableHeaderCell>
-            <TableHeaderCell className="text-gray-400">
+            <TableHeaderCell className="text-slate-600 dark:text-gray-400">
+              Peserta
+            </TableHeaderCell>
+            <TableHeaderCell className="text-slate-600 dark:text-gray-400">
               ID Siswa
             </TableHeaderCell>
-            <TableHeaderCell className="text-center text-gray-400">
+            <TableHeaderCell className="text-center text-slate-600 dark:text-gray-400">
               Komponen Selesai
             </TableHeaderCell>
-            <TableHeaderCell className="text-right text-gray-400">
+            <TableHeaderCell className="text-right text-slate-600 dark:text-gray-400">
               Nilai Total
             </TableHeaderCell>
-            <TableHeaderCell className="text-center text-gray-400">
+            <TableHeaderCell className="text-center text-slate-600 dark:text-gray-400">
               Status
             </TableHeaderCell>
             {onSelectStudent && (
-              <TableHeaderCell className="text-center text-gray-400">
+              <TableHeaderCell className="text-center text-slate-600 dark:text-gray-400">
                 Aksi
               </TableHeaderCell>
             )}
           </TableRow>
         </TableHead>
-        <TableBody className="divide-y divide-gray-800/60">
+        <TableBody className="divide-y divide-slate-200 dark:divide-gray-800/60">
           {reports.length === 0 ? (
             <TableRow>
               <TableCell
@@ -88,25 +90,25 @@ export default function CourseGradesTable({
               return (
                 <TableRow
                   key={report.userId}
-                  className="border-gray-800/60 hover:bg-gray-800/40 even:bg-gray-900/30 transition-colors"
+                  className="border-slate-200 dark:border-gray-800/60 hover:bg-slate-50 dark:hover:bg-gray-800/40 even:bg-slate-50/50 dark:even:bg-gray-900/30 transition-colors"
                 >
-                  <TableCell className="text-gray-200">
+                  <TableCell className="text-slate-800 dark:text-gray-200">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-gray-400">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400">
                         <User size={15} />
                       </div>
-                      <span className="font-medium text-white">
+                      <span className="font-medium text-slate-900 dark:text-white">
                         {report.userFullName}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-gray-400">
+                  <TableCell className="text-slate-500 dark:text-gray-400">
                     #{report.userId}
                   </TableCell>
-                  <TableCell className="text-center text-gray-300">
+                  <TableCell className="text-center text-slate-600 dark:text-gray-300">
                     {completedCount} / {report.items.length}
                   </TableCell>
-                  <TableCell className="text-right font-bold text-white">
+                  <TableCell className="text-right font-bold text-slate-900 dark:text-white">
                     {total ? total.gradeFormatted : "-"}
                   </TableCell>
                   <TableCell className="text-center">

@@ -18,7 +18,7 @@ export default function CourseCard({ course }: Props) {
   const cleanSummary = stripHtml(course.summary);
 
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-slate-800 bg-[#151521] p-5 transition-all duration-200 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5">
+    <div className="flex flex-col justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-5 shadow-sm transition-all duration-200 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <CourseCategoryBadge format={course.format} />
@@ -29,28 +29,28 @@ export default function CourseCard({ course }: Props) {
         </div>
 
         <div className="flex items-start gap-3 pt-1">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600/10 text-indigo-400 border border-indigo-600/20">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-600/20">
             <BookOpen size={20} />
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               {course.shortName}
             </p>
-            <h3 className="truncate text-base font-bold text-white hover:text-indigo-300">
+            <h3 className="truncate text-base font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-300">
               {course.displayName}
             </h3>
           </div>
         </div>
 
         {cleanSummary && (
-          <p className="line-clamp-2 text-xs text-slate-400 leading-relaxed">
+          <p className="line-clamp-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             {cleanSummary}
           </p>
         )}
       </div>
 
-      <div className="mt-5 border-t border-slate-800/80 pt-4">
+      <div className="mt-5 border-t border-slate-200 dark:border-slate-800/80 pt-4">
         <Button
           size="sm"
           color="primary"

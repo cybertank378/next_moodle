@@ -13,8 +13,17 @@ export default function Card({ children, className }: Props) {
     <div
       className={`
         rounded-xl
+        border
+        border-slate-200
+        dark:border-slate-800
+        bg-white
+        dark:bg-[#151521]
+        text-slate-800
+        dark:text-slate-200
         shadow-sm
         p-6
+        transition-colors
+        duration-200
         ${className ?? ""}
       `}
     >

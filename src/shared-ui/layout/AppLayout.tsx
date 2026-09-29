@@ -37,7 +37,7 @@ export default function AppLayout({
   //////////////////////////////////////////////////////////////
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#1e1e2d] text-gray-200">
+    <div className="flex h-screen overflow-hidden bg-slate-100 text-slate-800 dark:bg-[#1e1e2d] dark:text-gray-200 transition-colors duration-200">
       {/* SIDEBAR */}
       <AppSidebar
         role={activeRole}
@@ -55,7 +55,7 @@ export default function AppLayout({
         />
 
         {/* SCROLLABLE CONTENT */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100 dark:bg-[#1e1e2d] transition-colors duration-200">
           <div className="min-h-full px-4 py-6 md:px-6">{children}</div>
         </main>
       </div>

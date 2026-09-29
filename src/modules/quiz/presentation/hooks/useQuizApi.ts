@@ -56,7 +56,9 @@ export function useQuizApi() {
 
   const getQuizDetail = useCallback(async (quizId: number) => {
     setDetailState({ data: null, error: null, loading: true });
-    const result = await request<QuizSummaryResponseDTO>(`/api/quizzes/${quizId}`);
+    const result = await request<QuizSummaryResponseDTO>(
+      `/api/quizzes/${quizId}`,
+    );
     setDetailState({ ...result, loading: false });
     return result;
   }, []);
