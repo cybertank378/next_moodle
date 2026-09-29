@@ -1,16 +1,17 @@
+import Card from "@/shared-ui/component/Card";
+import Typography from "@/shared-ui/component/Typography";
+
 export default function StudentDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Portal Peserta Ujian
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-gray-400">
+        <Typography variant="h1">Portal Peserta Ujian</Typography>
+        <Typography variant="subheading" className="mt-1">
           Daftar mata pelajaran dan ujian yang tersedia untuk Anda.
-        </p>
+        </Typography>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-8 text-center shadow-sm">
+      <Card className="p-8 text-center">
         <p className="mb-2 text-base text-slate-700 dark:text-gray-300">
           Belum ada ujian aktif yang dijadwalkan saat ini.
         </p>
@@ -18,7 +19,7 @@ export default function StudentDashboard() {
           Silakan hubungi pengawas atau guru jika ujian seharusnya sudah
           dimulai.
         </p>
-      </div>
+      </Card>
     </div>
   );
 }
