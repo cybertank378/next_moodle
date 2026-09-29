@@ -1,0 +1,119 @@
+"use client";
+
+import { useState } from "react";
+import type { EnrolUserRequestDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
+import { Modal } from "@/shared-ui/component/Modal";
+
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  courseId: number | null;
+  courseTitle?: string;
+  onSubmit: (enrolment: EnrolUserRequestDto) => Promise<boolean>;
+  loading?: boolean;
+}
+
+export default function EnrolUserModal({
+  open,
+  onClose,
+  courseId,
+  courseTitle,
+  onSubmit,
+  loading = false,
+}: Props) {
+  const [userId, setUserId] = useState("");
+  const [roleId, setRoleId] = useState(5); // default 5 = student
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    if (!courseId) {
+      setErrorMsg("Pilih course terlebih dahulu.");
+      return;
+    }
+
+    const uid = Number.parseInt(userId.trim(), 10);
+    if (Number.isNaN(uid) || uid <= 0) {
+      setErrorMsg("Moodle User ID harus berupa angka valid.");
+      return;
+    }
+
+    setErrorMsg(null);
+    const success = await onSubmit({
+      courseId,
+      userId: uid,
+      roleId,
+    });
+
+    if (success) {
+      setUserId("");
+      setRoleId(5);
+      onClose();
+    }
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      title="Daftarkan Pengguna ke Course"
+      subtitle={
+        courseTitle
+          ? `Mendaftarkan peserta ke course: ${courseTitle}`
+          : "Daftarkan pengguna terpilih ke course."
+      }
+      submitText={loading ? "Mendaftarkan..." : "Daftarkan"}
+      cancelText="Batal"
+      submitDisabled={loading || !courseId}
+      submitLoading={loading}
+      size="md"
+    >
+      <div className="space-y-4 py-2">
+        {errorMsg && (
+          <div className="rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 p-3 text-sm text-rose-600 dark:text-rose-400">
+            {errorMsg}
+          </div>
+        )}
+
+        <div>
+          <label
+            htmlFor="enrol-user-id"
+            className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+          >
+            User ID (Moodle User ID) *
+          </label>
+          <input
+            id="enrol-user-id"
+            type="number"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            placeholder="misal: 10"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Masukkan ID unik pengguna yang terdaftar di sistem.
+          </p>
+        </div>
+
+        <div>
+          <label
+            htmlFor="enrol-role-id"
+            className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Peran di Course *
+          </label>
+          <select
+            id="enrol-role-id"
+            value={roleId}
+            onChange={(e) => setRoleId(Number(e.target.value))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value={5}>Student (Siswa / Peserta Ujian)</option>
+            <option value={3}>Editing Teacher (Guru Pengajar)</option>
+            <option value={4}>Non-editing Teacher (Pengawas / Asisten)</option>
+          </select>
+        </div>
+      </div>
+    </Modal>
+  );
+}
