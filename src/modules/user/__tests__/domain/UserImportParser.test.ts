@@ -86,4 +86,38 @@ user03,Siti,Aminah,invalid-email-format`;
       },
     ]);
   });
+
+  it("converts parsed user DTOs to custom local_exam_import_students payload structure", () => {
+    const users = [
+      {
+        username: "student01",
+        firstname: "Budi",
+        lastname: "Santoso",
+        email: "budi@example.com",
+        password: "Pass123!",
+        idnumber: "12345",
+      },
+    ];
+
+    const customPayload = UserImportParser.toLocalExamImportStudentsPayload(
+      users,
+      {
+        courseId: 10,
+        groupName: "Kelas-10A",
+      },
+    );
+
+    expect(customPayload).toEqual([
+      {
+        username: "student01",
+        firstname: "Budi",
+        lastname: "Santoso",
+        email: "budi@example.com",
+        password: "Pass123!",
+        idnumber: "12345",
+        courseid: 10,
+        groupname: "Kelas-10A",
+      },
+    ]);
+  });
 });

@@ -237,4 +237,50 @@ export class MoodleUserRepository implements UserRepositoryInterface {
       errors,
     };
   }
+
+  async importStudentsCustom(input: {
+    tenantId: string;
+    users: CreateUserRequestDto[];
+    courseId?: number;
+    groupName?: string;
+    client?: MoodleClient;
+  }): Promise<{
+    createdUsers: Array<{ id: number; username: string }>;
+    usedCustomApi: boolean;
+  }> {
+    if (input.users.length === 0) {
+      return { createdUsers: [], usedCustomApi: false };
+    }
+
+    const client = await this.resolveClient(input.tenantId, input.client);
+
+    try {
+      const payload = UserImportParser.toLocalExamImportStudentsPayload(
+        input.users,
+        {
+          courseId: input.courseId,
+          groupName: input.groupName,
+        },
+      );
+
+      const res = await client.call<Array<{ id: number; username: string }>>(
+        "local_exam_import_students",
+        { students: payload },
+      );
+
+      if (Array.isArray(res) && res.length > 0) {
+        return { createdUsers: res, usedCustomApi: true };
+      }
+    } catch {
+      // Gracefully fall back to core_user_create_users if custom plugin is not installed/registered
+    }
+
+    const fallbackCreated = await this.createUsers({
+      tenantId: input.tenantId,
+      users: input.users,
+      client,
+    });
+
+    return { createdUsers: fallbackCreated, usedCustomApi: false };
+  }
 }

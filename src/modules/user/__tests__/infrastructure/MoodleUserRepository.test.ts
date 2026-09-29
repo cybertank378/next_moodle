@@ -118,4 +118,91 @@ valid_user,Valid,User,valid@example.com
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.createdUsers).toEqual([{ id: 201, username: "valid_user" }]);
   });
+
+  it("calls local_exam_import_students API when custom endpoint is available", async () => {
+    const mockMoodleClient: MoodleClient = {
+      call: vi
+        .fn()
+        .mockResolvedValue([{ id: 301, username: "student_custom" }]),
+    };
+
+    const mockFactory: MoodleClientFactory = {
+      createClientForTenant: vi.fn().mockResolvedValue(mockMoodleClient),
+      createClient: vi.fn().mockReturnValue(mockMoodleClient),
+    };
+
+    const repo = new MoodleUserRepository(mockFactory, mockMoodleClient);
+    const result = await repo.importStudentsCustom({
+      tenantId: "tenant-1",
+      users: [
+        {
+          username: "student_custom",
+          firstname: "Custom",
+          lastname: "Student",
+          email: "custom@example.com",
+        },
+      ],
+      courseId: 10,
+      groupName: "Kelas-10",
+    });
+
+    expect(mockMoodleClient.call).toHaveBeenCalledWith(
+      "local_exam_import_students",
+      expect.objectContaining({
+        students: expect.arrayContaining([
+          expect.objectContaining({
+            username: "student_custom",
+            courseid: 10,
+            groupname: "Kelas-10",
+          }),
+        ]),
+      }),
+    );
+    expect(result.usedCustomApi).toBe(true);
+    expect(result.createdUsers).toEqual([
+      { id: 301, username: "student_custom" },
+    ]);
+  });
+
+  it("falls back to core_user_create_users when local_exam_import_students fails", async () => {
+    const mockMoodleClient: MoodleClient = {
+      call: vi
+        .fn()
+        .mockRejectedValueOnce(
+          new Error("Function local_exam_import_students not found"),
+        )
+        .mockResolvedValueOnce([{ id: 302, username: "student_fallback" }]),
+    };
+
+    const mockFactory: MoodleClientFactory = {
+      createClientForTenant: vi.fn().mockResolvedValue(mockMoodleClient),
+      createClient: vi.fn().mockReturnValue(mockMoodleClient),
+    };
+
+    const repo = new MoodleUserRepository(mockFactory, mockMoodleClient);
+    const result = await repo.importStudentsCustom({
+      tenantId: "tenant-1",
+      users: [
+        {
+          username: "student_fallback",
+          firstname: "Fallback",
+          lastname: "Student",
+          email: "fallback@example.com",
+        },
+      ],
+    });
+
+    expect(mockMoodleClient.call).toHaveBeenCalledWith(
+      "local_exam_import_students",
+      expect.any(Object),
+    );
+    expect(mockMoodleClient.call).toHaveBeenCalledWith(
+      "core_user_create_users",
+      expect.any(Object),
+    );
+    expect(result.usedCustomApi).toBe(false);
+    expect(result.createdUsers).toEqual([
+      { id: 302, username: "student_fallback" },
+    ]);
+  });
 });

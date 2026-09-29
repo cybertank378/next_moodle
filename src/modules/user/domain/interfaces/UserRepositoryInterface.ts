@@ -42,4 +42,15 @@ export interface UserRepositoryInterface {
     users?: CreateUserRequestDto[];
     client?: MoodleClient;
   }): Promise<BulkImportUsersResponseDto>;
+
+  importStudentsCustom?(input: {
+    tenantId: string;
+    users: CreateUserRequestDto[];
+    courseId?: number;
+    groupName?: string;
+    client?: MoodleClient;
+  }): Promise<{
+    createdUsers: Array<{ id: number; username: string }>;
+    usedCustomApi: boolean;
+  }>;
 }
