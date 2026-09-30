@@ -86,4 +86,59 @@ describe("MoodleErrorMapper", () => {
     expect(error.statusCode).toBe(500);
     expect(error.message).not.toContain("reverse proxy");
   });
+
+  describe("session-expired error codes", () => {
+    it("should map tokennotwhitelisted to UnauthorizedError with isSessionExpired", () => {
+      const error = MoodleErrorMapper.fromMoodleException({
+        exception: "webservice_access_exception",
+        errorcode: "tokennotwhitelisted",
+        message: "Token is not whitelisted",
+      });
+      expect(error).toBeInstanceOf(UnauthorizedError);
+      expect(error.message).toContain("Sesi Moodle");
+      expect((error as UnauthorizedError).details).toHaveProperty(
+        "isSessionExpired",
+        true,
+      );
+    });
+
+    it("should map servicerequireslogin to UnauthorizedError with isSessionExpired", () => {
+      const error = MoodleErrorMapper.fromMoodleException({
+        exception: "moodle_exception",
+        errorcode: "servicerequireslogin",
+        message: "Service requires login",
+      });
+      expect(error).toBeInstanceOf(UnauthorizedError);
+      expect((error as UnauthorizedError).details).toHaveProperty(
+        "isSessionExpired",
+        true,
+      );
+    });
+
+    it("should map invalidsession to UnauthorizedError with isSessionExpired", () => {
+      const error = MoodleErrorMapper.fromMoodleException({
+        exception: "moodle_exception",
+        errorcode: "invalidsession",
+        message: "Invalid session",
+      });
+      expect(error).toBeInstanceOf(UnauthorizedError);
+      expect((error as UnauthorizedError).details).toHaveProperty(
+        "isSessionExpired",
+        true,
+      );
+    });
+
+    it("should map webservice_access_exception with unknown errorcode to session expired", () => {
+      const error = MoodleErrorMapper.fromMoodleException({
+        exception: "webservice_access_exception",
+        errorcode: "someunknowncode",
+        message: "Access exception",
+      });
+      expect(error).toBeInstanceOf(UnauthorizedError);
+      expect((error as UnauthorizedError).details).toHaveProperty(
+        "isSessionExpired",
+        true,
+      );
+    });
+  });
 });
