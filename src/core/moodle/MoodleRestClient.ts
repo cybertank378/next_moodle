@@ -6,6 +6,10 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import { createLogger } from "@/core/logger/createLogger";
 import type { Logger } from "@/core/logger/Logger";
 import { SsrfValidator } from "@/core/security/SsrfValidator";
+import {
+  type CacheAdapter,
+  buildCacheKey,
+} from "./MoodleCacheAdapter";
 import { encodeMoodleParams } from "./MoodleEncoder";
 import { MoodleErrorMapper } from "./MoodleErrorMapper";
 import type {
@@ -52,10 +56,12 @@ export class MoodleRestClient implements MoodleClient {
   private readonly token: string;
   private readonly timeoutMs: number;
   private readonly logger: Logger;
+  private readonly cache: CacheAdapter | null;
 
   constructor(
     credentials: MoodleCredentials,
     ssrfValidator = new SsrfValidator(),
+    cache: CacheAdapter | null = null,
   ) {
     const rawBaseUrl = credentials.baseUrl.trim();
     const baseUrl = ssrfValidator.validateUrl(rawBaseUrl);
@@ -86,6 +92,7 @@ export class MoodleRestClient implements MoodleClient {
     this.token = credentials.token.trim();
     this.timeoutMs = credentials.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.logger = createLogger("MoodleRestClient");
+    this.cache = cache;
   }
 
   static async authenticate(
@@ -193,6 +200,20 @@ export class MoodleRestClient implements MoodleClient {
       ? this.logger.child({ requestId: options.requestId })
       : this.logger;
 
+    // Cache check: only for safe-read with cache adapter + ttlMs provided
+    if (
+      requestKind === "safe-read" &&
+      this.cache &&
+      options.cacheTtlMs !== undefined
+    ) {
+      const cacheKey = buildCacheKey(wsfunction, params);
+      const cached = this.cache.get<T>(cacheKey);
+      if (cached !== undefined) {
+        requestLogger.debug("Moodle cache hit", { wsfunction });
+        return cached;
+      }
+    }
+
     for (let attempt = 0; attempt <= retries; attempt += 1) {
       try {
         const response = await fetch(this.endpoint, {
@@ -244,6 +265,20 @@ export class MoodleRestClient implements MoodleClient {
             moodleErrorCode: responseData.errorcode,
           });
           throw MoodleErrorMapper.fromMoodleException(responseData);
+        }
+
+        // Cache the result for safe-read with TTL
+        if (
+          requestKind === "safe-read" &&
+          this.cache &&
+          options.cacheTtlMs !== undefined
+        ) {
+          const cacheKey = buildCacheKey(wsfunction, params);
+          this.cache.set(cacheKey, responseData, options.cacheTtlMs);
+          requestLogger.debug("Moodle response cached", {
+            wsfunction,
+            ttlMs: options.cacheTtlMs,
+          });
         }
 
         return responseData as T;
