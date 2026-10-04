@@ -1,4 +1,4 @@
-import { getApps, initializeApp, applicationDefault } from "firebase-admin/app";
+import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 import type { NotificationEntity } from "../../domain/entity/NotificationEntity";
 import type { PushNotificationAdapterInterface } from "../../domain/interfaces/PushNotificationAdapterInterface";
@@ -15,7 +15,9 @@ if (!getApps().length) {
   }
 }
 
-export class FirebaseCloudMessagingAdapter implements PushNotificationAdapterInterface {
+export class FirebaseCloudMessagingAdapter
+  implements PushNotificationAdapterInterface
+{
   async dispatchNotification(notification: NotificationEntity): Promise<void> {
     const tenantPart = notification.tenantId ?? "platform";
     // Construct the FCM topic name
@@ -49,7 +51,10 @@ export class FirebaseCloudMessagingAdapter implements PushNotificationAdapterInt
         },
       });
     } catch (error) {
-      console.error("Failed to dispatch Firebase Cloud Messaging event:", error);
+      console.error(
+        "Failed to dispatch Firebase Cloud Messaging event:",
+        error,
+      );
     }
   }
 }

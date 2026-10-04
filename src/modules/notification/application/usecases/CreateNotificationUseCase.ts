@@ -23,7 +23,9 @@ export class CreateNotificationUseCase {
     private readonly wsAdapter?: PushNotificationAdapterInterface,
   ) {}
 
-  async execute(dto: CreateNotificationRequestDto): Promise<NotificationEntity> {
+  async execute(
+    dto: CreateNotificationRequestDto,
+  ): Promise<NotificationEntity> {
     const title = dto.title.trim();
     const body = dto.body.trim();
     const linkPath = dto.linkPath?.trim() || null;
@@ -39,7 +41,9 @@ export class CreateNotificationUseCase {
       );
     }
     if (linkPath !== null && !isInternalPath(linkPath)) {
-      throw new ValidationError("Tautan notifikasi harus berupa path internal aplikasi.");
+      throw new ValidationError(
+        "Tautan notifikasi harus berupa path internal aplikasi.",
+      );
     }
 
     const notification = await this.repo.create({
@@ -52,7 +56,7 @@ export class CreateNotificationUseCase {
 
     if (this.wsAdapter) {
       // fire-and-forget to avoid blocking the response
-      this.wsAdapter.dispatchNotification(notification).catch(err => {
+      this.wsAdapter.dispatchNotification(notification).catch((err) => {
         console.error("Failed to dispatch real-time notification:", err);
       });
     }

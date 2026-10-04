@@ -6,10 +6,7 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import { createLogger } from "@/core/logger/createLogger";
 import type { Logger } from "@/core/logger/Logger";
 import { SsrfValidator } from "@/core/security/SsrfValidator";
-import {
-  type CacheAdapter,
-  buildCacheKey,
-} from "./MoodleCacheAdapter";
+import { buildCacheKey, type CacheAdapter } from "./MoodleCacheAdapter";
 import { encodeMoodleParams } from "./MoodleEncoder";
 import { MoodleErrorMapper } from "./MoodleErrorMapper";
 import type {

@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { useQuestionApi } from "@/modules/questions/presentation/hooks/useQuestionApi";
-import { QuestionType, CreateQuestionRequestDto } from "@/modules/questions/domain/types/QuestionTypes";
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Button from "@/shared-ui/component/Button";
-import TextField from "@/shared-ui/component/TextField";
-import SelectField from "@/shared-ui/component/SelectField";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { Bold, Italic, Strikethrough } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import {
+  type CreateQuestionRequestDto,
+  QuestionType,
+} from "@/modules/questions/domain/types/QuestionTypes";
+import { useQuestionApi } from "@/modules/questions/presentation/hooks/useQuestionApi";
+import Button from "@/shared-ui/component/Button";
+import SelectField from "@/shared-ui/component/SelectField";
+import TextField from "@/shared-ui/component/TextField";
 
 interface QuestionEditorProps {
   categoryId: number;
@@ -16,7 +20,11 @@ interface QuestionEditorProps {
   onSuccess?: () => void;
 }
 
-export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, existingQuestion, onSuccess }) => {
+export const QuestionEditor: React.FC<QuestionEditorProps> = ({
+  categoryId,
+  existingQuestion,
+  onSuccess,
+}) => {
   const { createQuestion, updateQuestion, loading } = useQuestionApi();
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +45,8 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, exis
     },
     editorProps: {
       attributes: {
-        class: 'prose max-w-none w-full px-3 py-2 rounded-b-md min-h-[150px] focus:outline-none bg-white dark:bg-[#151521]',
+        class:
+          "prose max-w-none w-full px-3 py-2 rounded-b-md min-h-[150px] focus:outline-none bg-white dark:bg-[#151521]",
       },
     },
   });
@@ -57,9 +66,9 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, exis
     } else {
       res = await createQuestion(formData);
     }
-    
+
     if (res.error) {
-      setError(res.error.message || "Failed to save question");
+      setError((res.error as any).message || "Failed to save question");
     } else if (res.data) {
       if (onSuccess) onSuccess();
     }
@@ -76,18 +85,24 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, exis
       <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-200">
         {isEditing ? "Edit Question" : "Create New Question"}
       </h2>
-      {error && <div className="mb-4 p-3 bg-red-50 text-red-600 rounded">{error}</div>}
-      
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded">{error}</div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <SelectField
             label="Question Type"
             value={formData.type}
             disabled={isEditing}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value as QuestionType })}
+            onChange={(e) =>
+              setFormData({ ...formData, type: e.target.value as QuestionType })
+            }
           >
-            {Object.values(QuestionType).map(t => (
-              <option key={t} value={t}>{t}</option>
+            {Object.values(QuestionType).map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </SelectField>
         </div>
@@ -104,14 +119,16 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, exis
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Question Text</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+            Question Text
+          </label>
           <div className="border border-gray-300 dark:border-slate-700 rounded-md overflow-hidden">
             {/* Toolbar */}
             <div className="flex flex-wrap gap-1 border-b border-gray-300 dark:border-slate-700 p-2 bg-slate-50 dark:bg-slate-800">
               <Button
                 type="button"
                 onClick={toggleBold}
-                variant={editor?.isActive('bold') ? 'filled' : 'ghost'}
+                variant={editor?.isActive("bold") ? "filled" : "ghost"}
                 size="sm"
                 iconOnly
                 leftIcon={Bold}
@@ -119,7 +136,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, exis
               <Button
                 type="button"
                 onClick={toggleItalic}
-                variant={editor?.isActive('italic') ? 'filled' : 'ghost'}
+                variant={editor?.isActive("italic") ? "filled" : "ghost"}
                 size="sm"
                 iconOnly
                 leftIcon={Italic}
@@ -127,13 +144,13 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, exis
               <Button
                 type="button"
                 onClick={toggleStrike}
-                variant={editor?.isActive('strike') ? 'filled' : 'ghost'}
+                variant={editor?.isActive("strike") ? "filled" : "ghost"}
                 size="sm"
                 iconOnly
                 leftIcon={Strikethrough}
               />
             </div>
-            
+
             {/* Editor Content */}
             <EditorContent editor={editor} />
           </div>
@@ -146,16 +163,17 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, exis
             required
             min="1"
             value={formData.defaultMark}
-            onChange={(e) => setFormData({ ...formData, defaultMark: parseInt(e.target.value, 10) })}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                defaultMark: parseInt(e.target.value, 10),
+              })
+            }
           />
         </div>
 
         <div className="pt-4 flex justify-end space-x-3">
-          <Button
-            type="submit"
-            loading={loading}
-            variant="primary"
-          >
+          <Button type="submit" loading={loading} variant="primary">
             {isEditing ? "Update Question" : "Save Question"}
           </Button>
         </div>

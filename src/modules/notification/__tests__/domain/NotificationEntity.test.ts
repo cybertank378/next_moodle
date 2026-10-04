@@ -55,9 +55,9 @@ describe("NotificationEntity", () => {
   });
 
   it("should throw if id is empty", () => {
-    expect(
-      () => new NotificationEntity({ ...baseProps, id: "" }),
-    ).toThrow(/id/i);
+    expect(() => new NotificationEntity({ ...baseProps, id: "" })).toThrow(
+      /id/i,
+    );
   });
 
   it("should throw if tenantId is empty for a tenant-scoped role", () => {
@@ -103,8 +103,8 @@ describe("NotificationEntity", () => {
   });
 
   it("should throw if title is empty", () => {
-    expect(
-      () => new NotificationEntity({ ...baseProps, title: "" }),
-    ).toThrow(/title/i);
+    expect(() => new NotificationEntity({ ...baseProps, title: "" })).toThrow(
+      /title/i,
+    );
   });
 });

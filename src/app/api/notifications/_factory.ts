@@ -1,13 +1,12 @@
 import "server-only";
 
+import { CreateNotificationUseCase } from "@/modules/notification/application/usecases/CreateNotificationUseCase";
 import { GetNotificationsUseCase } from "@/modules/notification/application/usecases/GetNotificationsUseCase";
 import { GetUnreadCountUseCase } from "@/modules/notification/application/usecases/GetUnreadCountUseCase";
-import { MarkNotificationReadUseCase } from "@/modules/notification/application/usecases/MarkNotificationReadUseCase";
 import { MarkAllReadUseCase } from "@/modules/notification/application/usecases/MarkAllReadUseCase";
-import { PrismaNotificationRepository } from "@/modules/notification/infrastructure/repo/PrismaNotificationRepository";
+import { MarkNotificationReadUseCase } from "@/modules/notification/application/usecases/MarkNotificationReadUseCase";
 import { NotificationController } from "@/modules/notification/infrastructure/http/NotificationController";
-
-import { CreateNotificationUseCase } from "@/modules/notification/application/usecases/CreateNotificationUseCase";
+import { PrismaNotificationRepository } from "@/modules/notification/infrastructure/repo/PrismaNotificationRepository";
 
 let _controller: NotificationController | null = null;
 let _createNotificationUseCase: CreateNotificationUseCase | null = null;

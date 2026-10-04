@@ -2,8 +2,8 @@ import { AppError } from "@/core/errors/AppError";
 import { createLogger } from "@/core/logger/createLogger";
 import type { Logger } from "@/core/logger/Logger";
 import {
-  type RateLimitScope,
   getRateLimiter,
+  type RateLimitScope,
   resolveRateLimitKey,
 } from "@/core/security/RateLimitConfig";
 import { resolveRequestId } from "@/core/security/RequestId";
@@ -52,9 +52,7 @@ export function withApiHandler<T = unknown>(
       const result = await limiter.limit(key);
 
       if (!result.success) {
-        const retryAfterSec = Math.ceil(
-          (result.resetAt - Date.now()) / 1_000,
-        );
+        const retryAfterSec = Math.ceil((result.resetAt - Date.now()) / 1_000);
         logger.warn("Rate limit exceeded", {
           key,
           scope,
@@ -126,4 +124,3 @@ export function withApiHandler<T = unknown>(
     }
   };
 }
-

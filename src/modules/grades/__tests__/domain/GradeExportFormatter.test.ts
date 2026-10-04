@@ -28,7 +28,7 @@ describe("GradeExportFormatter", () => {
     {
       courseId: 101,
       userId: 2,
-      userFullName: "Siti \"Aisyah\", S.Pd",
+      userFullName: 'Siti "Aisyah", S.Pd',
       items: [],
       courseTotal: {
         id: 992,
@@ -56,23 +56,36 @@ describe("GradeExportFormatter", () => {
   ];
 
   it("generates Excel-compatible CSV starting with UTF-8 BOM", () => {
-    const csv = GradeExportFormatter.formatGradesToCsv(mockReports, "Matematika Dasar");
+    const csv = GradeExportFormatter.formatGradesToCsv(
+      mockReports,
+      "Matematika Dasar",
+    );
     expect(csv.startsWith("\uFEFF")).toBe(true);
   });
 
   it("includes correct headers and metadata in CSV output", () => {
-    const csv = GradeExportFormatter.formatGradesToCsv(mockReports, "Matematika Dasar");
-    expect(csv).toContain("No,ID Peserta,Nama Siswa,Nilai Akhir,Nilai Maksimum,Persentase,Status Kelulusan,Catatan");
+    const csv = GradeExportFormatter.formatGradesToCsv(
+      mockReports,
+      "Matematika Dasar",
+    );
+    expect(csv).toContain(
+      "No,ID Peserta,Nama Siswa,Nilai Akhir,Nilai Maksimum,Persentase,Status Kelulusan,Catatan",
+    );
   });
 
   it("formats student records correctly with proper escaping for quotes and commas", () => {
-    const csv = GradeExportFormatter.formatGradesToCsv(mockReports, "Matematika Dasar");
-    
+    const csv = GradeExportFormatter.formatGradesToCsv(
+      mockReports,
+      "Matematika Dasar",
+    );
+
     // Row 1: Budi Santoso
-    expect(csv).toContain("1,1,Budi Santoso,85.50,100,85.50%,LULUS,\"Sangat baik, pertahankan!\"");
-    
+    expect(csv).toContain(
+      '1,1,Budi Santoso,85.50,100,85.50%,LULUS,"Sangat baik, pertahankan!"',
+    );
+
     // Row 2: Siti "Aisyah", S.Pd with escaped quotes and comma
-    expect(csv).toContain("\"Siti \"\"Aisyah\"\", S.Pd\"");
+    expect(csv).toContain('"Siti ""Aisyah"", S.Pd"');
     expect(csv).toContain("60.00,100,60.00%,BELUM LULUS,Perlu remedial");
 
     // Row 3: Ahmad Dahlan without courseTotal

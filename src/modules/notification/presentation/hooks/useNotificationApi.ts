@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { request } from "@/libs/apiClient";
-import type { NotificationTab } from "@/modules/notification/domain/types/NotificationTypes";
 import type {
   PaginatedNotificationsResponseDto,
   UnreadCountResponseDto,
 } from "@/modules/notification/domain/dto/NotificationResponseDto";
+import type { NotificationTab } from "@/modules/notification/domain/types/NotificationTypes";
 
 const POLL_INTERVAL_MS = 30_000;
 const DEFAULT_LIMIT = 10;
@@ -36,7 +36,9 @@ export function useNotificationApi() {
 
     async function setupFirebase() {
       try {
-        const { initMessaging, getToken, onMessage } = await import("@/libs/firebase");
+        const { initMessaging, getToken, onMessage } = await import(
+          "@/libs/firebase"
+        );
         const messaging = await initMessaging();
         if (!messaging) return; // FCM not supported
 
@@ -97,7 +99,10 @@ export function useNotificationApi() {
     void setupFirebase();
 
     // Fallback polling just in case WS disconnected
-    pollRef.current = setInterval(() => void fetchUnreadCount(), POLL_INTERVAL_MS);
+    pollRef.current = setInterval(
+      () => void fetchUnreadCount(),
+      POLL_INTERVAL_MS,
+    );
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
       if (unsubscribeOnMessage) unsubscribeOnMessage();

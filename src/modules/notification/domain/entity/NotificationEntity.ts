@@ -21,17 +21,22 @@ export class NotificationEntity {
 
   constructor(props: NotificationProps) {
     if (!props.id) throw new Error("NotificationEntity: id is required");
-    if (!props.recipientId) throw new Error("NotificationEntity: recipientId is required");
+    if (!props.recipientId)
+      throw new Error("NotificationEntity: recipientId is required");
     if (!Object.values(AppRole).includes(props.recipientRole as AppRole)) {
       throw new Error("NotificationEntity: recipientRole is invalid");
     }
 
     const isPlatformRecipient = props.recipientRole === AppRole.ADMIN;
     if (isPlatformRecipient && props.tenantId !== null) {
-      throw new Error("NotificationEntity: tenantId must be null for ADMIN recipients");
+      throw new Error(
+        "NotificationEntity: tenantId must be null for ADMIN recipients",
+      );
     }
     if (!isPlatformRecipient && !props.tenantId) {
-      throw new Error("NotificationEntity: tenantId is required for tenant-scoped recipients");
+      throw new Error(
+        "NotificationEntity: tenantId is required for tenant-scoped recipients",
+      );
     }
 
     if (!props.title) throw new Error("NotificationEntity: title is required");

@@ -3,8 +3,8 @@
 import { BellOff } from "lucide-react";
 import type { NotificationResponseDto } from "@/modules/notification/domain/dto/NotificationResponseDto";
 import type { NotificationTab } from "@/modules/notification/domain/types/NotificationTypes";
-import Skeleton from "@/shared-ui/component/Skeleton";
 import Pagination from "@/shared-ui/component/Pagination";
+import Skeleton from "@/shared-ui/component/Skeleton";
 import NotificationItem from "../atoms/NotificationItem";
 
 interface NotificationListProps {
@@ -58,7 +58,9 @@ export default function NotificationList({
           <BellOff size={20} className="text-slate-400" />
         </div>
         <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-          {tab === "unread" ? "Tidak ada notifikasi baru" : "Tidak ada notifikasi yang telah dibaca"}
+          {tab === "unread"
+            ? "Tidak ada notifikasi baru"
+            : "Tidak ada notifikasi yang telah dibaca"}
         </p>
       </div>
     );

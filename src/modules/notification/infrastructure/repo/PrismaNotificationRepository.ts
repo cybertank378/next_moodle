@@ -3,29 +3,27 @@ import "server-only";
 import { prisma } from "@/libs/prisma";
 import { NotificationEntity } from "../../domain/entity/NotificationEntity";
 import type {
-  NotificationRepositoryInterface,
+  CreateNotificationOptions,
   FindByRecipientOptions,
   FindByRecipientResult,
-  CreateNotificationOptions,
+  NotificationRepositoryInterface,
 } from "../../domain/interfaces/NotificationRepositoryInterface";
-import { NotificationType } from "../../domain/types/NotificationTypes";
+import type { NotificationType } from "../../domain/types/NotificationTypes";
 import type { NotificationScope } from "../../domain/value-object/NotificationScope";
 
-function mapPrismaToEntity(
-  row: {
-    id: string;
-    tenantId: string;
-    recipientId: string;
-    recipientRole: string;
-    type: string;
-    title: string;
-    body: string;
-    linkPath: string | null;
-    isRead: boolean;
-    readAt: Date | null;
-    createdAt: Date;
-  },
-): NotificationEntity {
+function mapPrismaToEntity(row: {
+  id: string;
+  tenantId: string;
+  recipientId: string;
+  recipientRole: string;
+  type: string;
+  title: string;
+  body: string;
+  linkPath: string | null;
+  isRead: boolean;
+  readAt: Date | null;
+  createdAt: Date;
+}): NotificationEntity {
   return new NotificationEntity({
     id: row.id,
     tenantId: row.tenantId,
@@ -110,7 +108,9 @@ export class PrismaNotificationRepository
     return count;
   }
 
-  async create(options: CreateNotificationOptions): Promise<NotificationEntity> {
+  async create(
+    options: CreateNotificationOptions,
+  ): Promise<NotificationEntity> {
     const row = await this.db.notification.create({
       data: {
         tenantId: options.scope.tenantId,

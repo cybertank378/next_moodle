@@ -1,10 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
-import { CreateQuestionUseCase } from "../../application/usecases/CreateQuestionUseCase";
-import { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
-import { QuestionEntity } from "../../domain/entity/QuestionEntity";
-import { QuestionType } from "../../domain/types/QuestionTypes";
-import { MoodleClient } from "@/core/moodle/types";
+import { describe, expect, it, vi } from "vitest";
 import { ValidationError } from "@/core/errors/ValidationError";
+import type { MoodleClient } from "@/core/moodle/types";
+import { CreateQuestionUseCase } from "../../application/usecases/CreateQuestionUseCase";
+import { QuestionEntity } from "../../domain/entity/QuestionEntity";
+import type { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
+import { QuestionType } from "../../domain/types/QuestionTypes";
 
 describe("CreateQuestionUseCase", () => {
   it("should create a question when dto is valid", async () => {
@@ -22,6 +22,7 @@ describe("CreateQuestionUseCase", () => {
       getQuestionsByCategory: vi.fn(),
       createQuestion: vi.fn().mockResolvedValue(mockEntity),
       deleteQuestion: vi.fn(),
+      updateQuestion: vi.fn(),
     };
 
     const useCase = new CreateQuestionUseCase(mockRepo);
@@ -44,11 +45,14 @@ describe("CreateQuestionUseCase", () => {
       getQuestionsByCategory: vi.fn(),
       createQuestion: vi.fn(),
       deleteQuestion: vi.fn(),
+      updateQuestion: vi.fn(),
     };
 
     const useCase = new CreateQuestionUseCase(mockRepo);
     const mockClient = {} as MoodleClient;
 
-    await expect(useCase.execute(mockClient, {})).rejects.toThrow(ValidationError);
+    await expect(useCase.execute(mockClient, {})).rejects.toThrow(
+      ValidationError,
+    );
   });
 });
