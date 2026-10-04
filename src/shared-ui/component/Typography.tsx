@@ -22,12 +22,12 @@ export interface TypographyProps extends HTMLAttributes<HTMLElement> {
 }
 
 const variantStyles: Record<TypographyVariant, string> = {
-  h1: "text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white",
-  h2: "text-xl md:text-2xl font-semibold tracking-tight text-slate-900 dark:text-white",
-  h3: "text-lg md:text-xl font-semibold text-slate-900 dark:text-white",
-  h4: "text-base md:text-lg font-semibold text-slate-900 dark:text-white",
-  h5: "text-sm md:text-base font-semibold text-slate-900 dark:text-white",
-  h6: "text-xs md:text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-white",
+  h1: "text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50",
+  h2: "text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100",
+  h3: "text-lg md:text-xl font-semibold text-slate-900 dark:text-slate-200",
+  h4: "text-base md:text-lg font-semibold text-slate-900 dark:text-slate-200",
+  h5: "text-sm md:text-base font-semibold text-slate-900 dark:text-slate-200",
+  h6: "text-xs md:text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-300",
   subheading: "text-sm font-medium text-slate-500 dark:text-slate-400",
   body: "text-sm text-slate-600 dark:text-slate-300 leading-relaxed",
   caption: "text-xs text-slate-400 dark:text-slate-500",

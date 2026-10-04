@@ -7,24 +7,27 @@ export function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
 }
 
+import { Role } from "@/libs/enums";
+
 export function resolveUserRole(role?: string | null): UserRole | null {
   switch (role) {
-    case "ADMIN":
+    case Role.ADMIN:
     case "SUPERADMIN":
-      return "ADMIN";
-    case "TENANT":
+      return Role.ADMIN;
+    case Role.TENANT:
     case "TENANT_ADMIN":
-    case "TEACHER":
-      return "TENANT";
-    case "STUDENT":
-      return "STUDENT";
+      return Role.TENANT;
+    case Role.TEACHER:
+      return Role.TEACHER;
+    case Role.STUDENT:
+      return Role.STUDENT;
     default:
       return null;
   }
 }
 
 export function redirectByRole(role?: string | null): string {
-  return resolveUserRole(role) ? ROUTES.DASHBOARD.ROOT : ROUTES.AUTH.LOGIN;
+  return resolveUserRole(role) ? ROUTES.HOME : ROUTES.AUTH.LOGIN;
 }
 
 export function stripHtml(html: string): string {

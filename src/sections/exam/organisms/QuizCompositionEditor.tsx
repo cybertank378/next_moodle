@@ -3,6 +3,7 @@
 import {
   closestCenter,
   DndContext,
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -87,8 +88,10 @@ export function QuizCompositionEditor({
     }),
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+
+    if (!over) return;
 
     if (active.id !== over.id) {
       setItems((items) => {

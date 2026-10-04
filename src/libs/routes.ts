@@ -6,19 +6,36 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/forgot-password",
     CHANGE_PASSWORD: "/change-password",
   },
-  DASHBOARD: {
-    ROOT: "/dashboard",
-    TENANTS: "/dashboard/tenants",
-    USERS: "/dashboard/users",
-    ENROLMENTS: "/dashboard/enrolments",
-    GROUPS: "/dashboard/groups",
-    COURSES: "/dashboard/courses",
-    QUESTIONS: "/dashboard/questions",
-    EXAMS: "/dashboard/exams",
-    RESULTS: "/dashboard/results",
-    BRANDING: "/dashboard/branding",
-    AUDIT: "/dashboard/audit",
-    SETTINGS: "/dashboard/settings",
+  ADMIN: {
+    ROOT: "/admin",
+    TENANTS: "/admin/tenants",
+    AUDIT: "/admin/audit",
+    SETTINGS: "/admin/settings",
+  },
+  TENANT: {
+    ROOT: "/tenant",
+    USERS: "/tenant/users",
+    ENROLMENTS: "/tenant/enrolments",
+    GROUPS: "/tenant/groups",
+    COURSES: "/tenant/courses",
+    QUESTIONS: "/tenant/questions",
+    EXAMS: "/tenant/exams",
+    RESULTS: "/tenant/results",
+    BRANDING: "/tenant/branding",
+    AUDIT: "/tenant/audit",
+  },
+  STUDENT: {
+    ROOT: "/student",
+    COURSES: "/student/courses",
+    EXAMS: "/student/exams",
+    RESULTS: "/student/results",
+  },
+  TEACHER: {
+    ROOT: "/teacher",
+    COURSES: "/teacher/courses",
+    QUESTIONS: "/teacher/questions",
+    EXAMS: "/teacher/exams",
+    RESULTS: "/teacher/results",
   },
 } as const;
 
@@ -28,24 +45,26 @@ export class AppRouteConstants {
   static readonly HOME = ROUTES.HOME;
   static readonly LOGIN = ROUTES.AUTH.LOGIN;
   static readonly REGISTER = ROUTES.AUTH.REGISTER;
-  static readonly DASHBOARD = ROUTES.DASHBOARD.ROOT;
-  static readonly COURSES = ROUTES.DASHBOARD.COURSES;
-  static readonly EXAMS = ROUTES.DASHBOARD.EXAMS;
-  static readonly USERS = ROUTES.DASHBOARD.USERS;
-  static readonly TENANTS = ROUTES.DASHBOARD.TENANTS;
+
+  // Aliases to avoid breaking existing UI components (defaulting to tenant paths where applicable)
+  static readonly DASHBOARD = ROUTES.TENANT.ROOT;
+  static readonly COURSES = ROUTES.TENANT.COURSES;
+  static readonly EXAMS = ROUTES.TENANT.EXAMS;
+  static readonly USERS = ROUTES.TENANT.USERS;
+  static readonly TENANTS = ROUTES.ADMIN.TENANTS;
 
   static courseDetail(id: number | string): string {
-    return `${ROUTES.DASHBOARD.COURSES}/${id}`;
+    return `${ROUTES.TENANT.COURSES}/${id}`;
   }
 
   static examDetail(id: number | string): string {
-    return `${ROUTES.DASHBOARD.EXAMS}/${id}`;
+    return `${ROUTES.TENANT.EXAMS}/${id}`;
   }
 
   static examAttempt(
     quizId: number | string,
     attemptId: number | string,
   ): string {
-    return `${ROUTES.DASHBOARD.EXAMS}/${quizId}/attempt/${attemptId}`;
+    return `${ROUTES.STUDENT.EXAMS}/${quizId}/attempt/${attemptId}`;
   }
 }

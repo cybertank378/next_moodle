@@ -34,8 +34,9 @@ export function mapMoodleUserToActor(
 
   let role = AppRole.STUDENT;
   if (serviceUsed === "nextjs_admin") {
-    // Platform admin service — but if teacher signals present, it's a TEACHER
-    if (isTeacherUsername || hasStaffCapabilities) {
+    if (usernameLower === "admin") {
+      role = AppRole.ADMIN;
+    } else if (isTeacherUsername || hasStaffCapabilities) {
       role = AppRole.TEACHER;
     } else {
       role = AppRole.ADMIN;

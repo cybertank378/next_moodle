@@ -26,7 +26,7 @@ export default function LoginForm() {
     if (identifierError || passwordError) return;
     try {
       await auth.login({ username: identifier, password });
-      router.push(ROUTES.DASHBOARD.ROOT);
+      router.push(ROUTES.HOME);
       router.refresh();
     } catch {
       // The hook exposes a safe, user-facing error message.

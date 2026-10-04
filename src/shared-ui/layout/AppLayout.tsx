@@ -3,7 +3,7 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
-import type { UserRole } from "@/libs/enums";
+import { Role, type UserRole } from "@/libs/enums";
 import AppSidebar from "@/shared-ui/layout/AppSidebar";
 import AppTopbar from "@/shared-ui/layout/AppTopbar";
 
@@ -24,7 +24,7 @@ export default function AppLayout({
   // RESOLVE ACTIVE ROLE
   //////////////////////////////////////////////////////////////
 
-  const activeRole: UserRole = role || userRole || "ADMIN";
+  const activeRole: UserRole = role || userRole || Role.ADMIN;
 
   //////////////////////////////////////////////////////////////
   // MOBILE SIDEBAR
@@ -37,7 +37,7 @@ export default function AppLayout({
   //////////////////////////////////////////////////////////////
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100 text-slate-800 dark:bg-[#1e1e2d] dark:text-gray-200 transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
       {/* SIDEBAR */}
       <AppSidebar
         role={activeRole}
@@ -55,8 +55,11 @@ export default function AppLayout({
         />
 
         {/* SCROLLABLE CONTENT */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100 dark:bg-[#1e1e2d] transition-colors duration-200">
-          <div className="min-h-full px-4 py-6 md:px-6">{children}</div>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative">
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none hidden dark:block"></div>
+          <div className="min-h-full px-4 py-6 md:px-6 relative z-10">
+            {children}
+          </div>
         </main>
       </div>
     </div>

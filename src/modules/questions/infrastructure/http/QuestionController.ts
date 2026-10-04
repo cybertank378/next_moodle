@@ -53,7 +53,8 @@ export class QuestionController {
         },
       });
     } catch (error) {
-      return mapErrorToHttpResponse(error);
+      const res = mapErrorToHttpResponse(error);
+      return NextResponse.json(res.body, { status: res.status });
     }
   }
 
@@ -108,7 +109,8 @@ export class QuestionController {
         },
       });
     } catch (error) {
-      return mapErrorToHttpResponse(error);
+      const res = mapErrorToHttpResponse(error);
+      return NextResponse.json(res.body, { status: res.status });
     }
   }
 }

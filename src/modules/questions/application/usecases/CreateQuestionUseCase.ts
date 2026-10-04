@@ -7,7 +7,10 @@ import { CreateQuestionDtoValidator } from "../../domain/validators/QuestionVali
 export class CreateQuestionUseCase {
   constructor(private readonly repository: QuestionRepositoryInterface) {}
 
-  async execute(client: MoodleClient, dto: unknown): Promise<QuestionEntity> {
+  async execute(
+    client: MoodleClient,
+    dto: Record<string, unknown> | null,
+  ): Promise<QuestionEntity> {
     const validationResult = CreateQuestionDtoValidator.validate(dto);
     if (validationResult.isFailure) {
       throw validationResult.getError();

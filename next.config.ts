@@ -3,9 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  // Standalone output traces only required node_modules for a minimal runtime memory footprint
-  output: "standalone",
-
   // Disable X-Powered-By header to reduce response overhead and enhance security
   poweredByHeader: false,
 

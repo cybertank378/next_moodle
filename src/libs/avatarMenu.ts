@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { Award, FileText, Home, LogOut, Settings, Users } from "lucide-react";
-import type { UserRole } from "@/libs/enums";
+import { Role, type UserRole } from "@/libs/enums";
 import { ROUTES } from "@/libs/routes";
 
 export type LinkMenuItem = {
@@ -21,74 +21,96 @@ export type AvatarMenuItem = LinkMenuItem | ActionMenuItem;
 
 export function getAvatarMenuByRole(role: UserRole): AvatarMenuItem[] {
   switch (role) {
-    case "ADMIN":
+    case Role.ADMIN:
       return [
         {
           type: "link",
           label: "Dashboard",
-          path: ROUTES.DASHBOARD.ROOT,
+          path: ROUTES.ADMIN.ROOT,
           icon: Home,
         },
         {
           type: "link",
           label: "Tenant",
-          path: ROUTES.DASHBOARD.TENANTS,
+          path: ROUTES.ADMIN.TENANTS,
           icon: Users,
         },
         {
           type: "link",
           label: "Pengaturan",
-          path: ROUTES.DASHBOARD.SETTINGS,
+          path: ROUTES.ADMIN.SETTINGS,
           icon: Settings,
         },
         { type: "action", label: "Logout", action: "logout", icon: LogOut },
       ];
-    case "TENANT":
+    case Role.TENANT:
       return [
         {
           type: "link",
           label: "Dashboard",
-          path: ROUTES.DASHBOARD.ROOT,
+          path: ROUTES.TENANT.ROOT,
           icon: Home,
         },
         {
           type: "link",
           label: "Pengguna",
-          path: ROUTES.DASHBOARD.USERS,
+          path: ROUTES.TENANT.USERS,
           icon: Users,
         },
         {
           type: "link",
           label: "Ujian",
-          path: ROUTES.DASHBOARD.EXAMS,
+          path: ROUTES.TENANT.EXAMS,
           icon: FileText,
         },
         {
           type: "link",
           label: "Hasil Ujian",
-          path: ROUTES.DASHBOARD.RESULTS,
+          path: ROUTES.TENANT.RESULTS,
           icon: Award,
         },
         { type: "action", label: "Logout", action: "logout", icon: LogOut },
       ];
-    case "STUDENT":
+    case Role.STUDENT:
       return [
         {
           type: "link",
           label: "Dashboard",
-          path: ROUTES.DASHBOARD.ROOT,
+          path: ROUTES.STUDENT.ROOT,
           icon: Home,
         },
         {
           type: "link",
           label: "Ujian Saya",
-          path: ROUTES.DASHBOARD.EXAMS,
+          path: ROUTES.STUDENT.EXAMS,
           icon: FileText,
         },
         {
           type: "link",
           label: "Hasil Nilai",
-          path: ROUTES.DASHBOARD.RESULTS,
+          path: ROUTES.STUDENT.RESULTS,
+          icon: Award,
+        },
+        { type: "action", label: "Logout", action: "logout", icon: LogOut },
+      ];
+    case Role.TEACHER:
+      return [
+        {
+          type: "link",
+          label: "Dashboard",
+          path: ROUTES.TEACHER.ROOT,
+          icon: Home,
+        },
+        {
+          type: "link",
+          label: "Bank Soal",
+          path: ROUTES.TEACHER.QUESTIONS,
+          icon: FileText,
+        },
+        {
+          type: "link",
+          label: "Nilai Kelas",
+          path: ROUTES.TEACHER.RESULTS,
           icon: Award,
         },
         { type: "action", label: "Logout", action: "logout", icon: LogOut },

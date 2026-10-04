@@ -2,6 +2,7 @@
 
 import { BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Role, type UserRole } from "@/libs/enums";
 import { useCourseApi } from "@/modules/course/presentation/hooks/useCourseApi";
 import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
@@ -10,7 +11,7 @@ import StudentGradeReportView from "./StudentGradeReportView";
 import TeacherClassResultsView from "./TeacherClassResultsView";
 
 export interface ResultsManagementViewProps {
-  userRole: "STUDENT" | "TENANT" | "ADMIN";
+  userRole: UserRole;
 }
 
 export default function ResultsManagementView({
@@ -65,7 +66,7 @@ export default function ResultsManagementView({
           <Skeleton className="h-32 w-full rounded-2xl" />
         </div>
       ) : selectedCourseId ? (
-        userRole === "STUDENT" ? (
+        userRole === Role.STUDENT ? (
           <StudentGradeReportView
             courseId={selectedCourseId}
             courseTitle={selectedCourse?.fullName}

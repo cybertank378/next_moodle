@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import type { UserRole } from "@/libs/enums";
+import { Role, type UserRole } from "@/libs/enums";
 import { PERMISSIONS } from "@/libs/permissions";
 import { ROUTES } from "@/libs/routes";
 import {
@@ -30,19 +30,19 @@ export interface SidebarGroup {
 
 export function getSidebarMenu(role: UserRole): SidebarGroup[] {
   switch (role) {
-    case "ADMIN":
+    case Role.ADMIN:
       return [
         {
           label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.DASHBOARD.ROOT,
+              path: ROUTES.ADMIN.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Manajemen Tenant",
-              path: ROUTES.DASHBOARD.TENANTS,
+              path: ROUTES.ADMIN.TENANTS,
               icon: Users,
               permission: PERMISSIONS.TENANT_MANAGE,
             },
@@ -53,83 +53,83 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Log Audit",
-              path: ROUTES.DASHBOARD.AUDIT,
+              path: ROUTES.ADMIN.AUDIT,
               icon: ShieldCheck,
             },
             {
               label: "Pengaturan",
-              path: ROUTES.DASHBOARD.SETTINGS,
+              path: ROUTES.ADMIN.SETTINGS,
               icon: Settings,
             },
           ],
         },
       ];
 
-    case "TENANT":
+    case Role.TENANT:
       return [
         {
           label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.DASHBOARD.ROOT,
+              path: ROUTES.TENANT.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Pengguna & Grup",
-              path: ROUTES.DASHBOARD.USERS,
+              path: ROUTES.TENANT.USERS,
               icon: Users,
               permission: PERMISSIONS.USER_MANAGE,
               children: [
                 {
                   label: "Daftar Pengguna",
-                  path: ROUTES.DASHBOARD.USERS,
+                  path: ROUTES.TENANT.USERS,
                   permission: PERMISSIONS.USER_MANAGE,
                 },
                 {
                   label: "Enrolment Manual",
-                  path: ROUTES.DASHBOARD.ENROLMENTS,
+                  path: ROUTES.TENANT.ENROLMENTS,
                   permission: PERMISSIONS.USER_MANAGE,
                 },
                 {
                   label: "Rombel & Grup",
-                  path: ROUTES.DASHBOARD.GROUPS,
+                  path: ROUTES.TENANT.GROUPS,
                   permission: PERMISSIONS.USER_MANAGE,
                 },
               ],
             },
             {
               label: "Kursus & Bank Soal",
-              path: ROUTES.DASHBOARD.COURSES,
+              path: ROUTES.TENANT.COURSES,
               icon: BookOpen,
               permission: PERMISSIONS.EXAM_MANAGE,
               children: [
                 {
                   label: "Mata Pelajaran",
-                  path: ROUTES.DASHBOARD.COURSES,
+                  path: ROUTES.TENANT.COURSES,
                   permission: PERMISSIONS.EXAM_MANAGE,
                 },
                 {
                   label: "Bank Soal",
-                  path: ROUTES.DASHBOARD.QUESTIONS,
+                  path: ROUTES.TENANT.QUESTIONS,
                   permission: PERMISSIONS.EXAM_MANAGE,
                 },
               ],
             },
             {
               label: "Ujian & Hasil",
-              path: ROUTES.DASHBOARD.EXAMS,
+              path: ROUTES.TENANT.EXAMS,
               icon: FileText,
               permission: PERMISSIONS.EXAM_MANAGE,
               children: [
                 {
                   label: "Jadwal Ujian",
-                  path: ROUTES.DASHBOARD.EXAMS,
+                  path: ROUTES.TENANT.EXAMS,
                   permission: PERMISSIONS.EXAM_MANAGE,
                 },
                 {
                   label: "Hasil & Nilai",
-                  path: ROUTES.DASHBOARD.RESULTS,
+                  path: ROUTES.TENANT.RESULTS,
                   permission: PERMISSIONS.RESULT_VIEW_ALL,
                 },
               ],
@@ -141,44 +141,73 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Branding",
-              path: ROUTES.DASHBOARD.BRANDING,
+              path: ROUTES.TENANT.BRANDING,
               icon: Palette,
             },
             {
               label: "Log Audit",
-              path: ROUTES.DASHBOARD.AUDIT,
+              path: ROUTES.TENANT.AUDIT,
               icon: ShieldCheck,
             },
           ],
         },
       ];
 
-    case "STUDENT":
+    case Role.STUDENT:
       return [
         {
           label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.DASHBOARD.ROOT,
+              path: ROUTES.STUDENT.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Mata Pelajaran",
-              path: ROUTES.DASHBOARD.COURSES,
+              path: ROUTES.STUDENT.COURSES,
               icon: BookOpen,
             },
             {
               label: "Jadwal Ujian",
-              path: ROUTES.DASHBOARD.EXAMS,
+              path: ROUTES.STUDENT.EXAMS,
               icon: FileText,
               permission: PERMISSIONS.EXAM_TAKE,
             },
             {
               label: "Hasil & Nilai",
-              path: ROUTES.DASHBOARD.RESULTS,
+              path: ROUTES.STUDENT.RESULTS,
               icon: Award,
               permission: PERMISSIONS.RESULT_VIEW_OWN,
+            },
+          ],
+        },
+      ];
+
+    case Role.TEACHER:
+      return [
+        {
+          label: "Menu Utama",
+          items: [
+            {
+              label: "Dashboard Guru",
+              path: ROUTES.TEACHER.ROOT,
+              icon: LayoutDashboard,
+            },
+            {
+              label: "Mata Pelajaran",
+              path: ROUTES.TEACHER.COURSES,
+              icon: BookOpen,
+            },
+            {
+              label: "Bank Soal",
+              path: ROUTES.TEACHER.QUESTIONS,
+              icon: FileText,
+            },
+            {
+              label: "Hasil & Penilaian",
+              path: ROUTES.TEACHER.RESULTS,
+              icon: Award,
             },
           ],
         },
@@ -200,30 +229,30 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
   const [openKey, setOpenKey] = useState<string | null>(null);
 
   const sidebarContent = (
-    <div className="flex h-screen w-72 flex-col bg-white dark:bg-[#151521] text-slate-800 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 transition-colors duration-200">
-      <div className="border-b border-slate-200 dark:border-slate-800 px-5 py-5">
+    <div className="flex h-screen w-72 flex-col bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-800/60 transition-colors duration-300">
+      <div className="border-b border-slate-200/60 dark:border-slate-800/60 px-5 py-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-white shadow-md">
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
             <GraduationCap size={28} />
           </div>
 
           <div>
-            <h1 className="text-base font-bold tracking-wide text-slate-900 dark:text-white">
+            <h1 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
               Exam SaaS
             </h1>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
               Platform Ujian Terpusat
             </p>
           </div>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#1e1e2d] px-4 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow">
+        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-50 dark:bg-slate-900/60 px-4 py-3 shadow-sm dark:shadow-none">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
             <LayoutDashboard size={18} />
           </div>
 
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               Role Aktif
             </p>
             <p className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -233,7 +262,7 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto bg-white dark:bg-[#151521] px-3 py-5">
+      <nav className="flex-1 overflow-y-auto bg-white dark:bg-slate-950 px-3 py-5">
         <div className="space-y-7">
           {groups.map((group, index) => (
             <div key={`group-${group.label ?? index}`}>
@@ -265,7 +294,7 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </nav>
 
-      <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] px-5 py-4">
+      <div className="border-t border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-950 px-5 py-4">
         <div className="rounded-2xl px-4 py-2">
           <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
             © {new Date().getFullYear()} Exam SaaS Moodle
