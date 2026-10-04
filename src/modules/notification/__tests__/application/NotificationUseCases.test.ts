@@ -239,10 +239,14 @@ describe("MarkAllReadUseCase", () => {
 describe("CreateNotificationUseCase", () => {
   let repo: NotificationRepositoryInterface;
   let useCase: CreateNotificationUseCase;
+  let wsAdapter: { dispatchNotification: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     repo = makeRepo();
-    useCase = new CreateNotificationUseCase(repo);
+    wsAdapter = {
+      dispatchNotification: vi.fn().mockResolvedValue(undefined),
+    };
+    useCase = new CreateNotificationUseCase(repo, wsAdapter);
   });
 
   it("should create a tenant-scoped notification", async () => {
@@ -265,6 +269,7 @@ describe("CreateNotificationUseCase", () => {
       linkPath: "/student/grades",
     });
     expect(result.id).toBe("n-1");
+    expect(wsAdapter.dispatchNotification).toHaveBeenCalledWith(created);
   });
 
   it("should create an ADMIN platform notification without a tenant", async () => {
