@@ -26,3 +26,18 @@ export class CreateQuestionDtoValidator {
     return Result.ok(dto as CreateQuestionRequestDto);
   }
 }
+
+export class UpdateQuestionDtoValidator {
+  static validate(dto: any): Result<any, ValidationError> {
+    if (dto.name !== undefined && typeof dto.name !== "string") {
+      return Result.fail(new ValidationError("Name must be a string"));
+    }
+    if (dto.questionText !== undefined && typeof dto.questionText !== "string") {
+      return Result.fail(new ValidationError("Question text must be a string"));
+    }
+    if (dto.defaultMark !== undefined && typeof dto.defaultMark !== "number") {
+      return Result.fail(new ValidationError("Default mark must be a number"));
+    }
+    return Result.ok(dto);
+  }
+}

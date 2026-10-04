@@ -1,5 +1,5 @@
 import { request } from "@/libs/apiClient";
-import { CreateQuestionRequestDto } from "../../domain/types/QuestionTypes";
+import { CreateQuestionRequestDto, UpdateQuestionRequestDto } from "../../domain/types/QuestionTypes";
 import { useCallback, useState } from "react";
 
 export function useQuestionApi() {
@@ -18,8 +18,22 @@ export function useQuestionApi() {
     }
   }, []);
 
+  const updateQuestion = useCallback(async (id: number, dto: UpdateQuestionRequestDto) => {
+    setLoading(true);
+    try {
+      const res = await request<any>(`/api/questions/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(dto),
+      });
+      return res;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     createQuestion,
+    updateQuestion,
     loading,
   };
 }

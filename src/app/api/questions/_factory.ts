@@ -1,4 +1,5 @@
 import { CreateQuestionUseCase } from "@/modules/questions/application/usecases/CreateQuestionUseCase";
+import { UpdateQuestionUseCase } from "@/modules/questions/application/usecases/UpdateQuestionUseCase";
 import { MoodleQuestionRepository } from "@/modules/questions/infrastructure/repo/MoodleQuestionRepository";
 import { QuestionController } from "@/modules/questions/infrastructure/http/QuestionController";
 import { DefaultMoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
@@ -9,6 +10,7 @@ import { prisma } from "@/libs/prisma";
 
 let _controller: QuestionController | null = null;
 let _createQuestionUseCase: CreateQuestionUseCase | null = null;
+let _updateQuestionUseCase: UpdateQuestionUseCase | null = null;
 let _clientFactory: DefaultMoodleClientFactory | null = null;
 
 export function getMoodleClientFactory() {
@@ -32,9 +34,21 @@ export function getCreateQuestionUseCase(): CreateQuestionUseCase {
   return _createQuestionUseCase;
 }
 
+export function getUpdateQuestionUseCase(): UpdateQuestionUseCase {
+  if (!_updateQuestionUseCase) {
+    const repo = new MoodleQuestionRepository();
+    _updateQuestionUseCase = new UpdateQuestionUseCase(repo);
+  }
+  return _updateQuestionUseCase;
+}
+
 export function getQuestionController(): QuestionController {
   if (!_controller) {
-    _controller = new QuestionController(getCreateQuestionUseCase(), getMoodleClientFactory());
+    _controller = new QuestionController(
+      getCreateQuestionUseCase(),
+      getUpdateQuestionUseCase(),
+      getMoodleClientFactory()
+    );
   }
   return _controller;
 }

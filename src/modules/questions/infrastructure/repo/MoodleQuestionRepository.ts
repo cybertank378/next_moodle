@@ -1,7 +1,7 @@
 import { MoodleClient } from "@/core/moodle/types";
 import { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
 import { QuestionEntity } from "../../domain/entity/QuestionEntity";
-import { CreateQuestionRequestDto } from "../../domain/types/QuestionTypes";
+import { CreateQuestionRequestDto, UpdateQuestionRequestDto } from "../../domain/types/QuestionTypes";
 import { MoodleError } from "@/core/errors/MoodleError";
 
 export class MoodleQuestionRepository implements QuestionRepositoryInterface {
@@ -50,5 +50,30 @@ export class MoodleQuestionRepository implements QuestionRepositoryInterface {
 
   async deleteQuestion(client: MoodleClient, questionId: number): Promise<void> {
     await client.call("local_examapi_delete_question", { questionid: questionId });
+  }
+
+  async updateQuestion(client: MoodleClient, questionId: number, dto: UpdateQuestionRequestDto): Promise<QuestionEntity> {
+    const args: any = { questionid: questionId };
+    if (dto.name !== undefined) args.name = dto.name;
+    if (dto.questionText !== undefined) args.questiontext = dto.questionText;
+    if (dto.defaultMark !== undefined) args.defaultmark = dto.defaultMark;
+    if (dto.options !== undefined) args.options = JSON.stringify(dto.options);
+
+    const res = await client.call<any>("local_examapi_update_question", args);
+
+    if (!res || !res.id) {
+      throw new MoodleError("Failed to update question");
+    }
+
+    return new QuestionEntity(res.id, {
+      categoryId: res.category,
+      type: res.qtype,
+      name: res.name,
+      questionText: res.questiontext,
+      defaultMark: res.defaultmark,
+      options: dto.options || [],
+      createdAt: new Date(res.timecreated * 1000),
+      updatedAt: new Date(res.timemodified * 1000),
+    });
   }
 }

@@ -19,3 +19,10 @@ export interface CreateQuestionRequestDto {
   defaultMark: number;
   options?: QuestionOption[];
 }
+
+export interface UpdateQuestionRequestDto {
+  name?: string;
+  questionText?: string;
+  defaultMark?: number;
+  options?: QuestionOption[];
+}

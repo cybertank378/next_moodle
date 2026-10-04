@@ -12,20 +12,21 @@ import { Bold, Italic, Strikethrough } from "lucide-react";
 
 interface QuestionEditorProps {
   categoryId: number;
+  existingQuestion?: any; // The question entity data if editing
   onSuccess?: () => void;
 }
 
-export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSuccess }) => {
-  const { createQuestion, loading } = useQuestionApi();
+export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, existingQuestion, onSuccess }) => {
+  const { createQuestion, updateQuestion, loading } = useQuestionApi();
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CreateQuestionRequestDto>({
     categoryId,
-    name: "",
-    questionText: "",
-    type: QuestionType.MULTICHOICE,
-    defaultMark: 1,
-    options: [],
+    name: existingQuestion?.name || "",
+    questionText: existingQuestion?.questionText || "",
+    type: existingQuestion?.type || QuestionType.MULTICHOICE,
+    defaultMark: existingQuestion?.defaultMark || 1,
+    options: existingQuestion?.options || [],
   });
 
   const editor = useEditor({
@@ -45,11 +46,21 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
     e.preventDefault();
     setError(null);
 
-    const { data, error: apiError } = await createQuestion(formData);
+    let res;
+    if (existingQuestion && existingQuestion.id) {
+      res = await updateQuestion(existingQuestion.id, {
+        name: formData.name,
+        questionText: formData.questionText,
+        defaultMark: formData.defaultMark,
+        options: formData.options,
+      });
+    } else {
+      res = await createQuestion(formData);
+    }
     
-    if (apiError) {
-      setError(apiError);
-    } else if (data) {
+    if (res.error) {
+      setError(res.error.message || "Failed to save question");
+    } else if (res.data) {
       if (onSuccess) onSuccess();
     }
   };
@@ -58,9 +69,13 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
   const toggleItalic = () => editor?.chain().focus().toggleItalic().run();
   const toggleStrike = () => editor?.chain().focus().toggleStrike().run();
 
+  const isEditing = !!existingQuestion;
+
   return (
     <div className="p-6 bg-white dark:bg-[#151521] rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-      <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-200">Create New Question</h2>
+      <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-200">
+        {isEditing ? "Edit Question" : "Create New Question"}
+      </h2>
       {error && <div className="mb-4 p-3 bg-red-50 text-red-600 rounded">{error}</div>}
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -68,6 +83,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
           <SelectField
             label="Question Type"
             value={formData.type}
+            disabled={isEditing}
             onChange={(e) => setFormData({ ...formData, type: e.target.value as QuestionType })}
           >
             {Object.values(QuestionType).map(t => (
@@ -140,7 +156,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
             loading={loading}
             variant="primary"
           >
-            Save Question
+            {isEditing ? "Update Question" : "Save Question"}
           </Button>
         </div>
       </form>
