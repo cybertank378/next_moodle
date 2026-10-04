@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-export type StatAccent = "indigo" | "emerald" | "amber" | "rose";
+export type StatAccent = "indigo" | "emerald" | "amber" | "rose" | "blue" | "cyan" | "teal";
 
 const accentStyles: Record<StatAccent, { glow: string; dot: string }> = {
   indigo: {
@@ -18,6 +18,18 @@ const accentStyles: Record<StatAccent, { glow: string; dot: string }> = {
   rose: {
     glow: "bg-rose-500/10 dark:bg-rose-400/10",
     dot: "bg-rose-500 dark:bg-rose-400",
+  },
+  blue: {
+    glow: "bg-blue-500/10 dark:bg-blue-400/10",
+    dot: "bg-blue-500 dark:bg-blue-400",
+  },
+  cyan: {
+    glow: "bg-cyan-500/10 dark:bg-cyan-400/10",
+    dot: "bg-cyan-500 dark:bg-cyan-400",
+  },
+  teal: {
+    glow: "bg-teal-500/10 dark:bg-teal-400/10",
+    dot: "bg-teal-500 dark:bg-teal-400",
   },
 };
 
