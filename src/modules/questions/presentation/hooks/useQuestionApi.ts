@@ -22,7 +22,7 @@ export function useQuestionApi() {
     setLoading(true);
     try {
       const res = await request<any>(`/api/questions/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         body: JSON.stringify(dto),
       });
       return res;
