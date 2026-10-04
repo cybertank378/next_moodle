@@ -1,5 +1,5 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import ExamAttemptPageView from "@/sections/exams/pages/ExamAttemptPageView";
+import ExamAttemptPageView from "@/sections/exam/pages/ExamAttemptPageView";
 
 interface Props {
   params: Promise<{

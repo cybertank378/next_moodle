@@ -1,5 +1,5 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import QuizDetailView from "@/sections/exams/organisms/QuizDetailView";
+import QuizDetailView from "@/sections/exam/organisms/QuizDetailView";
 
 interface ExamDetailPageProps {
   params: Promise<{ id: string }>;
