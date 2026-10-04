@@ -1,8 +1,8 @@
 import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
-import type { NotificationEntity } from "../../domain/entity/NotificationEntity";
-import type { PushNotificationAdapterInterface } from "../../domain/interfaces/PushNotificationAdapterInterface";
-import { NotificationMapper } from "../../domain/mapper/NotificationMapper";
+import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
+import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
+import { NotificationMapper } from "@/modules/notification/domain/mapper/NotificationMapper";
 
 // Ensure Firebase is initialized
 if (!getApps().length) {

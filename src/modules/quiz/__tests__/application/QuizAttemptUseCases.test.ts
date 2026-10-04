@@ -4,15 +4,15 @@ import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { AuthorizationError } from "@/core/rbac/AuthorizationError";
 import { Permission } from "@/core/rbac/Permission";
-import { GetAttemptDataUseCase } from "../../application/usecases/GetAttemptDataUseCase";
-import { GetAttemptSummaryUseCase } from "../../application/usecases/GetAttemptSummaryUseCase";
-import { GetUserAttemptsUseCase } from "../../application/usecases/GetUserAttemptsUseCase";
-import { SaveQuizAnswerUseCase } from "../../application/usecases/SaveQuizAnswerUseCase";
-import { StartQuizAttemptUseCase } from "../../application/usecases/StartQuizAttemptUseCase";
-import { SubmitQuizAttemptUseCase } from "../../application/usecases/SubmitQuizAttemptUseCase";
-import { QuizAttemptEntity } from "../../domain/entity/QuizAttemptEntity";
-import type { QuizAttemptRepositoryInterface } from "../../domain/interfaces/QuizAttemptRepositoryInterface";
-import { QuizAttemptMapper } from "../../domain/mapper/QuizAttemptMapper";
+import { GetAttemptDataUseCase } from "@/modules/quiz/application/usecases/GetAttemptDataUseCase";
+import { GetAttemptSummaryUseCase } from "@/modules/quiz/application/usecases/GetAttemptSummaryUseCase";
+import { GetUserAttemptsUseCase } from "@/modules/quiz/application/usecases/GetUserAttemptsUseCase";
+import { SaveQuizAnswerUseCase } from "@/modules/quiz/application/usecases/SaveQuizAnswerUseCase";
+import { StartQuizAttemptUseCase } from "@/modules/quiz/application/usecases/StartQuizAttemptUseCase";
+import { SubmitQuizAttemptUseCase } from "@/modules/quiz/application/usecases/SubmitQuizAttemptUseCase";
+import { QuizAttemptEntity } from "@/modules/quiz/domain/entity/QuizAttemptEntity";
+import type { QuizAttemptRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizAttemptRepositoryInterface";
+import { QuizAttemptMapper } from "@/modules/quiz/domain/mapper/QuizAttemptMapper";
 
 describe("Quiz Attempt Use Cases", () => {
   let mockRepo: QuizAttemptRepositoryInterface;

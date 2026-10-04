@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { UserGradeReportResponseDto } from "../../domain/dto/GradeResponseDto";
-import { GradeExportFormatter } from "../../domain/mapper/GradeExportFormatter";
+import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
+import { GradeExportFormatter } from "@/modules/grades/domain/mapper/GradeExportFormatter";
 
 describe("GradeExportFormatter", () => {
   const mockReports: UserGradeReportResponseDto[] = [

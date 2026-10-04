@@ -1,6 +1,6 @@
 // File: src/modules/grades/domain/mapper/GradeExportFormatter.ts
 
-import type { UserGradeReportResponseDto } from "../dto/GradeResponseDto";
+import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
 
 function escapeCsvField(value: unknown): string {
   if (value === null || value === undefined) {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { AutosaveQueueManager } from "../../presentation/helpers/AutosaveQueueManager";
+import { AutosaveQueueManager } from "@/modules/quiz/presentation/helpers/AutosaveQueueManager";
 
 describe("AutosaveQueueManager (RED -> GREEN)", () => {
   it("queues answers when offline and sets syncState to offline", async () => {

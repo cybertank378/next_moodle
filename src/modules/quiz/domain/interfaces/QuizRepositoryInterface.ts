@@ -1,6 +1,6 @@
 import type { MoodleClient } from "@/core/moodle/types";
-import type { QuizEntity } from "../entity/QuizEntity";
-import type { RawMoodleQuizAccessInfo } from "../types/QuizTypes";
+import type { QuizEntity } from "@/modules/quiz/domain/entity/QuizEntity";
+import type { RawMoodleQuizAccessInfo } from "@/modules/quiz/domain/types/QuizTypes";
 
 export interface QuizRepositoryInterface {
   getQuizzesByCourses(input: {

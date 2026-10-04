@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { AuthorizationError } from "@/core/rbac/AuthorizationError";
-import { QuizAttemptEntity } from "../../domain/entity/QuizAttemptEntity";
-import { QuizAttemptMapper } from "../../domain/mapper/QuizAttemptMapper";
-import type { RawMoodleAttempt } from "../../domain/types/QuizAttemptTypes";
+import { QuizAttemptEntity } from "@/modules/quiz/domain/entity/QuizAttemptEntity";
+import { QuizAttemptMapper } from "@/modules/quiz/domain/mapper/QuizAttemptMapper";
+import type { RawMoodleAttempt } from "@/modules/quiz/domain/types/QuizAttemptTypes";
 
 describe("QuizAttemptEntity and QuizAttemptMapper", () => {
   const sampleMetadata = {

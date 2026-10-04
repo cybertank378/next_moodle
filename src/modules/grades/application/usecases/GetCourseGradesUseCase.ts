@@ -1,8 +1,8 @@
-import type { GetCourseGradesRequestDto } from "../../domain/dto/GradeRequestDto";
-import type { CourseGradesResponseDto } from "../../domain/dto/GradeResponseDto";
-import type { GradeRepositoryInterface } from "../../domain/interfaces/GradeRepositoryInterface";
-import { GradeMapper } from "../../domain/mapper/GradeMapper";
-import { GradeAuthorizationService } from "../services/GradeAuthorizationService";
+import type { GetCourseGradesRequestDto } from "@/modules/grades/domain/dto/GradeRequestDto";
+import type { CourseGradesResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
+import type { GradeRepositoryInterface } from "@/modules/grades/domain/interfaces/GradeRepositoryInterface";
+import { GradeMapper } from "@/modules/grades/domain/mapper/GradeMapper";
+import { GradeAuthorizationService } from "@/modules/grades/application/services/GradeAuthorizationService";
 
 export class GetCourseGradesUseCase {
   constructor(private readonly gradeRepository: GradeRepositoryInterface) {}

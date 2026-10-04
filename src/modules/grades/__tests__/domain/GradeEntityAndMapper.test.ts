@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   GradeItemEntity,
   UserGradeReportEntity,
-} from "../../domain/entity/GradeItemEntity";
-import { GradeMapper } from "../../domain/mapper/GradeMapper";
+} from "@/modules/grades/domain/entity/GradeItemEntity";
+import { GradeMapper } from "@/modules/grades/domain/mapper/GradeMapper";
 import type {
   RawMoodleCoreGradesResponse,
   RawMoodleUserGrade,
-} from "../../domain/types/GradeTypes";
+} from "@/modules/grades/domain/types/GradeTypes";
 
 describe("GradeItemEntity", () => {
   it("should calculate isPassed correctly based on gradeRaw and gradePass", () => {

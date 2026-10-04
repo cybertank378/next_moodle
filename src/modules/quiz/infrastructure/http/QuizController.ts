@@ -7,13 +7,13 @@ import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
-import type { CheckQuizAccessUseCase } from "../../application/usecases/CheckQuizAccessUseCase";
-import type { GetQuizDetailUseCase } from "../../application/usecases/GetQuizDetailUseCase";
-import type { GetQuizzesByCourseUseCase } from "../../application/usecases/GetQuizzesByCourseUseCase";
+import type { CheckQuizAccessUseCase } from "@/modules/quiz/application/usecases/CheckQuizAccessUseCase";
+import type { GetQuizDetailUseCase } from "@/modules/quiz/application/usecases/GetQuizDetailUseCase";
+import type { GetQuizzesByCourseUseCase } from "@/modules/quiz/application/usecases/GetQuizzesByCourseUseCase";
 import {
   parseListQuizzesQuery,
   parseQuizId,
-} from "../validators/quiz.validator";
+} from "@/modules/quiz/infrastructure/validators/quiz.validator";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   return {

@@ -1,7 +1,7 @@
 import type { MoodleClient } from "@/core/moodle/types";
-import type { ExamAdministrationRepositoryInterface } from "../../domain/interfaces/ExamAdministrationRepositoryInterface";
-import { ReorderQuizQuestionsRequestDto } from "../../domain/types/ExamTypes";
-import { ReorderQuizQuestionsDtoValidator } from "../../domain/validators/ExamValidator";
+import type { ExamAdministrationRepositoryInterface } from "@/modules/exam/domain/interfaces/ExamAdministrationRepositoryInterface";
+import { ReorderQuizQuestionsRequestDto } from "@/modules/exam/domain/types/ExamTypes";
+import { ReorderQuizQuestionsDtoValidator } from "@/modules/exam/domain/validators/ExamValidator";
 
 export class ReorderQuizQuestionsUseCase {
   constructor(

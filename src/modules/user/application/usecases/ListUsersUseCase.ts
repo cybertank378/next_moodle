@@ -1,6 +1,6 @@
-import type { ListUsersQueryDto } from "../../domain/dto/UserRequestDto";
-import type { UserListResponseDto } from "../../domain/dto/UserResponseDto";
-import type { UserRepositoryInterface } from "../../domain/interfaces/UserRepositoryInterface";
+import type { ListUsersQueryDto } from "@/modules/user/domain/dto/UserRequestDto";
+import type { UserListResponseDto } from "@/modules/user/domain/dto/UserResponseDto";
+import type { UserRepositoryInterface } from "@/modules/user/domain/interfaces/UserRepositoryInterface";
 
 export class ListUsersUseCase {
   constructor(private readonly userRepository: UserRepositoryInterface) {}

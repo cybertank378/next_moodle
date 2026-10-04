@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleClient } from "@/core/moodle/types";
-import { MoodleUserRepository } from "../../infrastructure/repo/MoodleUserRepository";
+import { MoodleUserRepository } from "@/modules/user/infrastructure/repo/MoodleUserRepository";
 
 describe("MoodleUserRepository", () => {
   it("fetches user list via core_user_get_users and formats response", async () => {

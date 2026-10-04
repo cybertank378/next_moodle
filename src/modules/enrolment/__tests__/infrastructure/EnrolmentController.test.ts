@@ -2,10 +2,10 @@ import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { AppRole } from "@/core/rbac/AppRole";
-import type { EnrolUsersUseCase } from "../../application/usecases/EnrolUsersUseCase";
-import type { ListEnrolmentsUseCase } from "../../application/usecases/ListEnrolmentsUseCase";
-import type { UnenrolUsersUseCase } from "../../application/usecases/UnenrolUsersUseCase";
-import { EnrolmentController } from "../../infrastructure/http/EnrolmentController";
+import type { EnrolUsersUseCase } from "@/modules/enrolment/application/usecases/EnrolUsersUseCase";
+import type { ListEnrolmentsUseCase } from "@/modules/enrolment/application/usecases/ListEnrolmentsUseCase";
+import type { UnenrolUsersUseCase } from "@/modules/enrolment/application/usecases/UnenrolUsersUseCase";
+import { EnrolmentController } from "@/modules/enrolment/infrastructure/http/EnrolmentController";
 
 describe("EnrolmentController", () => {
   const tenantActor: CurrentActor = {

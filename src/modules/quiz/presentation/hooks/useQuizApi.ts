@@ -6,7 +6,7 @@ import type {
   QuizAccessResponseDTO,
   QuizListResponseDTO,
   QuizSummaryResponseDTO,
-} from "../../domain/dto/QuizResponseDto";
+} from "@/modules/quiz/domain/dto/QuizResponseDto";
 
 export function useQuizApi() {
   const [quizzesState, setQuizzesState] = useState<

@@ -1,5 +1,5 @@
-import type { EnrolUserRequestDto } from "../../domain/dto/EnrolmentRequestDto";
-import type { EnrolmentRepositoryInterface } from "../../domain/interfaces/EnrolmentRepositoryInterface";
+import type { EnrolUserRequestDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
+import type { EnrolmentRepositoryInterface } from "@/modules/enrolment/domain/interfaces/EnrolmentRepositoryInterface";
 
 export class EnrolUsersUseCase {
   constructor(private readonly repository: EnrolmentRepositoryInterface) {}

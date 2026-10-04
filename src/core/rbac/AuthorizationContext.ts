@@ -1,4 +1,4 @@
-import type { AppRole } from "./AppRole";
+import type { AppRole } from "@/core/rbac/AppRole";
 
 export interface AuthorizationActor {
   readonly id: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { QuestionEditor } from "../organisms/QuestionEditor";
+import { QuestionEditor } from "@/sections/questions/organisms/QuestionEditor";
 
 interface QuestionBankPageProps {
   categoryId: number;

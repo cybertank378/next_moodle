@@ -4,13 +4,13 @@ import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { AuthorizationError } from "@/core/rbac/AuthorizationError";
 import { Permission } from "@/core/rbac/Permission";
-import { GetCourseGradesUseCase } from "../../application/usecases/GetCourseGradesUseCase";
-import { GetUserGradesUseCase } from "../../application/usecases/GetUserGradesUseCase";
+import { GetCourseGradesUseCase } from "@/modules/grades/application/usecases/GetCourseGradesUseCase";
+import { GetUserGradesUseCase } from "@/modules/grades/application/usecases/GetUserGradesUseCase";
 import {
   GradeItemEntity,
   UserGradeReportEntity,
-} from "../../domain/entity/GradeItemEntity";
-import type { GradeRepositoryInterface } from "../../domain/interfaces/GradeRepositoryInterface";
+} from "@/modules/grades/domain/entity/GradeItemEntity";
+import type { GradeRepositoryInterface } from "@/modules/grades/domain/interfaces/GradeRepositoryInterface";
 
 describe("GradeUseCases", () => {
   const mockGradeItem = new GradeItemEntity({

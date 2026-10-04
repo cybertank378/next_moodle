@@ -5,9 +5,9 @@ import {
 import type {
   MoodleCredentialProvider,
   MoodleServiceCredential,
-} from "./MoodleCredentialProvider";
-import { MoodleRestClient } from "./MoodleRestClient";
-import type { MoodleCredentials } from "./types";
+} from "@/core/moodle/MoodleCredentialProvider";
+import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
+import type { MoodleCredentials } from "@/core/moodle/types";
 
 export interface MoodleClientFactory {
   createClient(credentials: MoodleCredentials): MoodleRestClient;

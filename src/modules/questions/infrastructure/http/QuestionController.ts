@@ -4,8 +4,8 @@ import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { AppRole } from "@/core/rbac/AppRole";
 import { authorize } from "@/core/rbac/authorize";
-import type { CreateQuestionUseCase } from "../../application/usecases/CreateQuestionUseCase";
-import type { UpdateQuestionUseCase } from "../../application/usecases/UpdateQuestionUseCase";
+import type { CreateQuestionUseCase } from "@/modules/questions/application/usecases/CreateQuestionUseCase";
+import type { UpdateQuestionUseCase } from "@/modules/questions/application/usecases/UpdateQuestionUseCase";
 
 export class QuestionController {
   constructor(

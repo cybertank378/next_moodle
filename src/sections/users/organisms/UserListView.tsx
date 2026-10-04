@@ -17,10 +17,10 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import UserStatusBadge from "../atoms/UserStatusBadge";
-import UserFilterBar from "../molecules/UserFilterBar";
-import CreateUserModal from "./CreateUserModal";
-import UserImportModal from "./UserImportModal";
+import UserStatusBadge from "@/sections/users/atoms/UserStatusBadge";
+import UserFilterBar from "@/sections/users/molecules/UserFilterBar";
+import CreateUserModal from "@/sections/users/organisms/CreateUserModal";
+import UserImportModal from "@/sections/users/organisms/UserImportModal";
 
 const PAGE_SIZE = 10;
 const SKELETON_KEYS = [

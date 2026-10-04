@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import ExamAttemptInterface from "../../organisms/ExamAttemptInterface";
+import ExamAttemptInterface from "@/sections/exam/organisms/ExamAttemptInterface";
 
 describe("ExamAttemptInterface", () => {
   const sampleQuestions = [

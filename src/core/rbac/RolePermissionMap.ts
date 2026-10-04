@@ -1,5 +1,5 @@
-import { AppRole } from "./AppRole";
-import { Permission, type PermissionType } from "./Permission";
+import { AppRole } from "@/core/rbac/AppRole";
+import { Permission, type PermissionType } from "@/core/rbac/Permission";
 
 export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
   [AppRole.ADMIN]: [

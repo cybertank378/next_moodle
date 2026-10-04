@@ -1,7 +1,7 @@
 import type {
   RecentTenantRecord,
   TenantStatusCount,
-} from "../types/DashboardTypes";
+} from "@/modules/dashboard/domain/types/DashboardTypes";
 
 export interface DashboardRepositoryInterface {
   countTenantsByStatus(): Promise<TenantStatusCount[]>;

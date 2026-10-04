@@ -2,7 +2,7 @@ import type { TenantStatusType } from "@/libs/enums";
 import type {
   TenantGrowthPoint,
   TenantStatusSummary,
-} from "../types/DashboardTypes";
+} from "@/modules/dashboard/domain/types/DashboardTypes";
 
 export interface RecentTenantResponseDto {
   id: string;
@@ -17,4 +17,50 @@ export interface AdminDashboardResponseDto {
   summary: TenantStatusSummary;
   growth: TenantGrowthPoint[];
   recentTenants: RecentTenantResponseDto[];
+}
+
+export interface ExamSummaryDto {
+  id: string;
+  name: string;
+  course: string;
+  scheduledDate: string;
+  duration: number;
+  status: "open" | "upcoming" | "published" | "pending";
+  enrolledCount?: number;
+}
+
+export interface StudentDashboardResponseDto {
+  upcomingExams: ExamSummaryDto[];
+}
+
+export interface TeacherDashboardResponseDto {
+  activeClasses: number;
+  totalQuestions: number;
+  upcomingExamsCount: number;
+  recentExams: ExamSummaryDto[];
+}
+
+export interface TenantDashboardResponseDto {
+  activeExams: number;
+  questionsInBank: number;
+  registeredUsers: number;
+  averageScore: number;
+  upcomingExams: ExamSummaryDto[];
+}
+
+export interface MonitorSessionDto {
+  id: string;
+  examName: string;
+  startTime: string;
+  duration: number;
+  activeCandidates: number;
+  totalCandidates: number;
+  flags: number;
+}
+
+export interface ProctorDashboardResponseDto {
+  liveExams: number;
+  activeCandidates: number;
+  incidentFlags: number;
+  sessions: MonitorSessionDto[];
 }

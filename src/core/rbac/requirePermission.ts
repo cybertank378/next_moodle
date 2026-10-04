@@ -1,9 +1,9 @@
 import type {
   AuthorizationActor,
   AuthorizationOptions,
-} from "./AuthorizationContext";
-import { authorize } from "./authorize";
-import type { PermissionType } from "./Permission";
+} from "@/core/rbac/AuthorizationContext";
+import { authorize } from "@/core/rbac/authorize";
+import type { PermissionType } from "@/core/rbac/Permission";
 
 export function requirePermission(
   actor: AuthorizationActor | null | undefined,

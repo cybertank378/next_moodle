@@ -1,11 +1,11 @@
 import { TenantStatus } from "@/libs/enums";
-import type { RecentTenantResponseDto } from "../dto/DashboardResponseDto";
+import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import type {
   RecentTenantRecord,
   TenantGrowthPoint,
   TenantStatusCount,
   TenantStatusSummary,
-} from "../types/DashboardTypes";
+} from "@/modules/dashboard/domain/types/DashboardTypes";
 
 function toPeriodKey(date: Date): string {
   const month = String(date.getUTCMonth() + 1).padStart(2, "0");

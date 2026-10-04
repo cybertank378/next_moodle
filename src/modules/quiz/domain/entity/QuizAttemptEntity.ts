@@ -3,7 +3,7 @@ import { AuthorizationError } from "@/core/rbac/AuthorizationError";
 import type {
   QuizAttemptMetadata,
   QuizAttemptStatus,
-} from "../types/QuizAttemptTypes";
+} from "@/modules/quiz/domain/types/QuizAttemptTypes";
 
 export class QuizAttemptEntity extends BaseEntity<number> {
   private readonly _tenantId: string;

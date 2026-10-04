@@ -1,4 +1,4 @@
-import EnrolmentListView from "../organisms/EnrolmentListView";
+import EnrolmentListView from "@/sections/enrolments/organisms/EnrolmentListView";
 
 export default function EnrolmentsPageView() {
   return <EnrolmentListView />;

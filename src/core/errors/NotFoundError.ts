@@ -1,4 +1,4 @@
-import { AppError } from "./AppError";
+import { AppError } from "@/core/errors/AppError";
 
 export class NotFoundError extends AppError {
   public readonly code = "NOT_FOUND";

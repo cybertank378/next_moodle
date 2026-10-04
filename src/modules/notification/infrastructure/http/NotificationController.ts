@@ -3,12 +3,12 @@ import "server-only";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
-import type { GetNotificationsUseCase } from "../../application/usecases/GetNotificationsUseCase";
-import type { GetUnreadCountUseCase } from "../../application/usecases/GetUnreadCountUseCase";
-import type { MarkAllReadUseCase } from "../../application/usecases/MarkAllReadUseCase";
-import type { MarkNotificationReadUseCase } from "../../application/usecases/MarkNotificationReadUseCase";
-import { NotificationScope } from "../../domain/value-object/NotificationScope";
-import { parseNotificationQuery } from "../validators/notificationValidator";
+import type { GetNotificationsUseCase } from "@/modules/notification/application/usecases/GetNotificationsUseCase";
+import type { GetUnreadCountUseCase } from "@/modules/notification/application/usecases/GetUnreadCountUseCase";
+import type { MarkAllReadUseCase } from "@/modules/notification/application/usecases/MarkAllReadUseCase";
+import type { MarkNotificationReadUseCase } from "@/modules/notification/application/usecases/MarkNotificationReadUseCase";
+import { NotificationScope } from "@/modules/notification/domain/value-object/NotificationScope";
+import { parseNotificationQuery } from "@/modules/notification/infrastructure/validators/notificationValidator";
 
 function respond(body: unknown, status: number): Response {
   return Response.json(

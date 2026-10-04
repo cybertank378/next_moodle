@@ -3,7 +3,7 @@ import type {
   QuizAccessRuleEvaluation,
   QuizAccessStatus,
   QuizMetadata,
-} from "../types/QuizTypes";
+} from "@/modules/quiz/domain/types/QuizTypes";
 
 export class QuizEntity extends BaseEntity<number> {
   private readonly _tenantId: string;

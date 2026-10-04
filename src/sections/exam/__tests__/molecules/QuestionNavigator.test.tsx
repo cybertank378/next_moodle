@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import QuestionNavigator from "../../molecules/QuestionNavigator";
+import QuestionNavigator from "@/sections/exam/molecules/QuestionNavigator";
 
 describe("QuestionNavigator", () => {
   const sampleQuestions = [

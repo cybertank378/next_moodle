@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { QuizEntity } from "../../domain/entity/QuizEntity";
-import { QuizMapper } from "../../domain/mapper/QuizMapper";
-import type { RawMoodleQuiz } from "../../domain/types/QuizTypes";
+import { QuizEntity } from "@/modules/quiz/domain/entity/QuizEntity";
+import { QuizMapper } from "@/modules/quiz/domain/mapper/QuizMapper";
+import type { RawMoodleQuiz } from "@/modules/quiz/domain/types/QuizTypes";
 
 describe("QuizEntity & QuizMapper", () => {
   const rawQuiz: RawMoodleQuiz = {

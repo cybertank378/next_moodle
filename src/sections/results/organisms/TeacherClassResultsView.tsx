@@ -6,9 +6,9 @@ import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
 import Button from "@/shared-ui/component/Button";
 import SearchField from "@/shared-ui/component/SearchField";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import GradeScoreCard from "../atoms/GradeScoreCard";
-import CourseGradesTable from "../molecules/CourseGradesTable";
-import StudentGradeReportView from "./StudentGradeReportView";
+import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
+import CourseGradesTable from "@/sections/results/molecules/CourseGradesTable";
+import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
 
 export interface TeacherClassResultsViewProps {
   courseId: number;

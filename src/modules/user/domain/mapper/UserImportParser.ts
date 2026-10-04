@@ -1,6 +1,6 @@
 import { generateSecureMoodlePassword } from "@/core/security/PasswordGenerator";
-import type { CreateUserRequestDto } from "../dto/UserRequestDto";
-import type { UserImportRowErrorDto } from "../dto/UserResponseDto";
+import type { CreateUserRequestDto } from "@/modules/user/domain/dto/UserRequestDto";
+import type { UserImportRowErrorDto } from "@/modules/user/domain/dto/UserResponseDto";
 
 export const USER_IMPORT_TEMPLATE_CSV =
   "\uFEFFusername,firstname,lastname,email,password,idnumber,role,department,institution\n" +

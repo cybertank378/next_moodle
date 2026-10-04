@@ -1,6 +1,6 @@
-import type { ListEnrolmentsQueryDto } from "../../domain/dto/EnrolmentRequestDto";
-import type { EnrolmentListResponseDto } from "../../domain/dto/EnrolmentResponseDto";
-import type { EnrolmentRepositoryInterface } from "../../domain/interfaces/EnrolmentRepositoryInterface";
+import type { ListEnrolmentsQueryDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
+import type { EnrolmentListResponseDto } from "@/modules/enrolment/domain/dto/EnrolmentResponseDto";
+import type { EnrolmentRepositoryInterface } from "@/modules/enrolment/domain/interfaces/EnrolmentRepositoryInterface";
 
 export class ListEnrolmentsUseCase {
   constructor(private readonly repository: EnrolmentRepositoryInterface) {}

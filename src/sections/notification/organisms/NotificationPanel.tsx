@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { NotificationResponseDto } from "@/modules/notification/domain/dto/NotificationResponseDto";
 import { useNotificationApi } from "@/modules/notification/presentation/hooks/useNotificationApi";
-import NotificationList from "../molecules/NotificationList";
-import NotificationTabBar from "../molecules/NotificationTabBar";
+import NotificationList from "@/sections/notification/molecules/NotificationList";
+import NotificationTabBar from "@/sections/notification/molecules/NotificationTabBar";
 
 interface NotificationPanelProps {
   isOpen: boolean;

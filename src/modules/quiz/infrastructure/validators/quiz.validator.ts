@@ -1,5 +1,5 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { ListQuizzesQueryDTO } from "../../domain/dto/QuizRequestDto";
+import type { ListQuizzesQueryDTO } from "@/modules/quiz/domain/dto/QuizRequestDto";
 
 export function parseQuizId(param: unknown): number {
   if (typeof param !== "string" && typeof param !== "number") {

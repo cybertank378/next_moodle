@@ -1,4 +1,4 @@
-import type { HttpStatusCode } from "./HttpStatus";
+import type { HttpStatusCode } from "@/core/http/HttpStatus";
 
 export interface ApiErrorDetail {
   code: string;

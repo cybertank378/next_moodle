@@ -1,12 +1,12 @@
 import type {
   QuizAccessResponseDTO,
   QuizSummaryResponseDTO,
-} from "../dto/QuizResponseDto";
-import { QuizEntity } from "../entity/QuizEntity";
+} from "@/modules/quiz/domain/dto/QuizResponseDto";
+import { QuizEntity } from "@/modules/quiz/domain/entity/QuizEntity";
 import type {
   QuizAccessRuleEvaluation,
   RawMoodleQuiz,
-} from "../types/QuizTypes";
+} from "@/modules/quiz/domain/types/QuizTypes";
 
 export class QuizMapper {
   public static toEntity(raw: RawMoodleQuiz, tenantId: string): QuizEntity {

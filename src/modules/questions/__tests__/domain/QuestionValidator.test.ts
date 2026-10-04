@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { QuestionType } from "../../domain/types/QuestionTypes";
-import { CreateQuestionDtoValidator } from "../../domain/validators/QuestionValidator";
+import type { QuestionType } from "@/modules/questions/domain/types/QuestionTypes";
+import { CreateQuestionDtoValidator } from "@/modules/questions/domain/validators/QuestionValidator";
 
 describe("CreateQuestionDtoValidator", () => {
   it("should fail when question type is not supported", () => {

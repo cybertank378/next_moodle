@@ -1,6 +1,6 @@
-import type { BulkImportUsersRequestDto } from "../../domain/dto/UserRequestDto";
-import type { BulkImportUsersResponseDto } from "../../domain/dto/UserResponseDto";
-import type { UserRepositoryInterface } from "../../domain/interfaces/UserRepositoryInterface";
+import type { BulkImportUsersRequestDto } from "@/modules/user/domain/dto/UserRequestDto";
+import type { BulkImportUsersResponseDto } from "@/modules/user/domain/dto/UserResponseDto";
+import type { UserRepositoryInterface } from "@/modules/user/domain/interfaces/UserRepositoryInterface";
 
 export class ImportUsersUseCase {
   constructor(private readonly userRepository: UserRepositoryInterface) {}

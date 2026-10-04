@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import ResultsEmptyState from "../../atoms/ResultsEmptyState";
+import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
 
 describe("ResultsEmptyState", () => {
   it("renders default title and description", () => {

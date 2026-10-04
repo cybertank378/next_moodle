@@ -1,8 +1,8 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { ApiResponse } from "./ApiResponse";
-import { HttpStatus } from "./HttpStatus";
+import { ApiResponse } from "@/core/http/ApiResponse";
+import { HttpStatus } from "@/core/http/HttpStatus";
 
 /**
  * Standard Next.js App Router dynamic route context.

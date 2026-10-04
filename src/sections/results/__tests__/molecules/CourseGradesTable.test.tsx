@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
-import CourseGradesTable from "../../molecules/CourseGradesTable";
+import CourseGradesTable from "@/sections/results/molecules/CourseGradesTable";
 
 describe("CourseGradesTable", () => {
   it("renders empty state when reports array is empty", () => {

@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import AttemptTimer, { formatTimerDisplay } from "../../atoms/AttemptTimer";
+import AttemptTimer, { formatTimerDisplay } from "@/sections/exam/atoms/AttemptTimer";
 
 describe("AttemptTimer (RED -> GREEN)", () => {
   it("formats time display into HH:MM:SS when duration is 1 hour or more", () => {

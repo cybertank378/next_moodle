@@ -8,12 +8,12 @@ import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { PermissionType } from "@/core/rbac/Permission";
-import type { GetAttemptDataUseCase } from "../../application/usecases/GetAttemptDataUseCase";
-import type { GetAttemptSummaryUseCase } from "../../application/usecases/GetAttemptSummaryUseCase";
-import type { GetUserAttemptsUseCase } from "../../application/usecases/GetUserAttemptsUseCase";
-import type { SaveQuizAnswerUseCase } from "../../application/usecases/SaveQuizAnswerUseCase";
-import type { StartQuizAttemptUseCase } from "../../application/usecases/StartQuizAttemptUseCase";
-import type { SubmitQuizAttemptUseCase } from "../../application/usecases/SubmitQuizAttemptUseCase";
+import type { GetAttemptDataUseCase } from "@/modules/quiz/application/usecases/GetAttemptDataUseCase";
+import type { GetAttemptSummaryUseCase } from "@/modules/quiz/application/usecases/GetAttemptSummaryUseCase";
+import type { GetUserAttemptsUseCase } from "@/modules/quiz/application/usecases/GetUserAttemptsUseCase";
+import type { SaveQuizAnswerUseCase } from "@/modules/quiz/application/usecases/SaveQuizAnswerUseCase";
+import type { StartQuizAttemptUseCase } from "@/modules/quiz/application/usecases/StartQuizAttemptUseCase";
+import type { SubmitQuizAttemptUseCase } from "@/modules/quiz/application/usecases/SubmitQuizAttemptUseCase";
 import {
   parseAttemptId,
   parseGetAttemptDataQuery,
@@ -21,7 +21,7 @@ import {
   parseSaveAnswerBody,
   parseStartAttemptBody,
   parseSubmitAttemptBody,
-} from "../validators/quizAttempt.validator";
+} from "@/modules/quiz/infrastructure/validators/quizAttempt.validator";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   return {

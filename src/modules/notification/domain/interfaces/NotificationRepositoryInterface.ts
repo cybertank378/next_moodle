@@ -1,6 +1,6 @@
-import type { NotificationEntity } from "../entity/NotificationEntity";
-import type { NotificationType } from "../types/NotificationTypes";
-import type { NotificationScope } from "../value-object/NotificationScope";
+import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
+import type { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
+import type { NotificationScope } from "@/modules/notification/domain/value-object/NotificationScope";
 
 export interface FindByRecipientOptions {
   scope: NotificationScope;

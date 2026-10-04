@@ -6,7 +6,7 @@ import { showErrorToast, showSuccessToast } from "@/shared-ui/component/Toast";
 import type {
   CourseGradesResponseDto,
   UserGradeReportResponseDto,
-} from "../../domain/dto/GradeResponseDto";
+} from "@/modules/grades/domain/dto/GradeResponseDto";
 
 export function useGradeApi() {
   const [userReportState, setUserReportState] = useState<

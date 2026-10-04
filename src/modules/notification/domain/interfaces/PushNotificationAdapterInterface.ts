@@ -1,4 +1,4 @@
-import type { NotificationEntity } from "../entity/NotificationEntity";
+import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 
 export interface PushNotificationAdapterInterface {
   /**

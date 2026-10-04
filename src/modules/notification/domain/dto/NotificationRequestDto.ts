@@ -1,8 +1,8 @@
 import type {
   NotificationTab,
   NotificationType,
-} from "../types/NotificationTypes";
-import type { NotificationScope } from "../value-object/NotificationScope";
+} from "@/modules/notification/domain/types/NotificationTypes";
+import type { NotificationScope } from "@/modules/notification/domain/value-object/NotificationScope";
 
 export interface GetNotificationsRequestDto {
   scope: NotificationScope;

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleClient } from "@/core/moodle/types";
-import { MoodleEnrolmentRepository } from "../../infrastructure/repo/MoodleEnrolmentRepository";
+import { MoodleEnrolmentRepository } from "@/modules/enrolment/infrastructure/repo/MoodleEnrolmentRepository";
 
 describe("MoodleEnrolmentRepository", () => {
   it("fetches enrolled users in a course via core_enrol_get_enrolled_users", async () => {

@@ -1,15 +1,15 @@
 import { Result } from "@/core/base/Result";
 import { Permission } from "@/core/rbac/Permission";
-import { authorizeDashboardOperation } from "../services/DashboardAuthorizationService";
-import type { GetAdminDashboardRequestDto } from "../../domain/dto/DashboardRequestDto";
-import type { AdminDashboardResponseDto } from "../../domain/dto/DashboardResponseDto";
-import type { DashboardRepositoryInterface } from "../../domain/interfaces/DashboardRepositoryInterface";
-import { DashboardMapper } from "../../domain/mapper/DashboardMapper";
+import { authorizeDashboardOperation } from "@/modules/dashboard/application/services/DashboardAuthorizationService";
+import type { GetAdminDashboardRequestDto } from "@/modules/dashboard/domain/dto/DashboardRequestDto";
+import type { AdminDashboardResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
+import type { DashboardRepositoryInterface } from "@/modules/dashboard/domain/interfaces/DashboardRepositoryInterface";
+import { DashboardMapper } from "@/modules/dashboard/domain/mapper/DashboardMapper";
 import {
   ADMIN_DASHBOARD_MAX_MONTHS,
   ADMIN_DASHBOARD_MIN_MONTHS,
   ADMIN_DASHBOARD_RECENT_TENANT_LIMIT,
-} from "../../domain/types/DashboardTypes";
+} from "@/modules/dashboard/domain/types/DashboardTypes";
 
 export class GetAdminDashboardUseCase {
   constructor(

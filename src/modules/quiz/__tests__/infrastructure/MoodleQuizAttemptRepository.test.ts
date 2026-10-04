@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleClient } from "@/core/moodle/types";
-import { MoodleQuizAttemptRepository } from "../../infrastructure/repo/MoodleQuizAttemptRepository";
+import { MoodleQuizAttemptRepository } from "@/modules/quiz/infrastructure/repo/MoodleQuizAttemptRepository";
 
 describe("MoodleQuizAttemptRepository", () => {
   let mockClient: MoodleClient;

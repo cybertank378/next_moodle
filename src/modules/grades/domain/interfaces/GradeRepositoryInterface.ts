@@ -1,4 +1,4 @@
-import type { UserGradeReportEntity } from "../entity/GradeItemEntity";
+import type { UserGradeReportEntity } from "@/modules/grades/domain/entity/GradeItemEntity";
 
 export interface GradeRepositoryInterface {
   getUserGradeReport(

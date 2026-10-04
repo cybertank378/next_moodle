@@ -1,0 +1,139 @@
+"use client";
+
+import { useEffect } from "react";
+import Card from "@/shared-ui/component/Card";
+import LinkButton from "@/shared-ui/component/LinkButton";
+import Typography from "@/shared-ui/component/Typography";
+import StatCard from "@/sections/dashboard/molecules/StatCard";
+import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
+import UpcomingExamsTable from "@/sections/dashboard/molecules/UpcomingExamsTable";
+import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
+
+export default function TenantDashboardOverview() {
+  const { tenantState, fetchTenantOverview } = useDashboardApi();
+
+  useEffect(() => {
+    fetchTenantOverview();
+  }, [fetchTenantOverview]);
+
+  const { data, loading, error } = tenantState;
+
+  if (error) {
+    return (
+      <div className="flex justify-center py-20 text-red-500">
+        Gagal memuat: {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <DashboardHeader
+        title="Dasbor Tenant"
+        subtitle="Selamat datang, Administrator. Kelola ujian, peserta, dan pantau aktivitas."
+        titleClassName="bg-gradient-to-r from-blue-700 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent"
+        borderBottom={false}
+      />
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+        <StatCard
+          label="Ujian Aktif"
+          value={data?.activeExams ?? 0}
+          hint="2 menunggu ulasan"
+          accent="blue"
+          loading={loading}
+          unavailable={!data}
+        />
+        <StatCard
+          label="Soal di Bank"
+          value={data?.questionsInBank?.toLocaleString() ?? 0}
+          hint="Dari 5 kategori"
+          accent="cyan"
+          loading={loading}
+          unavailable={!data}
+        />
+        <StatCard
+          label="Pengguna Terdaftar"
+          value={data?.registeredUsers?.toLocaleString() ?? 0}
+          hint="Pengguna Aktif: 24.1k"
+          accent="indigo"
+          loading={loading}
+          unavailable={!data}
+        />
+        <StatCard
+          label="Skor Rata-rata"
+          value={`${data?.averageScore ?? 0}%`}
+          hint="Tingkat Penyelesaian: 92%"
+          accent="amber"
+          loading={loading}
+          unavailable={!data}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card className="shadow-xl shadow-blue-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md overflow-hidden h-full transition-colors">
+            <UpcomingExamsTable exams={data?.upcomingExams ?? []} loading={loading} />
+          </Card>
+        </div>
+
+        <div className="lg:col-span-1">
+          <Card className="shadow-xl shadow-amber-500/5 dark:shadow-none border border-amber-200/60 dark:border-amber-900/40 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 h-full transition-colors">
+            <Typography
+              variant="h2"
+              className="text-amber-800 dark:text-amber-400 mb-4 flex items-center"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              Tindakan Diperlukan
+            </Typography>
+            <div className="space-y-4">
+              <div className="bg-white/80 dark:bg-slate-900/60 p-4 rounded-lg border border-amber-200/60 dark:border-amber-800/50 shadow-sm">
+                <Typography variant="h3" className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                  Soal Belum Ada
+                </Typography>
+                <Typography variant="body" className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                  "World History: Module 4" dijadwalkan untuk 2 Nov memiliki 0 soal.
+                </Typography>
+                <LinkButton
+                  href="#"
+                  variant="ghost"
+                  className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 mt-2 p-0 h-auto inline-flex"
+                >
+                  Tinjau Ujian &rarr;
+                </LinkButton>
+              </div>
+              <div className="bg-white/80 dark:bg-slate-900/60 p-4 rounded-lg border border-amber-200/60 dark:border-amber-800/50 shadow-sm">
+                <Typography variant="h3" className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                  Insiden Mencurigakan
+                </Typography>
+                <Typography variant="body" className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                  3 peserta ditandai keluar dari browser berulang kali dalam 24 jam terakhir.
+                </Typography>
+                <LinkButton
+                  href="#"
+                  variant="ghost"
+                  className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 mt-2 p-0 h-auto inline-flex"
+                >
+                  Lihat Log Audit &rarr;
+                </LinkButton>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

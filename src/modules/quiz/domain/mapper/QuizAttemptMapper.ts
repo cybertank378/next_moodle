@@ -1,16 +1,16 @@
-import type { AnswerInputPayload } from "../dto/QuizAttemptRequestDto";
+import type { AnswerInputPayload } from "@/modules/quiz/domain/dto/QuizAttemptRequestDto";
 import type {
   QuizAttemptQuestionDto,
   QuizAttemptResponseDto,
-} from "../dto/QuizAttemptResponseDto";
-import { QuizAttemptEntity } from "../entity/QuizAttemptEntity";
+} from "@/modules/quiz/domain/dto/QuizAttemptResponseDto";
+import { QuizAttemptEntity } from "@/modules/quiz/domain/entity/QuizAttemptEntity";
 import type {
   MoodleAnswerPayloadItem,
   QuizAttemptStatus,
   RawMoodleAttempt,
   RawMoodleAttemptQuestion,
   StructuredQuestionAnswer,
-} from "../types/QuizAttemptTypes";
+} from "@/modules/quiz/domain/types/QuizAttemptTypes";
 
 export class QuizAttemptMapper {
   public static mapMoodleState(stateStr: string): QuizAttemptStatus {

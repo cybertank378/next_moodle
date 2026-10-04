@@ -1,4 +1,4 @@
-import type { QuizAccessStatus } from "../types/QuizTypes";
+import type { QuizAccessStatus } from "@/modules/quiz/domain/types/QuizTypes";
 
 export interface QuizSummaryResponseDTO {
   id: number;

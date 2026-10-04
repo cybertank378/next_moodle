@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import AttemptStatusBadge from "../../atoms/AttemptStatusBadge";
+import AttemptStatusBadge from "@/sections/exam/atoms/AttemptStatusBadge";
 
 describe("AttemptStatusBadge", () => {
   it("renders Siap for ready status", () => {

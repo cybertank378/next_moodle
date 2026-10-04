@@ -6,11 +6,11 @@ import type {
   BulkImportUsersRequestDto,
   CreateUserRequestDto,
   ListUsersQueryDto,
-} from "../../domain/dto/UserRequestDto";
+} from "@/modules/user/domain/dto/UserRequestDto";
 import type {
   BulkImportUsersResponseDto,
   UserListResponseDto,
-} from "../../domain/dto/UserResponseDto";
+} from "@/modules/user/domain/dto/UserResponseDto";
 
 export function useUserApi() {
   const [usersState, setUsersState] = useState<

@@ -2,14 +2,14 @@
 
 import { useCallback, useState } from "react";
 import { type RequestState, request } from "@/libs/apiClient";
-import type { AnswerInputPayload } from "../../domain/dto/QuizAttemptRequestDto";
+import type { AnswerInputPayload } from "@/modules/quiz/domain/dto/QuizAttemptRequestDto";
 import type {
   QuizAttemptDataResponseDto,
   QuizAttemptResponseDto,
   QuizAttemptSummaryResponseDto,
   SaveQuizAnswerResponseDto,
   SubmitQuizAttemptResponseDto,
-} from "../../domain/dto/QuizAttemptResponseDto";
+} from "@/modules/quiz/domain/dto/QuizAttemptResponseDto";
 
 export function useQuizAttemptApi() {
   const [startState, setStartState] = useState<

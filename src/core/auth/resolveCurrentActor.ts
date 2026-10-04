@@ -1,8 +1,8 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 import { cookies } from "next/headers";
-import type { CurrentActor } from "./CurrentActor";
-import type { SessionRepository } from "./SessionRepository";
+import type { CurrentActor } from "@/core/auth/CurrentActor";
+import type { SessionRepository } from "@/core/auth/SessionRepository";
 import { getAuthRepository } from "@/app/api/auth/_factory";
 
 async function extractTokenFromRequest(request: Request): Promise<string | null> {

@@ -1,4 +1,4 @@
-import type { NotificationType } from "../types/NotificationTypes";
+import type { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
 
 /**
  * Browser-facing notification shape. Internal scope fields
