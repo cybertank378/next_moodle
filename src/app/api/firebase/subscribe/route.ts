@@ -27,7 +27,8 @@ export async function POST(req: Request) {
     }
 
     const tenantPart = actor.tenantId ?? "platform";
-    const topic = `${tenantPart}-${actor.role}-${actor.userId}`;
+    const rawTopic = `${tenantPart}-${actor.role}-${actor.userId}`;
+    const topic = rawTopic.replace(/[^a-zA-Z0-9-_.~%]/g, "_");
 
     await getMessaging().subscribeToTopic([token], topic);
 

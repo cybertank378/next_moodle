@@ -77,7 +77,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-white dark:bg-[#151521] border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-200">
+    <header className="sticky top-0 z-40 h-16 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-colors duration-300">
       <div className="h-full px-4 md:px-8 flex items-center justify-between gap-3">
         {/* ================= LEFT SECTION ================= */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -136,9 +136,9 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
             </button>
 
             {isOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-[#1e1e2d] rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden text-slate-800 dark:text-slate-200">
+              <div className="absolute right-0 mt-3 w-64 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-200/60 dark:border-slate-800/60 overflow-hidden text-slate-800 dark:text-slate-200">
                 {/* ===== USER HEADER ===== */}
-                <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#151521]">
+                <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/50">
                   <div className="relative w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow shrink-0">
                     {username ? username.charAt(0) : <User size={20} />}
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#151521] rounded-full" />

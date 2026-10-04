@@ -1,14 +1,28 @@
 import { redirect } from "next/navigation";
+import { Role } from "@/libs/enums";
 import { ROUTES } from "@/libs/routes";
-import { redirectByRole } from "@/libs/utils";
+import { resolveUserRole } from "@/libs/utils";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
 
 export default async function RootPage() {
-  const user = await getCurrentUser();
+  const actor = await getCurrentUser();
 
-  if (!user) {
+  if (!actor) {
     redirect(ROUTES.AUTH.LOGIN);
   }
 
-  redirect(redirectByRole(user.role));
+  const role = resolveUserRole(actor.role);
+
+  switch (role) {
+    case Role.ADMIN:
+      redirect(ROUTES.ADMIN.ROOT);
+    case Role.TENANT:
+      redirect(ROUTES.TENANT.ROOT);
+    case Role.STUDENT:
+      redirect(ROUTES.STUDENT.ROOT);
+    case Role.TEACHER:
+      redirect(ROUTES.TEACHER.ROOT);
+    default:
+      redirect(ROUTES.AUTH.LOGIN);
+  }
 }

@@ -6,7 +6,11 @@ import {
 } from "../types/QuestionTypes";
 
 export class CreateQuestionDtoValidator {
-  static validate(dto: any): Result<CreateQuestionRequestDto, ValidationError> {
+  static validate(
+    dto: Record<string, unknown> | null,
+  ): Result<CreateQuestionRequestDto, ValidationError> {
+    if (!dto || typeof dto !== "object")
+      return Result.fail(new ValidationError("Invalid DTO"));
     if (!dto.categoryId || typeof dto.categoryId !== "number") {
       return Result.fail(
         new ValidationError("Category ID is required and must be a number"),
@@ -34,7 +38,7 @@ export class CreateQuestionDtoValidator {
       );
     }
 
-    return Result.ok(dto as CreateQuestionRequestDto);
+    return Result.ok(dto as unknown as CreateQuestionRequestDto);
   }
 }
 

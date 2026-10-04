@@ -16,9 +16,17 @@ const firebaseConfig = {
 };
 
 export const app =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  getApps().length === 0 && firebaseConfig.projectId
+    ? initializeApp(firebaseConfig)
+    : getApps().length > 0
+      ? getApps()[0]
+      : null;
 
 export const initMessaging = async () => {
+  if (!app) {
+    console.warn("Firebase is not initialized. Check your .env configuration.");
+    return null;
+  }
   const supported = await isSupported();
   if (!supported) return null;
   return getMessaging(app);

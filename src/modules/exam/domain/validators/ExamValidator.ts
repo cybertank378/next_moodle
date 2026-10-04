@@ -4,7 +4,7 @@ import type { ReorderQuizQuestionsRequestDto } from "../types/ExamTypes";
 
 export class ReorderQuizQuestionsDtoValidator {
   static validate(
-    dto: any,
+    dto: Record<string, unknown> | null,
   ): Result<ReorderQuizQuestionsRequestDto, ValidationError> {
     if (!dto || typeof dto !== "object") {
       return Result.fail(new ValidationError("Invalid request body"));
@@ -36,6 +36,6 @@ export class ReorderQuizQuestionsDtoValidator {
       }
     }
 
-    return Result.ok(dto as ReorderQuizQuestionsRequestDto);
+    return Result.ok(dto as unknown as ReorderQuizQuestionsRequestDto);
   }
 }

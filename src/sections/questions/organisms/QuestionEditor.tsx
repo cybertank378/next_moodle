@@ -16,7 +16,7 @@ import TextField from "@/shared-ui/component/TextField";
 
 interface QuestionEditorProps {
   categoryId: number;
-  existingQuestion?: any; // The question entity data if editing
+  existingQuestion?: Partial<CreateQuestionRequestDto> & { id?: number }; // The question entity data if editing
   onSuccess?: () => void;
 }
 
@@ -68,7 +68,10 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     }
 
     if (res.error) {
-      setError((res.error as any).message || "Failed to save question");
+      setError(
+        (res.error as { message?: string }).message ||
+          "Failed to save question",
+      );
     } else if (res.data) {
       if (onSuccess) onSuccess();
     }

@@ -10,12 +10,14 @@ export async function getCurrentUser(): Promise<CurrentActor | null> {
     const sessionToken = cookieStore.get("session_token")?.value;
 
     if (!sessionToken) {
+      console.warn("getCurrentUser: no session_token cookie found.");
       return null;
     }
 
     const session = await getAuthRepository().resolveSession(sessionToken);
     return session.actor;
-  } catch {
+  } catch (error) {
+    console.error("getCurrentUser error:", error);
     return null;
   }
 }
