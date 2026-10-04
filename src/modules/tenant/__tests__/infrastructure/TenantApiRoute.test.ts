@@ -6,7 +6,7 @@ vi.mock("@/modules/auth/server/getCurrentUser", () => ({
   getCurrentUser: vi.fn(),
 }));
 
-vi.mock("@/app/api/tenants/_factory", () => {
+vi.mock("@/app/api/tenant/_factory", () => {
   const mockController = {
     list: vi.fn(),
     create: vi.fn(),
@@ -21,17 +21,17 @@ vi.mock("@/app/api/tenants/_factory", () => {
 });
 
 import { NextResponse } from "next/server";
-import { getTenantsController } from "@/app/api/tenants/_factory";
-import { PUT as configureCredentials } from "@/app/api/tenants/[tenantId]/credentials/route";
+import { getTenantsController } from "@/app/api/tenant/_factory";
+import { PUT as configureCredentials } from "@/app/api/tenant/[tenantId]/credentials/route";
 import {
   DELETE as deleteTenant,
   GET as getTenantById,
   PATCH as updateTenant,
-} from "@/app/api/tenants/[tenantId]/route";
+} from "@/app/api/tenant/[tenantId]/route";
 import {
   POST as createTenant,
   GET as getTenants,
-} from "@/app/api/tenants/route";
+} from "@/app/api/tenant/route";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { HttpStatus } from "@/core/http/HttpStatus";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
@@ -43,11 +43,11 @@ describe("Tenant API Routes & RBAC protection", () => {
     vi.clearAllMocks();
   });
 
-  describe("GET /api/tenants", () => {
+  describe("GET /api/tenant", () => {
     it("returns 401 UNAUTHORIZED when no actor session exists", async () => {
       vi.mocked(getCurrentUser).mockResolvedValueOnce(null);
 
-      const req = new NextRequest("http://localhost:3000/api/tenants");
+      const req = new NextRequest("http://localhost:3000/api/tenant");
       const res = await getTenants(req);
       const json = await res.json();
 
@@ -76,7 +76,7 @@ describe("Tenant API Routes & RBAC protection", () => {
         ),
       );
 
-      const req = new NextRequest("http://localhost:3000/api/tenants");
+      const req = new NextRequest("http://localhost:3000/api/tenant");
       const res = await getTenants(req);
       const json = await res.json();
 
@@ -121,7 +121,7 @@ describe("Tenant API Routes & RBAC protection", () => {
         ),
       );
 
-      const req = new NextRequest("http://localhost:3000/api/tenants");
+      const req = new NextRequest("http://localhost:3000/api/tenant");
       const res = await getTenants(req);
       const json = await res.json();
 
@@ -132,7 +132,7 @@ describe("Tenant API Routes & RBAC protection", () => {
     });
   });
 
-  describe("POST /api/tenants", () => {
+  describe("POST /api/tenant", () => {
     it("returns 403 FORBIDDEN when accessed by a STUDENT session", async () => {
       vi.mocked(getCurrentUser).mockResolvedValueOnce({
         userId: "student-1",
@@ -152,7 +152,7 @@ describe("Tenant API Routes & RBAC protection", () => {
         ),
       );
 
-      const req = new NextRequest("http://localhost:3000/api/tenants", {
+      const req = new NextRequest("http://localhost:3000/api/tenant", {
         method: "POST",
         body: JSON.stringify({ name: "New Tenant", slug: "new-tenant" }),
       });
@@ -183,7 +183,7 @@ describe("Tenant API Routes & RBAC protection", () => {
         ),
       );
 
-      const req = new NextRequest("http://localhost:3000/api/tenants", {
+      const req = new NextRequest("http://localhost:3000/api/tenant", {
         method: "POST",
         body: JSON.stringify({ name: "New Tenant", slug: "new-tenant" }),
       });
@@ -196,7 +196,7 @@ describe("Tenant API Routes & RBAC protection", () => {
     });
   });
 
-  describe("GET /api/tenants/[tenantId]", () => {
+  describe("GET /api/tenant/[tenantId]", () => {
     it("returns 403 FORBIDDEN when accessed by a STUDENT session", async () => {
       vi.mocked(getCurrentUser).mockResolvedValueOnce({
         userId: "student-1",
@@ -216,7 +216,7 @@ describe("Tenant API Routes & RBAC protection", () => {
         ),
       );
 
-      const req = new NextRequest("http://localhost:3000/api/tenants/tenant-1");
+      const req = new NextRequest("http://localhost:3000/api/tenant/tenant-1");
       const res = await getTenantById(req, {
         params: Promise.resolve({ tenantId: "tenant-1" }),
       });
@@ -228,7 +228,7 @@ describe("Tenant API Routes & RBAC protection", () => {
     });
   });
 
-  describe("PATCH /api/tenants/[tenantId]", () => {
+  describe("PATCH /api/tenant/[tenantId]", () => {
     it("returns 403 FORBIDDEN when accessed by a STUDENT session", async () => {
       vi.mocked(getCurrentUser).mockResolvedValueOnce({
         userId: "student-1",
@@ -248,13 +248,10 @@ describe("Tenant API Routes & RBAC protection", () => {
         ),
       );
 
-      const req = new NextRequest(
-        "http://localhost:3000/api/tenants/tenant-1",
-        {
-          method: "PATCH",
-          body: JSON.stringify({ name: "Updated Name" }),
-        },
-      );
+      const req = new NextRequest("http://localhost:3000/api/tenant/tenant-1", {
+        method: "PATCH",
+        body: JSON.stringify({ name: "Updated Name" }),
+      });
       const res = await updateTenant(req, {
         params: Promise.resolve({ tenantId: "tenant-1" }),
       });
@@ -265,7 +262,7 @@ describe("Tenant API Routes & RBAC protection", () => {
     });
   });
 
-  describe("DELETE /api/tenants/[tenantId]", () => {
+  describe("DELETE /api/tenant/[tenantId]", () => {
     it("returns 403 FORBIDDEN when accessed by a STUDENT session", async () => {
       vi.mocked(getCurrentUser).mockResolvedValueOnce({
         userId: "student-1",
@@ -285,12 +282,9 @@ describe("Tenant API Routes & RBAC protection", () => {
         ),
       );
 
-      const req = new NextRequest(
-        "http://localhost:3000/api/tenants/tenant-1",
-        {
-          method: "DELETE",
-        },
-      );
+      const req = new NextRequest("http://localhost:3000/api/tenant/tenant-1", {
+        method: "DELETE",
+      });
       const res = await deleteTenant(req, {
         params: Promise.resolve({ tenantId: "tenant-1" }),
       });
@@ -301,7 +295,7 @@ describe("Tenant API Routes & RBAC protection", () => {
     });
   });
 
-  describe("PUT /api/tenants/[tenantId]/credentials", () => {
+  describe("PUT /api/tenant/[tenantId]/credentials", () => {
     it("returns 403 FORBIDDEN when accessed by a STUDENT session", async () => {
       vi.mocked(getCurrentUser).mockResolvedValueOnce({
         userId: "student-1",
@@ -322,7 +316,7 @@ describe("Tenant API Routes & RBAC protection", () => {
       );
 
       const req = new NextRequest(
-        "http://localhost:3000/api/tenants/tenant-1/credentials",
+        "http://localhost:3000/api/tenant/tenant-1/credentials",
         {
           method: "PUT",
           body: JSON.stringify({

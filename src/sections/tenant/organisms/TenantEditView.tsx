@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {
   type TenantFormValue,
-} from "@/sections/tenants/molecules/TenantForm";
+} from "@/sections/tenant/molecules/TenantForm";
 import Skeleton from "@/shared-ui/component/Skeleton";
 
 export default function TenantEditView() {

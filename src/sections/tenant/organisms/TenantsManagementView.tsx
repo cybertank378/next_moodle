@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
-import TenantTable from "@/sections/tenants/molecules/TenantTable";
+import TenantTable from "@/sections/tenant/molecules/TenantTable";
 import LinkButton from "@/shared-ui/component/LinkButton";
 import Pagination from "@/shared-ui/component/Pagination";
 import SelectField from "@/shared-ui/component/SelectField";

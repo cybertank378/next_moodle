@@ -2,7 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { TenantSummaryResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
-import TenantTable from "@/sections/tenants/molecules/TenantTable";
+import TenantTable from "@/sections/tenant/molecules/TenantTable";
 import Pagination from "@/shared-ui/component/Pagination";
 
 describe("TenantTable & Pagination Component Testing", () => {

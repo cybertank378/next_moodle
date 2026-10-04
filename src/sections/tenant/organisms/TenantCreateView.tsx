@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {
   type TenantFormValue,
-} from "@/sections/tenants/molecules/TenantForm";
+} from "@/sections/tenant/molecules/TenantForm";
 
 export default function TenantCreateView() {
   const router = useRouter();

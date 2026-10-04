@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { NextRequest, NextResponse } from "next/server";
-import { getTenantsController } from "@/app/api/tenants/_factory";
+import { getTenantsController } from "@/app/api/tenant/_factory";
 import {
   type TenantRouteContext,
   unauthorizedResponse,

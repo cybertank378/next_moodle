@@ -76,7 +76,7 @@ describe("TenantController", () => {
 
     const controller = createController(mocks);
     const req = new NextRequest(
-      "http://localhost:3000/api/tenants?page=1&pageSize=10",
+      "http://localhost:3000/api/tenant?page=1&pageSize=10",
     );
     const response = await controller.list(studentActor, req);
     const body = await response.json();
@@ -111,7 +111,7 @@ describe("TenantController", () => {
     );
 
     const controller = createController(mocks);
-    const req = new NextRequest("http://localhost:3000/api/tenants");
+    const req = new NextRequest("http://localhost:3000/api/tenant");
     const response = await controller.list(adminActor, req);
     const body = await response.json();
 
@@ -142,7 +142,7 @@ describe("TenantController", () => {
     );
 
     const controller = createController(mocks);
-    const req = new NextRequest("http://localhost:3000/api/tenants", {
+    const req = new NextRequest("http://localhost:3000/api/tenant", {
       method: "POST",
       body: JSON.stringify({
         name: "Created Tenant",
@@ -161,7 +161,7 @@ describe("TenantController", () => {
     const mocks = createMockUseCases();
     const controller = createController(mocks);
 
-    const req = new NextRequest("http://localhost:3000/api/tenants", {
+    const req = new NextRequest("http://localhost:3000/api/tenant", {
       method: "POST",
       body: "not a valid json",
     });

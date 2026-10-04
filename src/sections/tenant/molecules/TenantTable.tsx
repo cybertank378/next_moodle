@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import type { TenantSummaryResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
-import TenantEmptyState from "@/sections/tenants/atoms/TenantEmptyState";
-import TenantStatusBadge from "@/sections/tenants/atoms/TenantStatusBadge";
+import TenantEmptyState from "@/sections/tenant/atoms/TenantEmptyState";
+import TenantStatusBadge from "@/sections/tenant/atoms/TenantStatusBadge";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import {
   Table,
