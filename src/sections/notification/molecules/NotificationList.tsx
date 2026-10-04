@@ -5,7 +5,7 @@ import type { NotificationResponseDto } from "@/modules/notification/domain/dto/
 import type { NotificationTab } from "@/modules/notification/domain/types/NotificationTypes";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import NotificationItem from "../atoms/NotificationItem";
+import NotificationItem from "@/sections/notification/atoms/NotificationItem";
 
 interface NotificationListProps {
   items: NotificationResponseDto[];

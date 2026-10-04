@@ -2,9 +2,9 @@ import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
-import { NotificationEntity } from "../../domain/entity/NotificationEntity";
-import { NotificationType } from "../../domain/types/NotificationTypes";
-import { FirebaseCloudMessagingAdapter } from "../../infrastructure/providers/FirebaseCloudMessagingAdapter";
+import { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
+import { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
+import { FirebaseCloudMessagingAdapter } from "@/modules/notification/infrastructure/providers/FirebaseCloudMessagingAdapter";
 
 vi.mock("firebase-admin/app", () => ({
   getApps: vi.fn(() => []),

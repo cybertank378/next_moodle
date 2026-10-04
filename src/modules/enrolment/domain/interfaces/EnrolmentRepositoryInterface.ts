@@ -3,8 +3,8 @@ import type {
   EnrolUserRequestDto,
   ListEnrolmentsQueryDto,
   UnenrolUserRequestDto,
-} from "../dto/EnrolmentRequestDto";
-import type { EnrolmentListResponseDto } from "../dto/EnrolmentResponseDto";
+} from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
+import type { EnrolmentListResponseDto } from "@/modules/enrolment/domain/dto/EnrolmentResponseDto";
 
 export interface EnrolmentRepositoryInterface {
   getCourseEnrolments(input: {

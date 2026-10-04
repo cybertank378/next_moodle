@@ -1,6 +1,6 @@
-import { AppRole } from "./AppRole";
-import type { AuthorizationActor } from "./AuthorizationContext";
-import { AuthorizationError } from "./AuthorizationError";
+import { AppRole } from "@/core/rbac/AppRole";
+import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { AuthorizationError } from "@/core/rbac/AuthorizationError";
 
 export function assertTenantScope(
   actor: AuthorizationActor,

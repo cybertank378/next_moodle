@@ -3,7 +3,7 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import {
   type CreateQuestionRequestDto,
   QuestionType,
-} from "../types/QuestionTypes";
+} from "@/modules/questions/domain/types/QuestionTypes";
 
 export class CreateQuestionDtoValidator {
   static validate(

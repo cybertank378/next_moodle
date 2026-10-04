@@ -2,13 +2,13 @@ import "server-only";
 
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleClient } from "@/core/moodle/types";
-import type { QuizEntity } from "../../domain/entity/QuizEntity";
-import type { QuizRepositoryInterface } from "../../domain/interfaces/QuizRepositoryInterface";
-import { QuizMapper } from "../../domain/mapper/QuizMapper";
+import type { QuizEntity } from "@/modules/quiz/domain/entity/QuizEntity";
+import type { QuizRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizRepositoryInterface";
+import { QuizMapper } from "@/modules/quiz/domain/mapper/QuizMapper";
 import type {
   RawMoodleQuiz,
   RawMoodleQuizAccessInfo,
-} from "../../domain/types/QuizTypes";
+} from "@/modules/quiz/domain/types/QuizTypes";
 
 interface MoodleQuizzesResponse {
   quizzes?: RawMoodleQuiz[];

@@ -1,6 +1,6 @@
 import { Award, BookOpen, CheckCircle2, User } from "lucide-react";
 import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
-import GradeStatusBadge from "../atoms/GradeStatusBadge";
+import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
 
 export interface GradeReportSummaryCardProps {
   report: UserGradeReportResponseDto;

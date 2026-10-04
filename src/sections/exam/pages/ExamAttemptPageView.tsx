@@ -6,7 +6,7 @@ import { AppRouteConstants } from "@/libs/routes";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import ExamAttemptInterface from "../organisms/ExamAttemptInterface";
+import ExamAttemptInterface from "@/sections/exam/organisms/ExamAttemptInterface";
 
 export interface ExamAttemptPageViewProps {
   quizId: number;

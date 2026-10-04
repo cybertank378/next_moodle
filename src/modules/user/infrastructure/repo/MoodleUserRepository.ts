@@ -6,15 +6,15 @@ import type {
   CreateUserRequestDto,
   ListUsersQueryDto,
   UpdateUserRequestDto,
-} from "../../domain/dto/UserRequestDto";
+} from "@/modules/user/domain/dto/UserRequestDto";
 import type {
   BulkImportUsersResponseDto,
   UserImportRowErrorDto,
   UserListResponseDto,
   UserSummaryResponseDto,
-} from "../../domain/dto/UserResponseDto";
-import type { UserRepositoryInterface } from "../../domain/interfaces/UserRepositoryInterface";
-import { UserImportParser } from "../../domain/mapper/UserImportParser";
+} from "@/modules/user/domain/dto/UserResponseDto";
+import type { UserRepositoryInterface } from "@/modules/user/domain/interfaces/UserRepositoryInterface";
+import { UserImportParser } from "@/modules/user/domain/mapper/UserImportParser";
 
 interface RawMoodleUser {
   id: number;

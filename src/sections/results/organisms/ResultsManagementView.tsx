@@ -6,9 +6,9 @@ import { Role, type UserRole } from "@/libs/enums";
 import { useCourseApi } from "@/modules/course/presentation/hooks/useCourseApi";
 import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import ResultsEmptyState from "../atoms/ResultsEmptyState";
-import StudentGradeReportView from "./StudentGradeReportView";
-import TeacherClassResultsView from "./TeacherClassResultsView";
+import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
+import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
+import TeacherClassResultsView from "@/sections/results/organisms/TeacherClassResultsView";
 
 export interface ResultsManagementViewProps {
   userRole: UserRole;

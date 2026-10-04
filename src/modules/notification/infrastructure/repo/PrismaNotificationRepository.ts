@@ -1,15 +1,15 @@
 import "server-only";
 
 import { prisma } from "@/libs/prisma";
-import { NotificationEntity } from "../../domain/entity/NotificationEntity";
+import { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 import type {
   CreateNotificationOptions,
   FindByRecipientOptions,
   FindByRecipientResult,
   NotificationRepositoryInterface,
-} from "../../domain/interfaces/NotificationRepositoryInterface";
-import type { NotificationType } from "../../domain/types/NotificationTypes";
-import type { NotificationScope } from "../../domain/value-object/NotificationScope";
+} from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
+import type { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
+import type { NotificationScope } from "@/modules/notification/domain/value-object/NotificationScope";
 
 function mapPrismaToEntity(row: {
   id: string;

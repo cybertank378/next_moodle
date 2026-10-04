@@ -12,8 +12,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import GradeStatusBadge from "../atoms/GradeStatusBadge";
-import ResultsEmptyState from "../atoms/ResultsEmptyState";
+import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
+import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
 
 export interface CourseGradesTableProps {
   reports: UserGradeReportResponseDto[];

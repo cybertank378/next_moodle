@@ -3,7 +3,7 @@ import { request } from "@/libs/apiClient";
 import type {
   CreateQuestionRequestDto,
   UpdateQuestionRequestDto,
-} from "../../domain/types/QuestionTypes";
+} from "@/modules/questions/domain/types/QuestionTypes";
 
 export function useQuestionApi() {
   const [loading, setLoading] = useState(false);

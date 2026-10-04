@@ -6,14 +6,14 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import { createLogger } from "@/core/logger/createLogger";
 import type { Logger } from "@/core/logger/Logger";
 import { SsrfValidator } from "@/core/security/SsrfValidator";
-import { buildCacheKey, type CacheAdapter } from "./MoodleCacheAdapter";
-import { encodeMoodleParams } from "./MoodleEncoder";
-import { MoodleErrorMapper } from "./MoodleErrorMapper";
+import { buildCacheKey, type CacheAdapter } from "@/core/moodle/MoodleCacheAdapter";
+import { encodeMoodleParams } from "@/core/moodle/MoodleEncoder";
+import { MoodleErrorMapper } from "@/core/moodle/MoodleErrorMapper";
 import type {
   MoodleClient,
   MoodleCredentials,
   MoodleRequestOptions,
-} from "./types";
+} from "@/core/moodle/types";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_RETRY_DELAY_MS = 100;

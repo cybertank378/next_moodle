@@ -6,8 +6,8 @@ import type {
   EnrolUserRequestDto,
   ListEnrolmentsQueryDto,
   UnenrolUserRequestDto,
-} from "../../domain/dto/EnrolmentRequestDto";
-import type { EnrolmentListResponseDto } from "../../domain/dto/EnrolmentResponseDto";
+} from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
+import type { EnrolmentListResponseDto } from "@/modules/enrolment/domain/dto/EnrolmentResponseDto";
 
 export function useEnrolmentApi() {
   const [enrolmentsState, setEnrolmentsState] = useState<

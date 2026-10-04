@@ -6,12 +6,12 @@ import type {
   EnrolUserRequestDto,
   ListEnrolmentsQueryDto,
   UnenrolUserRequestDto,
-} from "../../domain/dto/EnrolmentRequestDto";
+} from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
 import type {
   EnrolledUserResponseDto,
   EnrolmentListResponseDto,
-} from "../../domain/dto/EnrolmentResponseDto";
-import type { EnrolmentRepositoryInterface } from "../../domain/interfaces/EnrolmentRepositoryInterface";
+} from "@/modules/enrolment/domain/dto/EnrolmentResponseDto";
+import type { EnrolmentRepositoryInterface } from "@/modules/enrolment/domain/interfaces/EnrolmentRepositoryInterface";
 
 interface RawMoodleEnrolledRole {
   roleid: number;

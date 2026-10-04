@@ -4,11 +4,11 @@ import { ArrowLeft, ArrowRight, Send, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAutosaveAttempt } from "@/modules/quiz/presentation/hooks/useAutosaveAttempt";
 import Button from "@/shared-ui/component/Button";
-import AttemptStatusBadge from "../atoms/AttemptStatusBadge";
-import AttemptTimer from "../atoms/AttemptTimer";
-import QuestionCard, { type QuestionCardData } from "../molecules/QuestionCard";
-import QuestionNavigator from "../molecules/QuestionNavigator";
-import SubmitConfirmationModal from "../molecules/SubmitConfirmationModal";
+import AttemptStatusBadge from "@/sections/exam/atoms/AttemptStatusBadge";
+import AttemptTimer from "@/sections/exam/atoms/AttemptTimer";
+import QuestionCard, { type QuestionCardData } from "@/sections/exam/molecules/QuestionCard";
+import QuestionNavigator from "@/sections/exam/molecules/QuestionNavigator";
+import SubmitConfirmationModal from "@/sections/exam/molecules/SubmitConfirmationModal";
 
 export interface ExamAttemptInterfaceProps {
   attemptId: number;

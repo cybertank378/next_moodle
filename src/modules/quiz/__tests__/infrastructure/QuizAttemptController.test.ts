@@ -4,13 +4,13 @@ import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { AppRole } from "@/core/rbac/AppRole";
 import { AuthorizationError } from "@/core/rbac/AuthorizationError";
-import type { GetAttemptDataUseCase } from "../../application/usecases/GetAttemptDataUseCase";
-import type { GetAttemptSummaryUseCase } from "../../application/usecases/GetAttemptSummaryUseCase";
-import type { GetUserAttemptsUseCase } from "../../application/usecases/GetUserAttemptsUseCase";
-import type { SaveQuizAnswerUseCase } from "../../application/usecases/SaveQuizAnswerUseCase";
-import type { StartQuizAttemptUseCase } from "../../application/usecases/StartQuizAttemptUseCase";
-import type { SubmitQuizAttemptUseCase } from "../../application/usecases/SubmitQuizAttemptUseCase";
-import { QuizAttemptController } from "../../infrastructure/http/QuizAttemptController";
+import type { GetAttemptDataUseCase } from "@/modules/quiz/application/usecases/GetAttemptDataUseCase";
+import type { GetAttemptSummaryUseCase } from "@/modules/quiz/application/usecases/GetAttemptSummaryUseCase";
+import type { GetUserAttemptsUseCase } from "@/modules/quiz/application/usecases/GetUserAttemptsUseCase";
+import type { SaveQuizAnswerUseCase } from "@/modules/quiz/application/usecases/SaveQuizAnswerUseCase";
+import type { StartQuizAttemptUseCase } from "@/modules/quiz/application/usecases/StartQuizAttemptUseCase";
+import type { SubmitQuizAttemptUseCase } from "@/modules/quiz/application/usecases/SubmitQuizAttemptUseCase";
+import { QuizAttemptController } from "@/modules/quiz/infrastructure/http/QuizAttemptController";
 
 describe("QuizAttemptController", () => {
   const studentActor: CurrentActor = {

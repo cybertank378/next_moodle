@@ -1,7 +1,7 @@
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { TenantContext } from "./TenantContext";
-import type { TenantResolver } from "./TenantResolver";
+import type { TenantContext } from "@/core/tenant/TenantContext";
+import type { TenantResolver } from "@/core/tenant/TenantResolver";
 
 export async function resolveCurrentTenant(
   request: Request,

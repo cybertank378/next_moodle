@@ -11,13 +11,13 @@ import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { Permission } from "@/core/rbac/Permission";
 import { requirePermission } from "@/core/rbac/requirePermission";
-import type { EnrolUsersUseCase } from "../../application/usecases/EnrolUsersUseCase";
-import type { ListEnrolmentsUseCase } from "../../application/usecases/ListEnrolmentsUseCase";
-import type { UnenrolUsersUseCase } from "../../application/usecases/UnenrolUsersUseCase";
+import type { EnrolUsersUseCase } from "@/modules/enrolment/application/usecases/EnrolUsersUseCase";
+import type { ListEnrolmentsUseCase } from "@/modules/enrolment/application/usecases/ListEnrolmentsUseCase";
+import type { UnenrolUsersUseCase } from "@/modules/enrolment/application/usecases/UnenrolUsersUseCase";
 import type {
   EnrolUserRequestDto,
   UnenrolUserRequestDto,
-} from "../../domain/dto/EnrolmentRequestDto";
+} from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   if (!Object.values(AppRole).includes(actor.role as AppRole)) {

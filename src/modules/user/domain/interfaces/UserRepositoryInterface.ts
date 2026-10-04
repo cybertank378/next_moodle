@@ -3,12 +3,12 @@ import type {
   CreateUserRequestDto,
   ListUsersQueryDto,
   UpdateUserRequestDto,
-} from "../dto/UserRequestDto";
+} from "@/modules/user/domain/dto/UserRequestDto";
 import type {
   BulkImportUsersResponseDto,
   UserListResponseDto,
   UserSummaryResponseDto,
-} from "../dto/UserResponseDto";
+} from "@/modules/user/domain/dto/UserResponseDto";
 
 export interface UserRepositoryInterface {
   getUsers(input: {

@@ -14,10 +14,10 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import GradeScoreCard from "../atoms/GradeScoreCard";
-import GradeStatusBadge from "../atoms/GradeStatusBadge";
-import ResultsEmptyState from "../atoms/ResultsEmptyState";
-import GradeReportSummaryCard from "../molecules/GradeReportSummaryCard";
+import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
+import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
+import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
+import GradeReportSummaryCard from "@/sections/results/molecules/GradeReportSummaryCard";
 
 export interface StudentGradeReportViewProps {
   courseId: number;

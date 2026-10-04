@@ -1,6 +1,6 @@
-import { AppError } from "../errors/AppError";
-import { ApiResponse } from "./ApiResponse";
-import { HttpStatus, type HttpStatusCode } from "./HttpStatus";
+import { AppError } from "@/core/errors/AppError";
+import { ApiResponse } from "@/core/http/ApiResponse";
+import { HttpStatus, type HttpStatusCode } from "@/core/http/HttpStatus";
 
 export function mapErrorToHttpResponse(
   error: unknown,

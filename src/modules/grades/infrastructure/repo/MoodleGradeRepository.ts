@@ -2,13 +2,13 @@ import "server-only";
 
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleClient } from "@/core/moodle/types";
-import { UserGradeReportEntity } from "../../domain/entity/GradeItemEntity";
-import type { GradeRepositoryInterface } from "../../domain/interfaces/GradeRepositoryInterface";
-import { GradeMapper } from "../../domain/mapper/GradeMapper";
+import { UserGradeReportEntity } from "@/modules/grades/domain/entity/GradeItemEntity";
+import type { GradeRepositoryInterface } from "@/modules/grades/domain/interfaces/GradeRepositoryInterface";
+import { GradeMapper } from "@/modules/grades/domain/mapper/GradeMapper";
 import type {
   RawMoodleCoreGradesResponse,
   RawMoodleGradeReportResponse,
-} from "../../domain/types/GradeTypes";
+} from "@/modules/grades/domain/types/GradeTypes";
 
 export class MoodleGradeRepository implements GradeRepositoryInterface {
   constructor(

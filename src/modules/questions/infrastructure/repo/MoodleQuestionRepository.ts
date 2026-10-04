@@ -1,11 +1,11 @@
 import { MoodleError } from "@/core/errors/MoodleError";
 import type { MoodleClient } from "@/core/moodle/types";
-import { QuestionEntity } from "../../domain/entity/QuestionEntity";
-import type { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
+import { QuestionEntity } from "@/modules/questions/domain/entity/QuestionEntity";
+import type { QuestionRepositoryInterface } from "@/modules/questions/domain/interfaces/QuestionRepositoryInterface";
 import type {
   CreateQuestionRequestDto,
   UpdateQuestionRequestDto,
-} from "../../domain/types/QuestionTypes";
+} from "@/modules/questions/domain/types/QuestionTypes";
 
 export class MoodleQuestionRepository implements QuestionRepositoryInterface {
   async getQuestionsByCategory(

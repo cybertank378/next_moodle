@@ -1,5 +1,5 @@
 import type { UserRole } from "@/libs/enums";
-import ResultsManagementView from "../organisms/ResultsManagementView";
+import ResultsManagementView from "@/sections/results/organisms/ResultsManagementView";
 
 export interface ResultsPageViewProps {
   userRole: UserRole;

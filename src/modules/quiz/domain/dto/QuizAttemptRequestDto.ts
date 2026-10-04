@@ -1,7 +1,7 @@
 import type {
   MoodleAnswerPayloadItem,
   StructuredQuestionAnswer,
-} from "../types/QuizAttemptTypes";
+} from "@/modules/quiz/domain/types/QuizAttemptTypes";
 
 export type AnswerInputPayload =
   | Record<string, string | number>

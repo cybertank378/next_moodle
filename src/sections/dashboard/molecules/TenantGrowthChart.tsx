@@ -9,6 +9,7 @@ import {
 } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import Card from "@/shared-ui/component/Card";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import Typography from "@/shared-ui/component/Typography";
 
 const CHART_HEIGHT = 260;
 
@@ -34,20 +35,20 @@ export default function TenantGrowthChart({
     <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-900/60">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+          <Typography variant="h2" className="text-slate-900 dark:text-white">
             Pertumbuhan Tenant
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          </Typography>
+          <Typography variant="body" className="text-slate-500 dark:text-slate-400">
             Tenant baru per bulan ({points.length} bulan terakhir)
-          </p>
+          </Typography>
         </div>
         {!loading && (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <Typography variant="body" className="text-slate-500 dark:text-slate-400">
             <span className="font-semibold text-indigo-600 dark:text-indigo-400">
               +{formatCount(totalNew)}
             </span>{" "}
             · total {formatCount(latestTotal)}
-          </p>
+          </Typography>
         )}
       </div>
 
@@ -55,10 +56,12 @@ export default function TenantGrowthChart({
         <Skeleton height={CHART_HEIGHT} />
       ) : totalNew === 0 ? (
         <div
-          className="flex items-center justify-center rounded-xl border border-dashed border-slate-300 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400"
+          className="flex items-center justify-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700"
           style={{ height: CHART_HEIGHT }}
         >
-          Belum ada tenant baru pada periode ini.
+          <Typography variant="body" className="text-slate-500 dark:text-slate-400">
+            Belum ada tenant baru pada periode ini.
+          </Typography>
         </div>
       ) : (
         <ResponsiveChart height={CHART_HEIGHT}>

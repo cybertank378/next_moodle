@@ -8,7 +8,7 @@ import {
   type TenantContext,
   validateTenantContext,
 } from "@/core/tenant/TenantContext";
-import type { MoodleCredentials } from "./types";
+import type { MoodleCredentials } from "@/core/moodle/types";
 
 export type MoodleServiceCredential = "admin" | "proctor";
 

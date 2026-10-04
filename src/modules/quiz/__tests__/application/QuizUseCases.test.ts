@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
-import { CheckQuizAccessUseCase } from "../../application/usecases/CheckQuizAccessUseCase";
-import { GetQuizDetailUseCase } from "../../application/usecases/GetQuizDetailUseCase";
-import { GetQuizzesByCourseUseCase } from "../../application/usecases/GetQuizzesByCourseUseCase";
-import { QuizEntity } from "../../domain/entity/QuizEntity";
-import type { QuizRepositoryInterface } from "../../domain/interfaces/QuizRepositoryInterface";
+import { CheckQuizAccessUseCase } from "@/modules/quiz/application/usecases/CheckQuizAccessUseCase";
+import { GetQuizDetailUseCase } from "@/modules/quiz/application/usecases/GetQuizDetailUseCase";
+import { GetQuizzesByCourseUseCase } from "@/modules/quiz/application/usecases/GetQuizzesByCourseUseCase";
+import { QuizEntity } from "@/modules/quiz/domain/entity/QuizEntity";
+import type { QuizRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizRepositoryInterface";
 
 const studentActor: AuthorizationActor = {
   id: "student-1",

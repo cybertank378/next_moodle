@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleClient } from "@/core/moodle/types";
-import { MoodleGradeRepository } from "../../infrastructure/repo/MoodleGradeRepository";
+import { MoodleGradeRepository } from "@/modules/grades/infrastructure/repo/MoodleGradeRepository";
 
 describe("MoodleGradeRepository", () => {
   it("should fetch user grades from gradereport_user_get_grade_items", async () => {

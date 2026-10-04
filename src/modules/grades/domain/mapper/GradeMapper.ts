@@ -2,16 +2,16 @@ import type {
   CourseGradesResponseDto,
   GradeItemResponseDto,
   UserGradeReportResponseDto,
-} from "../dto/GradeResponseDto";
+} from "@/modules/grades/domain/dto/GradeResponseDto";
 import {
   GradeItemEntity,
   UserGradeReportEntity,
-} from "../entity/GradeItemEntity";
+} from "@/modules/grades/domain/entity/GradeItemEntity";
 import type {
   RawMoodleCoreGradesResponse,
   RawMoodleGradeItem,
   RawMoodleUserGrade,
-} from "../types/GradeTypes";
+} from "@/modules/grades/domain/types/GradeTypes";
 
 export class GradeMapper {
   public static toItemEntity(raw: RawMoodleGradeItem): GradeItemEntity {

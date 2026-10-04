@@ -1,4 +1,4 @@
-import type { EnrolmentRoleDto } from "../dto/EnrolmentResponseDto";
+import type { EnrolmentRoleDto } from "@/modules/enrolment/domain/dto/EnrolmentResponseDto";
 
 export class EnrolmentEntity {
   constructor(

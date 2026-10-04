@@ -1,6 +1,6 @@
 import { MoodleError } from "@/core/errors/MoodleError";
 import type { MoodleClient } from "@/core/moodle/types";
-import type { ExamAdministrationRepositoryInterface } from "../../domain/interfaces/ExamAdministrationRepositoryInterface";
+import type { ExamAdministrationRepositoryInterface } from "@/modules/exam/domain/interfaces/ExamAdministrationRepositoryInterface";
 
 export class MoodleExamAdministrationRepository
   implements ExamAdministrationRepositoryInterface

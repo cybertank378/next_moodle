@@ -1,8 +1,8 @@
 import type { MoodleClient } from "@/core/moodle/types";
-import type { QuestionEntity } from "../../domain/entity/QuestionEntity";
-import type { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
-import { CreateQuestionRequestDto } from "../../domain/types/QuestionTypes";
-import { CreateQuestionDtoValidator } from "../../domain/validators/QuestionValidator";
+import type { QuestionEntity } from "@/modules/questions/domain/entity/QuestionEntity";
+import type { QuestionRepositoryInterface } from "@/modules/questions/domain/interfaces/QuestionRepositoryInterface";
+import { CreateQuestionRequestDto } from "@/modules/questions/domain/types/QuestionTypes";
+import { CreateQuestionDtoValidator } from "@/modules/questions/domain/validators/QuestionValidator";
 
 export class CreateQuestionUseCase {
   constructor(private readonly repository: QuestionRepositoryInterface) {}

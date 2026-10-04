@@ -1,7 +1,7 @@
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { MarkNotificationReadRequestDto } from "../../domain/dto/NotificationRequestDto";
-import type { NotificationRepositoryInterface } from "../../domain/interfaces/NotificationRepositoryInterface";
+import type { MarkNotificationReadRequestDto } from "@/modules/notification/domain/dto/NotificationRequestDto";
+import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 
 export class MarkNotificationReadUseCase {
   constructor(private readonly repo: NotificationRepositoryInterface) {}

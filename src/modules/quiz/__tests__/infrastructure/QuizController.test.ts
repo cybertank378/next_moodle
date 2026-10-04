@@ -5,10 +5,10 @@ import { Result } from "@/core/base/Result";
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { AppRole } from "@/core/rbac/AppRole";
-import type { CheckQuizAccessUseCase } from "../../application/usecases/CheckQuizAccessUseCase";
-import type { GetQuizDetailUseCase } from "../../application/usecases/GetQuizDetailUseCase";
-import type { GetQuizzesByCourseUseCase } from "../../application/usecases/GetQuizzesByCourseUseCase";
-import { QuizController } from "../../infrastructure/http/QuizController";
+import type { CheckQuizAccessUseCase } from "@/modules/quiz/application/usecases/CheckQuizAccessUseCase";
+import type { GetQuizDetailUseCase } from "@/modules/quiz/application/usecases/GetQuizDetailUseCase";
+import type { GetQuizzesByCourseUseCase } from "@/modules/quiz/application/usecases/GetQuizzesByCourseUseCase";
+import { QuizController } from "@/modules/quiz/infrastructure/http/QuizController";
 
 describe("QuizController", () => {
   const studentActor: CurrentActor = {

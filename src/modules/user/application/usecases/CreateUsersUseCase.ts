@@ -1,5 +1,5 @@
-import type { CreateUserRequestDto } from "../../domain/dto/UserRequestDto";
-import type { UserRepositoryInterface } from "../../domain/interfaces/UserRepositoryInterface";
+import type { CreateUserRequestDto } from "@/modules/user/domain/dto/UserRequestDto";
+import type { UserRepositoryInterface } from "@/modules/user/domain/interfaces/UserRepositoryInterface";
 
 export class CreateUsersUseCase {
   constructor(private readonly userRepository: UserRepositoryInterface) {}

@@ -6,8 +6,8 @@ import { AppRouteConstants } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import type { QuizSummaryResponseDTO } from "@/modules/quiz/domain/dto/QuizResponseDto";
 import Button from "@/shared-ui/component/Button";
-import QuizStatusBadge from "../atoms/QuizStatusBadge";
-import QuizTimeLimitBadge from "../atoms/QuizTimeLimitBadge";
+import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
+import QuizTimeLimitBadge from "@/sections/exam/atoms/QuizTimeLimitBadge";
 
 interface Props {
   quiz: QuizSummaryResponseDTO;

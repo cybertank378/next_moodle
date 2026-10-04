@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AppRouteConstants } from "@/libs/routes";
 import Button from "@/shared-ui/component/Button";
-import StudentGradeReportView from "../organisms/StudentGradeReportView";
+import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
 
 export interface ResultDetailPageViewProps {
   courseId: number;

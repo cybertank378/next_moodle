@@ -7,8 +7,8 @@ import {
   resolveRateLimitKey,
 } from "@/core/security/RateLimitConfig";
 import { resolveRequestId } from "@/core/security/RequestId";
-import { ApiResponse } from "./ApiResponse";
-import { mapErrorToHttpResponse } from "./mapErrorToHttpResponse";
+import { ApiResponse } from "@/core/http/ApiResponse";
+import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 
 export interface ApiHandlerContext {
   requestId: string;

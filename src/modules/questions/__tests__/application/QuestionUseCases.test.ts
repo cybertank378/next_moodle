@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { ValidationError } from "@/core/errors/ValidationError";
 import type { MoodleClient } from "@/core/moodle/types";
-import { CreateQuestionUseCase } from "../../application/usecases/CreateQuestionUseCase";
-import { QuestionEntity } from "../../domain/entity/QuestionEntity";
-import type { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
-import { QuestionType } from "../../domain/types/QuestionTypes";
+import { CreateQuestionUseCase } from "@/modules/questions/application/usecases/CreateQuestionUseCase";
+import { QuestionEntity } from "@/modules/questions/domain/entity/QuestionEntity";
+import type { QuestionRepositoryInterface } from "@/modules/questions/domain/interfaces/QuestionRepositoryInterface";
+import { QuestionType } from "@/modules/questions/domain/types/QuestionTypes";
 
 describe("CreateQuestionUseCase", () => {
   it("should create a question when dto is valid", async () => {

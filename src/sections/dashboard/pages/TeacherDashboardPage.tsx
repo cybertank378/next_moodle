@@ -1,4 +1,4 @@
-import TeacherDashboardOverview from "../organisms/TeacherDashboardOverview";
+import TeacherDashboardOverview from "@/sections/dashboard/organisms/TeacherDashboardOverview";
 
 export default function TeacherDashboardPage() {
   return <TeacherDashboardOverview />;

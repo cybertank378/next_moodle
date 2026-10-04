@@ -1,5 +1,5 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { AnswerInputPayload } from "../../domain/dto/QuizAttemptRequestDto";
+import type { AnswerInputPayload } from "@/modules/quiz/domain/dto/QuizAttemptRequestDto";
 
 export function parseAttemptId(param: unknown): number {
   if (typeof param !== "string" && typeof param !== "number") {

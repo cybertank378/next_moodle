@@ -22,9 +22,9 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import EnrolmentRoleBadge from "../atoms/EnrolmentRoleBadge";
-import EnrolmentFilterBar from "../molecules/EnrolmentFilterBar";
-import EnrolUserModal from "./EnrolUserModal";
+import EnrolmentRoleBadge from "@/sections/enrolments/atoms/EnrolmentRoleBadge";
+import EnrolmentFilterBar from "@/sections/enrolments/molecules/EnrolmentFilterBar";
+import EnrolUserModal from "@/sections/enrolments/organisms/EnrolUserModal";
 
 const PAGE_SIZE = 10;
 const SKELETON_KEYS = [

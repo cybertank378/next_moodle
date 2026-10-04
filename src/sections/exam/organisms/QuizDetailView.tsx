@@ -18,7 +18,7 @@ import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
 import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import QuizStatusBadge from "../atoms/QuizStatusBadge";
+import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
 
 interface Props {
   quizId: number;

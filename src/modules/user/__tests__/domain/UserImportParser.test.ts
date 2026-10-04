@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   USER_IMPORT_TEMPLATE_CSV,
   UserImportParser,
-} from "../../domain/mapper/UserImportParser";
+} from "@/modules/user/domain/mapper/UserImportParser";
 
 describe("UserImportParser", () => {
   it("parses valid comma-separated CSV text into CreateUserRequestDto array", () => {

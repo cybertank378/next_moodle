@@ -2,10 +2,10 @@ import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { AppRole } from "@/core/rbac/AppRole";
-import type { CreateUsersUseCase } from "../../application/usecases/CreateUsersUseCase";
-import type { ImportUsersUseCase } from "../../application/usecases/ImportUsersUseCase";
-import type { ListUsersUseCase } from "../../application/usecases/ListUsersUseCase";
-import { UserController } from "../../infrastructure/http/UserController";
+import type { CreateUsersUseCase } from "@/modules/user/application/usecases/CreateUsersUseCase";
+import type { ImportUsersUseCase } from "@/modules/user/application/usecases/ImportUsersUseCase";
+import type { ListUsersUseCase } from "@/modules/user/application/usecases/ListUsersUseCase";
+import { UserController } from "@/modules/user/infrastructure/http/UserController";
 
 describe("UserController", () => {
   const tenantActor: CurrentActor = {

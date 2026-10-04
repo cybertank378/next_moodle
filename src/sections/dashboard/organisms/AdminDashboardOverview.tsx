@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { ADMIN_DASHBOARD_DEFAULT_MONTHS } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { formatCount } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
+import Button from "@/shared-ui/component/Button";
+import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
 import RecentTenantsTable from "@/sections/dashboard/molecules/RecentTenantsTable";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
 import TenantGrowthChart from "@/sections/dashboard/molecules/TenantGrowthChart";
@@ -44,21 +46,33 @@ export default function AdminDashboardOverview() {
   const unavailable = !data && !!error;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <DashboardHeader
+        title="Ikhtisar Platform"
+        subtitle="Manajemen platform SaaS, konfigurasi tenant, dan pemantauan sistem."
+        titleClassName="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400"
+        action={
+          <Button color="primary" variant="filled" leftIcon={undefined}>
+            + Daftarkan Tenant Baru
+          </Button>
+        }
+      />
+
       {error && (
         <div
           role="alert"
           className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300"
         >
           <span>{error}</span>
-          <button
-            type="button"
-            id="admin-dashboard-retry"
+          <Button
+            size="sm"
+            variant="outline"
+            color="error"
             onClick={() => void fetchAdminOverview(ADMIN_DASHBOARD_DEFAULT_MONTHS)}
-            className="font-semibold underline-offset-2 hover:underline"
+            className="border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300"
           >
             Coba lagi
-          </button>
+          </Button>
         </div>
       )}
 
@@ -80,7 +94,7 @@ export default function AdminDashboardOverview() {
           unavailable={unavailable}
         />
         <StatCard
-          label="Maintenance"
+          label="Pemeliharaan"
           value={formatCount(summary.maintenance)}
           hint="Sedang dalam pemeliharaan"
           accent="amber"
@@ -88,7 +102,7 @@ export default function AdminDashboardOverview() {
           unavailable={unavailable}
         />
         <StatCard
-          label="Suspended"
+          label="Ditangguhkan"
           value={formatCount(summary.suspended)}
           hint={summary.suspended > 0 ? "Perlu ditinjau" : "Tidak ada tindakan"}
           accent="rose"

@@ -5,17 +5,17 @@ import type { MoodleClient } from "@/core/moodle/types";
 import type {
   QuizAttemptDataResponseDto,
   QuizAttemptSummaryResponseDto,
-} from "../../domain/dto/QuizAttemptResponseDto";
-import type { QuizAttemptEntity } from "../../domain/entity/QuizAttemptEntity";
-import type { QuizAttemptRepositoryInterface } from "../../domain/interfaces/QuizAttemptRepositoryInterface";
-import { QuizAttemptMapper } from "../../domain/mapper/QuizAttemptMapper";
+} from "@/modules/quiz/domain/dto/QuizAttemptResponseDto";
+import type { QuizAttemptEntity } from "@/modules/quiz/domain/entity/QuizAttemptEntity";
+import type { QuizAttemptRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizAttemptRepositoryInterface";
+import { QuizAttemptMapper } from "@/modules/quiz/domain/mapper/QuizAttemptMapper";
 import type {
   MoodleAnswerPayloadItem,
   QuizAttemptStatus,
   RawMoodleAttempt,
   RawMoodleAttemptData,
   RawMoodleAttemptSummary,
-} from "../../domain/types/QuizAttemptTypes";
+} from "@/modules/quiz/domain/types/QuizAttemptTypes";
 
 interface MoodleStartAttemptResponse {
   attempt: RawMoodleAttempt;

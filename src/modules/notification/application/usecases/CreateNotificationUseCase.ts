@@ -1,9 +1,9 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { CreateNotificationRequestDto } from "../../domain/dto/NotificationRequestDto";
-import type { NotificationEntity } from "../../domain/entity/NotificationEntity";
-import type { NotificationRepositoryInterface } from "../../domain/interfaces/NotificationRepositoryInterface";
+import type { CreateNotificationRequestDto } from "@/modules/notification/domain/dto/NotificationRequestDto";
+import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
+import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 
-import type { PushNotificationAdapterInterface } from "../../domain/interfaces/PushNotificationAdapterInterface";
+import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_BODY_LENGTH = 1000;

@@ -1,5 +1,5 @@
-import type { NotificationResponseDto } from "../dto/NotificationResponseDto";
-import type { NotificationEntity } from "../entity/NotificationEntity";
+import type { NotificationResponseDto } from "@/modules/notification/domain/dto/NotificationResponseDto";
+import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 
 export class NotificationMapper {
   static toDto(entity: NotificationEntity): NotificationResponseDto {

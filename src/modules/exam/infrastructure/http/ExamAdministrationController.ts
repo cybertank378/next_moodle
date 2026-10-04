@@ -4,7 +4,7 @@ import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { AppRole } from "@/core/rbac/AppRole";
 import { authorize } from "@/core/rbac/authorize";
-import type { ReorderQuizQuestionsUseCase } from "../../application/usecases/ReorderQuizQuestionsUseCase";
+import type { ReorderQuizQuestionsUseCase } from "@/modules/exam/application/usecases/ReorderQuizQuestionsUseCase";
 
 export class ExamAdministrationController {
   constructor(

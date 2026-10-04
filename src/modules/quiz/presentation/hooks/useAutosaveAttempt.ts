@@ -5,7 +5,7 @@ import {
   type AttemptSyncState,
   AutosaveQueueManager,
   type QueuedAnswerItem,
-} from "../helpers/AutosaveQueueManager";
+} from "@/modules/quiz/presentation/helpers/AutosaveQueueManager";
 
 export interface UseAutosaveAttemptProps {
   attemptId: number;

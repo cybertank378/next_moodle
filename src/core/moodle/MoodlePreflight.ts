@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { MoodleClient } from "./types";
+import type { MoodleClient } from "@/core/moodle/types";
 
 const EXPECTED_COMPONENT = "local_examapi";
 const EXPECTED_API_VERSION = 1;

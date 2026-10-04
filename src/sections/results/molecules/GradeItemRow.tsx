@@ -1,6 +1,6 @@
 import { FileText, HelpCircle, Layers } from "lucide-react";
 import type { GradeItemResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
-import GradeStatusBadge from "../atoms/GradeStatusBadge";
+import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
 
 export interface GradeItemRowProps {
   item: GradeItemResponseDto;

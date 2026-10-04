@@ -1,9 +1,11 @@
+import { useState } from "react";
 import Link from "next/link";
 import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import { formatDisplayDate } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import TenantStatusBadge from "@/sections/tenant/atoms/TenantStatusBadge";
 import Card from "@/shared-ui/component/Card";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import Pagination from "@/shared-ui/component/Pagination";
 import {
   Table,
   TableBody,
@@ -15,6 +17,7 @@ import {
 
 const SKELETON_ROWS = 3;
 const COLUMN_COUNT = 4;
+const ITEMS_PER_PAGE = 5;
 
 interface RecentTenantsTableProps {
   tenants: RecentTenantResponseDto[];
@@ -25,9 +28,14 @@ export default function RecentTenantsTable({
   tenants,
   loading,
 }: RecentTenantsTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalItems = tenants.length;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedTenants = tenants.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
   return (
-    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-900/60">
-      <div className="mb-4 flex items-center justify-between">
+    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-900/60 p-0 overflow-hidden">
+      <div className="p-4 flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
           Tenant Terbaru
         </h2>
@@ -39,7 +47,7 @@ export default function RecentTenantsTable({
         </Link>
       </div>
 
-      <Table>
+      <Table wrapperClassName="border-0 rounded-none">
         <TableHead>
           <tr>
             <TableHeaderCell>Nama Tenant</TableHeaderCell>
@@ -59,7 +67,7 @@ export default function RecentTenantsTable({
                 </TableRow>
               ),
             )
-          ) : tenants.length === 0 ? (
+          ) : paginatedTenants.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={COLUMN_COUNT}
@@ -69,7 +77,7 @@ export default function RecentTenantsTable({
               </TableCell>
             </TableRow>
           ) : (
-            tenants.map((tenant) => (
+            paginatedTenants.map((tenant) => (
               <TableRow key={tenant.id}>
                 <TableCell className="font-medium text-slate-900 dark:text-slate-100">
                   {tenant.name}
@@ -84,6 +92,17 @@ export default function RecentTenantsTable({
           )}
         </TableBody>
       </Table>
+      
+      {!loading && totalItems > 0 && (
+        <div className="px-4 py-3 border-t border-slate-200/60 dark:border-slate-800">
+          <Pagination
+            currentPage={currentPage}
+            totalItems={totalItems}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChangeAction={setCurrentPage}
+          />
+        </div>
+      )}
     </Card>
   );
 }

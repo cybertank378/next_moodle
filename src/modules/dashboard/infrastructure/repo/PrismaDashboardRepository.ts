@@ -3,11 +3,11 @@ import "server-only";
 import type { PrismaClient } from "@prisma/client";
 import { TenantStatus } from "@/libs/enums";
 import { prisma } from "@/libs/prisma";
-import type { DashboardRepositoryInterface } from "../../domain/interfaces/DashboardRepositoryInterface";
+import type { DashboardRepositoryInterface } from "@/modules/dashboard/domain/interfaces/DashboardRepositoryInterface";
 import type {
   RecentTenantRecord,
   TenantStatusCount,
-} from "../../domain/types/DashboardTypes";
+} from "@/modules/dashboard/domain/types/DashboardTypes";
 
 const KNOWN_STATUSES = new Set<string>(Object.values(TenantStatus));
 

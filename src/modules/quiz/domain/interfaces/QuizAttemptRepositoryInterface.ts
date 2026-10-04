@@ -1,12 +1,12 @@
 import type {
   QuizAttemptDataResponseDto,
   QuizAttemptSummaryResponseDto,
-} from "../dto/QuizAttemptResponseDto";
-import type { QuizAttemptEntity } from "../entity/QuizAttemptEntity";
+} from "@/modules/quiz/domain/dto/QuizAttemptResponseDto";
+import type { QuizAttemptEntity } from "@/modules/quiz/domain/entity/QuizAttemptEntity";
 import type {
   MoodleAnswerPayloadItem,
   QuizAttemptStatus,
-} from "../types/QuizAttemptTypes";
+} from "@/modules/quiz/domain/types/QuizAttemptTypes";
 
 export interface QuizAttemptRepositoryInterface {
   startAttempt(

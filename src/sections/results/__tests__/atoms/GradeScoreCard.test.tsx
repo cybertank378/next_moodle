@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import GradeScoreCard from "../../atoms/GradeScoreCard";
+import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
 
 describe("GradeScoreCard", () => {
   it("renders label, value, and subLabel correctly", () => {

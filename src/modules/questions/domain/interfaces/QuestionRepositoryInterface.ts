@@ -1,9 +1,9 @@
 import type { MoodleClient } from "@/core/moodle/types";
-import type { QuestionEntity } from "../entity/QuestionEntity";
+import type { QuestionEntity } from "@/modules/questions/domain/entity/QuestionEntity";
 import type {
   CreateQuestionRequestDto,
   UpdateQuestionRequestDto,
-} from "../types/QuestionTypes";
+} from "@/modules/questions/domain/types/QuestionTypes";
 
 export interface QuestionRepositoryInterface {
   getQuestionsByCategory(

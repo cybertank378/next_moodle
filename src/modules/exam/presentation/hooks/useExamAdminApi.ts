@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ReorderQuizQuestionsRequestDto } from "../../domain/types/ExamTypes";
+import type { ReorderQuizQuestionsRequestDto } from "@/modules/exam/domain/types/ExamTypes";
 
 export function useExamAdminApi() {
   const [loading, setLoading] = useState(false);

@@ -1,5 +1,5 @@
 import { AppRole } from "@/core/rbac/AppRole";
-import type { NotificationType } from "../types/NotificationTypes";
+import type { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
 
 export interface NotificationProps {
   id: string;

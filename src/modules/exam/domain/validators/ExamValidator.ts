@@ -1,6 +1,6 @@
 import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { ReorderQuizQuestionsRequestDto } from "../types/ExamTypes";
+import type { ReorderQuizQuestionsRequestDto } from "@/modules/exam/domain/types/ExamTypes";
 
 export class ReorderQuizQuestionsDtoValidator {
   static validate(

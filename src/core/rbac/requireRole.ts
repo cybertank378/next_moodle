@@ -1,7 +1,7 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { AppRole } from "./AppRole";
-import type { AuthorizationActor } from "./AuthorizationContext";
-import { AuthorizationError } from "./AuthorizationError";
+import { AppRole } from "@/core/rbac/AppRole";
+import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { AuthorizationError } from "@/core/rbac/AuthorizationError";
 
 export function requireRole(
   actor: AuthorizationActor | null | undefined,

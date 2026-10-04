@@ -8,10 +8,10 @@ import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { PermissionType } from "@/core/rbac/Permission";
-import type { GetCourseGradesUseCase } from "../../application/usecases/GetCourseGradesUseCase";
-import type { GetUserGradesUseCase } from "../../application/usecases/GetUserGradesUseCase";
-import { GradeExportFormatter } from "../../domain/mapper/GradeExportFormatter";
-import { parseGetGradesQuery } from "../validators/grade.validator";
+import type { GetCourseGradesUseCase } from "@/modules/grades/application/usecases/GetCourseGradesUseCase";
+import type { GetUserGradesUseCase } from "@/modules/grades/application/usecases/GetUserGradesUseCase";
+import { GradeExportFormatter } from "@/modules/grades/domain/mapper/GradeExportFormatter";
+import { parseGetGradesQuery } from "@/modules/grades/infrastructure/validators/grade.validator";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   return {

@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { GradeItemResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
-import GradeItemRow from "../../molecules/GradeItemRow";
+import GradeItemRow from "@/sections/results/molecules/GradeItemRow";
 
 describe("GradeItemRow", () => {
   const mockItem: GradeItemResponseDto = {

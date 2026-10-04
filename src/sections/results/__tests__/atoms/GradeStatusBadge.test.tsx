@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import GradeStatusBadge from "../../atoms/GradeStatusBadge";
+import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
 
 describe("GradeStatusBadge", () => {
   it("renders Lulus for passed status (isPassed=true)", () => {

@@ -4,13 +4,13 @@ import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { AppRole } from "@/core/rbac/AppRole";
 import { AuthorizationError } from "@/core/rbac/AuthorizationError";
 import { Permission } from "@/core/rbac/Permission";
-import type { GetCourseGradesUseCase } from "../../application/usecases/GetCourseGradesUseCase";
-import type { GetUserGradesUseCase } from "../../application/usecases/GetUserGradesUseCase";
+import type { GetCourseGradesUseCase } from "@/modules/grades/application/usecases/GetCourseGradesUseCase";
+import type { GetUserGradesUseCase } from "@/modules/grades/application/usecases/GetUserGradesUseCase";
 import type {
   CourseGradesResponseDto,
   UserGradeReportResponseDto,
-} from "../../domain/dto/GradeResponseDto";
-import { GradeController } from "../../infrastructure/http/GradeController";
+} from "@/modules/grades/domain/dto/GradeResponseDto";
+import { GradeController } from "@/modules/grades/infrastructure/http/GradeController";
 
 function createMockRequest(url: string): NextRequest {
   return new Request(url, {

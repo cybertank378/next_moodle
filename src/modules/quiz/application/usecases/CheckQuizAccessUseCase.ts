@@ -2,10 +2,10 @@ import { Result } from "@/core/base/Result";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { ValidationError } from "@/core/errors/ValidationError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
-import type { QuizAccessResponseDTO } from "../../domain/dto/QuizResponseDto";
-import type { QuizRepositoryInterface } from "../../domain/interfaces/QuizRepositoryInterface";
-import { QuizMapper } from "../../domain/mapper/QuizMapper";
-import { authorizeQuizOperation } from "../services/QuizAuthorizationService";
+import type { QuizAccessResponseDTO } from "@/modules/quiz/domain/dto/QuizResponseDto";
+import type { QuizRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizRepositoryInterface";
+import { QuizMapper } from "@/modules/quiz/domain/mapper/QuizMapper";
+import { authorizeQuizOperation } from "@/modules/quiz/application/services/QuizAuthorizationService";
 
 export interface CheckQuizAccessInput {
   actor: AuthorizationActor | null | undefined;

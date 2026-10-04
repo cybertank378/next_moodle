@@ -4,8 +4,8 @@ import { HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import QuizCard from "../molecules/QuizCard";
-import QuizFilterBar from "../molecules/QuizFilterBar";
+import QuizCard from "@/sections/exam/molecules/QuizCard";
+import QuizFilterBar from "@/sections/exam/molecules/QuizFilterBar";
 
 interface Props {
   courseId?: number;

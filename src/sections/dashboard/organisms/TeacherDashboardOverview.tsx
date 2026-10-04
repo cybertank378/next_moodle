@@ -1,52 +1,63 @@
+"use client";
+
+import { useEffect } from "react";
 import Card from "@/shared-ui/component/Card";
 import LinkButton from "@/shared-ui/component/LinkButton";
 import Typography from "@/shared-ui/component/Typography";
-import StatCard from "../molecules/StatCard";
+import StatCard from "@/sections/dashboard/molecules/StatCard";
+import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
+import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
 
 export default function TeacherDashboardOverview() {
+  const { teacherState, fetchTeacherOverview } = useDashboardApi();
+
+  useEffect(() => {
+    fetchTeacherOverview();
+  }, [fetchTeacherOverview]);
+
+  const { data, loading, error } = teacherState;
+
+  if (error) {
+    return (
+      <div className="flex justify-center py-20 text-red-500">
+        Gagal memuat: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Typography
-            variant="h1"
-            className="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent"
-          >
-            Teacher Workspace
-          </Typography>
-          <Typography
-            variant="subheading"
-            className="mt-1 text-slate-600 dark:text-slate-400"
-          >
-            Kelola soal, kelas, dan pantau kemajuan peserta didik Anda.
-          </Typography>
-        </div>
-      </div>
+      <DashboardHeader
+        title="Ruang Kerja Guru"
+        subtitle="Kelola soal, kelas, dan pantau kemajuan peserta didik Anda."
+        titleClassName="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent"
+        borderBottom={false}
+      />
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <StatCard
           label="Kelas Aktif"
-          value={5}
+          value={data?.activeClasses ?? 0}
           hint="Total kelas aktif diajar"
           accent="emerald"
-          loading={false}
-          unavailable={false}
+          loading={loading}
+          unavailable={!data}
         />
         <StatCard
           label="Total Soal Dibuat"
-          value={324}
+          value={data?.totalQuestions ?? 0}
           hint="Pertanyaan di bank soal"
           accent="teal"
-          loading={false}
-          unavailable={false}
+          loading={loading}
+          unavailable={!data}
         />
         <StatCard
           label="Ujian Mendatang"
-          value={2}
+          value={data?.upcomingExamsCount ?? 0}
           hint="Segera dimulai minggu ini"
           accent="blue"
-          loading={false}
-          unavailable={false}
+          loading={loading}
+          unavailable={!data}
         />
       </div>
 
@@ -60,13 +71,13 @@ export default function TeacherDashboardOverview() {
             variant="secondary"
             className="text-xs px-3 py-1"
           >
-            View All
+            Lihat Semua
           </LinkButton>
         </div>
         <div className="p-6">
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
+          <Typography variant="body" className="text-slate-500 dark:text-slate-400 text-sm">
             Belum ada ujian kelas yang sedang berjalan hari ini.
-          </p>
+          </Typography>
         </div>
       </Card>
     </div>

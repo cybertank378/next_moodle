@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ReorderQuizQuestionsRequestDto } from "../../domain/types/ExamTypes";
-import { ReorderQuizQuestionsDtoValidator } from "../../domain/validators/ExamValidator";
+import type { ReorderQuizQuestionsRequestDto } from "@/modules/exam/domain/types/ExamTypes";
+import { ReorderQuizQuestionsDtoValidator } from "@/modules/exam/domain/validators/ExamValidator";
 
 describe("ExamValidator - ReorderQuizQuestionsDtoValidator", () => {
   it("should validate a correct DTO", () => {

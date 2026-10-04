@@ -2,7 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { getAuthRepository } from "@/app/api/auth/_factory";
-import type { AppSessionPayload } from "../domain/interfaces/AuthInterfaces";
+import type { AppSessionPayload } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
 export async function getCurrentSession(): Promise<AppSessionPayload | null> {
   try {

@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import QuestionCard from "../../molecules/QuestionCard";
+import QuestionCard from "@/sections/exam/molecules/QuestionCard";
 
 describe("QuestionCard", () => {
   it("renders question number, bobot, and question HTML content", () => {

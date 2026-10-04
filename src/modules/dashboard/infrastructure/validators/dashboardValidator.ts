@@ -1,5 +1,5 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-import { ADMIN_DASHBOARD_DEFAULT_MONTHS } from "../../domain/types/DashboardTypes";
+import { ADMIN_DASHBOARD_DEFAULT_MONTHS } from "@/modules/dashboard/domain/types/DashboardTypes";
 
 export interface AdminDashboardQuery {
   months: number;

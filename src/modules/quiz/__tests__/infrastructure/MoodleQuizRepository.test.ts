@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { MoodleClient } from "@/core/moodle/types";
-import { MoodleQuizRepository } from "../../infrastructure/repo/MoodleQuizRepository";
+import { MoodleQuizRepository } from "@/modules/quiz/infrastructure/repo/MoodleQuizRepository";
 
 describe("MoodleQuizRepository", () => {
   it("fetches quizzes by courses via mod_quiz_get_quizzes_by_courses", async () => {

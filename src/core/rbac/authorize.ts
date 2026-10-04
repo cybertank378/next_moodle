@@ -1,12 +1,12 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { AppRole } from "./AppRole";
+import { AppRole } from "@/core/rbac/AppRole";
 import type {
   AuthorizationActor,
   AuthorizationOptions,
-} from "./AuthorizationContext";
-import { AuthorizationError } from "./AuthorizationError";
-import { hasPermission } from "./hasPermission";
-import type { PermissionType } from "./Permission";
+} from "@/core/rbac/AuthorizationContext";
+import { AuthorizationError } from "@/core/rbac/AuthorizationError";
+import { hasPermission } from "@/core/rbac/hasPermission";
+import type { PermissionType } from "@/core/rbac/Permission";
 
 export function authorize(
   actor: AuthorizationActor | null | undefined,
