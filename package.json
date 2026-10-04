@@ -20,6 +20,9 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "@tiptap/pm": "^3.31.4",
+    "@tiptap/react": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
     "@types/react-datepicker": "^6.2.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",

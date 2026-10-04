@@ -13,12 +13,12 @@ Manajemen bank soal via Web Service custom `local_exam_get_question_categories`,
 *Tugas wajib diselesaikan melalui pendekatan Test-Driven Development.*
 
 ### 🔴 RED (Tulis Test yang Gagal)
-- [ ] Test Validator DTO CreateQuestion memastikan tipe soal didukung (RED -> GREEN).
-- [ ] Jalankan `npm run test` dan verifikasi test gagal dengan benar.
+- [x] Test Validator DTO CreateQuestion memastikan tipe soal didukung (RED -> GREEN).
+- [x] Jalankan `npm run test` dan verifikasi test gagal dengan benar.
 
 ### 🟢 GREEN (Buat Test Berhasil)
-- [ ] Tulis implementasi lengkap untuk memenuhi kebutuhan Contract Interface.
-- [ ] Validasi test menjadi hijau (Pass).
+- [x] Tulis implementasi lengkap untuk memenuhi kebutuhan Contract Interface.
+- [x] Validasi test menjadi hijau (Pass).
 
 ### 🔵 REFACTOR (Optimasi Code)
 - [ ] Refactor kode: Hilangkan duplikasi dan perjelas struktur data.
@@ -26,9 +26,9 @@ Manajemen bank soal via Web Service custom `local_exam_get_question_categories`,
 
 ## 4. Task Checklist (To-Do)
 *Langkah-langkah sistematis untuk meminimalisir bug fatal:*
-1. [ ] Buat Module `questions`.
-1. [ ] Buat infrastructure custom API question.
-1. [ ] Buat UI Question Bank editor.
+1. [x] Buat Module `questions`.
+1. [x] Buat infrastructure custom API question.
+1. [x] Buat UI Question Bank editor.
 - [ ] Verifikasi `npm run typecheck` tidak menghasilkan error.
 - [ ] Verifikasi `npm run lint` bebas error Biome.
 
