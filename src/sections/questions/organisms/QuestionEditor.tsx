@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useQuestionApi } from "@/modules/questions/presentation/hooks/useQuestionApi";
 import { QuestionType, CreateQuestionRequestDto } from "@/modules/questions/domain/types/QuestionTypes";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
 interface QuestionEditorProps {
   categoryId: number;
@@ -22,6 +24,19 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
     options: [],
   });
 
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: formData.questionText,
+    onUpdate: ({ editor }) => {
+      setFormData({ ...formData, questionText: editor.getHTML() });
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose max-w-none w-full px-3 py-2 border rounded-b-md min-h-[150px] focus:outline-none focus:ring-2 focus:ring-blue-500',
+      },
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -35,6 +50,10 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
     }
   };
 
+  const toggleBold = () => editor?.chain().focus().toggleBold().run();
+  const toggleItalic = () => editor?.chain().focus().toggleItalic().run();
+  const toggleStrike = () => editor?.chain().focus().toggleStrike().run();
+
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200">
       <h2 className="text-lg font-semibold mb-4 text-slate-800">Create New Question</h2>
@@ -46,7 +65,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
           <select
             value={formData.type}
             onChange={(e) => setFormData({ ...formData, type: e.target.value as QuestionType })}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {Object.values(QuestionType).map(t => (
               <option key={t} value={t}>{t}</option>
@@ -61,20 +80,42 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
             required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Question Name"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Question Text</label>
-          <textarea
-            required
-            value={formData.questionText}
-            onChange={(e) => setFormData({ ...formData, questionText: e.target.value })}
-            className="w-full px-3 py-2 border rounded-md min-h-[100px]"
-            placeholder="Type your question here..."
-          />
+          <div className="border rounded-md">
+            {/* Toolbar */}
+            <div className="flex flex-wrap gap-1 border-b p-2 bg-slate-50 rounded-t-md">
+              <button
+                type="button"
+                onClick={toggleBold}
+                className={`px-2 py-1 text-sm rounded ${editor?.isActive('bold') ? 'bg-slate-300 font-semibold' : 'hover:bg-slate-200 font-semibold'}`}
+              >
+                B
+              </button>
+              <button
+                type="button"
+                onClick={toggleItalic}
+                className={`px-2 py-1 text-sm rounded ${editor?.isActive('italic') ? 'bg-slate-300 italic' : 'hover:bg-slate-200 italic'}`}
+              >
+                I
+              </button>
+              <button
+                type="button"
+                onClick={toggleStrike}
+                className={`px-2 py-1 text-sm rounded line-through ${editor?.isActive('strike') ? 'bg-slate-300' : 'hover:bg-slate-200'}`}
+              >
+                S
+              </button>
+            </div>
+            
+            {/* Editor Content */}
+            <EditorContent editor={editor} />
+          </div>
         </div>
 
         <div>
@@ -85,7 +126,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({ categoryId, onSu
             min="1"
             value={formData.defaultMark}
             onChange={(e) => setFormData({ ...formData, defaultMark: parseInt(e.target.value, 10) })}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
