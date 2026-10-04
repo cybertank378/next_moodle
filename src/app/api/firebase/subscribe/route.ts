@@ -1,7 +1,7 @@
+import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
+import { getMessaging } from "firebase-admin/messaging";
 import { NextResponse } from "next/server";
 import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
-import { getApps, initializeApp, applicationDefault } from "firebase-admin/app";
-import { getMessaging } from "firebase-admin/messaging";
 
 if (!getApps().length) {
   try {

@@ -91,7 +91,12 @@ describe("GetNotificationsUseCase", () => {
   it("should query isRead=true for tab=read", async () => {
     vi.mocked(repo.findByRecipient).mockResolvedValue({ items: [], total: 0 });
 
-    await useCase.execute({ scope: studentScope, tab: "read", page: 1, limit: 10 });
+    await useCase.execute({
+      scope: studentScope,
+      tab: "read",
+      page: 1,
+      limit: 10,
+    });
 
     expect(repo.findByRecipient).toHaveBeenCalledWith(
       expect.objectContaining({ isRead: true }),
@@ -130,7 +135,12 @@ describe("GetNotificationsUseCase", () => {
   it("should pass the ADMIN platform scope through unchanged", async () => {
     vi.mocked(repo.findByRecipient).mockResolvedValue({ items: [], total: 0 });
 
-    await useCase.execute({ scope: adminScope, tab: "unread", page: 2, limit: 10 });
+    await useCase.execute({
+      scope: adminScope,
+      tab: "unread",
+      page: 2,
+      limit: 10,
+    });
 
     expect(repo.findByRecipient).toHaveBeenCalledWith(
       expect.objectContaining({ scope: adminScope, page: 2 }),
@@ -306,19 +316,21 @@ describe("CreateNotificationUseCase", () => {
     expect(repo.create).not.toHaveBeenCalled();
   });
 
-  it.each(["https://evil.example/phish", "//evil.example", "javascript:alert(1)", "student/grades"])(
-    "should reject a non-internal linkPath (%s)",
-    async (linkPath) => {
-      await expect(
-        useCase.execute({
-          scope: studentScope,
-          type: NotificationType.ANNOUNCEMENT,
-          title: "Info",
-          body: "x",
-          linkPath,
-        }),
-      ).rejects.toBeInstanceOf(ValidationError);
-      expect(repo.create).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    "https://evil.example/phish",
+    "//evil.example",
+    "javascript:alert(1)",
+    "student/grades",
+  ])("should reject a non-internal linkPath (%s)", async (linkPath) => {
+    await expect(
+      useCase.execute({
+        scope: studentScope,
+        type: NotificationType.ANNOUNCEMENT,
+        title: "Info",
+        body: "x",
+        linkPath,
+      }),
+    ).rejects.toBeInstanceOf(ValidationError);
+    expect(repo.create).not.toHaveBeenCalled();
+  });
 });

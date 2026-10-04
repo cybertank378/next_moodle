@@ -40,7 +40,10 @@ export function mapMoodleUserToActor(
     } else {
       role = AppRole.ADMIN;
     }
-  } else if (serviceUsed === "nextjs_tenant" || serviceUsed === "nextjs_proctor") {
+  } else if (
+    serviceUsed === "nextjs_tenant" ||
+    serviceUsed === "nextjs_proctor"
+  ) {
     role = AppRole.TENANT;
   } else if (isTeacherUsername || hasStaffCapabilities) {
     // Teacher using student service token — promote to TEACHER

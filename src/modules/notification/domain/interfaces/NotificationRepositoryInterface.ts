@@ -27,7 +27,9 @@ export interface CreateNotificationOptions {
  * implementation always filters by tenant + recipient + role together.
  */
 export interface NotificationRepositoryInterface {
-  findByRecipient(options: FindByRecipientOptions): Promise<FindByRecipientResult>;
+  findByRecipient(
+    options: FindByRecipientOptions,
+  ): Promise<FindByRecipientResult>;
   countUnread(scope: NotificationScope): Promise<number>;
   findById(id: string): Promise<NotificationEntity | null>;
   markAsRead(id: string): Promise<NotificationEntity>;

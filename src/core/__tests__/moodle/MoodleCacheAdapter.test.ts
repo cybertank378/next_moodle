@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  InMemoryCacheAdapter,
   buildCacheKey,
   CACHE_TTL,
+  InMemoryCacheAdapter,
 } from "@/core/moodle/MoodleCacheAdapter";
 
 describe("InMemoryCacheAdapter", () => {

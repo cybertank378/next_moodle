@@ -1,4 +1,7 @@
-import type { NotificationTab, NotificationType } from "../types/NotificationTypes";
+import type {
+  NotificationTab,
+  NotificationType,
+} from "../types/NotificationTypes";
 import type { NotificationScope } from "../value-object/NotificationScope";
 
 export interface GetNotificationsRequestDto {

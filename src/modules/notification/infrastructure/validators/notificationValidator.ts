@@ -12,13 +12,17 @@ export function parseNotificationQuery(
 ): ParsedNotificationQuery {
   const rawTab = searchParams.get("tab") ?? "unread";
   if (rawTab !== "unread" && rawTab !== "read") {
-    throw new ValidationError("Parameter 'tab' harus bernilai 'unread' atau 'read'.");
+    throw new ValidationError(
+      "Parameter 'tab' harus bernilai 'unread' atau 'read'.",
+    );
   }
 
   const rawPage = searchParams.get("page") ?? "1";
   const page = Number(rawPage);
   if (!Number.isInteger(page) || page < 1) {
-    throw new ValidationError("Parameter 'page' harus berupa bilangan bulat positif.");
+    throw new ValidationError(
+      "Parameter 'page' harus berupa bilangan bulat positif.",
+    );
   }
 
   const rawLimit = searchParams.get("limit") ?? "10";

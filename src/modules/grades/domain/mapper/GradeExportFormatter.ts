@@ -8,7 +8,12 @@ function escapeCsvField(value: unknown): string {
   }
 
   const str = String(value);
-  if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+  if (
+    str.includes(",") ||
+    str.includes('"') ||
+    str.includes("\n") ||
+    str.includes("\r")
+  ) {
     return `"${str.replace(/"/g, '""')}"`;
   }
 
@@ -40,7 +45,8 @@ function formatGradesToCsv(
       (total?.gradeRaw !== null && total?.gradeRaw !== undefined
         ? String(total.gradeRaw)
         : "-");
-    const gradeMax = total?.gradeMax !== undefined ? String(total.gradeMax) : "100";
+    const gradeMax =
+      total?.gradeMax !== undefined ? String(total.gradeMax) : "100";
     const percentage = total?.percentageFormatted || "-";
     const status =
       total?.isPassed === true

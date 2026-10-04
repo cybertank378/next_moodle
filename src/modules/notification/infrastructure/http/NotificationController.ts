@@ -5,13 +5,19 @@ import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { GetNotificationsUseCase } from "../../application/usecases/GetNotificationsUseCase";
 import type { GetUnreadCountUseCase } from "../../application/usecases/GetUnreadCountUseCase";
-import type { MarkNotificationReadUseCase } from "../../application/usecases/MarkNotificationReadUseCase";
 import type { MarkAllReadUseCase } from "../../application/usecases/MarkAllReadUseCase";
-import { parseNotificationQuery } from "../validators/notificationValidator";
+import type { MarkNotificationReadUseCase } from "../../application/usecases/MarkNotificationReadUseCase";
 import { NotificationScope } from "../../domain/value-object/NotificationScope";
+import { parseNotificationQuery } from "../validators/notificationValidator";
 
 function respond(body: unknown, status: number): Response {
-  return Response.json({ success: status < 400, ...( status >= 400 ? { error: body } : { data: body } ) }, { status });
+  return Response.json(
+    {
+      success: status < 400,
+      ...(status >= 400 ? { error: body } : { data: body }),
+    },
+    { status },
+  );
 }
 
 export class NotificationController {
@@ -26,7 +32,10 @@ export class NotificationController {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
       return Response.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+        },
         { status: 401 },
       );
     }
@@ -59,7 +68,10 @@ export class NotificationController {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
       return Response.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+        },
         { status: 401 },
       );
     }
@@ -75,28 +87,34 @@ export class NotificationController {
         scope,
       });
 
-      return Response.json({ success: true, data: { unreadCount } }, { status: 200 });
+      return Response.json(
+        { success: true, data: { unreadCount } },
+        { status: 200 },
+      );
     } catch (error) {
       const r = mapErrorToHttpResponse(error);
       return Response.json(r.body, { status: r.status });
     }
   }
 
-  async markAsRead(
-    notificationId: string,
-    req: Request,
-  ): Promise<Response> {
+  async markAsRead(notificationId: string, req: Request): Promise<Response> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
       return Response.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+        },
         { status: 401 },
       );
     }
 
     if (!notificationId || !notificationId.trim()) {
       return Response.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "ID Notifikasi tidak valid." } },
+        {
+          success: false,
+          error: { code: "BAD_REQUEST", message: "ID Notifikasi tidak valid." },
+        },
         { status: 400 },
       );
     }
@@ -114,7 +132,10 @@ export class NotificationController {
       });
 
       return Response.json(
-        { success: true, data: { message: "Notifikasi telah ditandai sebagai dibaca." } },
+        {
+          success: true,
+          data: { message: "Notifikasi telah ditandai sebagai dibaca." },
+        },
         { status: 200 },
       );
     } catch (error) {
@@ -127,7 +148,10 @@ export class NotificationController {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
       return Response.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+        },
         { status: 401 },
       );
     }

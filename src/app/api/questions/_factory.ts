@@ -1,12 +1,12 @@
-import { CreateQuestionUseCase } from "@/modules/questions/application/usecases/CreateQuestionUseCase";
-import { UpdateQuestionUseCase } from "@/modules/questions/application/usecases/UpdateQuestionUseCase";
-import { MoodleQuestionRepository } from "@/modules/questions/infrastructure/repo/MoodleQuestionRepository";
-import { QuestionController } from "@/modules/questions/infrastructure/http/QuestionController";
 import { DefaultMoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentialProvider";
 import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
-import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
 import { prisma } from "@/libs/prisma";
+import { CreateQuestionUseCase } from "@/modules/questions/application/usecases/CreateQuestionUseCase";
+import { UpdateQuestionUseCase } from "@/modules/questions/application/usecases/UpdateQuestionUseCase";
+import { QuestionController } from "@/modules/questions/infrastructure/http/QuestionController";
+import { MoodleQuestionRepository } from "@/modules/questions/infrastructure/repo/MoodleQuestionRepository";
+import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
 
 let _controller: QuestionController | null = null;
 let _createQuestionUseCase: CreateQuestionUseCase | null = null;
@@ -47,7 +47,7 @@ export function getQuestionController(): QuestionController {
     _controller = new QuestionController(
       getCreateQuestionUseCase(),
       getUpdateQuestionUseCase(),
-      getMoodleClientFactory()
+      getMoodleClientFactory(),
     );
   }
   return _controller;

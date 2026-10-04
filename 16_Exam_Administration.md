@@ -4,31 +4,31 @@
 Manajemen perakitan kuis, pengaturan waktu, dan randomisasi soal (`local_exam_create_quiz`, `local_exam_reorder_quiz_questions`).
 
 ## 2. Requirements & Scope
-- [ ] Implementasi mematuhi Hexagonal / DDD module boundary.
-- [ ] Dilarang keras menggunakan barrel export (`index.ts` / `index.tsx`).
-- [ ] Konfigurasi exam metadata.
-- [ ] UI Drag & Drop komposisi soal.
+- [x] Implementasi mematuhi Hexagonal / DDD module boundary.
+- [x] Dilarang keras menggunakan barrel export (`index.ts` / `index.tsx`).
+- [x] Konfigurasi exam metadata.
+- [x] UI Drag & Drop komposisi soal.
 
 ## 3. TDD Approach (RED -> GREEN -> REFACTOR)
 *Tugas wajib diselesaikan melalui pendekatan Test-Driven Development.*
 
 ### 🔴 RED (Tulis Test yang Gagal)
-- [ ] Test domain logic ReorderQuestion (RED -> GREEN).
-- [ ] Jalankan `npm run test` dan verifikasi test gagal dengan benar.
+- [x] Test domain logic ReorderQuestion (RED -> GREEN).
+- [x] Jalankan `npm run test` dan verifikasi test gagal dengan benar.
 
 ### 🟢 GREEN (Buat Test Berhasil)
-- [ ] Tulis implementasi lengkap untuk memenuhi kebutuhan Contract Interface.
-- [ ] Validasi test menjadi hijau (Pass).
+- [x] Tulis implementasi lengkap untuk memenuhi kebutuhan Contract Interface.
+- [x] Validasi test menjadi hijau (Pass).
 
 ### 🔵 REFACTOR (Optimasi Code)
-- [ ] Refactor kode: Hilangkan duplikasi dan perjelas struktur data.
-- [ ] Pastikan tidak ada dependensi UI/Infrastruktur (seperti React/Next API) yang bocor ke Domain Layer.
+- [x] Refactor kode: Hilangkan duplikasi dan perjelas struktur data.
+- [x] Pastikan tidak ada dependensi UI/Infrastruktur (seperti React/Next API) yang bocor ke Domain Layer.
 
 ## 4. Task Checklist (To-Do)
 *Langkah-langkah sistematis untuk meminimalisir bug fatal:*
-1. [ ] Module `exam-administration`.
-1. [ ] API endpoint komposisi soal kuis.
-1. [ ] UI Exam Configuration.
+1. [x] Module `exam-administration`.
+1. [x] API endpoint komposisi soal kuis.
+1. [x] UI Exam Configuration.
 - [ ] Verifikasi `npm run typecheck` tidak menghasilkan error.
 - [ ] Verifikasi `npm run lint` bebas error Biome.
 

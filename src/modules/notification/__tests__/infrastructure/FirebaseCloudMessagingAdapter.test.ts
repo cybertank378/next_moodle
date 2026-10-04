@@ -1,10 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { FirebaseCloudMessagingAdapter } from "../../infrastructure/providers/FirebaseCloudMessagingAdapter";
+import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
+import { getMessaging } from "firebase-admin/messaging";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AppRole } from "@/core/rbac/AppRole";
 import { NotificationEntity } from "../../domain/entity/NotificationEntity";
 import { NotificationType } from "../../domain/types/NotificationTypes";
-import { AppRole } from "@/core/rbac/AppRole";
-import { getApps, initializeApp, applicationDefault } from "firebase-admin/app";
-import { getMessaging } from "firebase-admin/messaging";
+import { FirebaseCloudMessagingAdapter } from "../../infrastructure/providers/FirebaseCloudMessagingAdapter";
 
 vi.mock("firebase-admin/app", () => ({
   getApps: vi.fn(() => []),
@@ -92,7 +92,7 @@ describe("FirebaseCloudMessagingAdapter", () => {
     expect(messagingMock.send).toHaveBeenCalledWith(
       expect.objectContaining({
         topic: "platform-ADMIN-admin-1",
-      })
+      }),
     );
   });
 });

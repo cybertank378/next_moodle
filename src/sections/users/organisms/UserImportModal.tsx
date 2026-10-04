@@ -126,7 +126,8 @@ export default function UserImportModal({
                 Butuh contoh format file?
               </p>
               <p className="text-slate-500 dark:text-slate-400">
-                Unduh template CSV/Excel yang sudah berisi header dan data sampel.
+                Unduh template CSV/Excel yang sudah berisi header dan data
+                sampel.
               </p>
             </div>
             <button

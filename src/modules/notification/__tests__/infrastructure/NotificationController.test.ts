@@ -1,16 +1,16 @@
-import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { AppRole } from "@/core/rbac/AppRole";
 import { Permission } from "@/core/rbac/Permission";
 import type { GetNotificationsUseCase } from "@/modules/notification/application/usecases/GetNotificationsUseCase";
 import type { GetUnreadCountUseCase } from "@/modules/notification/application/usecases/GetUnreadCountUseCase";
-import type { MarkNotificationReadUseCase } from "@/modules/notification/application/usecases/MarkNotificationReadUseCase";
 import type { MarkAllReadUseCase } from "@/modules/notification/application/usecases/MarkAllReadUseCase";
-import { NotificationController } from "@/modules/notification/infrastructure/http/NotificationController";
+import type { MarkNotificationReadUseCase } from "@/modules/notification/application/usecases/MarkNotificationReadUseCase";
 import { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
 import { NotificationScope } from "@/modules/notification/domain/value-object/NotificationScope";
-import { ForbiddenError } from "@/core/errors/ForbiddenError";
-import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
+import { NotificationController } from "@/modules/notification/infrastructure/http/NotificationController";
 
 vi.mock("@/core/auth/resolveCurrentActor", () => ({
   resolveCurrentActor: vi.fn(),
@@ -128,7 +128,9 @@ describe("NotificationController", () => {
     });
 
     it("should return 401 when actor is missing", async () => {
-      vi.mocked(resolveCurrentActor).mockResolvedValue(null as unknown as CurrentActor);
+      vi.mocked(resolveCurrentActor).mockResolvedValue(
+        null as unknown as CurrentActor,
+      );
       const req = makeRequest("http://localhost/api/notifications");
       const res = await controller.getNotifications(req);
       expect(res.status).toBe(401);
@@ -136,7 +138,9 @@ describe("NotificationController", () => {
 
     it("should pass a tenant scope built from the session actor", async () => {
       vi.mocked(resolveCurrentActor).mockResolvedValue(studentActor);
-      const req = makeRequest("http://localhost/api/notifications?tab=read&page=2");
+      const req = makeRequest(
+        "http://localhost/api/notifications?tab=read&page=2",
+      );
       await controller.getNotifications(req);
 
       const call = vi.mocked(getNotificationsUseCase.execute).mock.calls[0][0];
@@ -150,7 +154,9 @@ describe("NotificationController", () => {
 
     it("should ignore tenantId supplied in the query string", async () => {
       vi.mocked(resolveCurrentActor).mockResolvedValue(studentActor);
-      const req = makeRequest("http://localhost/api/notifications?tenantId=tenant-evil");
+      const req = makeRequest(
+        "http://localhost/api/notifications?tenantId=tenant-evil",
+      );
       await controller.getNotifications(req);
 
       const call = vi.mocked(getNotificationsUseCase.execute).mock.calls[0][0];
@@ -197,7 +203,9 @@ describe("NotificationController", () => {
     });
 
     it("should return 401 when actor is missing", async () => {
-      vi.mocked(resolveCurrentActor).mockResolvedValue(null as unknown as CurrentActor);
+      vi.mocked(resolveCurrentActor).mockResolvedValue(
+        null as unknown as CurrentActor,
+      );
       const req = makeRequest("http://localhost/api/notifications/count");
       const res = await controller.getUnreadCount(req);
       expect(res.status).toBe(401);
@@ -214,7 +222,10 @@ describe("NotificationController", () => {
   describe("markAsRead", () => {
     it("should return 200 when notification is marked as read", async () => {
       vi.mocked(resolveCurrentActor).mockResolvedValue(studentActor);
-      const req = makeRequest("http://localhost/api/notifications/n-1/read", "PATCH");
+      const req = makeRequest(
+        "http://localhost/api/notifications/n-1/read",
+        "PATCH",
+      );
       const res = await controller.markAsRead("n-1", req);
       expect(res.status).toBe(200);
 
@@ -225,7 +236,10 @@ describe("NotificationController", () => {
 
     it("should return 400 when notification id is blank", async () => {
       vi.mocked(resolveCurrentActor).mockResolvedValue(studentActor);
-      const req = makeRequest("http://localhost/api/notifications/%20/read", "PATCH");
+      const req = makeRequest(
+        "http://localhost/api/notifications/%20/read",
+        "PATCH",
+      );
       const res = await controller.markAsRead(" ", req);
       expect(res.status).toBe(400);
       expect(markReadUseCase.execute).not.toHaveBeenCalled();
@@ -236,7 +250,10 @@ describe("NotificationController", () => {
       vi.mocked(markReadUseCase.execute).mockRejectedValue(
         new ForbiddenError("Tidak berhak"),
       );
-      const req = makeRequest("http://localhost/api/notifications/n-99/read", "PATCH");
+      const req = makeRequest(
+        "http://localhost/api/notifications/n-99/read",
+        "PATCH",
+      );
       const res = await controller.markAsRead("n-99", req);
       expect(res.status).toBe(403);
     });
@@ -245,7 +262,10 @@ describe("NotificationController", () => {
   describe("markAllAsRead", () => {
     it("should return 200 with count of marked notifications", async () => {
       vi.mocked(resolveCurrentActor).mockResolvedValue(studentActor);
-      const req = makeRequest("http://localhost/api/notifications/read-all", "PATCH");
+      const req = makeRequest(
+        "http://localhost/api/notifications/read-all",
+        "PATCH",
+      );
       const res = await controller.markAllAsRead(req);
 
       expect(res.status).toBe(200);

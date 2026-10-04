@@ -1,8 +1,8 @@
-import { MoodleClient } from "@/core/moodle/types";
-import { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
-import { UpdateQuestionRequestDto } from "../../domain/types/QuestionTypes";
+import type { MoodleClient } from "@/core/moodle/types";
+import type { QuestionEntity } from "../../domain/entity/QuestionEntity";
+import type { QuestionRepositoryInterface } from "../../domain/interfaces/QuestionRepositoryInterface";
+import type { UpdateQuestionRequestDto } from "../../domain/types/QuestionTypes";
 import { UpdateQuestionDtoValidator } from "../../domain/validators/QuestionValidator";
-import { QuestionEntity } from "../../domain/entity/QuestionEntity";
 
 export class UpdateQuestionUseCase {
   constructor(private readonly questionRepo: QuestionRepositoryInterface) {}
@@ -10,10 +10,10 @@ export class UpdateQuestionUseCase {
   async execute(
     client: MoodleClient,
     questionId: number,
-    dto: any
+    dto: any,
   ): Promise<QuestionEntity> {
     const validationResult = UpdateQuestionDtoValidator.validate(dto);
-    if (!validationResult.isSuccess()) {
+    if (!validationResult.isSuccess) {
       throw validationResult.getError();
     }
 

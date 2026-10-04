@@ -47,7 +47,11 @@ describe("NotificationScope", () => {
     (role) => {
       for (const tenantId of [null, undefined, "", "   "]) {
         expect(() =>
-          NotificationScope.forRecipient({ recipientId: "u-1", role, tenantId }),
+          NotificationScope.forRecipient({
+            recipientId: "u-1",
+            role,
+            tenantId,
+          }),
         ).toThrow(ForbiddenError);
       }
     },

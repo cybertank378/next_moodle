@@ -1,5 +1,5 @@
 import { BaseEntity } from "@/core/base/BaseEntity";
-import { QuestionType, QuestionOption } from "../types/QuestionTypes";
+import type { QuestionOption, QuestionType } from "../types/QuestionTypes";
 
 export interface QuestionProps {
   categoryId: number;

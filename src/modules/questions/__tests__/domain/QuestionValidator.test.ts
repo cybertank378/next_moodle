@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { QuestionType } from "../../domain/types/QuestionTypes";
 import { CreateQuestionDtoValidator } from "../../domain/validators/QuestionValidator";
-import { QuestionType } from "../../domain/types/QuestionTypes";
 
 describe("CreateQuestionDtoValidator", () => {
   it("should fail when question type is not supported", () => {

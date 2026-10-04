@@ -91,7 +91,12 @@ describe("PrismaNotificationRepository", () => {
       prisma.notification.findMany.mockResolvedValue([]);
       prisma.notification.count.mockResolvedValue(0);
 
-      await repo.findByRecipient({ scope: adminScope, isRead: true, page: 1, limit: 10 });
+      await repo.findByRecipient({
+        scope: adminScope,
+        isRead: true,
+        page: 1,
+        limit: 10,
+      });
 
       expect(prisma.notification.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -127,7 +132,9 @@ describe("PrismaNotificationRepository", () => {
 
       const entity = await repo.findById("n-1");
 
-      expect(prisma.notification.findUnique).toHaveBeenCalledWith({ where: { id: "n-1" } });
+      expect(prisma.notification.findUnique).toHaveBeenCalledWith({
+        where: { id: "n-1" },
+      });
       expect(entity?.id).toBe("n-1");
     });
 
