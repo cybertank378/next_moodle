@@ -1,0 +1,36 @@
+import type { NotificationEntity } from "../entity/NotificationEntity";
+import type { NotificationType } from "../types/NotificationTypes";
+import type { NotificationScope } from "../value-object/NotificationScope";
+
+export interface FindByRecipientOptions {
+  scope: NotificationScope;
+  isRead: boolean;
+  page: number;
+  limit: number;
+}
+
+export interface FindByRecipientResult {
+  items: NotificationEntity[];
+  total: number;
+}
+
+export interface CreateNotificationOptions {
+  scope: NotificationScope;
+  type: NotificationType;
+  title: string;
+  body: string;
+  linkPath: string | null;
+}
+
+/**
+ * Every list/count/bulk operation receives a NotificationScope so the
+ * implementation always filters by tenant + recipient + role together.
+ */
+export interface NotificationRepositoryInterface {
+  findByRecipient(options: FindByRecipientOptions): Promise<FindByRecipientResult>;
+  countUnread(scope: NotificationScope): Promise<number>;
+  findById(id: string): Promise<NotificationEntity | null>;
+  markAsRead(id: string): Promise<NotificationEntity>;
+  markAllAsRead(scope: NotificationScope): Promise<number>;
+  create(options: CreateNotificationOptions): Promise<NotificationEntity>;
+}

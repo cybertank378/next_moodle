@@ -5,6 +5,9 @@
 import { Bell, LogOut, Menu, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import NotificationBadge from "@/sections/notification/atoms/NotificationBadge";
+import NotificationPanel from "@/sections/notification/organisms/NotificationPanel";
+import { useNotificationApi } from "@/modules/notification/presentation/hooks/useNotificationApi";
 import { type AvatarMenuItem, getAvatarMenuByRole } from "@/libs/avatarMenu";
 import type { UserRole } from "@/libs/enums";
 import { roleConfig } from "@/libs/rbacConfig";
@@ -28,7 +31,11 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [topbarSearch, setTopbarSearch] = useState("");
+  const [notifOpen, setNotifOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const { unreadCount } = useNotificationApi();
 
   // Get dynamic avatar menu based on role
   const avatarMenu = getAvatarMenuByRole(role);
@@ -98,14 +105,24 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
           {/* Figma Design Light/Dark Mode Switch */}
           <ThemeSwitch size="md" />
 
-          <button
-            type="button"
-            aria-label="Notifikasi"
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <Bell size={18} />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-[#151521]" />
-          </button>
+          {/* ── NOTIFICATION BELL ── */}
+          <div className="relative" ref={notifRef}>
+            <button
+              type="button"
+              aria-label="Notifikasi"
+              aria-expanded={notifOpen}
+              onClick={() => setNotifOpen((prev) => !prev)}
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <Bell size={18} />
+              <NotificationBadge count={unreadCount} />
+            </button>
+
+            <NotificationPanel
+              isOpen={notifOpen}
+              onClose={() => setNotifOpen(false)}
+            />
+          </div>
 
           {/* ================= AVATAR ================= */}
           <div className="relative z-50" ref={dropdownRef}>
