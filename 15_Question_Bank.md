@@ -4,10 +4,10 @@
 Manajemen bank soal via Web Service custom `local_exam_get_question_categories`, `local_exam_create_question`, dll.
 
 ## 2. Requirements & Scope
-- [ ] Implementasi mematuhi Hexagonal / DDD module boundary.
-- [ ] Dilarang keras menggunakan barrel export (`index.ts` / `index.tsx`).
-- [ ] Antarmuka pembuat soal untuk TEACHER dan TENANT.
-- [ ] Pemindahan dan duplikasi soal.
+- [x] Implementasi mematuhi Hexagonal / DDD module boundary.
+- [x] Dilarang keras menggunakan barrel export (`index.ts` / `index.tsx`).
+- [x] Antarmuka pembuat soal untuk TEACHER dan TENANT.
+- [x] Pemindahan dan duplikasi soal.
 
 ## 3. TDD Approach (RED -> GREEN -> REFACTOR)
 *Tugas wajib diselesaikan melalui pendekatan Test-Driven Development.*
