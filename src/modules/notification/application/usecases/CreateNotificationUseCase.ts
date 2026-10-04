@@ -3,6 +3,8 @@ import type { CreateNotificationRequestDto } from "../../domain/dto/Notification
 import type { NotificationEntity } from "../../domain/entity/NotificationEntity";
 import type { NotificationRepositoryInterface } from "../../domain/interfaces/NotificationRepositoryInterface";
 
+import type { PushNotificationAdapterInterface } from "../../domain/interfaces/PushNotificationAdapterInterface";
+
 const MAX_TITLE_LENGTH = 200;
 const MAX_BODY_LENGTH = 1000;
 
@@ -16,7 +18,10 @@ function isInternalPath(path: string): boolean {
  * completion or exam result availability). Not exposed to the browser.
  */
 export class CreateNotificationUseCase {
-  constructor(private readonly repo: NotificationRepositoryInterface) {}
+  constructor(
+    private readonly repo: NotificationRepositoryInterface,
+    private readonly wsAdapter?: PushNotificationAdapterInterface,
+  ) {}
 
   async execute(dto: CreateNotificationRequestDto): Promise<NotificationEntity> {
     const title = dto.title.trim();
@@ -37,12 +42,21 @@ export class CreateNotificationUseCase {
       throw new ValidationError("Tautan notifikasi harus berupa path internal aplikasi.");
     }
 
-    return this.repo.create({
+    const notification = await this.repo.create({
       scope: dto.scope,
       type: dto.type,
       title,
       body,
       linkPath,
     });
+
+    if (this.wsAdapter) {
+      // fire-and-forget to avoid blocking the response
+      this.wsAdapter.dispatchNotification(notification).catch(err => {
+        console.error("Failed to dispatch real-time notification:", err);
+      });
+    }
+
+    return notification;
   }
 }

@@ -27,13 +27,80 @@ export function useNotificationApi() {
     }
   }, []);
 
-  // Start/stop polling
+  // Start/stop polling and setup Firebase
   useEffect(() => {
     setCountLoading(true);
     void fetchUnreadCount().finally(() => setCountLoading(false));
+
+    let unsubscribeOnMessage: (() => void) | undefined;
+
+    async function setupFirebase() {
+      try {
+        const { initMessaging, getToken, onMessage } = await import("@/libs/firebase");
+        const messaging = await initMessaging();
+        if (!messaging) return; // FCM not supported
+
+        // Request permission and get token
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          const token = await getToken(messaging, {
+            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+          });
+
+          if (token) {
+            // Send token to backend to subscribe to topic
+            await request("/api/firebase/subscribe", {
+              method: "POST",
+              body: JSON.stringify({ token }),
+            });
+
+            // Listen for foreground messages
+            unsubscribeOnMessage = onMessage(messaging, (payload) => {
+              if (payload.data) {
+                const newNotif = {
+                  id: payload.data.id,
+                  type: payload.data.type,
+                  title: payload.data.title,
+                  body: payload.data.body,
+                  linkPath: payload.data.linkPath ?? null,
+                  isRead: payload.data.isRead === "true",
+                  createdAt: payload.data.createdAt,
+                  readAt: payload.data.readAt ?? null,
+                };
+
+                // Increment badge unread count
+                setUnreadCount((prev) => prev + 1);
+
+                // Optimistically update list state if currently viewing unread
+                setListState((prev) => {
+                  if (prev.data) {
+                    return {
+                      ...prev,
+                      data: {
+                        ...prev.data,
+                        items: [newNotif as any, ...prev.data.items],
+                        total: prev.data.total + 1,
+                      },
+                    };
+                  }
+                  return prev;
+                });
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to setup firebase:", err);
+      }
+    }
+
+    void setupFirebase();
+
+    // Fallback polling just in case WS disconnected
     pollRef.current = setInterval(() => void fetchUnreadCount(), POLL_INTERVAL_MS);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
+      if (unsubscribeOnMessage) unsubscribeOnMessage();
     };
   }, [fetchUnreadCount]);
 
