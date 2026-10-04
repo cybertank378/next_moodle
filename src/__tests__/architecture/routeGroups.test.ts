@@ -133,7 +133,7 @@ describe("Architecture Guard: consolidated App Router structure", () => {
 
   it("keeps internal API routes outside the UI route consolidation", () => {
     expect(exists("src/app/api")).toBe(true);
-    expect(exists("src/app/api/tenants/route.ts")).toBe(true);
+    expect(exists("src/app/api/tenant/route.ts")).toBe(true);
   });
 
   it("removes obsolete route-group gitkeep placeholders", () => {
