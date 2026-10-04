@@ -18,4 +18,8 @@ export const roleConfig: Record<UserRole, RoleMeta> = {
     label: "Peserta Ujian",
     description: "Siswa / Mahasiswa",
   },
+  TEACHER: {
+    label: "Pengajar",
+    description: "Guru / Dosen",
+  },
 };

@@ -22,7 +22,8 @@ model Tenant {
   updatedAt    DateTime          @updatedAt
   credential   TenantCredential?
   branding     TenantBranding?
-  auditLogs    SaasAuditLog[]
+  auditLogs     SaasAuditLog[]
+  notifications Notification[]
 
   @@index([status])
   @@index([name])
@@ -76,4 +77,39 @@ model SaasAuditLog {
   @@index([tenantId])
   @@index([createdAt])
   @@map("saas_audit_logs")
+}
+
+enum NotificationType {
+  EXAM_RESULT_AVAILABLE
+  ASSIGNMENT_SUBMITTED
+  ASSIGNMENT_GRADED
+  STUDENT_ENROLLED
+  STUDENT_IMPORT_COMPLETE
+  STUDENT_IMPORT_FAILED
+  TENANT_REGISTERED
+  CREDENTIAL_FAILED
+  SYSTEM_ERROR
+  ANNOUNCEMENT
+}
+
+/// In-app notification (SaaS operational metadata, not Moodle data).
+/// tenantId = null  → platform-scoped notification for ADMIN recipients.
+/// tenantId != null → tenant-scoped notification (TENANT/TEACHER/STUDENT).
+model Notification {
+  id            String           @id @default(uuid())
+  tenantId      String?
+  recipientId   String
+  recipientRole String
+  type          NotificationType
+  title         String
+  body          String
+  linkPath      String?
+  isRead        Boolean          @default(false)
+  readAt        DateTime?
+  createdAt     DateTime         @default(now())
+  tenant        Tenant?          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, recipientId, recipientRole, isRead])
+  @@index([tenantId, recipientId, createdAt])
+  @@map("notifications")
 }

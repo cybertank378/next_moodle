@@ -160,7 +160,7 @@ export default function TeacherClassResultsView({
 
           <Button
             size="sm"
-            variant="solid"
+            variant="filled"
             color="primary"
             leftIcon={Download}
             loading={exporting}
