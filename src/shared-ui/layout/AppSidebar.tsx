@@ -13,6 +13,12 @@ import {
   Settings,
   ShieldCheck,
   Users,
+  Calendar,
+  CalendarDays,
+  Megaphone,
+  Bell,
+  Clock,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 import { Role, type UserRole } from "@/libs/enums";
@@ -156,7 +162,6 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
     case Role.STUDENT:
       return [
         {
-          label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
@@ -169,19 +174,59 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               icon: BookOpen,
             },
             {
-              label: "Jadwal Ujian",
-              path: ROUTES.STUDENT.EXAMS,
+              label: "Tugas",
+              path: "/student/assignments",
               icon: FileText,
-              permission: PERMISSIONS.EXAM_TAKE,
             },
             {
-              label: "Hasil & Nilai",
+              label: "Kalender",
+              path: "/student/calendar",
+              icon: Calendar,
+            },
+            {
+              label: "Jadwal Pelajaran",
+              path: "/student/schedule",
+              icon: CalendarDays,
+            },
+            {
+              label: "Nilai",
               path: ROUTES.STUDENT.RESULTS,
               icon: Award,
               permission: PERMISSIONS.RESULT_VIEW_OWN,
             },
+            {
+              label: "Pengumuman",
+              path: "/student/announcements",
+              icon: Megaphone,
+            },
+            {
+              label: "Notifikasi",
+              path: "/student/notifications",
+              icon: Bell,
+              // Ideally there would be a badge here, but we'll add it to the item type if needed
+            },
+            {
+              label: "Aktivitas Terbaru",
+              path: "/student/activities",
+              icon: Clock,
+            },
           ],
         },
+        {
+          label: "LAINNYA",
+          items: [
+            {
+              label: "Profil",
+              path: "/student/profile",
+              icon: User,
+            },
+            {
+              label: "Pengaturan",
+              path: "/student/settings",
+              icon: Settings,
+            },
+          ]
+        }
       ];
 
     case Role.TEACHER:
@@ -246,20 +291,22 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
           </div>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-4 py-3 shadow-sm">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400 border border-slate-700 shadow-md">
-            <LayoutDashboard size={18} />
-          </div>
+        {role !== Role.STUDENT && (
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-4 py-3 shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400 border border-slate-700 shadow-md">
+              <LayoutDashboard size={18} />
+            </div>
 
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Role Aktif
-            </p>
-            <p className="text-sm font-semibold text-white">
-              {role.replaceAll("_", " ")}
-            </p>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Role Aktif
+              </p>
+              <p className="text-sm font-semibold text-white">
+                {role.replaceAll("_", " ")}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <nav className="flex-1 overflow-y-auto bg-slate-900 px-3 py-5">
@@ -294,12 +341,28 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </nav>
 
-      <div className="border-t border-slate-800 bg-slate-900 px-5 py-4">
-        <div className="rounded-2xl px-4 py-2">
-          <p className="text-xs font-medium text-slate-500">
-            © {new Date().getFullYear()} Moodle. All rights reserved.
-          </p>
-        </div>
+      <div className="border-t border-slate-800 bg-slate-900 px-5 py-5">
+        {role === Role.STUDENT ? (
+          <div className="flex items-center gap-3 rounded-2xl bg-slate-800/50 p-3 shadow-sm border border-slate-700/50">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Jenjang Sekolah • SMP
+              </p>
+              <p className="text-xs font-semibold text-white truncate">
+                SMP Negeri 1 Jakarta
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl px-4 py-2 text-center">
+            <p className="text-xs font-medium text-slate-500">
+              © {new Date().getFullYear()} Moodle. All rights reserved.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
