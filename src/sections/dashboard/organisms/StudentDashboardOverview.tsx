@@ -54,18 +54,19 @@ export default function StudentDashboardOverview() {
     ? Math.round(data.courses.reduce((acc, curr) => acc + (curr.progress || 0), 0) / data.courses.length) 
     : 0;
 
-  let avgGradeScore = 0;
-  let avgGradeLetter = "-";
-  if (data?.recentGrades && data.recentGrades.length > 0) {
-    avgGradeScore = Math.round(data.recentGrades.reduce((acc, curr) => acc + curr.score, 0) / data.recentGrades.length);
-    if (avgGradeScore >= 90) avgGradeLetter = 'A';
-    else if (avgGradeScore >= 85) avgGradeLetter = 'A-';
-    else if (avgGradeScore >= 80) avgGradeLetter = 'B+';
-    else if (avgGradeScore >= 75) avgGradeLetter = 'B';
-    else if (avgGradeScore >= 70) avgGradeLetter = 'B-';
-    else if (avgGradeScore >= 60) avgGradeLetter = 'C';
-    else avgGradeLetter = 'D';
-  }
+  const avgGradeScore = data?.recentGrades?.length 
+    ? Math.round(data.recentGrades.reduce((acc, curr) => acc + curr.score, 0) / data.recentGrades.length) 
+    : 0;
+
+  const GRADE_THRESHOLDS = [
+    { min: 90, letter: 'A' }, { min: 85, letter: 'A-' }, { min: 80, letter: 'B+' },
+    { min: 75, letter: 'B' }, { min: 70, letter: 'B-' }, { min: 60, letter: 'C' },
+    { min: 0, letter: 'D' }
+  ];
+  
+  const avgGradeLetter = avgGradeScore > 0 
+    ? GRADE_THRESHOLDS.find(t => avgGradeScore >= t.min)?.letter || 'D'
+    : "-";
 
   return (
     <div className="flex flex-col xl:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12 w-full max-w-[1600px] mx-auto">
