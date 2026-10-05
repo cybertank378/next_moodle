@@ -99,7 +99,7 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               ],
             },
             {
-              label: "Kursus & Bank Soal",
+              label: "Mata Pelajaran & Bank Soal",
               path: ROUTES.TENANT.COURSES,
               icon: BookOpen,
               permission: PERMISSIONS.EXAM_MANAGE,

@@ -46,11 +46,11 @@ export default function CourseDetailView({ courseId }: CourseDetailViewProps) {
           iconOnly
           leftIcon={ArrowLeft}
           onClick={() => router.push(AppRouteConstants.COURSES)}
-          aria-label="Kembali ke daftar kursus"
+          aria-label="Kembali ke daftar mata pelajaran"
         />
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Detail Kursus
+            Detail Mata Pelajaran
           </h1>
           <p className="text-sm text-slate-500 dark:text-gray-400">
             Konten materi, kuis, dan topik pembelajaran.
@@ -87,10 +87,10 @@ export default function CourseDetailView({ courseId }: CourseDetailViewProps) {
             <BookOpen size={24} />
           </div>
           <h3 className="mt-4 text-base font-semibold text-slate-900 dark:text-white">
-            Belum ada konten kursus
+            Belum ada konten mata pelajaran
           </h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            Kursus ini belum memiliki topik atau modul pembelajaran di Moodle.
+            Mata Pelajaran ini belum memiliki topik atau modul pembelajaran di Moodle.
           </p>
         </div>
       )}

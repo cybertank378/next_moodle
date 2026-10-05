@@ -127,7 +127,7 @@ export default function StudentGradeReportView({
               variant="success"
             />
             <GradeScoreCard
-              label="Skor Akhir Kursus"
+              label="Skor Akhir Mata Pelajaran"
               value={
                 report.courseTotal ? report.courseTotal.gradeFormatted : "-"
               }
@@ -174,7 +174,7 @@ export default function StudentGradeReportView({
                       <TableCell colSpan={5} className="py-8 text-center">
                         <ResultsEmptyState
                           title="Belum ada aktivitas kuis atau materi yang dinilai"
-                          description="Nilai belum diinput oleh pengajar untuk kursus ini."
+                          description="Nilai belum diinput oleh pengajar untuk mata pelajaran ini."
                           onRetry={() =>
                             void getUserGradeReport(courseId, userId)
                           }

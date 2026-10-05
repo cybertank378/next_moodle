@@ -56,7 +56,7 @@ export default function AppLayout({
 
         {/* SCROLLABLE CONTENT */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative">
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none hidden dark:block"></div>
+          <div className="absolute inset-0 bg-[url('/images/ilustrator/noise.png')] opacity-10 mix-blend-overlay pointer-events-none hidden dark:block"></div>
           <div className="min-h-full px-4 py-6 md:px-6 relative z-10">
             {children}
           </div>

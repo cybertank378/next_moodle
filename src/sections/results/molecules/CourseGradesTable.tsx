@@ -75,7 +75,7 @@ export default function CourseGradesTable({
               >
                 <ResultsEmptyState
                   title="Belum ada rekap nilai peserta yang tersedia"
-                  description="Data rekapitulasi nilai untuk kursus ini belum tersedia atau peserta belum dinilai."
+                  description="Data rekapitulasi nilai untuk mata pelajaran ini belum tersedia atau peserta belum dinilai."
                   onRetry={onRetry}
                 />
               </TableCell>

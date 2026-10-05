@@ -92,7 +92,7 @@ export default function QuizDetailView({ quizId }: Props) {
                       {quiz.name}
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      ID Kuis: {quiz.id} • Modul Kursus: {quiz.courseModuleId}
+                      ID Kuis: {quiz.id} • Modul Mata Pelajaran: {quiz.courseModuleId}
                     </p>
                   </div>
                 </div>

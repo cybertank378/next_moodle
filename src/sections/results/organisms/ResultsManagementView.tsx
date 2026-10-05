@@ -40,7 +40,7 @@ export default function ResultsManagementView({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-4 shadow-sm">
           <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-400">
             <BookOpen size={16} className="text-sky-500 dark:text-sky-400" />
-            <span>Pilih Kursus:</span>
+            <span>Pilih Mata Pelajaran:</span>
           </div>
           <SelectField
             value={selectedCourseId ?? ""}
@@ -79,8 +79,8 @@ export default function ResultsManagementView({
         )
       ) : (
         <ResultsEmptyState
-          title="Tidak ada kursus aktif"
-          description="Tidak ditemukan kursus yang terdaftar untuk melihat hasil penilaian."
+          title="Tidak ada mata pelajaran aktif"
+          description="Tidak ditemukan mata pelajaran yang terdaftar untuk melihat hasil penilaian."
           onRetry={() => void listCourses()}
         />
       )}
