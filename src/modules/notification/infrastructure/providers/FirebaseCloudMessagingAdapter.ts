@@ -57,4 +57,41 @@ export class FirebaseCloudMessagingAdapter
       );
     }
   }
+
+  async sendPushNotification(options: {
+    token?: string;
+    topic?: string;
+    title: string;
+    body: string;
+    data?: Record<string, string>;
+  }): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    try {
+      let messageId: string;
+      if (options.token) {
+        messageId = await getMessaging().send({
+          token: options.token,
+          notification: {
+            title: options.title,
+            body: options.body,
+          },
+          data: options.data,
+        });
+      } else if (options.topic) {
+        messageId = await getMessaging().send({
+          topic: options.topic,
+          notification: {
+            title: options.title,
+            body: options.body,
+          },
+          data: options.data,
+        });
+      } else {
+        return { success: false, error: "NO_TARGET_PROVIDED" };
+      }
+      return { success: true, messageId };
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "SEND_FAILED";
+      return { success: false, error: msg };
+    }
+  }
 }

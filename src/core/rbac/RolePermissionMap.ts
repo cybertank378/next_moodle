@@ -10,6 +10,14 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
     Permission.TENANT_STATUS_UPDATE,
     Permission.TENANT_CONNECTION_TEST,
     Permission.PLATFORM_AUDIT_READ,
+    Permission.NOTIFICATION_MANAGE,
+    Permission.NOTIFICATION_CAMPAIGN_CREATE,
+    Permission.NOTIFICATION_CAMPAIGN_READ,
+    Permission.NOTIFICATION_CAMPAIGN_UPDATE,
+    Permission.NOTIFICATION_CAMPAIGN_SEND,
+    Permission.NOTIFICATION_CAMPAIGN_CANCEL,
+    Permission.NOTIFICATION_CAMPAIGN_ARCHIVE,
+    Permission.NOTIFICATION_REPORT_READ,
   ],
 
   [AppRole.TENANT]: [
@@ -38,6 +46,14 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
     Permission.EXAM_MONITOR_ACTION,
     Permission.GRADE_READ,
     Permission.TENANT_AUDIT_READ,
+    Permission.NOTIFICATION_MANAGE,
+    Permission.NOTIFICATION_CAMPAIGN_CREATE,
+    Permission.NOTIFICATION_CAMPAIGN_READ,
+    Permission.NOTIFICATION_CAMPAIGN_UPDATE,
+    Permission.NOTIFICATION_CAMPAIGN_SEND,
+    Permission.NOTIFICATION_CAMPAIGN_CANCEL,
+    Permission.NOTIFICATION_CAMPAIGN_ARCHIVE,
+    Permission.NOTIFICATION_REPORT_READ,
   ],
 
   [AppRole.STUDENT]: [

@@ -141,17 +141,19 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
   });
 
   describe("Sidebar Navigation Menu for Role.ADMIN", () => {
-    it("returns expected 4 admin menus categorized into 2 groups", () => {
+    it("returns expected admin menus categorized into 2 groups", () => {
       const menu = getSidebarMenu(Role.ADMIN);
       expect(menu).toHaveLength(2);
 
       const [mainGroup, systemGroup] = menu;
       expect(mainGroup.label).toBe("Menu Utama");
-      expect(mainGroup.items).toHaveLength(2);
+      expect(mainGroup.items).toHaveLength(3);
       expect(mainGroup.items[0].label).toBe("Dashboard");
       expect(mainGroup.items[0].path).toBe(ROUTES.ADMIN.ROOT);
       expect(mainGroup.items[1].label).toBe("Manajemen Tenant");
       expect(mainGroup.items[1].path).toBe(ROUTES.ADMIN.TENANTS);
+      expect(mainGroup.items[2].label).toBe("Pengelolaan Notifikasi");
+      expect(mainGroup.items[2].path).toBe(ROUTES.ADMIN.NOTIFICATIONS);
 
       expect(systemGroup.label).toBe("Sistem & Audit");
       expect(systemGroup.items).toHaveLength(2);
