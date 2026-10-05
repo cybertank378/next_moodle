@@ -27,6 +27,7 @@
     "@fullcalendar/react": "^7.1.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "@tailwindcss/postcss": "^4.3.3",
     "@tiptap/pm": "^3.31.4",
     "@tiptap/react": "^3.31.4",
     "@tiptap/starter-kit": "^3.31.4",
@@ -57,7 +58,7 @@
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.28",
     "prisma": "^7.9.1",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.8.2",
     "vitest": "^3.0.7"
   }
