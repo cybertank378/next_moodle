@@ -19,8 +19,7 @@ export function StudentCalendarWidget({ upcomingExams }: Props) {
        
        <div className="mb-4 text-xs max-w-full overflow-hidden fullcalendar-student">
           <FullCalendar
-             // @ts-ignore
-             plugins={[dayGridPlugin]}
+             plugins={[dayGridPlugin as any]}
              initialView="dayGridMonth"
              headerToolbar={{
                 left: 'prev',
