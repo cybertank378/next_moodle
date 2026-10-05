@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import Card from "@/shared-ui/component/Card";
-import LinkButton from "@/shared-ui/component/LinkButton";
-import Button from "@/shared-ui/component/Button";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
-import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
+import Skeleton from "@/shared-ui/component/Skeleton";
+
+import { StudentWelcomeBanner } from "@/sections/dashboard/molecules/StudentWelcomeBanner";
+import { StudentStatCards } from "@/sections/dashboard/molecules/StudentStatCards";
+import { StudentActiveCourses } from "@/sections/dashboard/molecules/StudentActiveCourses";
+import { StudentUpcomingTasks } from "@/sections/dashboard/molecules/StudentUpcomingTasks";
+import { StudentRecentGrades } from "@/sections/dashboard/molecules/StudentRecentGrades";
+import { StudentResumeLearning } from "@/sections/dashboard/molecules/StudentResumeLearning";
+import { StudentCalendarWidget } from "@/sections/dashboard/molecules/StudentCalendarWidget";
+import { StudentRightRailWidgets } from "@/sections/dashboard/molecules/StudentRightRailWidgets";
 
 export default function StudentDashboardOverview() {
   const { studentState, fetchStudentOverview } = useDashboardApi();
@@ -18,100 +24,79 @@ export default function StudentDashboardOverview() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20 text-slate-500">
-        Memuat dashboard...
+      <div className="flex flex-col xl:flex-row gap-6 animate-pulse p-4 max-w-[1600px] mx-auto w-full">
+         <div className="flex-1 space-y-6">
+            <Skeleton height={140} rounded className="rounded-3xl" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+               <Skeleton height={100} rounded className="rounded-2xl" count={4} />
+            </div>
+            <Skeleton height={300} rounded className="rounded-2xl" />
+         </div>
+         <div className="w-full xl:w-96 shrink-0 space-y-6">
+            <Skeleton height={400} rounded className="rounded-2xl" />
+            <Skeleton height={300} rounded className="rounded-2xl" />
+         </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center py-20 text-red-500">
-        Gagal memuat: {error}
-      </div>
-    );
-  }
+  const totalCourses = data?.courses?.length || 0;
+  const activeExams = data?.upcomingExams?.filter(e => e.status === "open").length || 0;
+  const avgProgress = data?.courses && data.courses.length > 0 
+    ? Math.round(data.courses.reduce((acc, curr) => acc + (curr.progress || 0), 0) / data.courses.length) 
+    : 0;
+
+  const avgGradeScore = data?.recentGrades?.length 
+    ? Math.round(data.recentGrades.reduce((acc, curr) => acc + curr.score, 0) / data.recentGrades.length) 
+    : 0;
+
+  const GRADE_THRESHOLDS = [
+    { min: 90, letter: 'A' }, { min: 85, letter: 'A-' }, { min: 80, letter: 'B+' },
+    { min: 75, letter: 'B' }, { min: 70, letter: 'B-' }, { min: 60, letter: 'C' },
+    { min: 0, letter: 'D' }
+  ];
+  
+  const avgGradeLetter = avgGradeScore > 0 
+    ? GRADE_THRESHOLDS.find(t => avgGradeScore >= t.min)?.letter || 'D'
+    : "-";
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">
-      <DashboardHeader
-        title="Ujian Mendatang Saya"
-        subtitle="Lihat dan mulai jadwal ujian Anda di bawah ini."
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {data?.upcomingExams?.length === 0 && (
-          <div className="col-span-1 md:col-span-2 text-center py-10 text-slate-500">
-            Tidak ada ujian mendatang.
+    <div className="flex flex-col xl:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12 w-full max-w-[1600px] mx-auto">
+      
+      {/* LEFT COLUMN - Main Content */}
+      <div className="flex-1 space-y-6 min-w-0">
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-2xl border border-red-100 text-sm font-medium shadow-sm">
+            Terdapat kendala saat memuat data: {error}
           </div>
         )}
         
-        {data?.upcomingExams?.map((exam) => (
-          <Card key={exam.id} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-lg shadow-blue-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700/50 hover:shadow-blue-500/10 dark:hover:shadow-blue-900/20 transition-all duration-300 group">
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                {exam.name}
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                {exam.course}
-              </p>
+        <StudentWelcomeBanner profile={data?.profile} />
+        
+        <StudentStatCards 
+           totalCourses={totalCourses} 
+           activeExams={activeExams} 
+           avgGradeScore={avgGradeScore} 
+           avgGradeLetter={avgGradeLetter} 
+           avgProgress={avgProgress} 
+        />
 
-              <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
-                <div>
-                  <p className="text-slate-500 dark:text-slate-400 mb-1">Tanggal</p>
-                  <p className="font-semibold text-slate-900 dark:text-slate-200">
-                    {exam.scheduledDate.split(", ")[0]}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-500">
-                    {exam.scheduledDate.split(", ")[1]}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-500 dark:text-slate-400 mb-1">
-                    Durasi
-                  </p>
-                  <p className="font-semibold text-slate-900 dark:text-slate-200">
-                    {exam.duration} Menit
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-500 dark:text-slate-400 mb-1">
-                    Status
-                  </p>
-                  {exam.status === "open" ? (
-                    <span className="inline-flex items-center text-emerald-700 dark:text-emerald-400 font-medium">
-                      <span className="w-2 h-2 mr-1.5 bg-emerald-500 dark:bg-emerald-400 rounded-full animate-pulse"></span>
-                      Aktif
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center text-slate-700 dark:text-slate-400 font-medium capitalize">
-                      {exam.status}
-                    </span>
-                  )}
-                </div>
-              </div>
+        <StudentActiveCourses courses={data?.courses} />
 
-              {exam.status === "open" ? (
-                <LinkButton
-                  href={`/student/exams/${exam.id}/attempt`}
-                  variant="primary"
-                  className="w-full justify-center shadow-md shadow-blue-500/20 dark:shadow-none"
-                >
-                  Mulai Ujian
-                </LinkButton>
-              ) : (
-                <Button
-                  disabled
-                  variant="outline"
-                  className="w-full justify-center text-slate-400 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/50"
-                >
-                  Belum Dimulai
-                </Button>
-              )}
-            </div>
-          </Card>
-        ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+           <StudentUpcomingTasks upcomingExams={data?.upcomingExams} />
+           <StudentRecentGrades recentGrades={data?.recentGrades} />
+        </div>
+
+        <StudentResumeLearning courses={data?.courses} />
+      </div>
+      
+      {/* RIGHT RAIL */}
+      <div className="w-full xl:w-96 shrink-0 space-y-6">
+         <StudentCalendarWidget upcomingExams={data?.upcomingExams} />
+         <StudentRightRailWidgets />
       </div>
     </div>
   );
 }
+

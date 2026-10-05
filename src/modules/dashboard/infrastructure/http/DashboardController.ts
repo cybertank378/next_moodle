@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { CurrentActor } from "@/core/auth/CurrentActor";
-import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
+import { resolveCurrentActor, extractTokenFromRequest } from "@/core/auth/resolveCurrentActor";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
@@ -13,6 +13,7 @@ import type { GetTeacherDashboardUseCase } from "@/modules/dashboard/application
 import type { GetTenantDashboardUseCase } from "@/modules/dashboard/application/usecases/GetTenantDashboardUseCase";
 import type { GetProctorDashboardUseCase } from "@/modules/dashboard/application/usecases/GetProctorDashboardUseCase";
 import { parseAdminDashboardQuery } from "@/modules/dashboard/infrastructure/validators/dashboardValidator";
+import { getAuthRepository } from "@/app/api/auth/_factory";
 
 function respond(response: ApiResponse): Response {
   return Response.json(response.body, { status: response.status });
@@ -24,6 +25,8 @@ function toAuthorizationActor(actor: CurrentActor): AuthorizationActor | null {
     id: actor.userId,
     role: actor.role as AppRole,
     tenantId: actor.tenantId || null,
+    moodleUserId: actor.moodleUserId || null,
+    displayName: actor.displayName,
   };
 }
 
@@ -63,14 +66,19 @@ export class DashboardController {
   }
 
   async getStudentOverview(req: Request): Promise<Response> {
-    const actor = await resolveCurrentActor(req).catch(() => null);
-    if (!actor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")));
-
     try {
+      const sessionToken = await extractTokenFromRequest(req);
+      if (!sessionToken) throw new UnauthorizedError("Token hilang.");
+      const session = await getAuthRepository().resolveSession(sessionToken);
+      const actor = session.actor;
+
       const authActor = toAuthorizationActor(actor);
       if (!authActor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Peran tidak valid.")));
       
-      const result = await this.getStudentDashboard.execute({ actor: authActor });
+      const result = await this.getStudentDashboard.execute({ 
+        actor: authActor, 
+        moodleToken: session.moodleToken 
+      });
       return result.isFailure ? respond(mapErrorToHttpResponse(result.getError())) : respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
@@ -78,14 +86,19 @@ export class DashboardController {
   }
 
   async getTeacherOverview(req: Request): Promise<Response> {
-    const actor = await resolveCurrentActor(req).catch(() => null);
-    if (!actor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")));
-
     try {
+      const sessionToken = await extractTokenFromRequest(req);
+      if (!sessionToken) throw new UnauthorizedError("Token hilang.");
+      const session = await getAuthRepository().resolveSession(sessionToken);
+      const actor = session.actor;
+
       const authActor = toAuthorizationActor(actor);
       if (!authActor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Peran tidak valid.")));
       
-      const result = await this.getTeacherDashboard.execute({ actor: authActor });
+      const result = await this.getTeacherDashboard.execute({ 
+        actor: authActor,
+        moodleToken: session.moodleToken
+      });
       return result.isFailure ? respond(mapErrorToHttpResponse(result.getError())) : respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
@@ -122,4 +135,3 @@ export class DashboardController {
     }
   }
 }
-

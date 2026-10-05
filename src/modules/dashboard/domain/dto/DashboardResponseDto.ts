@@ -29,15 +29,43 @@ export interface ExamSummaryDto {
   enrolledCount?: number;
 }
 
+export interface CourseSummaryDto {
+  id: string;
+  name: string;
+  shortName: string;
+  instructor?: string;
+  progress?: number;
+}
+
+export interface StudentProfileDto {
+  name: string;
+  educationLevel: "SD" | "SMP" | "SMA" | "SMK";
+  schoolName: string;
+  className: string;
+  academicYear: string;
+  gender?: "laki-laki" | "perempuan";
+}
+
+export interface GradeSummaryDto {
+  courseName: string;
+  score: number;
+  grade: string;
+}
+
 export interface StudentDashboardResponseDto {
+  profile?: StudentProfileDto;
   upcomingExams: ExamSummaryDto[];
+  courses?: CourseSummaryDto[];
+  recentGrades?: GradeSummaryDto[];
 }
 
 export interface TeacherDashboardResponseDto {
   activeClasses: number;
   totalQuestions: number;
   upcomingExamsCount: number;
+  totalStudents?: number;
   recentExams: ExamSummaryDto[];
+  courses?: CourseSummaryDto[];
 }
 
 export interface TenantDashboardResponseDto {

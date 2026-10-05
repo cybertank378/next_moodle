@@ -5,6 +5,7 @@ export interface AuthorizationActor {
   readonly role: AppRole;
   readonly tenantId: string | null;
   readonly moodleUserId?: number | null;
+  readonly displayName?: string;
   readonly permissions?: readonly string[];
 }
 

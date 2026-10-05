@@ -1,45 +1,123 @@
 import { Result } from "@/core/base/Result";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { StudentDashboardResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
+import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
+import type { QuizRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizRepositoryInterface";
+import type { GradeRepositoryInterface } from "@/modules/grades/domain/interfaces/GradeRepositoryInterface";
+import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 
 export interface GetStudentDashboardRequest {
   actor: AuthorizationActor;
+  moodleToken: string;
 }
 
 export class GetStudentDashboardUseCase {
+  constructor(
+    private readonly courseRepo: CourseRepositoryInterface,
+    private readonly quizRepo: QuizRepositoryInterface,
+    private readonly gradeRepo: GradeRepositoryInterface,
+    private readonly clientFactory: MoodleClientFactory,
+  ) {}
+
   async execute(
     request: GetStudentDashboardRequest,
   ): Promise<Result<StudentDashboardResponseDto>> {
-    // TODO: Fetch from actual Moodle / Student API once the boundary is fully tested.
-    // For now, return the mock data to satisfy the UI integration.
-    
-    return Result.ok<StudentDashboardResponseDto>({
-      upcomingExams: [
-        {
-          id: "exam-1",
-          name: "Introduction to Computer Science",
-          course: "(Code: CS101) - Faculty of Science",
-          scheduledDate: "Oct 26, 2026, 10:00 AM",
-          duration: 90,
-          status: "open",
-        },
-        {
-          id: "exam-2",
-          name: "Advanced Web Development",
-          course: "(Code: WD302) - Faculty of Technology",
-          scheduledDate: "Oct 28, 2026, 11:30 AM",
-          duration: 120,
-          status: "upcoming",
-        },
-        {
-          id: "exam-3",
-          name: "Data Structures & Algorithms",
-          course: "(Code: CS210) - Faculty of Science",
-          scheduledDate: "Oct 29, 2026, 09:00 AM",
-          duration: 105,
-          status: "upcoming",
-        },
-      ],
-    });
+    const tenantId = request.actor.tenantId;
+    const moodleUserId = request.actor.moodleUserId;
+
+    if (!tenantId || !moodleUserId) {
+        return Result.failure(new Error("Tenant ID or Moodle User ID missing"));
+    }
+
+    try {
+        const userClient = await this.clientFactory.createClientForUser(
+          { tenantId, tenantSlug: tenantId, status: "ACTIVE" },
+          request.moodleToken
+        );
+
+        const rawCourses = await this.courseRepo.getUserCourses({ tenantId, moodleUserId, client: userClient });
+        const courseIds = rawCourses.map(c => c.id);
+        
+        let quizzes: any[] = [];
+        if (courseIds.length > 0) {
+            quizzes = await this.quizRepo.getQuizzesByCourses({ tenantId, courseIds, client: userClient });
+        }
+
+        const upcomingExams = quizzes.map(q => {
+            const course = rawCourses.find(c => c.id === q.courseId);
+            return {
+                id: q.id.toString(),
+                name: q.name,
+                course: course ? course.fullName : "Uncategorized",
+                scheduledDate: q.timeOpen ? new Date(q.timeOpen * 1000).toLocaleString() : "No schedule",
+                duration: q.timeLimit ? Math.floor(q.timeLimit / 60) : 0,
+                status: "open" as const
+            };
+        });
+
+        const courses = rawCourses.map(c => ({
+            id: c.id.toString(),
+            name: c.fullName,
+            shortName: c.shortName,
+            instructor: "Guru Pengampu", 
+            progress: c.progress || 0
+        }));
+
+        // TODO: Map from real tenant details and user settings instead of hardcoding
+        const profile = {
+          name: request.actor.displayName || "Siswa",
+          educationLevel: "SMA" as const,
+          schoolName: `Sekolah ${tenantId.toUpperCase()}`,
+          className: "Kelas 10A",
+          academicYear: "2026/2027",
+        };
+
+        // Fetch recent grades for up to 3 active courses
+        const recentGrades: any[] = [];
+        if (courseIds.length > 0) {
+            try {
+                // Fetch grade report for the most recent courses
+                const recentCourseIds = courseIds.slice(0, 3);
+                for (const cid of recentCourseIds) {
+                    const courseEntity = rawCourses.find(c => c.id === cid);
+                    if (!courseEntity) continue;
+                    
+                    const report = await this.gradeRepo.getUserGradeReport(tenantId, cid, moodleUserId, request.moodleToken);
+                    if (report) {
+                        const courseTotal = report.courseTotal;
+                        if (courseTotal && courseTotal.gradeRaw !== null) {
+                            recentGrades.push({
+                                courseName: courseEntity.shortName,
+                                score: Math.round(courseTotal.gradeRaw),
+                                grade: getGradeLetter(courseTotal.gradeRaw)
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                // Ignore grade fetch errors to not break dashboard
+                console.warn(`Failed to fetch grades for user ${moodleUserId}:`, e);
+            }
+        }
+
+        return Result.ok<StudentDashboardResponseDto>({
+          profile,
+          upcomingExams,
+          courses,
+          recentGrades
+        });
+    } catch (e) {
+        return Result.failure(e instanceof Error ? e : new Error(String(e)));
+    }
   }
+}
+
+function getGradeLetter(score: number): string {
+  if (score >= 90) return 'A';
+  if (score >= 85) return 'A-';
+  if (score >= 80) return 'B+';
+  if (score >= 75) return 'B';
+  if (score >= 70) return 'B-';
+  if (score >= 60) return 'C';
+  return 'D';
 }
