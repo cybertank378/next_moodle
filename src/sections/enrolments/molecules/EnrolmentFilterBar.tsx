@@ -3,6 +3,7 @@
 import { BookOpen, UserPlus } from "lucide-react";
 import Button from "@/shared-ui/component/Button";
 import SearchField from "@/shared-ui/component/SearchField";
+import SelectField from "@/shared-ui/component/SelectField";
 
 interface CourseOption {
   id: number;
@@ -33,22 +34,22 @@ export default function EnrolmentFilterBar({
         <div className="relative min-w-[240px]">
           <BookOpen
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none"
+            className="absolute left-3 top-[18px] -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none z-10"
           />
-          <select
+          <SelectField
             value={selectedCourseId ?? ""}
             onChange={(e) => onCourseSelect(Number(e.target.value))}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="pl-9"
           >
             <option value="" disabled>
-              Pilih Course...
+              Pilih Mata Pelajaran...
             </option>
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.fullName}
               </option>
             ))}
-          </select>
+          </SelectField>
         </div>
 
         {/* Search Input */}

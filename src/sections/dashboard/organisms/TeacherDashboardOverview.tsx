@@ -53,9 +53,9 @@ export default function TeacherDashboardOverview() {
           unavailable={!data}
         />
         <StatCard
-          label="Ujian Mendatang"
-          value={data?.upcomingExamsCount ?? 0}
-          hint="Segera dimulai minggu ini"
+          label="Total Siswa Terdaftar"
+          value={data?.totalStudents ?? 0}
+          hint="Di seluruh mata pelajaran"
           accent="blue"
           loading={loading}
           unavailable={!data}
@@ -63,6 +63,31 @@ export default function TeacherDashboardOverview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* WIDGET PERINGATAN / ACTION REQUIRED */}
+        <div className="lg:col-span-2">
+          <Card className="border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-900/10 shadow-sm p-5">
+            <Typography variant="h4" className="text-rose-700 dark:text-rose-400 font-bold mb-3 flex items-center">
+              <span className="w-2 h-2 rounded-full bg-rose-500 mr-2 animate-pulse"></span>
+              Peringatan & Tindakan Diperlukan
+            </Typography>
+            <div className="space-y-3">
+              {loading ? (
+                 <Skeleton className="h-10 w-full rounded" />
+              ) : (
+                <>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-slate-900 border border-rose-100 dark:border-rose-800">
+                    <Typography variant="body" className="text-sm">Ujian <strong>"Matematika Mid-Term"</strong> dijadwalkan besok namun belum memiliki soal.</Typography>
+                    <LinkButton href="/teacher/exams/manage" variant="secondary" className="text-xs text-rose-600 border-rose-200 hover:bg-rose-50">Tambahkan Soal</LinkButton>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-slate-900 border border-amber-100 dark:border-amber-800">
+                    <Typography variant="body" className="text-sm">Terdapat <strong>3 insiden mencurigakan</strong> pada sesi Proctoring ujian terakhir.</Typography>
+                    <LinkButton href="/teacher/proctoring/reports" variant="secondary" className="text-xs text-amber-600 border-amber-200 hover:bg-amber-50">Lihat Laporan</LinkButton>
+                  </div>
+                </>
+              )}
+            </div>
+          </Card>
+        </div>
         <Card className="shadow-xl shadow-emerald-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md overflow-hidden transition-colors">
           <div className="px-6 py-5 border-b border-slate-200/60 dark:border-slate-800 flex justify-between items-center">
             <Typography variant="h2" className="text-slate-900 dark:text-white">
