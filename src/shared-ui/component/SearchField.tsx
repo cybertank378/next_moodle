@@ -182,9 +182,9 @@ export default function SearchField({
   return (
     <div
       className={clsx(
-        "flex items-center gap-3 rounded-lg border border-gray-300  bg-white  px-4",
-        "transition-colors duration-200",
-        "focus-within:border-indigo-500",
+        "flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4",
+        "transition-all duration-200",
+        "focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/10",
         "focus-within:outline-none",
         sizeMap[size],
         className,

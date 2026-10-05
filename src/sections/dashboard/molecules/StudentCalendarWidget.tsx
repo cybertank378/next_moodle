@@ -37,8 +37,8 @@ export function StudentCalendarWidget({ upcomingExams }: Props) {
                 
                 if (examsByDate[dateString]) {
                   return (
-                    <div className="flex flex-col items-center mt-1 space-y-1">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <div className="flex justify-center mt-1">
+                      <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
                     </div>
                   );
                 }
@@ -46,6 +46,13 @@ export function StudentCalendarWidget({ upcomingExams }: Props) {
               return null;
             }}
           />
+       </div>
+
+       <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mt-6 px-1">
+          <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Tugas</div>
+          <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500"></div> Ujian</div>
+          <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-pink-500"></div> Kegiatan</div>
+          <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-slate-400"></div> Lainnya</div>
        </div>
     </Card>
   );

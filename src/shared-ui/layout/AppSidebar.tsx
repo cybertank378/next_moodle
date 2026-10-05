@@ -229,46 +229,46 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
   const [openKey, setOpenKey] = useState<string | null>(null);
 
   const sidebarContent = (
-    <div className="flex h-screen w-72 flex-col bg-white  text-slate-800  border-r border-slate-200/60  transition-colors duration-300">
-      <div className="border-b border-slate-200/60  px-5 py-5">
+    <div className="flex h-screen w-72 flex-col bg-slate-900 text-slate-300 border-r border-slate-800 transition-colors duration-300">
+      <div className="border-b border-slate-800 px-5 py-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
-            <GraduationCap size={28} />
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
+            <GraduationCap size={24} />
           </div>
 
           <div>
-            <h1 className="text-base font-extrabold tracking-tight text-slate-900 ">
-              Exam SaaS
+            <h1 className="text-base font-extrabold tracking-tight text-white">
+              Moodle
             </h1>
-            <p className="mt-0.5 text-xs font-medium text-slate-500 ">
-              Platform Ujian Terpusat
+            <p className="mt-0.5 text-xs font-medium text-slate-400">
+              Sistem Pembelajaran
             </p>
           </div>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-200/60  bg-slate-50  px-4 py-3 shadow-sm ">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
+        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-4 py-3 shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400 border border-slate-700 shadow-md">
             <LayoutDashboard size={18} />
           </div>
 
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 ">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Role Aktif
             </p>
-            <p className="text-sm font-semibold text-slate-900 ">
+            <p className="text-sm font-semibold text-white">
               {role.replaceAll("_", " ")}
             </p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto bg-white  px-3 py-5">
+      <nav className="flex-1 overflow-y-auto bg-slate-900 px-3 py-5">
         <div className="space-y-7">
           {groups.map((group, index) => (
             <div key={`group-${group.label ?? index}`}>
               {group.label && (
                 <div className="mb-3 px-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400 ">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                     {group.label}
                   </p>
                 </div>
@@ -294,10 +294,10 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </nav>
 
-      <div className="border-t border-slate-200/60  bg-white  px-5 py-4">
+      <div className="border-t border-slate-800 bg-slate-900 px-5 py-4">
         <div className="rounded-2xl px-4 py-2">
-          <p className="text-xs font-medium text-slate-400 ">
-            © {new Date().getFullYear()} Exam SaaS Moodle
+          <p className="text-xs font-medium text-slate-500">
+            © {new Date().getFullYear()} Moodle. All rights reserved.
           </p>
         </div>
       </div>

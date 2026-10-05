@@ -77,25 +77,25 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-white/80  backdrop-blur-xl border-b border-slate-200/60  shadow-sm transition-colors duration-300">
+    <header className="sticky top-0 z-40 h-20 bg-white border-b border-slate-100 transition-colors duration-300">
       <div className="h-full px-4 md:px-8 flex items-center justify-between gap-3">
         {/* ================= LEFT SECTION ================= */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
             type="button"
             onClick={onMenuClick}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500  transition-colors hover:bg-slate-100  hover:text-slate-900  focus:outline-none focus:ring-2 focus:ring-indigo-500 md:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500  transition-colors hover:bg-slate-100  hover:text-slate-900  focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
             aria-label="Open sidebar menu"
           >
             <Menu size={22} />
           </button>
 
-          <div className="flex-1 max-w-md min-w-0">
+          <div className="flex-1 max-w-xl min-w-0">
             <SearchField
               value={topbarSearch}
               onChange={setTopbarSearch}
-              placeholder="Cari ujian, mata pelajaran, siswa..."
-              size="sm"
+              placeholder="Cari mata pelajaran, tugas, atau materi..."
+              size="md"
             />
           </div>
         </div>
