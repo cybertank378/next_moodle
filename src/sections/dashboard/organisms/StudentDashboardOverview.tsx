@@ -40,14 +40,6 @@ export default function StudentDashboardOverview() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center py-20 text-red-500">
-        Gagal memuat: {error}
-      </div>
-    );
-  }
-
   const totalCourses = data?.courses?.length || 0;
   const activeExams = data?.upcomingExams?.filter(e => e.status === "open").length || 0;
   const avgProgress = data?.courses && data.courses.length > 0 
@@ -73,6 +65,12 @@ export default function StudentDashboardOverview() {
       
       {/* LEFT COLUMN - Main Content */}
       <div className="flex-1 space-y-6 min-w-0">
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-2xl border border-red-100 text-sm font-medium shadow-sm">
+            Terdapat kendala saat memuat data: {error}
+          </div>
+        )}
+        
         <StudentWelcomeBanner profile={data?.profile} />
         
         <StudentStatCards 
