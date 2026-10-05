@@ -5,12 +5,21 @@ import { showErrorToast } from "@/shared-ui/component/Toast";
 
 export function getErrorMessage(error?: unknown): string {
   if (!error) return "Terjadi kesalahan.";
-  if (typeof error === "string") return error;
-  if (error instanceof Error) return error.message;
-  if (typeof error === "object" && error !== null && "message" in error) {
-    return String((error as { message: unknown }).message);
+  let msg = "";
+  if (typeof error === "string") {
+    msg = error;
+  } else if (error instanceof Error) {
+    msg = error.message;
+  } else if (typeof error === "object" && error !== null && "message" in error) {
+    msg = String((error as { message: unknown }).message);
+  } else {
+    msg = "Terjadi kesalahan tidak terduga.";
   }
-  return "Terjadi kesalahan tidak terduga.";
+
+  if (msg.toLowerCase().includes("internal server error")) {
+    return "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.";
+  }
+  return msg;
 }
 
 export const handleApiErrorToast = (error?: AppError | Error | unknown) => {
