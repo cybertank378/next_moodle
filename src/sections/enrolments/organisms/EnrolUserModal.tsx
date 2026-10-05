@@ -72,7 +72,7 @@ export default function EnrolUserModal({
     >
       <div className="space-y-4 py-2">
         {errorMsg && (
-          <div className="rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 p-3 text-sm text-rose-600 dark:text-rose-400">
+          <div className="rounded-lg bg-rose-50  border border-rose-200  p-3 text-sm text-rose-600 ">
             {errorMsg}
           </div>
         )}

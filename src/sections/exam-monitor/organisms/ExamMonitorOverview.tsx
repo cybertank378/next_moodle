@@ -37,10 +37,10 @@ export default function ExamMonitorOverview({ quizId }: ExamMonitorOverviewProps
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">
       <div>
-        <Typography variant="h2" className="bg-gradient-to-r from-indigo-700 to-rose-600 dark:from-indigo-400 dark:to-rose-400 bg-clip-text text-transparent">
+        <Typography variant="h2" className="bg-gradient-to-r from-indigo-700 to-rose-600   bg-clip-text text-transparent">
           Pengawasan Ujian (Live)
         </Typography>
-        <Typography variant="body" className="text-slate-500 dark:text-slate-400 mt-2">
+        <Typography variant="body" className="text-slate-500  mt-2">
           Memantau sesi ujian dan kandidat secara real-time.
         </Typography>
       </div>
@@ -65,7 +65,7 @@ export default function ExamMonitorOverview({ quizId }: ExamMonitorOverviewProps
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="shadow-xl shadow-indigo-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md overflow-hidden transition-colors">
+        <Card className="shadow-xl shadow-indigo-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden transition-colors">
           <ActiveParticipantsTable quizId={quizId} participants={data?.participants ?? []} loading={loading} />
         </Card>
       </div>

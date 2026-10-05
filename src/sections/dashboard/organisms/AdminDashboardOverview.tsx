@@ -12,30 +12,11 @@ import StatCard from "@/sections/dashboard/molecules/StatCard";
 import TenantGrowthChart from "@/sections/dashboard/molecules/TenantGrowthChart";
 import TenantStatusChart from "@/sections/dashboard/molecules/TenantStatusChart";
 
-const CHART_THEME_LIGHT: ThemeName = "pearl";
-const CHART_THEME_DARK: ThemeName = "midnight";
-
 const EMPTY_SUMMARY = { total: 0, active: 0, maintenance: 0, suspended: 0 };
 
-/** Tracks the `dark` class toggled on <html> by ThemeSwitch. */
-function useChartTheme(): ThemeName {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const sync = () => setIsDark(root.classList.contains("dark"));
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
-
-  return isDark ? CHART_THEME_DARK : CHART_THEME_LIGHT;
-}
 
 export default function AdminDashboardOverview() {
   const { adminState, fetchAdminOverview } = useDashboardApi();
-  const chartTheme = useChartTheme();
 
   useEffect(() => {
     void fetchAdminOverview(ADMIN_DASHBOARD_DEFAULT_MONTHS);
@@ -50,7 +31,7 @@ export default function AdminDashboardOverview() {
       <DashboardHeader
         title="Ikhtisar Platform"
         subtitle="Manajemen platform SaaS, konfigurasi tenant, dan pemantauan sistem."
-        titleClassName="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400"
+        titleClassName="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent  "
         action={
           <Button color="primary" variant="filled" leftIcon={undefined}>
             + Daftarkan Tenant Baru
@@ -61,7 +42,7 @@ export default function AdminDashboardOverview() {
       {error && (
         <div
           role="alert"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700   "
         >
           <span>{error}</span>
           <Button
@@ -69,7 +50,7 @@ export default function AdminDashboardOverview() {
             variant="outline"
             color="error"
             onClick={() => void fetchAdminOverview(ADMIN_DASHBOARD_DEFAULT_MONTHS)}
-            className="border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300"
+            className="border-rose-300  text-rose-700 "
           >
             Coba lagi
           </Button>
@@ -116,13 +97,13 @@ export default function AdminDashboardOverview() {
           <TenantGrowthChart
             points={data?.growth ?? []}
             loading={loading && !data}
-            theme={chartTheme}
+            theme="pearl"
           />
         </div>
         <TenantStatusChart
           summary={summary}
           loading={loading && !data}
-          theme={chartTheme}
+          theme="pearl"
         />
       </div>
 

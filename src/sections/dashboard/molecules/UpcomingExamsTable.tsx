@@ -41,8 +41,8 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
 
   return (
     <div className="w-full">
-      <div className="px-6 py-5 border-b border-slate-200/60 dark:border-slate-800 flex justify-between items-center bg-white/70 dark:bg-slate-900/70 rounded-t-lg backdrop-blur-md">
-        <Typography variant="h2" className="text-slate-900 dark:text-white">
+      <div className="px-6 py-5 border-b border-slate-200/60  flex justify-between items-center bg-white/70  rounded-t-lg backdrop-blur-md">
+        <Typography variant="h2" className="text-slate-900 ">
           Ujian Mendatang
         </Typography>
         <LinkButton href="/dashboard/exams" variant="secondary" className="text-xs px-3 py-1">
@@ -70,7 +70,7 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
             ))
           ) : paginatedExams.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="py-8 text-center text-slate-500 dark:text-slate-400">
+              <TableCell colSpan={4} className="py-8 text-center text-slate-500 ">
                 Tidak ada data ujian.
               </TableCell>
             </TableRow>
@@ -78,17 +78,17 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
             paginatedExams.map((exam) => (
               <TableRow key={exam.id}>
                 <TableCell>
-                  <div className="font-semibold text-slate-900 dark:text-slate-100">{exam.name}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <div className="font-semibold text-slate-900 ">{exam.name}</div>
+                  <div className="text-xs text-slate-500  mt-1">
                     Siswa terdaftar: {exam.enrolledCount ?? 0}
                   </div>
                 </TableCell>
-                <TableCell className="text-slate-600 dark:text-slate-300">
+                <TableCell className="text-slate-600 ">
                   {exam.course}
                 </TableCell>
-                <TableCell className="text-slate-600 dark:text-slate-300">
+                <TableCell className="text-slate-600 ">
                   <div>{exam.scheduledDate.split(", ")[0]}</div>
-                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                  <div className="text-xs text-slate-400  mt-0.5">
                     Durasi: {exam.duration} menit
                   </div>
                 </TableCell>
@@ -113,7 +113,7 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
       </Table>
       
       {!loading && totalItems > 0 && (
-        <div className="px-6 py-4 bg-white/70 dark:bg-slate-900/70 border border-t-0 border-slate-200/60 dark:border-slate-800 rounded-b-lg">
+        <div className="px-6 py-4 bg-white/70  border border-t-0 border-slate-200/60  rounded-b-lg">
           <Pagination
             currentPage={currentPage}
             totalItems={totalItems}

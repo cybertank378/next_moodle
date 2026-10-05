@@ -24,10 +24,11 @@ export function StudentCalendarWidget({ upcomingExams }: Props) {
        <div className="flex justify-between items-center mb-6">
           <h3 className="text-base font-extrabold flex items-center gap-2"><CalendarIcon className="w-5 h-5 text-slate-700"/> Kalender</h3>
        </div>
-       
-       <div className="mb-4 text-xs max-w-full overflow-hidden student-react-calendar-wrapper">
+       <div className="mb-2 max-w-full overflow-hidden student-react-calendar-wrapper">
           <Calendar
             className="w-full border-none font-sans"
+            next2Label={null}
+            prev2Label={null}
             tileContent={({ date, view }) => {
               if (view === 'month') {
                 // Timezone adjustment for local date string matching
@@ -37,8 +38,8 @@ export function StudentCalendarWidget({ upcomingExams }: Props) {
                 
                 if (examsByDate[dateString]) {
                   return (
-                    <div className="flex flex-col items-center mt-1 space-y-1">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <div className="flex justify-center mt-1.5 w-full">
+                      <div className="w-1.5 h-1.5 bg-orange-500 rounded-full shadow-sm"></div>
                     </div>
                   );
                 }
@@ -46,6 +47,13 @@ export function StudentCalendarWidget({ upcomingExams }: Props) {
               return null;
             }}
           />
+       </div>
+
+       <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mt-6 px-1">
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></div> Tugas</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></div> Ujian</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-sm"></div> Kegiatan</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></div> Lainnya</div>
        </div>
     </Card>
   );

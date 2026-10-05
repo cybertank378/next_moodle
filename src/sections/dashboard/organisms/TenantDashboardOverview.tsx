@@ -31,7 +31,7 @@ export default function TenantDashboardOverview() {
       <DashboardHeader
         title="Dasbor Tenant"
         subtitle="Selamat datang, Administrator. Kelola ujian, peserta, dan pantau aktivitas."
-        titleClassName="bg-gradient-to-r from-blue-700 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent"
+        titleClassName="bg-gradient-to-r from-blue-700 to-cyan-600   bg-clip-text text-transparent"
         borderBottom={false}
       />
 
@@ -72,16 +72,16 @@ export default function TenantDashboardOverview() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <Card className="shadow-xl shadow-blue-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md overflow-hidden h-full transition-colors">
+          <Card className="shadow-xl shadow-blue-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden h-full transition-colors">
             <UpcomingExamsTable exams={data?.upcomingExams ?? []} loading={loading} />
           </Card>
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="shadow-xl shadow-amber-500/5 dark:shadow-none border border-amber-200/60 dark:border-amber-900/40 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 h-full transition-colors">
+          <Card className="shadow-xl shadow-amber-500/5  border border-amber-200/60  bg-gradient-to-br from-amber-50 to-orange-50   h-full transition-colors">
             <Typography
               variant="h2"
-              className="text-amber-800 dark:text-amber-400 mb-4 flex items-center"
+              className="text-amber-800  mb-4 flex items-center"
             >
               <svg
                 className="w-5 h-5 mr-2"
@@ -100,32 +100,32 @@ export default function TenantDashboardOverview() {
               Tindakan Diperlukan
             </Typography>
             <div className="space-y-4">
-              <div className="bg-white/80 dark:bg-slate-900/60 p-4 rounded-lg border border-amber-200/60 dark:border-amber-800/50 shadow-sm">
-                <Typography variant="h3" className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+              <div className="bg-white/80  p-4 rounded-lg border border-amber-200/60  shadow-sm">
+                <Typography variant="h3" className="font-semibold text-sm text-slate-900 ">
                   Soal Belum Ada
                 </Typography>
-                <Typography variant="body" className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                <Typography variant="body" className="text-xs text-slate-600  mt-1 leading-relaxed">
                   "World History: Module 4" dijadwalkan untuk 2 Nov memiliki 0 soal.
                 </Typography>
                 <LinkButton
                   href="#"
                   variant="ghost"
-                  className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 mt-2 p-0 h-auto inline-flex"
+                  className="text-xs font-medium text-amber-700  hover:text-amber-900  mt-2 p-0 h-auto inline-flex"
                 >
                   Tinjau Ujian &rarr;
                 </LinkButton>
               </div>
-              <div className="bg-white/80 dark:bg-slate-900/60 p-4 rounded-lg border border-amber-200/60 dark:border-amber-800/50 shadow-sm">
-                <Typography variant="h3" className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+              <div className="bg-white/80  p-4 rounded-lg border border-amber-200/60  shadow-sm">
+                <Typography variant="h3" className="font-semibold text-sm text-slate-900 ">
                   Insiden Mencurigakan
                 </Typography>
-                <Typography variant="body" className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                <Typography variant="body" className="text-xs text-slate-600  mt-1 leading-relaxed">
                   3 peserta ditandai keluar dari browser berulang kali dalam 24 jam terakhir.
                 </Typography>
                 <LinkButton
                   href="#"
                   variant="ghost"
-                  className="text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 mt-2 p-0 h-auto inline-flex"
+                  className="text-xs font-medium text-amber-700  hover:text-amber-900  mt-2 p-0 h-auto inline-flex"
                 >
                   Lihat Log Audit &rarr;
                 </LinkButton>

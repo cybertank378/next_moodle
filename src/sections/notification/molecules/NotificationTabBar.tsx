@@ -19,7 +19,7 @@ export default function NotificationTabBar({
   ];
 
   return (
-    <div className="flex border-b border-slate-200 dark:border-slate-700">
+    <div className="flex border-b border-slate-200 ">
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -29,13 +29,13 @@ export default function NotificationTabBar({
           className={[
             "flex-1 py-2.5 text-sm font-medium transition-colors relative",
             activeTab === tab.key
-              ? "text-indigo-600 dark:text-indigo-400"
-              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
+              ? "text-indigo-600 "
+              : "text-slate-500  hover:text-slate-700 ",
           ].join(" ")}
         >
           {tab.label}
           {tab.key === "unread" && unreadCount > 0 && (
-            <span className="ml-1.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold">
+            <span className="ml-1.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-indigo-100  text-indigo-600  text-[10px] font-bold">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}

@@ -70,12 +70,12 @@ const sizeMap: Record<Size, string> = {
 
 const variantMap: Record<Variant, string> = {
   outlined:
-    "border border-gray-300 dark:border-slate-700 bg-white dark:bg-[#151521]",
+    "border border-gray-300  bg-white ",
 
-  filled: "bg-gray-100 dark:bg-slate-800 border border-transparent",
+  filled: "bg-gray-100  border border-transparent",
 
   custom:
-    "border border-gray-300 dark:border-slate-700 rounded-xl bg-white dark:bg-[#151521]",
+    "border border-gray-300  rounded-xl bg-white ",
 };
 
 const TextField = forwardRef<HTMLInputElement, Props>(
@@ -212,31 +212,31 @@ const TextField = forwardRef<HTMLInputElement, Props>(
             className={clsx(
               "w-full rounded-lg outline-none transition-all",
 
-              "text-gray-800 dark:text-slate-200",
+              "text-gray-800 ",
 
-              "placeholder:text-gray-400 dark:placeholder:text-slate-500",
+              "placeholder:text-gray-400 ",
 
               sizeMap[size],
 
               variantMap[variant],
 
               finalError &&
-                "border-red-500 focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900/40",
+                "border-red-500 focus:ring-2 focus:ring-red-200 ",
 
               success &&
                 !finalError &&
-                "border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-900/40",
+                "border-green-500 focus:ring-2 focus:ring-green-200 ",
 
               !finalError &&
                 !success &&
-                "border-gray-300 dark:border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-900/40",
+                "border-gray-300  focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 ",
 
               LeftIcon && "pl-9",
 
               (RightIcon || (enablePasswordToggle && isPassword)) && "pr-9",
 
               disabled &&
-                "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 cursor-not-allowed",
+                "bg-gray-100  text-gray-400  cursor-not-allowed",
 
               className,
             )}
@@ -249,7 +249,7 @@ const TextField = forwardRef<HTMLInputElement, Props>(
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+              className="absolute right-3 text-gray-400 hover:text-gray-600   cursor-pointer"
               tabIndex={-1}
             >
               <ToggleIcon size={18} />
@@ -262,7 +262,7 @@ const TextField = forwardRef<HTMLInputElement, Props>(
             <button
               type="button"
               onClick={onRightIconClick}
-              className="absolute right-3 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+              className="absolute right-3 text-gray-400 hover:text-gray-600   cursor-pointer"
               tabIndex={-1}
             >
               <RightIcon size={16} />

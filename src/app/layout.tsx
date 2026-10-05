@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           } catch (_) {}`}
         </script>
       </head>
-      <body className="bg-slate-50 text-slate-900 dark:bg-[#1e1e2d] dark:text-gray-200 antialiased transition-colors duration-200">
+      <body className="bg-slate-50 text-slate-900   antialiased transition-colors duration-200">
         <AppToastProvider>{children}</AppToastProvider>
       </body>
     </html>

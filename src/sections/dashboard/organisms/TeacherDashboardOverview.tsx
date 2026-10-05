@@ -31,7 +31,7 @@ export default function TeacherDashboardOverview() {
       <DashboardHeader
         title="Ruang Kerja Guru"
         subtitle="Kelola soal, kelas, dan pantau kemajuan peserta didik Anda."
-        titleClassName="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent"
+        titleClassName="bg-gradient-to-r from-emerald-600 to-teal-500   bg-clip-text text-transparent"
         borderBottom={false}
       />
 
@@ -65,8 +65,8 @@ export default function TeacherDashboardOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* WIDGET PERINGATAN / ACTION REQUIRED */}
         <div className="lg:col-span-2">
-          <Card className="border border-rose-200 dark:border-rose-900/50 bg-rose-50/50 dark:bg-rose-900/10 shadow-sm p-5">
-            <Typography variant="h4" className="text-rose-700 dark:text-rose-400 font-bold mb-3 flex items-center">
+          <Card className="border border-rose-200  bg-rose-50/50  shadow-sm p-5">
+            <Typography variant="h4" className="text-rose-700  font-bold mb-3 flex items-center">
               <span className="w-2 h-2 rounded-full bg-rose-500 mr-2 animate-pulse"></span>
               Peringatan & Tindakan Diperlukan
             </Typography>
@@ -75,11 +75,11 @@ export default function TeacherDashboardOverview() {
                  <Skeleton className="h-10 w-full rounded" />
               ) : (
                 <>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-slate-900 border border-rose-100 dark:border-rose-800">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-white  border border-rose-100 ">
                     <Typography variant="body" className="text-sm">Ujian <strong>"Matematika Mid-Term"</strong> dijadwalkan besok namun belum memiliki soal.</Typography>
                     <LinkButton href="/teacher/exams/manage" variant="secondary" className="text-xs text-rose-600 border-rose-200 hover:bg-rose-50">Tambahkan Soal</LinkButton>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-slate-900 border border-amber-100 dark:border-amber-800">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-white  border border-amber-100 ">
                     <Typography variant="body" className="text-sm">Terdapat <strong>3 insiden mencurigakan</strong> pada sesi Proctoring ujian terakhir.</Typography>
                     <LinkButton href="/teacher/proctoring/reports" variant="secondary" className="text-xs text-amber-600 border-amber-200 hover:bg-amber-50">Lihat Laporan</LinkButton>
                   </div>
@@ -88,9 +88,9 @@ export default function TeacherDashboardOverview() {
             </div>
           </Card>
         </div>
-        <Card className="shadow-xl shadow-emerald-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md overflow-hidden transition-colors">
-          <div className="px-6 py-5 border-b border-slate-200/60 dark:border-slate-800 flex justify-between items-center">
-            <Typography variant="h2" className="text-slate-900 dark:text-white">
+        <Card className="shadow-xl shadow-emerald-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden transition-colors">
+          <div className="px-6 py-5 border-b border-slate-200/60  flex justify-between items-center">
+            <Typography variant="h2" className="text-slate-900 ">
               Mata Pelajaran Saya
             </Typography>
             <LinkButton
@@ -109,16 +109,16 @@ export default function TeacherDashboardOverview() {
               </div>
             )}
             {!loading && (!data?.courses || data.courses.length === 0) && (
-              <Typography variant="body" className="text-slate-500 dark:text-slate-400 text-sm text-center py-6">
+              <Typography variant="body" className="text-slate-500  text-sm text-center py-6">
                 Belum ada mata pelajaran yang Anda ampu.
               </Typography>
             )}
             {!loading && data?.courses?.slice(0, 5).map(course => (
-               <div key={course.id} className="p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800 transition-colors">
+               <div key={course.id} className="p-4 rounded-xl border border-slate-200/50  bg-slate-50/50  hover:bg-slate-100/50  transition-colors">
                   <div className="flex justify-between items-start">
                      <div>
-                        <Typography variant="body" className="font-semibold text-slate-900 dark:text-white">{course.name}</Typography>
-                        <Typography variant="caption" className="text-slate-500 dark:text-slate-400">{course.shortName}</Typography>
+                        <Typography variant="body" className="font-semibold text-slate-900 ">{course.name}</Typography>
+                        <Typography variant="caption" className="text-slate-500 ">{course.shortName}</Typography>
                      </div>
                   </div>
                </div>
@@ -126,9 +126,9 @@ export default function TeacherDashboardOverview() {
           </div>
         </Card>
 
-        <Card className="shadow-xl shadow-emerald-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md overflow-hidden transition-colors">
-          <div className="px-6 py-5 border-b border-slate-200/60 dark:border-slate-800 flex justify-between items-center">
-            <Typography variant="h2" className="text-slate-900 dark:text-white">
+        <Card className="shadow-xl shadow-emerald-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden transition-colors">
+          <div className="px-6 py-5 border-b border-slate-200/60  flex justify-between items-center">
+            <Typography variant="h2" className="text-slate-900 ">
               Aktivitas Ujian Kelas
             </Typography>
             <LinkButton
@@ -147,16 +147,16 @@ export default function TeacherDashboardOverview() {
               </div>
             )}
             {!loading && (!data?.recentExams || data.recentExams.length === 0) && (
-              <Typography variant="body" className="text-slate-500 dark:text-slate-400 text-sm text-center py-6">
+              <Typography variant="body" className="text-slate-500  text-sm text-center py-6">
                 Belum ada ujian kelas yang dijadwalkan.
               </Typography>
             )}
             {!loading && data?.recentExams?.map(exam => (
-               <div key={exam.id} className="p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800 transition-colors">
+               <div key={exam.id} className="p-4 rounded-xl border border-slate-200/50  bg-slate-50/50  hover:bg-slate-100/50  transition-colors">
                   <div className="flex justify-between items-start mb-2">
                      <div>
-                        <Typography variant="body" className="font-semibold text-slate-900 dark:text-white">{exam.name}</Typography>
-                        <Typography variant="caption" className="text-slate-500 dark:text-slate-400">{exam.course}</Typography>
+                        <Typography variant="body" className="font-semibold text-slate-900 ">{exam.name}</Typography>
+                        <Typography variant="caption" className="text-slate-500 ">{exam.course}</Typography>
                      </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 mt-4">

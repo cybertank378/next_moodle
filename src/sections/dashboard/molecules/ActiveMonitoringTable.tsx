@@ -41,8 +41,8 @@ export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonit
 
   return (
     <div className="w-full">
-      <div className="px-6 py-5 border-b border-slate-200/60 dark:border-slate-800 flex justify-between items-center bg-white/70 dark:bg-slate-900/70 rounded-t-lg backdrop-blur-md">
-        <Typography variant="h2" className="text-slate-900 dark:text-white">
+      <div className="px-6 py-5 border-b border-slate-200/60  flex justify-between items-center bg-white/70  rounded-t-lg backdrop-blur-md">
+        <Typography variant="h2" className="text-slate-900 ">
           Pemantauan Sesi Aktif
         </Typography>
       </div>
@@ -68,7 +68,7 @@ export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonit
             ))
           ) : paginatedSessions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="py-8 text-center text-slate-500 dark:text-slate-400">
+              <TableCell colSpan={5} className="py-8 text-center text-slate-500 ">
                 Tidak ada sesi ujian aktif.
               </TableCell>
             </TableRow>
@@ -76,15 +76,15 @@ export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonit
             paginatedSessions.map((session) => (
               <TableRow key={session.id}>
                 <TableCell>
-                  <div className="font-semibold text-slate-900 dark:text-slate-100">{session.examName}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <div className="font-semibold text-slate-900 ">{session.examName}</div>
+                  <div className="text-xs text-slate-500  mt-1">
                     Dimulai: {session.startTime}
                   </div>
                 </TableCell>
-                <TableCell className="font-medium text-slate-600 dark:text-slate-300">
+                <TableCell className="font-medium text-slate-600 ">
                   ~ {session.duration} menit
                 </TableCell>
-                <TableCell className="text-slate-600 dark:text-slate-300">
+                <TableCell className="text-slate-600 ">
                   {session.activeCandidates} / {session.totalCandidates}
                 </TableCell>
                 <TableCell>
@@ -110,7 +110,7 @@ export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonit
       </Table>
       
       {!loading && totalItems > 0 && (
-        <div className="px-6 py-4 bg-white/70 dark:bg-slate-900/70 border border-t-0 border-slate-200/60 dark:border-slate-800 rounded-b-lg">
+        <div className="px-6 py-4 bg-white/70  border border-t-0 border-slate-200/60  rounded-b-lg">
           <Pagination
             currentPage={currentPage}
             totalItems={totalItems}

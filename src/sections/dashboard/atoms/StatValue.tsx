@@ -16,7 +16,7 @@ export default function StatValue({
   if (loading) return <Skeleton width={96} height={36} />;
   if (unavailable) {
     return (
-      <span className="text-slate-400 dark:text-slate-500" aria-label="Data tidak tersedia">
+      <span className="text-slate-400 " aria-label="Data tidak tersedia">
         —
       </span>
     );

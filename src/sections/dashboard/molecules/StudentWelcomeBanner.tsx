@@ -29,23 +29,23 @@ export function StudentWelcomeBanner({ profile }: Props) {
          </div>
          <div>
             <Typography variant="h2" className="text-slate-800 font-bold mb-1 flex items-center gap-2">
-              Halo, {profile?.name || "Andi Pratama"}!
+              Halo, {profile?.name || "Andi Pratama"}! 👋
             </Typography>
             <Typography variant="body" className="text-slate-600 mb-4 font-medium">
               Terus semangat belajar dan raih cita-citamu!
             </Typography>
             <div className="flex items-center text-sm font-semibold text-slate-500 space-x-2">
-               <span className="bg-white px-3 py-1 rounded-full border border-slate-200">{profile?.schoolName || "SMP Negeri 1 Jakarta"}</span>
+               <span>{profile?.schoolName || "SMP Negeri 1 Jakarta"}</span>
                <span>•</span>
-               <span className="bg-white px-3 py-1 rounded-full border border-slate-200">{profile?.className || "Kelas 8A"}</span>
+               <span>{profile?.className || "Kelas 8A"}</span>
                <span>•</span>
-               <span className="bg-white px-3 py-1 rounded-full border border-slate-200">Semester Genap {profile?.academicYear || "2024/2025"}</span>
+               <span>Semester Genap {profile?.academicYear || "2024/2025"}</span>
             </div>
          </div>
       </div>
-      <div className="hidden md:flex bg-white p-5 rounded-2xl shadow-sm border border-slate-100 max-w-[220px] mt-4 md:mt-0 text-sm italic text-slate-600 relative before:absolute before:left-0 before:top-4 before:bottom-4 before:w-1 before:bg-blue-300 before:rounded-r-lg">
+      <div className="hidden md:flex bg-blue-100/50 p-5 rounded-2xl max-w-[220px] mt-4 md:mt-0 text-sm font-medium text-slate-700 relative">
          "Belajar hari ini, untuk masa depan yang lebih baik."
-         <div className="absolute top-2 right-2 text-emerald-400 opacity-50"><Flame className="w-6 h-6"/></div>
+         <div className="absolute bottom-2 right-2 text-emerald-500 opacity-60 text-2xl">🍃</div>
       </div>
     </div>
   );

@@ -34,14 +34,14 @@ export default function RecentTenantsTable({
   const paginatedTenants = tenants.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
-    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-900/60 p-0 overflow-hidden">
-      <div className="p-4 flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl   p-0 overflow-hidden">
+      <div className="p-4 flex items-center justify-between border-b border-slate-200/60 ">
+        <h2 className="text-lg font-semibold text-slate-900 ">
           Tenant Terbaru
         </h2>
         <Link
           href="/admin/tenants"
-          className="text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+          className="text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-800  "
         >
           Lihat semua →
         </Link>
@@ -71,7 +71,7 @@ export default function RecentTenantsTable({
             <TableRow>
               <TableCell
                 colSpan={COLUMN_COUNT}
-                className="py-8 text-center text-slate-500 dark:text-slate-400"
+                className="py-8 text-center text-slate-500 "
               >
                 Belum ada tenant terdaftar.
               </TableCell>
@@ -79,7 +79,7 @@ export default function RecentTenantsTable({
           ) : (
             paginatedTenants.map((tenant) => (
               <TableRow key={tenant.id}>
-                <TableCell className="font-medium text-slate-900 dark:text-slate-100">
+                <TableCell className="font-medium text-slate-900 ">
                   {tenant.name}
                 </TableCell>
                 <TableCell className="font-mono text-xs">{tenant.slug}</TableCell>
@@ -94,7 +94,7 @@ export default function RecentTenantsTable({
       </Table>
       
       {!loading && totalItems > 0 && (
-        <div className="px-4 py-3 border-t border-slate-200/60 dark:border-slate-800">
+        <div className="px-4 py-3 border-t border-slate-200/60 ">
           <Pagination
             currentPage={currentPage}
             totalItems={totalItems}

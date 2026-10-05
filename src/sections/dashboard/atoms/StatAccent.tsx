@@ -4,32 +4,32 @@ export type StatAccent = "indigo" | "emerald" | "amber" | "rose" | "blue" | "cya
 
 const accentStyles: Record<StatAccent, { glow: string; dot: string }> = {
   indigo: {
-    glow: "bg-indigo-500/10 dark:bg-indigo-400/10",
-    dot: "bg-indigo-500 dark:bg-indigo-400",
+    glow: "bg-indigo-500/10 ",
+    dot: "bg-indigo-500 ",
   },
   emerald: {
-    glow: "bg-emerald-500/10 dark:bg-emerald-400/10",
-    dot: "bg-emerald-500 dark:bg-emerald-400",
+    glow: "bg-emerald-500/10 ",
+    dot: "bg-emerald-500 ",
   },
   amber: {
-    glow: "bg-amber-500/10 dark:bg-amber-400/10",
-    dot: "bg-amber-500 dark:bg-amber-400",
+    glow: "bg-amber-500/10 ",
+    dot: "bg-amber-500 ",
   },
   rose: {
-    glow: "bg-rose-500/10 dark:bg-rose-400/10",
-    dot: "bg-rose-500 dark:bg-rose-400",
+    glow: "bg-rose-500/10 ",
+    dot: "bg-rose-500 ",
   },
   blue: {
-    glow: "bg-blue-500/10 dark:bg-blue-400/10",
-    dot: "bg-blue-500 dark:bg-blue-400",
+    glow: "bg-blue-500/10 ",
+    dot: "bg-blue-500 ",
   },
   cyan: {
-    glow: "bg-cyan-500/10 dark:bg-cyan-400/10",
-    dot: "bg-cyan-500 dark:bg-cyan-400",
+    glow: "bg-cyan-500/10 ",
+    dot: "bg-cyan-500 ",
   },
   teal: {
-    glow: "bg-teal-500/10 dark:bg-teal-400/10",
-    dot: "bg-teal-500 dark:bg-teal-400",
+    glow: "bg-teal-500/10 ",
+    dot: "bg-teal-500 ",
   },
 };
 

@@ -63,14 +63,14 @@ export default function NotificationItem({
       data-testid={`notification-item-${notification.id}`}
       onClick={() => onClick(notification)}
       className={[
-        "w-full text-left px-4 py-3 flex gap-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50",
+        "w-full text-left px-4 py-3 flex gap-3 transition-colors hover:bg-slate-50 ",
         !notification.isRead
-          ? "bg-indigo-50/60 dark:bg-indigo-900/10 border-l-2 border-indigo-500"
+          ? "bg-indigo-50/60  border-l-2 border-indigo-500"
           : "border-l-2 border-transparent",
       ].join(" ")}
     >
       {/* Icon */}
-      <div className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+      <div className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-full bg-slate-100  flex items-center justify-center">
         {getNotificationIcon(notification.type)}
       </div>
 
@@ -80,16 +80,16 @@ export default function NotificationItem({
           className={[
             "text-sm leading-snug",
             !notification.isRead
-              ? "font-semibold text-slate-900 dark:text-white"
-              : "font-normal text-slate-700 dark:text-slate-300",
+              ? "font-semibold text-slate-900 "
+              : "font-normal text-slate-700 ",
           ].join(" ")}
         >
           {notification.title}
         </p>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+        <p className="mt-0.5 text-xs text-slate-500  line-clamp-2">
           {notification.body}
         </p>
-        <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
+        <p className="mt-1 text-[11px] text-slate-400 ">
           {formatRelativeTime(notification.createdAt)}
         </p>
       </div>

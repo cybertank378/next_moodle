@@ -54,10 +54,10 @@ export default function NotificationList({
         data-testid="notification-empty"
         className="flex flex-col items-center justify-center py-10 gap-3 text-center"
       >
-        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full bg-slate-100  flex items-center justify-center">
           <BellOff size={20} className="text-slate-400" />
         </div>
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+        <p className="text-sm font-medium text-slate-600 ">
           {tab === "unread"
             ? "Tidak ada notifikasi baru"
             : "Tidak ada notifikasi yang telah dibaca"}
@@ -68,7 +68,7 @@ export default function NotificationList({
 
   return (
     <div>
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
+      <div className="divide-y divide-slate-100 ">
         {items.map((notification) => (
           <NotificationItem
             key={notification.id}
@@ -79,7 +79,7 @@ export default function NotificationList({
       </div>
 
       {totalPages > 1 && (
-        <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-3">
+        <div className="border-t border-slate-100  px-4 py-3">
           <Pagination
             currentPage={page}
             totalItems={total}

@@ -16,7 +16,7 @@ import NotificationPanel from "@/sections/notification/organisms/NotificationPan
 import Button from "@/shared-ui/component/Button";
 import { DropdownItem } from "@/shared-ui/component/DropdownItem";
 import SearchField from "@/shared-ui/component/SearchField";
-import ThemeSwitch from "@/shared-ui/component/ThemeSwitch";
+
 
 interface Props {
   role: UserRole;
@@ -77,25 +77,25 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-colors duration-300">
+    <header className="sticky top-0 z-40 h-20 bg-white border-b border-slate-100 transition-colors duration-300">
       <div className="h-full px-4 md:px-8 flex items-center justify-between gap-3">
         {/* ================= LEFT SECTION ================= */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
             type="button"
             onClick={onMenuClick}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 md:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500  transition-colors hover:bg-slate-100  hover:text-slate-900  focus:outline-none focus:ring-2 focus:ring-blue-500 md:hidden"
             aria-label="Open sidebar menu"
           >
             <Menu size={22} />
           </button>
 
-          <div className="flex-1 max-w-md min-w-0">
+          <div className="flex-1 max-w-xl min-w-0">
             <SearchField
               value={topbarSearch}
               onChange={setTopbarSearch}
-              placeholder="Cari ujian, mata pelajaran, siswa..."
-              size="sm"
+              placeholder="Cari mata pelajaran, tugas, atau materi..."
+              size="md"
             />
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
         {/* ================= RIGHT SECTION ================= */}
         <div className="flex items-center gap-3 shrink-0">
           {/* Figma Design Light/Dark Mode Switch */}
-          <ThemeSwitch size="md" />
+          {/* Theme switch removed as per light theme only constraint */}
 
           {/* ── NOTIFICATION BELL ── */}
           <div className="relative" ref={notifRef}>
@@ -112,7 +112,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
               aria-label="Notifikasi"
               aria-expanded={notifOpen}
               onClick={() => setNotifOpen((prev) => !prev)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500  hover:text-slate-900  hover:bg-slate-100  transition-colors"
             >
               <Bell size={18} />
               <NotificationBadge count={unreadCount} />
@@ -136,19 +136,19 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
             </button>
 
             {isOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-200/60 dark:border-slate-800/60 overflow-hidden text-slate-800 dark:text-slate-200">
+              <div className="absolute right-0 mt-3 w-64 bg-white/90  backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-200/50  border border-slate-200/60  overflow-hidden text-slate-800 ">
                 {/* ===== USER HEADER ===== */}
-                <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/50">
+                <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200/60  bg-slate-50/50 ">
                   <div className="relative w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow shrink-0">
                     {username ? username.charAt(0) : <User size={20} />}
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#151521] rounded-full" />
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white  rounded-full" />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                    <p className="text-sm font-semibold text-slate-900  truncate">
                       {username || "User"}
                     </p>
-                    <p className="text-xs text-indigo-600 dark:text-indigo-400 truncate">
+                    <p className="text-xs text-indigo-600  truncate">
                       {roleMeta.label}
                     </p>
                   </div>
@@ -179,7 +179,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
                   })}
                 </div>
 
-                <div className="border-t border-slate-200 dark:border-slate-800" />
+                <div className="border-t border-slate-200 " />
 
                 {/* ===== LOGOUT BUTTON ===== */}
                 <div className="p-3">

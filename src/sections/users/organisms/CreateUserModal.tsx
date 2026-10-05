@@ -77,7 +77,7 @@ export default function CreateUserModal({
     >
       <div className="space-y-4 py-2">
         {formError && (
-          <div className="rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 p-3 text-sm text-rose-600 dark:text-rose-400">
+          <div className="rounded-lg bg-rose-50  border border-rose-200  p-3 text-sm text-rose-600 ">
             {formError}
           </div>
         )}
@@ -86,7 +86,7 @@ export default function CreateUserModal({
           <div>
             <label
               htmlFor="create-user-username"
-              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-xs font-semibold text-gray-700  mb-1"
             >
               Username *
             </label>
@@ -96,14 +96,14 @@ export default function CreateUserModal({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="misal: budi_santoso"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
           <div>
             <label
               htmlFor="create-user-role"
-              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-xs font-semibold text-gray-700  mb-1"
             >
               Peran (Role)
             </label>
@@ -111,7 +111,7 @@ export default function CreateUserModal({
               id="create-user-role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="student">Siswa / Peserta</option>
               <option value="teacher">Guru / Pengajar</option>
@@ -124,7 +124,7 @@ export default function CreateUserModal({
           <div>
             <label
               htmlFor="create-user-firstname"
-              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-xs font-semibold text-gray-700  mb-1"
             >
               Nama Depan *
             </label>
@@ -134,14 +134,14 @@ export default function CreateUserModal({
               value={firstname}
               onChange={(e) => setFirstname(e.target.value)}
               placeholder="misal: Budi"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
           <div>
             <label
               htmlFor="create-user-lastname"
-              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-xs font-semibold text-gray-700  mb-1"
             >
               Nama Belakang *
             </label>
@@ -151,7 +151,7 @@ export default function CreateUserModal({
               value={lastname}
               onChange={(e) => setLastname(e.target.value)}
               placeholder="misal: Santoso"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function CreateUserModal({
         <div>
           <label
             htmlFor="create-user-email"
-            className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-xs font-semibold text-gray-700  mb-1"
           >
             Email *
           </label>
@@ -169,7 +169,7 @@ export default function CreateUserModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="misal: budi@sekolah.sch.id"
-            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
@@ -177,7 +177,7 @@ export default function CreateUserModal({
           <div>
             <label
               htmlFor="create-user-password"
-              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-xs font-semibold text-gray-700  mb-1"
             >
               Password (opsional)
             </label>
@@ -187,14 +187,14 @@ export default function CreateUserModal({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password awal"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
           <div>
             <label
               htmlFor="create-user-idnumber"
-              className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-xs font-semibold text-gray-700  mb-1"
             >
               NISN / NIP / ID (opsional)
             </label>
@@ -204,7 +204,7 @@ export default function CreateUserModal({
               value={idnumber}
               onChange={(e) => setIdnumber(e.target.value)}
               placeholder="misal: 10293847"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         </div>

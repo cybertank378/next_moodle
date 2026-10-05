@@ -30,7 +30,7 @@ export default function ProctorDashboardOverview() {
       <DashboardHeader
         title="Konsol Pengawas"
         subtitle="Pantau sesi ujian langsung dan tinjau aktivitas mencurigakan."
-        titleClassName="bg-gradient-to-r from-indigo-700 to-rose-600 dark:from-indigo-400 dark:to-rose-400 bg-clip-text text-transparent"
+        titleClassName="bg-gradient-to-r from-indigo-700 to-rose-600   bg-clip-text text-transparent"
       />
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -61,7 +61,7 @@ export default function ProctorDashboardOverview() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <Card className="shadow-xl shadow-indigo-500/5 dark:shadow-none border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md overflow-hidden transition-colors">
+        <Card className="shadow-xl shadow-indigo-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden transition-colors">
           <ActiveMonitoringTable sessions={data?.sessions ?? []} loading={loading} />
         </Card>
       </div>

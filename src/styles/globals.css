@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@config "../../tailwind.config.ts";
 
 @layer base {
   :root {
@@ -28,31 +28,6 @@
     --ring: 221 83% 53%;
     --radius: 0.625rem;
   }
-
-  .dark {
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
-    --surface: 224 71% 7%;
-    --surface-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 224 71% 4%;
-    --primary-hover: 217 91% 68%;
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --accent: 215 28% 17%;
-    --accent-foreground: 210 40% 98%;
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 20% 65%;
-    --danger: 0 72% 51%;
-    --danger-foreground: 210 40% 98%;
-    --success: 142 71% 45%;
-    --success-foreground: 224 71% 4%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 224 71% 4%;
-    --border: 215 28% 18%;
-    --input: 215 28% 18%;
-    --ring: 217 91% 60%;
-  }
 }
 
 @layer base {
@@ -67,49 +42,87 @@
   }
 }
 
-/* Student Dashboard FullCalendar Customizations */
-.fullcalendar-student .fc-toolbar-title {
-   font-size: 14px !important;
-   font-weight: 700 !important;
-   color: #1e293b !important;
+/* Student Dashboard React Calendar Customizations */
+.student-react-calendar-wrapper .react-calendar {
+   width: 100%;
+   border: none;
+   background: transparent;
+   font-family: inherit;
 }
-.fullcalendar-student .fc-button-primary {
-   background-color: transparent !important;
-   border: none !important;
-   color: #94a3b8 !important;
-   padding: 4px !important;
-   box-shadow: none !important;
+.student-react-calendar-wrapper .react-calendar__navigation {
+   margin-bottom: 1rem;
 }
-.fullcalendar-student .fc-button-primary:hover {
-   color: #475569 !important;
-   background-color: #f1f5f9 !important;
+.student-react-calendar-wrapper .react-calendar__navigation button {
+   min-width: 44px;
+   background: none;
+   font-weight: 700;
+   font-size: 14px;
+   color: #1e293b;
+   border-radius: 12px;
+   padding: 8px;
+   transition: all 0.2s;
 }
-.fullcalendar-student .fc-col-header-cell-cushion {
-   font-size: 11px !important;
-   font-weight: 700 !important;
-   color: #94a3b8 !important;
+.student-react-calendar-wrapper .react-calendar__navigation button:enabled:hover,
+.student-react-calendar-wrapper .react-calendar__navigation button:enabled:focus {
+   background-color: #f1f5f9;
 }
-.fullcalendar-student .fc-daygrid-day-number {
-   font-size: 12px !important;
-   font-weight: 600 !important;
+.student-react-calendar-wrapper .react-calendar__navigation button[disabled] {
+   background-color: transparent;
+   color: #cbd5e1;
+}
+.student-react-calendar-wrapper .react-calendar__month-view__weekdays {
+   font-size: 0.7rem;
+   text-transform: uppercase;
+   font-weight: 800;
+   color: #64748b;
+   text-decoration: none;
+}
+.student-react-calendar-wrapper .react-calendar__month-view__weekdays__weekday {
+   padding: 0.5em;
+   text-align: center;
+}
+.student-react-calendar-wrapper .react-calendar__month-view__weekdays__weekday abbr {
+   text-decoration: none;
+}
+.student-react-calendar-wrapper .react-calendar__month-view__days__day--weekend {
+   color: #ef4444;
+}
+.student-react-calendar-wrapper .react-calendar__tile {
+   padding: 10px 6px;
+   background: none;
+   text-align: center;
+   font-weight: 600;
+   font-size: 13px;
    color: #334155;
-   padding: 4px !important;
-}
-.fullcalendar-student .fc-day-today .fc-daygrid-day-number {
-   background-color: #2563eb !important;
-   color: white !important;
-   border-radius: 9999px;
-   width: 24px;
-   height: 24px;
-   display: inline-flex;
+   border-radius: 12px;
+   transition: all 0.2s;
+   display: flex;
+   flex-direction: column;
    align-items: center;
-   justify-content: center;
-   margin: 2px;
+   justify-content: flex-start;
+   aspect-ratio: 1 / 1;
 }
-.fullcalendar-student .fc-theme-standard td, .fullcalendar-student .fc-theme-standard th {
-   border: none !important;
+.student-react-calendar-wrapper .react-calendar__tile:enabled:hover,
+.student-react-calendar-wrapper .react-calendar__tile:enabled:focus {
+   background-color: #f8fafc;
+   color: #2563eb;
 }
-.fullcalendar-student .fc-view-harness {
-   min-height: 250px;
+.student-react-calendar-wrapper .react-calendar__tile--now {
+   background: #eff6ff;
+   color: #2563eb;
+   font-weight: 800;
 }
-
+.student-react-calendar-wrapper .react-calendar__tile--now:enabled:hover,
+.student-react-calendar-wrapper .react-calendar__tile--now:enabled:focus {
+   background: #dbeafe;
+}
+.student-react-calendar-wrapper .react-calendar__tile--active {
+   background: #2563eb !important;
+   color: white !important;
+   font-weight: 800;
+   box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+}
+.student-react-calendar-wrapper .react-calendar__month-view__days__day--neighboringMonth {
+   color: #cbd5e1;
+   font-weight: 500;
+}
