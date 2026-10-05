@@ -43,6 +43,7 @@ export interface StudentProfileDto {
   schoolName: string;
   className: string;
   academicYear: string;
+  gender?: "laki-laki" | "perempuan";
 }
 
 export interface GradeSummaryDto {

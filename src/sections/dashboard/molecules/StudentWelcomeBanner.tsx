@@ -8,13 +8,17 @@ interface Props {
 }
 
 export function StudentWelcomeBanner({ profile }: Props) {
+  const illustration = profile?.gender === "perempuan" 
+    ? "/assets/images/ilustrator/siswi-non-hijab.png" 
+    : "/assets/images/ilustrator/siswa.png";
+
   return (
     <div className="relative overflow-hidden rounded-3xl bg-[#f0f7ff] border border-blue-100 p-8 flex flex-col md:flex-row items-center justify-between shadow-sm">
       <div className="flex items-center">
          <div className="w-24 h-24 mr-6 hidden sm:flex items-center justify-center shrink-0">
             <div className="relative w-full h-full bg-blue-100 rounded-full flex items-center justify-center border-[6px] border-white shadow-sm overflow-hidden">
                <Image 
-                 src="/assets/images/ilustrator/siswa.png" 
+                 src={illustration} 
                  alt="Student Illustration" 
                  fill
                  className="object-cover"
