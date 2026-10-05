@@ -9,6 +9,7 @@ import { DashboardController } from "@/modules/dashboard/infrastructure/http/Das
 import { PrismaDashboardRepository } from "@/modules/dashboard/infrastructure/repo/PrismaDashboardRepository";
 import { MoodleCourseRepository } from "@/modules/course/infrastructure/repo/MoodleCourseRepository";
 import { MoodleQuizRepository } from "@/modules/quiz/infrastructure/repo/MoodleQuizRepository";
+import { MoodleGradeRepository } from "@/modules/grades/infrastructure/repo/MoodleGradeRepository";
 import { DefaultMoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentialProvider";
 import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
@@ -37,10 +38,11 @@ export function getDashboardController(): DashboardController {
     const clientFactory = getMoodleClientFactory();
     const courseRepo = new MoodleCourseRepository(clientFactory);
     const quizRepo = new MoodleQuizRepository(clientFactory);
+    const gradeRepo = new MoodleGradeRepository(clientFactory);
 
     _controller = new DashboardController(
       new GetAdminDashboardUseCase(repo),
-      new GetStudentDashboardUseCase(courseRepo, quizRepo, clientFactory),
+      new GetStudentDashboardUseCase(courseRepo, quizRepo, gradeRepo, clientFactory),
       new GetTeacherDashboardUseCase(courseRepo, quizRepo, clientFactory),
       new GetTenantDashboardUseCase(),
       new GetProctorDashboardUseCase()

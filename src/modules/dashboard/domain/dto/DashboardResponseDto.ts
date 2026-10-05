@@ -45,10 +45,17 @@ export interface StudentProfileDto {
   academicYear: string;
 }
 
+export interface GradeSummaryDto {
+  courseName: string;
+  score: number;
+  grade: string;
+}
+
 export interface StudentDashboardResponseDto {
   profile?: StudentProfileDto;
   upcomingExams: ExamSummaryDto[];
   courses?: CourseSummaryDto[];
+  recentGrades?: GradeSummaryDto[];
 }
 
 export interface TeacherDashboardResponseDto {

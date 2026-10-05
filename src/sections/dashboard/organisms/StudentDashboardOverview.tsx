@@ -8,6 +8,7 @@ import {
   BookOpen, Clock, PlayCircle, FileText, Award, ChevronRight, ChevronLeft, Bell, CheckCircle, Flame, Calendar
 } from "lucide-react";
 import Link from "next/link";
+import Skeleton from "@/shared-ui/component/Skeleton";
 
 export default function StudentDashboardOverview() {
   const { studentState, fetchStudentOverview } = useDashboardApi();
@@ -20,8 +21,18 @@ export default function StudentDashboardOverview() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20 text-slate-500">
-        Memuat dashboard...
+      <div className="flex flex-col xl:flex-row gap-6 animate-pulse p-4 max-w-[1600px] mx-auto w-full">
+         <div className="flex-1 space-y-6">
+            <Skeleton height={140} rounded className="rounded-3xl" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+               <Skeleton height={100} rounded className="rounded-2xl" count={4} />
+            </div>
+            <Skeleton height={300} rounded className="rounded-2xl" />
+         </div>
+         <div className="w-full xl:w-96 shrink-0 space-y-6">
+            <Skeleton height={400} rounded className="rounded-2xl" />
+            <Skeleton height={300} rounded className="rounded-2xl" />
+         </div>
       </div>
     );
   }
@@ -203,34 +214,20 @@ export default function StudentDashboardOverview() {
                        </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                       {/* Mock Data based on design */}
-                       <tr className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3.5 font-bold text-slate-800">Bahasa Indonesia</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-slate-700">88</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-emerald-600">B+</td>
-                       </tr>
-                       <tr className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3.5 font-bold text-slate-800">Matematika</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-slate-700">82</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-slate-600">B-</td>
-                       </tr>
-                       <tr className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3.5 font-bold text-slate-800">IPA</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-slate-700">90</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-emerald-600">A-</td>
-                       </tr>
-                       <tr className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3.5 font-bold text-slate-800">IPS</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-slate-700">85</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-emerald-600">B+</td>
-                       </tr>
-                       <tr className="hover:bg-slate-50 transition-colors border-b border-slate-100">
-                          <td className="px-4 py-3.5 font-bold text-slate-800">Bahasa Inggris</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-slate-700">87</td>
-                          <td className="px-4 py-3.5 text-center font-extrabold text-emerald-600">B+</td>
-                       </tr>
-                    </tbody>
-                 </table>
+                        {data?.recentGrades?.map((grade, idx) => (
+                           <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                              <td className="px-4 py-3.5 font-bold text-slate-800">{grade.courseName}</td>
+                              <td className="px-4 py-3.5 text-center font-extrabold text-slate-700">{grade.score}</td>
+                              <td className="px-4 py-3.5 text-center font-extrabold text-emerald-600">{grade.grade}</td>
+                           </tr>
+                        ))}
+                     </tbody>
+                  </table>
+                  {(!data?.recentGrades || data.recentGrades.length === 0) && (
+                     <div className="py-10 text-center text-slate-500 text-sm font-medium border-2 border-dashed border-slate-100 rounded-2xl mx-4 mt-4 mb-4">
+                        Belum ada nilai yang dipublikasikan.
+                     </div>
+                  )}
                  <div className="mt-auto pt-4 px-2">
                     <Link href="/student/grades" className="text-blue-600 text-sm font-bold flex items-center hover:text-blue-700">Lihat Semua Nilai <ChevronRight className="w-4 h-4 ml-1"/></Link>
                  </div>
@@ -339,48 +336,8 @@ export default function StudentDashboardOverview() {
               <Link href="/student/schedule" className="text-blue-600 text-[11px] font-bold flex items-center hover:text-blue-700">Lihat Semua <ChevronRight className="w-3 h-3 ml-0.5"/></Link>
            </div>
            
-           <div className="space-y-0 relative before:absolute before:inset-0 before:ml-[5px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-[2px] before:bg-slate-100">
-              {/* Mock Timeline */}
-              <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group mb-5">
-                 <div className="flex items-center justify-center w-3 h-3 rounded-full border-[3px] border-white bg-blue-600 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 relative left-0 md:left-0"></div>
-                 <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-5 md:pl-0 md:group-even:pl-5 md:group-odd:pr-5 flex flex-col md:flex-row gap-1 md:gap-4 md:items-start">
-                    <div className="text-[11px] font-bold text-slate-400 md:w-20 pt-1 shrink-0">07:00 - 08:30</div>
-                    <div>
-                       <h4 className="text-[13px] font-bold text-slate-800">Bahasa Indonesia</h4>
-                       <p className="text-[11px] text-slate-500 font-medium mt-0.5">Kelas 8A • Ruang 12</p>
-                    </div>
-                 </div>
-              </div>
-              <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group mb-5">
-                 <div className="flex items-center justify-center w-3 h-3 rounded-full border-[3px] border-white bg-blue-600 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 relative left-0 md:left-0"></div>
-                 <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-5 md:pl-0 md:group-even:pl-5 md:group-odd:pr-5 flex flex-col md:flex-row gap-1 md:gap-4 md:items-start">
-                    <div className="text-[11px] font-bold text-slate-400 md:w-20 pt-1 shrink-0">09:00 - 10:30</div>
-                    <div>
-                       <h4 className="text-[13px] font-bold text-slate-800">Matematika</h4>
-                       <p className="text-[11px] text-slate-500 font-medium mt-0.5">Kelas 8A • Ruang 12</p>
-                    </div>
-                 </div>
-              </div>
-              <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group mb-5">
-                 <div className="flex items-center justify-center w-3 h-3 rounded-full border-[3px] border-white bg-slate-300 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 relative left-0 md:left-0"></div>
-                 <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-5 md:pl-0 md:group-even:pl-5 md:group-odd:pr-5 flex flex-col md:flex-row gap-1 md:gap-4 md:items-start">
-                    <div className="text-[11px] font-bold text-slate-400 md:w-20 pt-1 shrink-0">11:00 - 12:30</div>
-                    <div>
-                       <h4 className="text-[13px] font-bold text-slate-800">IPA</h4>
-                       <p className="text-[11px] text-slate-500 font-medium mt-0.5">Kelas 8A • Ruang 14</p>
-                    </div>
-                 </div>
-              </div>
-              <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group mb-2">
-                 <div className="flex items-center justify-center w-3 h-3 rounded-full border-[3px] border-white bg-slate-300 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 relative left-0 md:left-0"></div>
-                 <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-5 md:pl-0 md:group-even:pl-5 md:group-odd:pr-5 flex flex-col md:flex-row gap-1 md:gap-4 md:items-start">
-                    <div className="text-[11px] font-bold text-slate-400 md:w-20 pt-1 shrink-0">13:00 - 14:30</div>
-                    <div>
-                       <h4 className="text-[13px] font-bold text-slate-800">Bahasa Inggris</h4>
-                       <p className="text-[11px] text-slate-500 font-medium mt-0.5">Kelas 8A • Ruang 12</p>
-                    </div>
-                 </div>
-              </div>
+           <div className="py-10 text-center text-slate-500 text-sm font-medium border-2 border-dashed border-slate-100 rounded-2xl mx-1 mt-2">
+              Tidak ada jadwal pelajaran hari ini.
            </div>
         </Card>
 
@@ -391,28 +348,8 @@ export default function StudentDashboardOverview() {
               <Link href="/student/announcements" className="text-blue-600 text-[11px] font-bold flex items-center hover:text-blue-700">Lihat Semua <ChevronRight className="w-3 h-3 ml-0.5"/></Link>
            </div>
            
-           <div className="space-y-5">
-              <div className="flex gap-4 items-start">
-                 <div className="p-2.5 bg-red-50 text-red-500 rounded-full shrink-0"><Bell className="w-4 h-4"/></div>
-                 <div>
-                    <h4 className="text-[13px] font-bold text-slate-800 leading-snug">Libur Nasional - Hari Raya Idul Fitri</h4>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium">28 Mar 2025 • Admin Sekolah</p>
-                 </div>
-              </div>
-              <div className="flex gap-4 items-start">
-                 <div className="p-2.5 bg-blue-50 text-blue-500 rounded-full shrink-0"><FileText className="w-4 h-4"/></div>
-                 <div>
-                    <h4 className="text-[13px] font-bold text-slate-800 leading-snug">Jadwal Ujian Tengah Semester</h4>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium">25 Mar 2025 • Wakil Kurikulum</p>
-                 </div>
-              </div>
-              <div className="flex gap-4 items-start">
-                 <div className="p-2.5 bg-emerald-50 text-emerald-500 rounded-full shrink-0"><Award className="w-4 h-4"/></div>
-                 <div>
-                    <h4 className="text-[13px] font-bold text-slate-800 leading-snug">Pengumpulan Tugas Proyek IPA</h4>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium">22 Mar 2025 • Ibu Rini Wulandari</p>
-                 </div>
-              </div>
+           <div className="py-10 text-center text-slate-500 text-sm font-medium border-2 border-dashed border-slate-100 rounded-2xl mx-1 mt-2">
+              Belum ada pengumuman terbaru.
            </div>
         </Card>
 
@@ -423,28 +360,8 @@ export default function StudentDashboardOverview() {
               <Link href="/student/activities" className="text-blue-600 text-[11px] font-bold flex items-center hover:text-blue-700">Lihat Semua <ChevronRight className="w-3 h-3 ml-0.5"/></Link>
            </div>
            
-           <div className="space-y-5">
-              <div className="flex gap-4 items-start">
-                 <div className="p-2.5 bg-teal-50 text-teal-600 rounded-full shrink-0"><CheckCircle className="w-4 h-4"/></div>
-                 <div>
-                    <h4 className="text-[13px] font-semibold text-slate-700 leading-snug">Anda menyelesaikan tugas "Latihan Soal Matematika"</h4>
-                    <p className="text-[11px] text-slate-400 mt-1 font-medium">2 jam yang lalu</p>
-                 </div>
-              </div>
-              <div className="flex gap-4 items-start">
-                 <div className="p-2.5 bg-orange-50 text-orange-500 rounded-full shrink-0"><Award className="w-4 h-4"/></div>
-                 <div>
-                    <h4 className="text-[13px] font-semibold text-slate-700 leading-snug">Guru memberikan nilai untuk tugas "Laporan IPA"</h4>
-                    <p className="text-[11px] text-slate-400 mt-1 font-medium">5 jam yang lalu</p>
-                 </div>
-              </div>
-              <div className="flex gap-4 items-start">
-                 <div className="p-2.5 bg-purple-50 text-purple-600 rounded-full shrink-0"><PlayCircle className="w-4 h-4"/></div>
-                 <div>
-                    <h4 className="text-[13px] font-semibold text-slate-700 leading-snug">Anda mengakses materi "Ekosistem dan Lingkungan"</h4>
-                    <p className="text-[11px] text-slate-400 mt-1 font-medium">1 hari yang lalu</p>
-                 </div>
-              </div>
+           <div className="py-10 text-center text-slate-500 text-sm font-medium border-2 border-dashed border-slate-100 rounded-2xl mx-1 mt-2">
+              Belum ada aktivitas terbaru.
            </div>
         </Card>
 

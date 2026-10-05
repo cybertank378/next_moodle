@@ -3,6 +3,7 @@ import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { StudentDashboardResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
 import type { QuizRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizRepositoryInterface";
+import type { GradeRepositoryInterface } from "@/modules/grades/domain/interfaces/GradeRepositoryInterface";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 
 export interface GetStudentDashboardRequest {
@@ -14,6 +15,7 @@ export class GetStudentDashboardUseCase {
   constructor(
     private readonly courseRepo: CourseRepositoryInterface,
     private readonly quizRepo: QuizRepositoryInterface,
+    private readonly gradeRepo: GradeRepositoryInterface,
     private readonly clientFactory: MoodleClientFactory,
   ) {}
 
@@ -70,13 +72,52 @@ export class GetStudentDashboardUseCase {
           academicYear: "2026/2027",
         };
 
+        // Fetch recent grades for up to 3 active courses
+        const recentGrades: any[] = [];
+        if (courseIds.length > 0) {
+            try {
+                // Fetch grade report for the most recent courses
+                const recentCourseIds = courseIds.slice(0, 3);
+                for (const cid of recentCourseIds) {
+                    const courseEntity = rawCourses.find(c => c.id === cid);
+                    if (!courseEntity) continue;
+                    
+                    const report = await this.gradeRepo.getUserGradeReport(tenantId, cid, moodleUserId, request.moodleToken);
+                    if (report) {
+                        const courseTotal = report.courseTotal;
+                        if (courseTotal && courseTotal.gradeRaw !== null) {
+                            recentGrades.push({
+                                courseName: courseEntity.shortName,
+                                score: Math.round(courseTotal.gradeRaw),
+                                grade: getGradeLetter(courseTotal.gradeRaw)
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                // Ignore grade fetch errors to not break dashboard
+                console.warn(`Failed to fetch grades for user ${moodleUserId}:`, e);
+            }
+        }
+
         return Result.ok<StudentDashboardResponseDto>({
           profile,
           upcomingExams,
-          courses
+          courses,
+          recentGrades
         });
     } catch (e) {
         return Result.failure(e instanceof Error ? e : new Error(String(e)));
     }
   }
+}
+
+function getGradeLetter(score: number): string {
+  if (score >= 90) return 'A';
+  if (score >= 85) return 'A-';
+  if (score >= 80) return 'B+';
+  if (score >= 75) return 'B';
+  if (score >= 70) return 'B-';
+  if (score >= 60) return 'C';
+  return 'D';
 }
