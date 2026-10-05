@@ -34,11 +34,18 @@ export async function request<T>(
     }
 
     if (!response.ok || !body.success || body.data === undefined) {
-      return { data: null, error: body.error?.message ?? "Permintaan gagal." };
+      let errorMsg = body.error?.message ?? "Permintaan gagal.";
+      if (errorMsg.toLowerCase().includes("internal server error")) {
+        errorMsg = "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.";
+      }
+      return { data: null, error: errorMsg };
     }
     return { data: body.data, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Permintaan gagal.";
+    let message = err instanceof Error ? err.message : "Permintaan gagal.";
+    if (message.toLowerCase().includes("internal server error")) {
+      message = "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.";
+    }
     return { data: null, error: message };
   }
 }

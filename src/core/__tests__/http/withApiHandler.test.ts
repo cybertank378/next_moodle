@@ -76,7 +76,9 @@ describe("withApiHandler", () => {
     const json = await response.json();
     expect(json.success).toBe(false);
     expect(json.error.code).toBe("INTERNAL_ERROR");
-    expect(json.error.message).toBe("Internal server error");
+    expect(json.error.message).toBe(
+      "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.",
+    );
     expect(json.error.stack).toBeUndefined();
     expect(json.meta.requestId).toBeDefined();
   });

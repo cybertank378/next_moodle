@@ -25,7 +25,7 @@ export function mapErrorToHttpResponse(
   );
   return ApiResponse.error(
     "INTERNAL_ERROR",
-    "Internal server error",
+    "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.",
     HttpStatus.INTERNAL_SERVER_ERROR,
     undefined,
     meta,
