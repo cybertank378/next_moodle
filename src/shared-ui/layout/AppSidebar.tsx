@@ -56,6 +56,11 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               icon: Users,
               permission: PERMISSIONS.TENANT_MANAGE,
             },
+            {
+              label: "Pengelolaan Notifikasi",
+              path: ROUTES.ADMIN.NOTIFICATIONS,
+              icon: Bell,
+            },
           ],
         },
         {
@@ -143,6 +148,11 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
                   permission: PERMISSIONS.RESULT_VIEW_ALL,
                 },
               ],
+            },
+            {
+              label: "Pengumuman",
+              path: ROUTES.TENANT.NOTIFICATIONS,
+              icon: Bell,
             },
           ],
         },

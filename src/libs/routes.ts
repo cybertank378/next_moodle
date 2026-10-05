@@ -9,6 +9,7 @@ export const ROUTES = {
   ADMIN: {
     ROOT: "/admin",
     TENANTS: "/admin/tenants",
+    NOTIFICATIONS: "/admin/notifications",
     AUDIT: "/admin/audit",
     SETTINGS: "/admin/settings",
   },
@@ -21,6 +22,7 @@ export const ROUTES = {
     QUESTIONS: "/tenant/questions",
     EXAMS: "/tenant/exams",
     RESULTS: "/tenant/results",
+    NOTIFICATIONS: "/tenant/notifications",
     BRANDING: "/tenant/branding",
     AUDIT: "/tenant/audit",
   },
