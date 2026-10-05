@@ -19,8 +19,12 @@ import {
   Bell,
   Clock,
   User,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Role, type UserRole } from "@/libs/enums";
 import { PERMISSIONS } from "@/libs/permissions";
 import { ROUTES } from "@/libs/routes";
@@ -265,33 +269,96 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
 
 interface Props {
   role: UserRole;
+  username?: string;
   mobileOpen: boolean;
   onClose: () => void;
 }
 
-export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
+export default function AppSidebar({
+  role,
+  username,
+  mobileOpen,
+  onClose,
+}: Props) {
   const groups = getSidebarMenu(role);
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen, onClose]);
 
   const sidebarContent = (
-    <div className="flex h-screen w-72 flex-col bg-slate-900 text-slate-300 border-r border-slate-800 transition-colors duration-300">
-      <div className="border-b border-slate-800 px-5 py-5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
-            <GraduationCap size={24} />
+    <div
+      className={`flex h-screen flex-col bg-slate-900 text-slate-300 border-r border-slate-800 transition-all duration-300 ${
+        isCollapsed ? "w-20" : "w-72"
+      }`}
+    >
+      <div className="border-b border-slate-800 px-4 py-5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
+              <GraduationCap size={24} />
+            </div>
+
+            {!isCollapsed && (
+              <div className="overflow-hidden">
+                <h1 className="text-base font-extrabold tracking-tight text-white truncate">
+                  Moodle
+                </h1>
+                <p className="mt-0.5 text-xs font-medium text-slate-400 truncate">
+                  Sistem Pembelajaran
+                </p>
+              </div>
+            )}
           </div>
 
-          <div>
-            <h1 className="text-base font-extrabold tracking-tight text-white">
-              Moodle
-            </h1>
-            <p className="mt-0.5 text-xs font-medium text-slate-400">
-              Sistem Pembelajaran
-            </p>
-          </div>
+          {/* Desktop collapse button */}
+          <button
+            type="button"
+            aria-label={isCollapsed ? "Perluas sidebar" : "Perkecil sidebar"}
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          >
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+
+          {/* Mobile close button */}
+          <button
+            type="button"
+            aria-label="Tutup menu sidebar"
+            onClick={onClose}
+            className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        {role !== Role.STUDENT && (
+        {/* Role Identity Card */}
+        {!isCollapsed && role === Role.ADMIN && (
+          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-800/60 px-4 py-3 shadow-sm">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs uppercase shadow-sm">
+              AD
+            </div>
+
+            <div className="overflow-hidden">
+              <p className="text-xs font-bold uppercase tracking-wider text-white">
+                ADMIN
+              </p>
+              <p className="text-[11px] font-medium text-slate-400 truncate">
+                Administrator Platform
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!isCollapsed && role !== Role.ADMIN && role !== Role.STUDENT && (
           <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-4 py-3 shadow-sm">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400 border border-slate-700 shadow-md">
               <LayoutDashboard size={18} />
@@ -313,7 +380,7 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         <div className="space-y-7">
           {groups.map((group, index) => (
             <div key={`group-${group.label ?? index}`}>
-              {group.label && (
+              {group.label && !isCollapsed && (
                 <div className="mb-3 px-3">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                     {group.label}
@@ -341,20 +408,61 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </nav>
 
-      <div className="border-t border-slate-800 bg-slate-900 px-5 py-5">
-        {role === Role.STUDENT ? (
+      <div className="border-t border-slate-800 bg-slate-900 px-4 py-4">
+        {role === Role.ADMIN ? (
+          <div className="space-y-3">
+            <div
+              className={`flex items-center ${
+                isCollapsed ? "justify-center" : "justify-between"
+              } rounded-2xl border border-slate-700/60 bg-slate-800/50 p-2.5 shadow-sm`}
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs">
+                  {username ? username.slice(0, 2).toUpperCase() : "AD"}
+                </div>
+                {!isCollapsed && (
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-white truncate">
+                      {username || "Administrator"}
+                    </p>
+                    <p className="text-[11px] font-medium text-slate-400 truncate">
+                      Administrator platform
+                    </p>
+                  </div>
+                )}
+              </div>
+              {!isCollapsed && (
+                <ChevronDown
+                  size={14}
+                  className="text-slate-400 shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+
+            {!isCollapsed && (
+              <div className="text-center">
+                <p className="text-[11px] font-medium text-slate-500">
+                  © {new Date().getFullYear()} Moodle. All rights reserved.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : role === Role.STUDENT ? (
           <div className="flex items-center gap-3 rounded-2xl bg-slate-800/50 p-3 shadow-sm border border-slate-700/50">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <div className="overflow-hidden">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Jenjang Sekolah • SMP
-              </p>
-              <p className="text-xs font-semibold text-white truncate">
-                SMP Negeri 1 Jakarta
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="overflow-hidden">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Jenjang Sekolah • SMP
+                </p>
+                <p className="text-xs font-semibold text-white truncate">
+                  SMP Negeri 1 Jakarta
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="rounded-2xl px-4 py-2 text-center">
@@ -383,6 +491,9 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
             />
 
             <motion.aside
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu navigasi samping"
               className="fixed left-0 top-0 z-50 md:hidden"
               initial={{ x: -320 }}
               animate={{ x: 0 }}
