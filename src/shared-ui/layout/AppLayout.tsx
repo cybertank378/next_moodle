@@ -41,6 +41,7 @@ export default function AppLayout({
       {/* SIDEBAR */}
       <AppSidebar
         role={activeRole}
+        username={username}
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
       />
