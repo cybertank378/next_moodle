@@ -127,7 +127,7 @@ export default function EnrolmentListView() {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-600 dark:text-emerald-400">
+        <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-600 ">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={18} />
             <span>{toastMessage}</span>
@@ -145,10 +145,10 @@ export default function EnrolmentListView() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 ">
             Pendaftaran Mata Pelajaran (Enrolments)
           </h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-slate-500  mt-1">
             Kelola pendaftaran peserta dan penugasan peran guru di setiap
             mata pelajaran.
           </p>
@@ -157,43 +157,43 @@ export default function EnrolmentListView() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 flex items-center gap-4 shadow-sm">
-          <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+        <div className="rounded-xl border border-slate-200  bg-white  p-4 flex items-center gap-4 shadow-sm">
+          <div className="p-3 rounded-lg bg-indigo-50  text-indigo-600 ">
             <BookOpen size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+            <p className="text-xs text-slate-500  font-medium">
               Mata Pelajaran Aktif
             </p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 truncate max-w-[180px]">
+            <p className="text-sm font-bold text-slate-900  mt-0.5 truncate max-w-[180px]">
               {currentCourse?.fullName || "Belum dipilih"}
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 flex items-center gap-4 shadow-sm">
-          <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+        <div className="rounded-xl border border-slate-200  bg-white  p-4 flex items-center gap-4 shadow-sm">
+          <div className="p-3 rounded-lg bg-emerald-50  text-emerald-600 ">
             <GraduationCap size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+            <p className="text-xs text-slate-500  font-medium">
               Total Terdaftar
             </p>
-            <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+            <p className="text-xl font-bold text-slate-900  mt-0.5">
               {loading ? "..." : total}
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 flex items-center gap-4 shadow-sm">
-          <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+        <div className="rounded-xl border border-slate-200  bg-white  p-4 flex items-center gap-4 shadow-sm">
+          <div className="p-3 rounded-lg bg-amber-50  text-amber-600 ">
             <Users size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+            <p className="text-xs text-slate-500  font-medium">
               Ditampilkan di Halaman
             </p>
-            <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+            <p className="text-xl font-bold text-slate-900  mt-0.5">
               {loading ? "..." : enrolments.length}
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function EnrolmentListView() {
 
       {/* Error state */}
       {enrolmentsState.error && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-500 dark:text-rose-400">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-500 ">
           {enrolmentsState.error}
         </div>
       )}
@@ -258,9 +258,9 @@ export default function EnrolmentListView() {
           ) : !selectedCourseId ? (
             <TableRow>
               <TableCell colSpan={5} className="py-12 text-center">
-                <div className="flex flex-col items-center justify-center text-slate-500 dark:text-gray-400">
+                <div className="flex flex-col items-center justify-center text-slate-500 ">
                   <BookOpen size={32} className="stroke-1 mb-2" />
-                  <p className="font-semibold text-slate-900 dark:text-white">
+                  <p className="font-semibold text-slate-900 ">
                     Pilih mata pelajaran terlebih dahulu
                   </p>
                   <p className="text-xs mt-1">
@@ -273,9 +273,9 @@ export default function EnrolmentListView() {
           ) : enrolments.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="py-12 text-center">
-                <div className="flex flex-col items-center justify-center text-slate-500 dark:text-gray-400">
+                <div className="flex flex-col items-center justify-center text-slate-500 ">
                   <Users size={32} className="stroke-1 mb-2" />
-                  <p className="font-semibold text-slate-900 dark:text-white">
+                  <p className="font-semibold text-slate-900 ">
                     Belum ada peserta terdaftar
                   </p>
                   <p className="text-xs mt-1">
@@ -289,7 +289,7 @@ export default function EnrolmentListView() {
           ) : (
             enrolments.map((enrol) => (
               <TableRow key={`${enrol.courseId}-${enrol.userId}`}>
-                <TableCell className="font-semibold text-slate-900 dark:text-white">
+                <TableCell className="font-semibold text-slate-900 ">
                   {enrol.fullname}
                 </TableCell>
                 <TableCell className="font-mono text-xs">

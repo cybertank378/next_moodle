@@ -32,17 +32,17 @@ export default function SubmitConfirmationModal({
       data-testid="submit-confirmation-modal"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-6 shadow-2xl space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-4">
+      <div className="relative w-full max-w-md rounded-2xl border border-slate-200  bg-white  p-6 shadow-2xl space-y-5">
+        <div className="flex items-center justify-between border-b border-slate-200  pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500  border border-amber-500/20">
               <Send size={18} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-slate-900 ">
                 Kumpulkan Ujian?
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500 ">
                 Konfirmasi penyelesaian dan submit jawaban.
               </p>
             </div>
@@ -60,13 +60,13 @@ export default function SubmitConfirmationModal({
         </div>
 
         {isOffline && (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 flex items-start gap-3 text-amber-600 dark:text-amber-400">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 flex items-start gap-3 text-amber-600 ">
             <WifiOff size={18} className="shrink-0 mt-0.5" />
             <div className="text-xs space-y-1">
               <p className="font-semibold">
                 Koneksi Internet Terputus (Offline)
               </p>
-              <p className="text-amber-700 dark:text-amber-300/80 leading-relaxed">
+              <p className="text-amber-700  leading-relaxed">
                 Terdapat jawaban yang masih berada pada antrean lokal. Harap
                 hubungkan internet kembali agar jawaban tersinkronisasi sebelum
                 submit.
@@ -76,11 +76,11 @@ export default function SubmitConfirmationModal({
         )}
 
         {hasUnanswered && (
-          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 flex items-start gap-3 text-rose-600 dark:text-rose-400">
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 flex items-start gap-3 text-rose-600 ">
             <AlertTriangle size={18} className="shrink-0 mt-0.5" />
             <div className="text-xs space-y-1">
               <p className="font-semibold">Perhatian: Soal Belum Lengkap</p>
-              <p className="text-rose-700 dark:text-rose-300/80 leading-relaxed">
+              <p className="text-rose-700  leading-relaxed">
                 Anda masih memiliki{" "}
                 <span className="font-bold underline">{unansweredCount}</span>{" "}
                 soal yang belum terjawab. Jawaban yang belum diisi tidak akan
@@ -91,30 +91,30 @@ export default function SubmitConfirmationModal({
         )}
 
         <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3 space-y-1">
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="rounded-xl border border-slate-200  bg-slate-50  p-3 space-y-1">
+            <span className="text-[11px] text-slate-500 ">
               Sudah Terjawab
             </span>
-            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+            <p className="text-lg font-bold text-emerald-600  flex items-center gap-1.5">
               <CheckCircle2 size={16} />
               {answeredCount}
             </p>
           </div>
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3 space-y-1">
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="rounded-xl border border-slate-200  bg-slate-50  p-3 space-y-1">
+            <span className="text-[11px] text-slate-500 ">
               Belum Terjawab
             </span>
             <p
-              className={`text-lg font-bold ${hasUnanswered ? "text-rose-600 dark:text-rose-400" : "text-slate-400"}`}
+              className={`text-lg font-bold ${hasUnanswered ? "text-rose-600 " : "text-slate-400"}`}
             >
               {unansweredCount}
             </p>
           </div>
         </div>
 
-        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p className="text-xs text-slate-500  leading-relaxed">
           Setelah menekan tombol{" "}
-          <strong className="text-slate-900 dark:text-white">
+          <strong className="text-slate-900 ">
             Kumpulkan Sekarang
           </strong>
           , sesi ujian Anda akan ditutup dan Anda tidak dapat lagi mengubah

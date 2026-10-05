@@ -10,7 +10,8 @@ import { StudentActiveCourses } from "@/sections/dashboard/molecules/StudentActi
 import { StudentUpcomingTasks } from "@/sections/dashboard/molecules/StudentUpcomingTasks";
 import { StudentRecentGrades } from "@/sections/dashboard/molecules/StudentRecentGrades";
 import { StudentResumeLearning } from "@/sections/dashboard/molecules/StudentResumeLearning";
-import { StudentCalendarWidget } from "@/sections/dashboard/molecules/StudentCalendarWidget";
+import dynamic from 'next/dynamic';
+const StudentCalendarWidget = dynamic(() => import('@/sections/dashboard/molecules/StudentCalendarWidget').then(mod => mod.StudentCalendarWidget), { ssr: false });
 import { StudentRightRailWidgets } from "@/sections/dashboard/molecules/StudentRightRailWidgets";
 
 export default function StudentDashboardOverview() {

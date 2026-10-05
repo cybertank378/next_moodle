@@ -79,7 +79,7 @@ export default function UserListView() {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-600 dark:text-emerald-400">
+        <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-600 ">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={18} />
             <span>{toastMessage}</span>
@@ -97,10 +97,10 @@ export default function UserListView() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 ">
             Manajemen Pengguna
           </h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-slate-500  mt-1">
             Kelola data peserta, pengajar, dan admin dalam institusi tenant.
           </p>
         </div>
@@ -108,43 +108,43 @@ export default function UserListView() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 flex items-center gap-4 shadow-sm">
-          <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+        <div className="rounded-xl border border-slate-200  bg-white  p-4 flex items-center gap-4 shadow-sm">
+          <div className="p-3 rounded-lg bg-indigo-50  text-indigo-600 ">
             <Users size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+            <p className="text-xs text-slate-500  font-medium">
               Total Pengguna
             </p>
-            <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+            <p className="text-xl font-bold text-slate-900  mt-0.5">
               {loading ? "..." : total}
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 flex items-center gap-4 shadow-sm">
-          <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+        <div className="rounded-xl border border-slate-200  bg-white  p-4 flex items-center gap-4 shadow-sm">
+          <div className="p-3 rounded-lg bg-emerald-50  text-emerald-600 ">
             <UserCheck size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+            <p className="text-xs text-slate-500  font-medium">
               Pengguna Aktif
             </p>
-            <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+            <p className="text-xl font-bold text-slate-900  mt-0.5">
               {loading ? "..." : users.filter((u) => !u.suspended).length}
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 flex items-center gap-4 shadow-sm">
-          <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+        <div className="rounded-xl border border-slate-200  bg-white  p-4 flex items-center gap-4 shadow-sm">
+          <div className="p-3 rounded-lg bg-amber-50  text-amber-600 ">
             <Users size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
+            <p className="text-xs text-slate-500  font-medium">
               Ditampilkan di Halaman
             </p>
-            <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+            <p className="text-xl font-bold text-slate-900  mt-0.5">
               {loading ? "..." : users.length}
             </p>
           </div>
@@ -164,7 +164,7 @@ export default function UserListView() {
 
       {/* Error state */}
       {usersState.error && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-500 dark:text-rose-400">
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-500 ">
           {usersState.error}
         </div>
       )}
@@ -204,9 +204,9 @@ export default function UserListView() {
           ) : users.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="py-12 text-center">
-                <div className="flex flex-col items-center justify-center text-slate-500 dark:text-gray-400">
+                <div className="flex flex-col items-center justify-center text-slate-500 ">
                   <Search size={32} className="stroke-1 mb-2" />
-                  <p className="font-semibold text-slate-900 dark:text-white">
+                  <p className="font-semibold text-slate-900 ">
                     Tidak ada pengguna ditemukan
                   </p>
                   <p className="text-xs mt-1">
@@ -220,7 +220,7 @@ export default function UserListView() {
           ) : (
             users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="font-semibold text-slate-900 dark:text-white">
+                <TableCell className="font-semibold text-slate-900 ">
                   {user.fullname}
                 </TableCell>
                 <TableCell className="font-mono text-xs">

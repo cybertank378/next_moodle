@@ -114,16 +114,16 @@ export default function ExamAttemptInterface({
       className={`space-y-6 ${className}`}
     >
       {/* Top Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200  bg-white  p-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600  border border-indigo-500/20">
             <ShieldCheck size={20} />
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white">
+            <h1 className="text-base font-bold text-slate-900 ">
               {quizName}
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500 ">
               ID Kuis: {quizId} • Attempt #{attemptId}
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function ExamAttemptInterface({
           />
 
           {/* Navigation Controls */}
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 shadow-sm">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200  bg-white  p-4 shadow-sm">
             <Button
               size="md"
               variant="outline"
@@ -197,7 +197,7 @@ export default function ExamAttemptInterface({
             onSelectSlot={(slot) => setCurrentSlot(slot)}
           />
 
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#151521] p-4 text-center shadow-sm">
+          <div className="rounded-xl border border-slate-200  bg-white  p-4 text-center shadow-sm">
             <Button
               size="md"
               variant="outline"

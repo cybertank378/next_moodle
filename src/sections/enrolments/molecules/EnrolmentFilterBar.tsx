@@ -34,7 +34,7 @@ export default function EnrolmentFilterBar({
         <div className="relative min-w-[240px]">
           <BookOpen
             size={16}
-            className="absolute left-3 top-[18px] -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none z-10"
+            className="absolute left-3 top-[18px] -translate-y-1/2 text-gray-400  pointer-events-none z-10"
           />
           <SelectField
             value={selectedCourseId ?? ""}

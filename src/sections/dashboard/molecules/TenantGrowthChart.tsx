@@ -32,19 +32,19 @@ export default function TenantGrowthChart({
   const latestTotal = points.at(-1)?.cumulativeTenants ?? 0;
 
   return (
-    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-900/60">
+    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl  ">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <Typography variant="h2" className="text-slate-900 dark:text-white">
+          <Typography variant="h2" className="text-slate-900 ">
             Pertumbuhan Tenant
           </Typography>
-          <Typography variant="body" className="text-slate-500 dark:text-slate-400">
+          <Typography variant="body" className="text-slate-500 ">
             Tenant baru per bulan ({points.length} bulan terakhir)
           </Typography>
         </div>
         {!loading && (
-          <Typography variant="body" className="text-slate-500 dark:text-slate-400">
-            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+          <Typography variant="body" className="text-slate-500 ">
+            <span className="font-semibold text-indigo-600 ">
               +{formatCount(totalNew)}
             </span>{" "}
             · total {formatCount(latestTotal)}
@@ -56,10 +56,10 @@ export default function TenantGrowthChart({
         <Skeleton height={CHART_HEIGHT} />
       ) : totalNew === 0 ? (
         <div
-          className="flex items-center justify-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700"
+          className="flex items-center justify-center rounded-xl border border-dashed border-slate-300 "
           style={{ height: CHART_HEIGHT }}
         >
-          <Typography variant="body" className="text-slate-500 dark:text-slate-400">
+          <Typography variant="body" className="text-slate-500 ">
             Belum ada tenant baru pada periode ini.
           </Typography>
         </div>

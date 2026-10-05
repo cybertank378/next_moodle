@@ -37,9 +37,9 @@ export default function ResultsManagementView({
   return (
     <div data-testid="results-management-view" className="space-y-6">
       {courses.length > 1 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900/40 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-400">
-            <BookOpen size={16} className="text-sky-500 dark:text-sky-400" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-xl border border-slate-200  bg-white  p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-sm text-slate-600 ">
+            <BookOpen size={16} className="text-sky-500 " />
             <span>Pilih Mata Pelajaran:</span>
           </div>
           <SelectField
@@ -51,7 +51,7 @@ export default function ResultsManagementView({
               <option
                 key={c.id}
                 value={c.id}
-                className="bg-white dark:bg-gray-900 text-slate-800 dark:text-white"
+                className="bg-white  text-slate-800 "
               >
                 {c.fullName}
               </option>

@@ -46,7 +46,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     editorProps: {
       attributes: {
         class:
-          "prose max-w-none w-full px-3 py-2 rounded-b-md min-h-[150px] focus:outline-none bg-white dark:bg-[#151521]",
+          "prose max-w-none w-full px-3 py-2 rounded-b-md min-h-[150px] focus:outline-none bg-white ",
       },
     },
   });
@@ -84,8 +84,8 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
   const isEditing = !!existingQuestion;
 
   return (
-    <div className="p-6 bg-white dark:bg-[#151521] rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-      <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-200">
+    <div className="p-6 bg-white  rounded-lg shadow-sm border border-slate-200 ">
+      <h2 className="text-lg font-semibold mb-4 text-slate-800 ">
         {isEditing ? "Edit Question" : "Create New Question"}
       </h2>
       {error && (
@@ -122,12 +122,12 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+          <label className="block text-sm font-medium text-slate-700  mb-1">
             Question Text
           </label>
-          <div className="border border-gray-300 dark:border-slate-700 rounded-md overflow-hidden">
+          <div className="border border-gray-300  rounded-md overflow-hidden">
             {/* Toolbar */}
-            <div className="flex flex-wrap gap-1 border-b border-gray-300 dark:border-slate-700 p-2 bg-slate-50 dark:bg-slate-800">
+            <div className="flex flex-wrap gap-1 border-b border-gray-300  p-2 bg-slate-50 ">
               <Button
                 type="button"
                 onClick={toggleBold}

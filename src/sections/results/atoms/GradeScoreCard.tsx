@@ -30,19 +30,19 @@ export default function GradeScoreCard({
       className={`rounded-2xl border p-4 shadow-sm backdrop-blur-sm transition-all ${variantStyles} ${className}`}
     >
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-slate-500 dark:text-gray-400">
+        <p className="text-xs font-medium text-slate-500 ">
           {label}
         </p>
         {icon && (
-          <div className="text-slate-500 dark:text-gray-400">{icon}</div>
+          <div className="text-slate-500 ">{icon}</div>
         )}
       </div>
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <span className="text-2xl font-bold tracking-tight text-slate-900 ">
           {value}
         </span>
         {subLabel && (
-          <span className="text-xs text-slate-500 dark:text-gray-400">
+          <span className="text-xs text-slate-500 ">
             {subLabel}
           </span>
         )}

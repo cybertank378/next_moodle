@@ -28,11 +28,11 @@ export default function TenantStatusChart({
   ].filter((d) => d.value > 0);
 
   return (
-    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-900/60">
-      <Typography variant="h2" className="text-slate-900 dark:text-white">
+    <Card className="border border-slate-200/70 bg-white/70 backdrop-blur-xl  ">
+      <Typography variant="h2" className="text-slate-900 ">
         Distribusi Status
       </Typography>
-      <Typography variant="body" className="mb-4 text-slate-500 dark:text-slate-400">
+      <Typography variant="body" className="mb-4 text-slate-500 ">
         Komposisi status seluruh tenant
       </Typography>
 
@@ -40,7 +40,7 @@ export default function TenantStatusChart({
         {loading ? (
           <Skeleton circle width={DONUT_SIZE} height={DONUT_SIZE} />
         ) : data.length === 0 ? (
-          <Typography variant="body" className="text-slate-500 dark:text-slate-400">
+          <Typography variant="body" className="text-slate-500 ">
             Belum ada tenant terdaftar.
           </Typography>
         ) : (
@@ -56,10 +56,10 @@ export default function TenantStatusChart({
             format={formatCount}
             centerContent={
               <div className="text-center">
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                <p className="text-2xl font-bold text-slate-900 ">
                   {formatCount(summary.total)}
                 </p>
-                <Typography variant="body" className="text-xs text-slate-500 dark:text-slate-400">
+                <Typography variant="body" className="text-xs text-slate-500 ">
                   Tenant
                 </Typography>
               </div>

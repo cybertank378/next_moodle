@@ -137,10 +137,10 @@ export default function TeacherClassResultsView({
     <div data-testid="teacher-class-results-view" className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 ">
             Rekap Nilai Kelas & Ujian
           </h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400">
+          <p className="text-sm text-slate-500 ">
             Penarikan hasil penilaian ujian siswa pada mata pelajaran{" "}
             {courseTitle ? `"${courseTitle}"` : `#${courseId}`}.
           </p>

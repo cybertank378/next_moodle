@@ -74,7 +74,7 @@ export default function Skeleton({
         <div
           key={item}
           className={clsx(
-            "relative overflow-hidden bg-slate-200 dark:bg-slate-700",
+            "relative overflow-hidden bg-slate-200 ",
 
             rounded && !circle && "rounded-md",
 
