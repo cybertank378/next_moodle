@@ -29,8 +29,17 @@ export interface ExamSummaryDto {
   enrolledCount?: number;
 }
 
+export interface CourseSummaryDto {
+  id: string;
+  name: string;
+  shortName: string;
+  instructor?: string;
+  progress?: number;
+}
+
 export interface StudentDashboardResponseDto {
   upcomingExams: ExamSummaryDto[];
+  courses?: CourseSummaryDto[];
 }
 
 export interface TeacherDashboardResponseDto {
@@ -38,6 +47,7 @@ export interface TeacherDashboardResponseDto {
   totalQuestions: number;
   upcomingExamsCount: number;
   recentExams: ExamSummaryDto[];
+  courses?: CourseSummaryDto[];
 }
 
 export interface TenantDashboardResponseDto {

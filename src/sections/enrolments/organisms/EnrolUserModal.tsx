@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { EnrolUserRequestDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
+import SelectField from "@/shared-ui/component/SelectField";
+import TextField from "@/shared-ui/component/TextField";
 import { Modal } from "@/shared-ui/component/Modal";
 
 interface Props {
@@ -76,42 +78,28 @@ export default function EnrolUserModal({
         )}
 
         <div>
-          <label
-            htmlFor="enrol-user-id"
-            className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-          >
-            User ID (Moodle User ID) *
-          </label>
-          <input
+          <TextField
             id="enrol-user-id"
             type="number"
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
             placeholder="misal: 10"
-            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            label="User ID (Moodle User ID) *"
+            helperText="Masukkan ID unik pengguna yang terdaftar di sistem."
           />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Masukkan ID unik pengguna yang terdaftar di sistem.
-          </p>
         </div>
 
         <div>
-          <label
-            htmlFor="enrol-role-id"
-            className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-          >
-            Peran di Mata Pelajaran *
-          </label>
-          <select
+          <SelectField
             id="enrol-role-id"
             value={roleId}
             onChange={(e) => setRoleId(Number(e.target.value))}
-            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#151521] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            label="Peran di Course *"
           >
             <option value={5}>Student (Siswa / Peserta Ujian)</option>
             <option value={3}>Editing Teacher (Guru Pengajar)</option>
             <option value={4}>Non-editing Teacher (Pengawas / Asisten)</option>
-          </select>
+          </SelectField>
         </div>
       </div>
     </Modal>
