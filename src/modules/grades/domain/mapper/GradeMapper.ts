@@ -19,7 +19,7 @@ export class GradeMapper {
       id: raw.id,
       itemName:
         raw.itemname ||
-        (raw.itemtype === "course" ? "Total Kursus" : "Penilaian"),
+        (raw.itemtype === "course" ? "Total Mata Pelajaran" : "Penilaian"),
       itemType: raw.itemtype,
       itemModule: raw.itemmodule ?? null,
       itemInstance: raw.iteminstance ?? null,

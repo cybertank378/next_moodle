@@ -12,7 +12,7 @@ export default function AuthFrame({ title, description, children }: Props) {
   return (
     <div className="grid min-h-screen grid-cols-1 gap-6 bg-white dark:bg-slate-950 p-6 lg:grid-cols-2 transition-colors duration-500">
       <aside className="relative hidden min-h-125 overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-blue-800 to-indigo-900 dark:from-indigo-950 dark:via-slate-900 dark:to-indigo-950 p-8 lg:flex xl:p-12 shadow-xl shadow-blue-900/20 dark:shadow-none">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-[url('/images/ilustrator/noise.png')] opacity-20 mix-blend-overlay"></div>
         <Logo className="pointer-events-none absolute bottom-0 left-0 h-auto w-full opacity-10 dark:opacity-5" />
         <div className="relative z-10 flex w-full flex-col justify-between text-white">
           <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight xl:text-6xl drop-shadow-sm">

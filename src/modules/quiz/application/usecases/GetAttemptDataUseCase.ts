@@ -39,7 +39,7 @@ export class GetAttemptDataUseCase {
         data.attempt.moodleUserId !== input.actor.moodleUserId)
     ) {
       throw new AuthorizationError(
-        "Akses ditolak: mahasiswa hanya dapat mengakses attempt miliknya sendiri.",
+        "Akses ditolak: siswa hanya dapat mengakses attempt miliknya sendiri.",
       );
     }
 

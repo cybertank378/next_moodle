@@ -39,7 +39,7 @@ export default function GradeReportSummaryCard({
               </h2>
               <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400">
                 <BookOpen size={13} />
-                <span>{courseTitle || `Kursus ID #${report.courseId}`}</span>
+                <span>{courseTitle || `Mata Pelajaran ID #${report.courseId}`}</span>
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function GradeReportSummaryCard({
         <div className="flex items-center gap-6 border-t md:border-t-0 md:border-l border-slate-200 dark:border-gray-800 pt-4 md:pt-0 md:pl-6">
           <div className="text-right">
             <p className="text-xs font-medium text-slate-500 dark:text-gray-400">
-              Nilai Akhir Kursus
+              Nilai Akhir Mata Pelajaran
             </p>
             <div className="flex items-baseline gap-1 mt-0.5">
               <span className="text-3xl font-extrabold text-slate-900 dark:text-white">

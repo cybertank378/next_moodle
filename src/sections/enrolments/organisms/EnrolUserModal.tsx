@@ -27,7 +27,7 @@ export default function EnrolUserModal({
 
   const handleSubmit = async () => {
     if (!courseId) {
-      setErrorMsg("Pilih course terlebih dahulu.");
+      setErrorMsg("Pilih mata pelajaran terlebih dahulu.");
       return;
     }
 
@@ -56,11 +56,11 @@ export default function EnrolUserModal({
       open={open}
       onClose={onClose}
       onSubmit={handleSubmit}
-      title="Daftarkan Pengguna ke Course"
+      title="Daftarkan Pengguna ke Mata Pelajaran"
       subtitle={
         courseTitle
-          ? `Mendaftarkan peserta ke course: ${courseTitle}`
-          : "Daftarkan pengguna terpilih ke course."
+          ? `Mendaftarkan peserta ke mata pelajaran: ${courseTitle}`
+          : "Daftarkan pengguna terpilih ke mata pelajaran."
       }
       submitText={loading ? "Mendaftarkan..." : "Daftarkan"}
       cancelText="Batal"
@@ -100,7 +100,7 @@ export default function EnrolUserModal({
             htmlFor="enrol-role-id"
             className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
           >
-            Peran di Course *
+            Peran di Mata Pelajaran *
           </label>
           <select
             id="enrol-role-id"

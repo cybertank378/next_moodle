@@ -22,7 +22,7 @@ export default function CoursesView() {
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Mata Pelajaran & Kursus
+          Mata Pelajaran
         </h1>
         <p className="text-sm text-slate-500 dark:text-gray-400">
           Daftar mata pelajaran aktif yang terhubung dengan modul pembelajaran
@@ -63,11 +63,11 @@ export default function CoursesView() {
             <BookOpen size={24} />
           </div>
           <h3 className="mt-4 text-base font-semibold text-slate-900 dark:text-white">
-            Belum ada kursus yang ditemukan
+            Belum ada mata pelajaran yang ditemukan
           </h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
             {search
-              ? "Tidak ada kursus yang cocok dengan pencarian Anda."
+              ? "Tidak ada mata pelajaran yang cocok dengan pencarian Anda."
               : "Anda belum terdaftar pada mata pelajaran apapun di Moodle saat ini."}
           </p>
         </div>

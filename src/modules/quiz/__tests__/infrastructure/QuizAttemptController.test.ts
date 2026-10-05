@@ -132,7 +132,7 @@ describe("QuizAttemptController", () => {
         .fn()
         .mockRejectedValue(
           new AuthorizationError(
-            "Akses ditolak: bukan attempt milik mahasiswa",
+            "Akses ditolak: bukan attempt milik siswa",
           ),
         ),
     } as unknown as SaveQuizAnswerUseCase;

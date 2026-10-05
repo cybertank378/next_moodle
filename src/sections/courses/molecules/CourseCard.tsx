@@ -59,7 +59,7 @@ export default function CourseCard({ course }: Props) {
           rightIcon={ArrowRight}
           onClick={() => router.push(AppRouteConstants.courseDetail(course.id))}
         >
-          Buka Kursus
+          Buka Mata Pelajaran
         </Button>
       </div>
     </div>

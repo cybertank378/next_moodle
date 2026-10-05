@@ -86,7 +86,7 @@ export class QuizAttemptEntity extends BaseEntity<number> {
 
     if (!matchesUserId && !matchesMoodleUserId) {
       throw new AuthorizationError(
-        "Akses ditolak: mahasiswa hanya dapat mengakses attempt miliknya sendiri.",
+        "Akses ditolak: siswa hanya dapat mengakses attempt miliknya sendiri.",
       );
     }
   }

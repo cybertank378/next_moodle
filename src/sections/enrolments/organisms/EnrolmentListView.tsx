@@ -90,7 +90,7 @@ export default function EnrolmentListView() {
   const handleEnrol = async (dto: EnrolUserRequestDto) => {
     const res = await enrolUser(dto);
     if (res.data) {
-      setToastMessage("Peserta berhasil didaftarkan ke course!");
+      setToastMessage("Peserta berhasil didaftarkan ke mata pelajaran!");
       if (selectedCourseId) {
         void listEnrolments({
           courseId: selectedCourseId,
@@ -107,7 +107,7 @@ export default function EnrolmentListView() {
   const handleUnenrol = async (userId: number, fullname: string) => {
     if (!selectedCourseId) return;
     const confirmed = window.confirm(
-      `Apakah Anda yakin ingin membatalkan pendaftaran ${fullname} dari course ini?`,
+      `Apakah Anda yakin ingin membatalkan pendaftaran ${fullname} dari mata pelajaran ini?`,
     );
     if (!confirmed) return;
 
@@ -146,11 +146,11 @@ export default function EnrolmentListView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Pendaftaran Kursus (Enrolments)
+            Pendaftaran Mata Pelajaran (Enrolments)
           </h1>
           <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">
             Kelola pendaftaran peserta dan penugasan peran guru di setiap
-            course.
+            mata pelajaran.
           </p>
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function EnrolmentListView() {
           </div>
           <div>
             <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">
-              Course Aktif
+              Mata Pelajaran Aktif
             </p>
             <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 truncate max-w-[180px]">
               {currentCourse?.fullName || "Belum dipilih"}
@@ -230,7 +230,7 @@ export default function EnrolmentListView() {
             <TableHeaderCell>Nama Peserta</TableHeaderCell>
             <TableHeaderCell>Username</TableHeaderCell>
             <TableHeaderCell>Email</TableHeaderCell>
-            <TableHeaderCell>Peran di Kursus</TableHeaderCell>
+            <TableHeaderCell>Peran di Mata Pelajaran</TableHeaderCell>
             <TableHeaderCell className="text-right">Aksi</TableHeaderCell>
           </TableRow>
         </TableHead>
@@ -261,10 +261,10 @@ export default function EnrolmentListView() {
                 <div className="flex flex-col items-center justify-center text-slate-500 dark:text-gray-400">
                   <BookOpen size={32} className="stroke-1 mb-2" />
                   <p className="font-semibold text-slate-900 dark:text-white">
-                    Pilih course terlebih dahulu
+                    Pilih mata pelajaran terlebih dahulu
                   </p>
                   <p className="text-xs mt-1">
-                    Silakan pilih salah satu course di atas untuk melihat data
+                    Silakan pilih salah satu mata pelajaran di atas untuk melihat data
                     pendaftaran peserta.
                   </p>
                 </div>
@@ -281,7 +281,7 @@ export default function EnrolmentListView() {
                   <p className="text-xs mt-1">
                     {search
                       ? "Tidak ada peserta yang cocok dengan kata kunci pencarian Anda."
-                      : "Course ini belum memiliki peserta terdaftar. Klik 'Daftarkan Peserta' untuk menambahkan."}
+                      : "Mata pelajaran ini belum memiliki peserta terdaftar. Klik 'Daftarkan Peserta' untuk menambahkan."}
                   </p>
                 </div>
               </TableCell>
