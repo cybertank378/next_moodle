@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
 
 export default function StudentDashboardOverview() {
   const { studentState, fetchStudentOverview } = useDashboardApi();
@@ -50,6 +52,19 @@ export default function StudentDashboardOverview() {
   const avgProgress = data?.courses && data.courses.length > 0 
     ? Math.round(data.courses.reduce((acc, curr) => acc + (curr.progress || 0), 0) / data.courses.length) 
     : 0;
+
+  let avgGradeScore = 0;
+  let avgGradeLetter = "-";
+  if (data?.recentGrades && data.recentGrades.length > 0) {
+    avgGradeScore = Math.round(data.recentGrades.reduce((acc, curr) => acc + curr.score, 0) / data.recentGrades.length);
+    if (avgGradeScore >= 90) avgGradeLetter = 'A';
+    else if (avgGradeScore >= 85) avgGradeLetter = 'A-';
+    else if (avgGradeScore >= 80) avgGradeLetter = 'B+';
+    else if (avgGradeScore >= 75) avgGradeLetter = 'B';
+    else if (avgGradeScore >= 70) avgGradeLetter = 'B-';
+    else if (avgGradeScore >= 60) avgGradeLetter = 'C';
+    else avgGradeLetter = 'D';
+  }
 
   return (
     <div className="flex flex-col xl:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12 w-full max-w-[1600px] mx-auto">
@@ -109,8 +124,10 @@ export default function StudentDashboardOverview() {
              <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl"><Award className="w-6 h-6"/></div>
              <div>
                 <p className="text-xs text-slate-500 font-bold mb-0.5">Rata-rata Nilai</p>
-                <p className="text-2xl font-bold text-slate-800 leading-none">86.5</p>
-                <p className="text-[10px] text-emerald-600 font-bold mt-1">B+</p>
+                <p className="text-2xl font-bold text-slate-800 leading-none">{avgGradeScore > 0 ? avgGradeScore : "-"}</p>
+                <p className={`text-[10px] font-bold mt-1 ${avgGradeScore > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                   {avgGradeScore > 0 ? avgGradeLetter : "Belum ada"}
+                </p>
              </div>
           </Card>
           <Card className="p-5 border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
@@ -283,49 +300,73 @@ export default function StudentDashboardOverview() {
               <h3 className="text-base font-extrabold flex items-center gap-2"><Calendar className="w-5 h-5 text-slate-700"/> Kalender</h3>
            </div>
            
-           {/* Mock Calendar */}
-           <div className="mb-4">
-              <div className="flex justify-between items-center mb-6">
-                 <button className="text-slate-400 hover:text-slate-600 p-1"><ChevronLeft className="w-4 h-4"/></button>
-                 <span className="font-bold text-sm text-slate-800">April 2025</span>
-                 <button className="text-slate-400 hover:text-slate-600 p-1"><ChevronRight className="w-4 h-4"/></button>
-              </div>
-              <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 mb-3">
-                 <div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div>
-              </div>
-              <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center text-sm font-semibold">
-                 {/* Mock dates */}
-                 <div className="py-1.5 text-slate-300">30</div><div className="py-1.5 text-slate-300">31</div>
-                 <div className="py-1.5 text-slate-700">1</div><div className="py-1.5 text-slate-700">2</div>
-                 <div className="py-1.5 text-slate-700 relative">3<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700 relative">4</div>
-                 <div className="py-1.5 text-slate-700">5</div>
-                 <div className="py-1.5 bg-blue-50 text-blue-600 rounded-lg relative">6</div>
-                 <div className="py-1.5 text-slate-700 relative">7<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700">8</div>
-                 <div className="py-1.5 text-slate-700 relative">9<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full"></span></div>
-                 <div className="py-1.5 bg-blue-600 text-white rounded-full shadow-md shadow-blue-500/40 relative z-10 scale-110">10</div>
-                 <div className="py-1.5 text-slate-700">11</div><div className="py-1.5 text-slate-700">12</div><div className="py-1.5 text-slate-700">13</div>
-                 <div className="py-1.5 text-slate-700">14</div><div className="py-1.5 text-slate-700">15</div>
-                 <div className="py-1.5 text-slate-700 relative">16<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700 relative">17<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700">18</div><div className="py-1.5 text-slate-700">19</div><div className="py-1.5 text-slate-700">20</div>
-                 <div className="py-1.5 text-slate-700">21</div><div className="py-1.5 text-slate-700">22</div>
-                 <div className="py-1.5 text-slate-700 relative">23<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700 relative">24<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700 relative">25<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700 relative">26<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700">27</div>
-                 <div className="py-1.5 text-slate-700">28</div><div className="py-1.5 text-slate-700 relative">29<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full"></span></div>
-                 <div className="py-1.5 text-slate-700 relative">30<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span></div>
-                 
-                 <div className="col-span-7 mt-6 flex justify-between text-slate-500 px-1">
-                    <span className="flex items-center text-[10px] font-bold"><span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>Tugas</span>
-                    <span className="flex items-center text-[10px] font-bold"><span className="w-2 h-2 rounded-full bg-orange-500 mr-1.5"></span>Ujian</span>
-                    <span className="flex items-center text-[10px] font-bold"><span className="w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>Kegiatan</span>
-                    <span className="flex items-center text-[10px] font-bold"><span className="w-2 h-2 rounded-full bg-slate-400 mr-1.5"></span>Lainnya</span>
-                 </div>
-              </div>
+           {/* FullCalendar Plugin */}
+           <div className="mb-4 text-xs max-w-full overflow-hidden fullcalendar-student">
+              <style>{`
+                 .fullcalendar-student .fc-toolbar-title {
+                    font-size: 14px !important;
+                    font-weight: 700 !important;
+                    color: #1e293b !important;
+                 }
+                 .fullcalendar-student .fc-button-primary {
+                    background-color: transparent !important;
+                    border: none !important;
+                    color: #94a3b8 !important;
+                    padding: 4px !important;
+                    box-shadow: none !important;
+                 }
+                 .fullcalendar-student .fc-button-primary:hover {
+                    color: #475569 !important;
+                    background-color: #f1f5f9 !important;
+                 }
+                 .fullcalendar-student .fc-col-header-cell-cushion {
+                    font-size: 11px !important;
+                    font-weight: 700 !important;
+                    color: #94a3b8 !important;
+                 }
+                 .fullcalendar-student .fc-daygrid-day-number {
+                    font-size: 12px !important;
+                    font-weight: 600 !important;
+                    color: #334155;
+                    padding: 4px !important;
+                 }
+                 .fullcalendar-student .fc-day-today .fc-daygrid-day-number {
+                    background-color: #2563eb !important;
+                    color: white !important;
+                    border-radius: 9999px;
+                    width: 24px;
+                    height: 24px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 2px;
+                 }
+                 .fullcalendar-student .fc-theme-standard td, .fullcalendar-student .fc-theme-standard th {
+                    border: none !important;
+                 }
+                 .fullcalendar-student .fc-view-harness {
+                    min-height: 250px;
+                 }
+              `}</style>
+              <FullCalendar
+                 // @ts-ignore
+                 plugins={[dayGridPlugin]}
+                 initialView="dayGridMonth"
+                 headerToolbar={{
+                    left: 'prev',
+                    center: 'title',
+                    right: 'next'
+                 }}
+                 height="auto"
+                 contentHeight="auto"
+                 fixedWeekCount={false}
+                 dayMaxEvents={true}
+                 events={data?.upcomingExams?.map(exam => ({
+                    title: exam.name,
+                    date: exam.scheduledDate ? exam.scheduledDate.split('T')[0] : new Date().toISOString().split('T')[0],
+                    color: '#f97316'
+                 })) || []}
+              />
            </div>
         </Card>
 
