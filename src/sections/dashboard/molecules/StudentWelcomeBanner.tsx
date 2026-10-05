@@ -1,6 +1,7 @@
 import Typography from "@/shared-ui/component/Typography";
 import { Flame } from "lucide-react";
 import type { StudentProfileDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
+import Image from "next/image";
 
 interface Props {
   profile?: StudentProfileDto;
@@ -10,9 +11,14 @@ export function StudentWelcomeBanner({ profile }: Props) {
   return (
     <div className="relative overflow-hidden rounded-3xl bg-[#f0f7ff] border border-blue-100 p-8 flex flex-col md:flex-row items-center justify-between shadow-sm">
       <div className="flex items-center">
-         <div className="w-24 h-24 mr-6 hidden sm:flex items-center justify-center">
-            <div className="w-full h-full bg-blue-100 rounded-full flex items-center justify-center text-blue-600 border-[6px] border-white shadow-sm">
-               <span className="text-4xl">🧑‍🎓</span>
+         <div className="w-24 h-24 mr-6 hidden sm:flex items-center justify-center shrink-0">
+            <div className="relative w-full h-full bg-blue-100 rounded-full flex items-center justify-center border-[6px] border-white shadow-sm overflow-hidden">
+               <Image 
+                 src="/assets/images/ilustrator/siswa.png" 
+                 alt="Student Illustration" 
+                 fill
+                 className="object-cover"
+               />
             </div>
          </div>
          <div>
