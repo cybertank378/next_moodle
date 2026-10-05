@@ -61,7 +61,17 @@ export class GetStudentDashboardUseCase {
             progress: c.progress || 0
         }));
 
+        // TODO: Map from real tenant details and user settings instead of hardcoding
+        const profile = {
+          name: request.actor.displayName || "Siswa",
+          educationLevel: "SMA" as const,
+          schoolName: `Sekolah ${tenantId.toUpperCase()}`,
+          className: "Kelas 10A",
+          academicYear: "2026/2027",
+        };
+
         return Result.ok<StudentDashboardResponseDto>({
+          profile,
           upcomingExams,
           courses
         });

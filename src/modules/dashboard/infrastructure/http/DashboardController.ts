@@ -26,6 +26,7 @@ function toAuthorizationActor(actor: CurrentActor): AuthorizationActor | null {
     role: actor.role as AppRole,
     tenantId: actor.tenantId || null,
     moodleUserId: actor.moodleUserId || null,
+    displayName: actor.displayName,
   };
 }
 

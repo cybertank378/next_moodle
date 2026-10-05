@@ -37,7 +37,16 @@ export interface CourseSummaryDto {
   progress?: number;
 }
 
+export interface StudentProfileDto {
+  name: string;
+  educationLevel: "SD" | "SMP" | "SMA" | "SMK";
+  schoolName: string;
+  className: string;
+  academicYear: string;
+}
+
 export interface StudentDashboardResponseDto {
+  profile?: StudentProfileDto;
   upcomingExams: ExamSummaryDto[];
   courses?: CourseSummaryDto[];
 }
@@ -46,6 +55,7 @@ export interface TeacherDashboardResponseDto {
   activeClasses: number;
   totalQuestions: number;
   upcomingExamsCount: number;
+  totalStudents?: number;
   recentExams: ExamSummaryDto[];
   courses?: CourseSummaryDto[];
 }

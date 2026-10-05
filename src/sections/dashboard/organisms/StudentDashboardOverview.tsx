@@ -50,18 +50,45 @@ export default function StudentDashboardOverview() {
         <div className="relative p-8 md:p-12 z-10 flex flex-col md:flex-row items-center justify-between">
           <div>
             <Typography variant="h2" className="text-white font-bold mb-2">
-              Selamat Datang Kembali! 👋
+              Selamat datang, {data?.profile?.name || "Siswa"} 👋
             </Typography>
             <Typography variant="body" className="text-blue-100 max-w-2xl text-lg">
-              Siap untuk melanjutkan belajar hari ini? Anda memiliki {activeExams} ujian aktif yang perlu diselesaikan.
+              {data?.profile?.className} • {data?.profile?.schoolName} • Tahun Pelajaran {data?.profile?.academicYear}
             </Typography>
           </div>
-          <div className="mt-6 md:mt-0">
-            <LinkButton href="/student/exams" variant="secondary" className="font-semibold bg-white text-indigo-600 hover:bg-blue-50 rounded-full px-6 py-3">
-              Lihat Semua Ujian
+          <div className="mt-6 md:mt-0 flex gap-3">
+            <LinkButton href="/student/exams" variant="secondary" className="font-semibold bg-white text-indigo-600 hover:bg-blue-50 rounded-full px-6 py-3 shadow-md">
+              Lihat Ujian
             </LinkButton>
           </div>
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <LinkButton href="/student/courses" variant="outline" className="flex flex-col items-center justify-center p-4 h-24 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-slate-700 dark:text-slate-300">
+          <BookOpen className="w-6 h-6 mb-2 text-indigo-500" />
+          <span className="text-sm font-medium">Mata Pelajaran</span>
+        </LinkButton>
+        <LinkButton href="/student/assignments" variant="outline" className="flex flex-col items-center justify-center p-4 h-24 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-slate-700 dark:text-slate-300">
+          <Trophy className="w-6 h-6 mb-2 text-rose-500" />
+          <span className="text-sm font-medium">Tugas</span>
+        </LinkButton>
+        <LinkButton href="/student/calendar" variant="outline" className="flex flex-col items-center justify-center p-4 h-24 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-slate-700 dark:text-slate-300">
+          <Calendar className="w-6 h-6 mb-2 text-amber-500" />
+          <span className="text-sm font-medium">Kalender</span>
+        </LinkButton>
+        <LinkButton href="/student/grades" variant="outline" className="flex flex-col items-center justify-center p-4 h-24 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-slate-700 dark:text-slate-300">
+          <GraduationCap className="w-6 h-6 mb-2 text-emerald-500" />
+          <span className="text-sm font-medium">Nilai</span>
+        </LinkButton>
+        
+        {data?.profile?.educationLevel !== "SD" && (
+          <LinkButton href="/student/announcements" variant="outline" className="flex flex-col items-center justify-center p-4 h-24 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-slate-700 dark:text-slate-300 col-span-2 md:col-span-4 lg:col-span-1">
+            <PlayCircle className="w-6 h-6 mb-2 text-sky-500" />
+            <span className="text-sm font-medium">Pengumuman</span>
+          </LinkButton>
+        )}
       </div>
 
       {/* Stats Grid */}

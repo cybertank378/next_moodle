@@ -52,6 +52,7 @@ export class GetTeacherDashboardUseCase {
         return Result.ok<TeacherDashboardResponseDto>({
           activeClasses: courses.length,
           totalQuestions: 0,
+          totalStudents: 0,
           upcomingExamsCount: quizzes.length,
           recentExams: quizzes.slice(0, 5).map(q => {
             const course = rawCourses.find(c => c.id === q.courseId);
