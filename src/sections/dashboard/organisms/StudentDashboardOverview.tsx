@@ -9,8 +9,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import dynamic from 'next/dynamic';
+
+const FullCalendar = dynamic(() => import('@fullcalendar/react'), { ssr: false });
 
 export default function StudentDashboardOverview() {
   const { studentState, fetchStudentOverview } = useDashboardApi();
