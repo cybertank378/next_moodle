@@ -21,13 +21,15 @@ export function StudentWelcomeBanner({ profile }: Props) {
                  src={illustration} 
                  alt="Student Illustration" 
                  fill
+                 priority
+                 sizes="(max-width: 768px) 100vw, 96px"
                  className="object-cover"
                />
             </div>
          </div>
          <div>
             <Typography variant="h2" className="text-slate-800 font-bold mb-1 flex items-center gap-2">
-              Halo, {profile?.name || "Andi Pratama"}! <span className="text-2xl">👋</span>
+              Halo, {profile?.name || "Andi Pratama"}!
             </Typography>
             <Typography variant="body" className="text-slate-600 mb-4 font-medium">
               Terus semangat belajar dan raih cita-citamu!
