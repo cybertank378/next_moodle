@@ -1,24 +1,31 @@
 // Files: src/modules/notification/application/usecases/GetNotificationCampaignListUseCase.ts
 
-import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
-import type {
-  CampaignFilterParams,
-  NotificationCampaignRepositoryInterface,
-} from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
+import { AppRole } from "@/core/rbac/AppRole";
 import {
   type CampaignActor,
   NotificationAuthorizationService,
 } from "@/modules/notification/application/services/NotificationAuthorizationService";
+import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
+import type {
+  CampaignFilterParams,
+  CampaignSummaryStats,
+  NotificationCampaignRepositoryInterface,
+} from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import { NotificationOwnerScope } from "@/modules/notification/domain/types/NotificationTypes";
-import { AppRole } from "@/core/rbac/AppRole";
 
 export class GetNotificationCampaignListUseCase {
-  constructor(private readonly campaignRepo: NotificationCampaignRepositoryInterface) {}
+  constructor(
+    private readonly campaignRepo: NotificationCampaignRepositoryInterface,
+  ) {}
 
   async execute(
     filter: CampaignFilterParams,
     actor: CampaignActor,
-  ): Promise<{ campaigns: NotificationCampaignEntity[]; total: number }> {
+  ): Promise<{
+    campaigns: NotificationCampaignEntity[];
+    total: number;
+    summary?: CampaignSummaryStats;
+  }> {
     NotificationAuthorizationService.assertCanManageCampaign(actor);
 
     const scopedFilter: CampaignFilterParams = { ...filter };

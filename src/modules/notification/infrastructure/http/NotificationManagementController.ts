@@ -5,23 +5,24 @@ import "server-only";
 import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
 import type { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
-import type { GetNotificationCampaignListUseCase } from "@/modules/notification/application/usecases/GetNotificationCampaignListUseCase";
-import type { GetNotificationCampaignByIdUseCase } from "@/modules/notification/application/usecases/GetNotificationCampaignByIdUseCase";
-import type { CreateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CreateNotificationCampaignUseCase";
-import type { UpdateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/UpdateNotificationCampaignUseCase";
-import type { DeleteNotificationDraftUseCase } from "@/modules/notification/application/usecases/DeleteNotificationDraftUseCase";
-import type { PreviewNotificationAudienceUseCase } from "@/modules/notification/application/usecases/PreviewNotificationAudienceUseCase";
-import type { GetNotificationRecipientOptionsUseCase } from "@/modules/notification/application/usecases/GetNotificationRecipientOptionsUseCase";
-import type { SendNotificationCampaignUseCase } from "@/modules/notification/application/usecases/SendNotificationCampaignUseCase";
-import type { ScheduleNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ScheduleNotificationCampaignUseCase";
-import type { CancelNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CancelNotificationCampaignUseCase";
 import type { ArchiveNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ArchiveNotificationCampaignUseCase";
-import type { RetryNotificationDeliveryUseCase } from "@/modules/notification/application/usecases/RetryNotificationDeliveryUseCase";
+import type { CancelNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CancelNotificationCampaignUseCase";
+import type { CreateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CreateNotificationCampaignUseCase";
+import type { DeleteNotificationDraftUseCase } from "@/modules/notification/application/usecases/DeleteNotificationDraftUseCase";
+import type { GetNotificationCampaignByIdUseCase } from "@/modules/notification/application/usecases/GetNotificationCampaignByIdUseCase";
+import type { GetNotificationCampaignListUseCase } from "@/modules/notification/application/usecases/GetNotificationCampaignListUseCase";
 import type { GetNotificationDeliveryReportUseCase } from "@/modules/notification/application/usecases/GetNotificationDeliveryReportUseCase";
+import type { GetNotificationRecipientOptionsUseCase } from "@/modules/notification/application/usecases/GetNotificationRecipientOptionsUseCase";
+import type { PreviewNotificationAudienceUseCase } from "@/modules/notification/application/usecases/PreviewNotificationAudienceUseCase";
 import type { RegisterNotificationDeviceUseCase } from "@/modules/notification/application/usecases/RegisterNotificationDeviceUseCase";
+import type { RetryNotificationDeliveryUseCase } from "@/modules/notification/application/usecases/RetryNotificationDeliveryUseCase";
+import type { ScheduleNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ScheduleNotificationCampaignUseCase";
+import type { SendNotificationCampaignUseCase } from "@/modules/notification/application/usecases/SendNotificationCampaignUseCase";
 import type { UnregisterNotificationDeviceUseCase } from "@/modules/notification/application/usecases/UnregisterNotificationDeviceUseCase";
+import type { UpdateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/UpdateNotificationCampaignUseCase";
 import { NotificationCampaignMapper } from "@/modules/notification/domain/mapper/NotificationCampaignMapper";
 import {
+  NotificationChannel,
   NotificationDispatchStatus,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
@@ -70,6 +71,7 @@ export class NotificationManagementController {
       const { searchParams } = new URL(req.url);
       const search = searchParams.get("search") || undefined;
       const statusParam = searchParams.get("status");
+      const channelParam = searchParams.get("channel");
       const isArchivedParam = searchParams.get("isArchived");
       const page = Number(searchParams.get("page")) || 1;
       const limit = Number(searchParams.get("limit")) || 10;
@@ -82,23 +84,47 @@ export class NotificationManagementController {
           ? (statusParam as NotificationDispatchStatus)
           : undefined;
 
-      const isArchived = isArchivedParam === "true" ? true : isArchivedParam === "false" ? false : undefined;
+      const channel =
+        channelParam &&
+        Object.values(NotificationChannel).includes(
+          channelParam as NotificationChannel,
+        )
+          ? (channelParam as NotificationChannel)
+          : undefined;
 
-      const { campaigns, total } = await this.getListUseCase.execute(
-        { search, dispatchStatus, isArchived, page, limit },
+      const isArchived =
+        isArchivedParam === "true"
+          ? true
+          : isArchivedParam === "false"
+            ? false
+            : undefined;
+
+      const { campaigns, total, summary } = await this.getListUseCase.execute(
+        { search, dispatchStatus, channel, isArchived, page, limit },
         actor,
       );
 
       return jsonSuccess({
-        items: campaigns.map((c) => NotificationCampaignMapper.toResponseDto(c)),
+        items: campaigns.map((c) =>
+          NotificationCampaignMapper.toResponseDto(c),
+        ),
         total,
+        summary: summary || {
+          total: 0,
+          sent: 0,
+          scheduled: 0,
+          draft: 0,
+        },
         page,
         limit,
       });
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -109,12 +135,20 @@ export class NotificationManagementController {
   async getCampaign(req: Request, id: string): Promise<Response> {
     try {
       const actor = await this.getActor(req);
-      const { campaign, summary } = await this.getByIdUseCase.execute(id, actor);
-      return jsonSuccess(NotificationCampaignMapper.toResponseDto(campaign, summary));
+      const { campaign, summary } = await this.getByIdUseCase.execute(
+        id,
+        actor,
+      );
+      return jsonSuccess(
+        NotificationCampaignMapper.toResponseDto(campaign, summary),
+      );
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -127,11 +161,17 @@ export class NotificationManagementController {
       const actor = await this.getActor(req);
       const body = await req.json();
       const created = await this.createUseCase.execute(body, actor);
-      return jsonSuccess(NotificationCampaignMapper.toResponseDto(created), 201);
+      return jsonSuccess(
+        NotificationCampaignMapper.toResponseDto(created),
+        201,
+      );
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -148,7 +188,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -164,7 +207,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -181,7 +227,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -197,7 +246,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -213,7 +265,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -230,7 +285,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -246,7 +304,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -262,7 +323,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -278,7 +342,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -293,11 +360,8 @@ export class NotificationManagementController {
       const page = Number(searchParams.get("page")) || 1;
       const limit = Number(searchParams.get("limit")) || 20;
 
-      const { deliveries, total, summary } = await this.getDeliveryReportUseCase.execute(
-        id,
-        actor,
-        { page, limit },
-      );
+      const { deliveries, total, summary } =
+        await this.getDeliveryReportUseCase.execute(id, actor, { page, limit });
 
       return jsonSuccess({
         items: deliveries.map(NotificationCampaignMapper.toDeliveryDto),
@@ -309,7 +373,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }
@@ -326,7 +393,10 @@ export class NotificationManagementController {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
         return Response.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." } },
+          {
+            success: false,
+            error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
+          },
           { status: 401 },
         );
       }

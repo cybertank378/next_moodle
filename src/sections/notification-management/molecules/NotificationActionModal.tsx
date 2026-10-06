@@ -1,9 +1,9 @@
 // Files: src/sections/notification-management/molecules/NotificationActionModal.tsx
 "use client";
 
-import { Modal } from "@/shared-ui/component/Modal";
+import { Send, Trash2 } from "lucide-react";
 import Button from "@/shared-ui/component/Button";
-import { AlertTriangle, Send, Trash2, XCircle } from "lucide-react";
+import { Modal } from "@/shared-ui/component/Modal";
 
 interface Props {
   isOpen: boolean;
@@ -34,7 +34,9 @@ export default function NotificationActionModal({
         <div className="flex items-start gap-3">
           <div
             className={`p-2.5 rounded-full shrink-0 ${
-              isDanger ? "bg-rose-100 text-rose-600" : "bg-indigo-100 text-indigo-600"
+              isDanger
+                ? "bg-rose-100 text-rose-600"
+                : "bg-indigo-100 text-indigo-600"
             }`}
           >
             {isDanger ? (
@@ -44,12 +46,20 @@ export default function NotificationActionModal({
             )}
           </div>
           <div>
-            <p className="text-sm text-slate-600 leading-relaxed">{description}</p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {description}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
-          <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            disabled={loading}
+          >
             Batal
           </Button>
           <Button

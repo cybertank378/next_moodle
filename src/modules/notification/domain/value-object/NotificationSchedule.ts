@@ -12,14 +12,18 @@ export class NotificationSchedule {
     Object.freeze(this);
   }
 
-  static create(scheduledAt?: Date | string | null, timezone?: string | null): NotificationSchedule {
+  static create(
+    scheduledAt?: Date | string | null,
+    timezone?: string | null,
+  ): NotificationSchedule {
     const tz = timezone?.trim() || "Asia/Jakarta";
 
     if (!scheduledAt) {
       return new NotificationSchedule(null, tz);
     }
 
-    const date = typeof scheduledAt === "string" ? new Date(scheduledAt) : scheduledAt;
+    const date =
+      typeof scheduledAt === "string" ? new Date(scheduledAt) : scheduledAt;
     if (isNaN(date.getTime())) {
       throw new ValidationError("Format waktu jadwal pengiriman tidak valid.");
     }

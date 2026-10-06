@@ -1,19 +1,19 @@
 // Files: src/modules/notification/domain/mapper/NotificationCampaignMapper.ts
 
-import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
-import { NotificationDeliveryEntity } from "@/modules/notification/domain/entity/NotificationDeliveryEntity";
 import type {
   NotificationCampaignResponseDto,
   NotificationDeliveryItemDto,
 } from "@/modules/notification/domain/dto/NotificationCampaignResponseDto";
+import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
+import { NotificationDeliveryEntity } from "@/modules/notification/domain/entity/NotificationDeliveryEntity";
 import {
   NotificationAudienceScope,
   type NotificationAudienceSpec,
-  NotificationChannel,
-  NotificationDeliveryStatus,
+  type NotificationChannel,
+  type NotificationDeliveryStatus,
   type NotificationDeliverySummary,
-  NotificationDispatchStatus,
-  NotificationOwnerScope,
+  type NotificationDispatchStatus,
+  type NotificationOwnerScope,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
 export class NotificationCampaignMapper {
@@ -129,7 +129,9 @@ export class NotificationCampaignMapper {
     });
   }
 
-  static toDeliveryDto(entity: NotificationDeliveryEntity): NotificationDeliveryItemDto {
+  static toDeliveryDto(
+    entity: NotificationDeliveryEntity,
+  ): NotificationDeliveryItemDto {
     return {
       id: entity.id,
       recipientId: entity.recipientId,

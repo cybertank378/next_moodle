@@ -1,14 +1,14 @@
 // Files: src/modules/notification/application/usecases/ScheduleNotificationCampaignUseCase.ts
 
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
-import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
-import type { NotificationOutboxRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
-import type { ScheduleNotificationCampaignRequestDto } from "@/modules/notification/domain/dto/NotificationCampaignRequestDto";
 import {
   type CampaignActor,
   NotificationAuthorizationService,
 } from "@/modules/notification/application/services/NotificationAuthorizationService";
+import type { ScheduleNotificationCampaignRequestDto } from "@/modules/notification/domain/dto/NotificationCampaignRequestDto";
+import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
+import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
+import type { NotificationOutboxRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
 import { NotificationSchedule } from "@/modules/notification/domain/value-object/NotificationSchedule";
 
 export class ScheduleNotificationCampaignUseCase {

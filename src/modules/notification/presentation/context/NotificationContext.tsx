@@ -1,7 +1,9 @@
 // Files: src/modules/notification/presentation/context/NotificationContext.tsx
 "use client";
 
-import React, {
+import type { MessagePayload, Messaging } from "firebase/messaging";
+import type React from "react";
+import {
   createContext,
   useCallback,
   useContext,
@@ -9,7 +11,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { MessagePayload, Messaging } from "firebase/messaging";
 import { request } from "@/libs/apiClient";
 import type {
   PaginatedNotificationsResponseDto,
@@ -20,7 +21,11 @@ import type { NotificationTab } from "@/modules/notification/domain/types/Notifi
 const POLL_INTERVAL_MS = 30_000;
 const DEFAULT_LIMIT = 10;
 
-export type PushPermissionStatus = "default" | "granted" | "denied" | "unsupported";
+export type PushPermissionStatus =
+  | "default"
+  | "granted"
+  | "denied"
+  | "unsupported";
 
 export interface NotificationContextValue {
   // Badge & Count
@@ -53,14 +58,19 @@ export interface NotificationContextValue {
   unregisterPush: () => Promise<void>;
 }
 
-const NotificationContext = createContext<NotificationContextValue | null>(null);
+const NotificationContext = createContext<NotificationContextValue | null>(
+  null,
+);
 
 export interface NotificationProviderProps {
   children: React.ReactNode;
   userKey?: string;
 }
 
-export function NotificationProvider({ children, userKey }: NotificationProviderProps) {
+export function NotificationProvider({
+  children,
+  userKey,
+}: NotificationProviderProps) {
   // ── 1. Unread count state ──
   const [unreadCount, setUnreadCount] = useState(0);
   const [countLoading, setCountLoading] = useState(false);
@@ -85,12 +95,14 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
   const requestIdRef = useRef(0);
 
   // ── 3. Push permission & device state ──
-  const [pushPermission, setPushPermission] = useState<PushPermissionStatus>(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      return Notification.permission as PushPermissionStatus;
-    }
-    return "unsupported";
-  });
+  const [pushPermission, setPushPermission] = useState<PushPermissionStatus>(
+    () => {
+      if (typeof window !== "undefined" && "Notification" in window) {
+        return Notification.permission as PushPermissionStatus;
+      }
+      return "unsupported";
+    },
+  );
   const [pushLoading, setPushLoading] = useState(false);
   const [pushError, setPushError] = useState<string | null>(null);
 
@@ -101,9 +113,12 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
   // ── 4. Fetch unread count ──
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const res = await request<UnreadCountResponseDto>("/api/notifications/count", {
-        method: "GET",
-      });
+      const res = await request<UnreadCountResponseDto>(
+        "/api/notifications/count",
+        {
+          method: "GET",
+        },
+      );
       if (!res.error && res.data !== null) {
         setUnreadCount(res.data.unreadCount);
       }
@@ -163,7 +178,9 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
   const markAsRead = useCallback(
     async (notificationId: string) => {
       // Idempotency: verify if already read
-      const currentItem = listState.data?.items.find((item) => item.id === notificationId);
+      const currentItem = listState.data?.items.find(
+        (item) => item.id === notificationId,
+      );
       if (currentItem && currentItem.isRead) {
         return;
       }
@@ -250,45 +267,48 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
   }, [fetchNotifications]);
 
   // ── 8. Coordinated Push Setup & Foreground Message Listener ──
-  const setupForegroundListener = useCallback((messaging: Messaging) => {
-    if (unsubscribeForegroundRef.current) {
-      unsubscribeForegroundRef.current();
-    }
+  const setupForegroundListener = useCallback(
+    (messaging: Messaging) => {
+      if (unsubscribeForegroundRef.current) {
+        unsubscribeForegroundRef.current();
+      }
 
-    import("@/libs/firebase").then(({ onMessage }) => {
-      unsubscribeForegroundRef.current = onMessage(messaging, (payload: MessagePayload) => {
-        if (!payload?.data) return;
+      import("@/libs/firebase").then(({ onMessage }) => {
+        unsubscribeForegroundRef.current = onMessage(
+          messaging,
+          (payload: MessagePayload) => {
+            if (!payload?.data) return;
 
-        const notifId = payload.data.id;
-        // Deduplicate incoming foreground messages
-        if (notifId && processedMessageIdsRef.current.has(notifId)) {
-          return;
-        }
-        if (notifId) {
-          processedMessageIdsRef.current.add(notifId);
-        }
+            const notifId = payload.data.id;
+            // Deduplicate incoming foreground messages
+            if (notifId && processedMessageIdsRef.current.has(notifId)) {
+              return;
+            }
+            if (notifId) {
+              processedMessageIdsRef.current.add(notifId);
+            }
 
-        // Coordinate state update: refetch count accurately
-        void fetchUnreadCount();
+            // Coordinate state update: refetch count accurately
+            void fetchUnreadCount();
 
-        // Refresh list if user is viewing unread on page 1
-        if (activeTabRef.current === "unread" && pageRef.current === 1) {
-          void fetchNotifications("unread", 1);
-        }
-      });
-    });
-  }, [fetchUnreadCount, fetchNotifications]);
-
-  const registerToken = useCallback(
-    async (token: string) => {
-      deviceTokenRef.current = token;
-      await request("/api/firebase/subscribe", {
-        method: "POST",
-        body: JSON.stringify({ token }),
+            // Refresh list if user is viewing unread on page 1
+            if (activeTabRef.current === "unread" && pageRef.current === 1) {
+              void fetchNotifications("unread", 1);
+            }
+          },
+        );
       });
     },
-    [],
+    [fetchUnreadCount, fetchNotifications],
   );
+
+  const registerToken = useCallback(async (token: string) => {
+    deviceTokenRef.current = token;
+    await request("/api/firebase/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+  }, []);
 
   // Explicit user action to request push permission
   const requestPushPermission = useCallback(async () => {
@@ -318,7 +338,10 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
         }
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal mengaktifkan notifikasi push";
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Gagal mengaktifkan notifikasi push";
       setPushError(msg);
     } finally {
       setPushLoading(false);
@@ -355,7 +378,11 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
     void fetchUnreadCount().finally(() => setCountLoading(false));
 
     // If permission was already granted prior, passively wire messaging
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
       void (async () => {
         try {
           const { initMessaging, getToken } = await import("@/libs/firebase");
@@ -396,7 +423,10 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
     return () => {
       clearInterval(pollInterval);
       if (typeof document !== "undefined") {
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
       }
       if (unsubscribeForegroundRef.current) {
         unsubscribeForegroundRef.current();
@@ -435,7 +465,9 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
 export function useNotificationContext(): NotificationContextValue {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error("useNotificationContext must be used within a NotificationProvider");
+    throw new Error(
+      "useNotificationContext must be used within a NotificationProvider",
+    );
   }
   return context;
 }

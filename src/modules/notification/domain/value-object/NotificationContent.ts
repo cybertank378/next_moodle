@@ -45,7 +45,9 @@ export class NotificationContent {
     }
 
     if (!input.contentJson || typeof input.contentJson !== "object") {
-      throw new ValidationError("Konten notifikasi dalam format JSON tidak valid.");
+      throw new ValidationError(
+        "Konten notifikasi dalam format JSON tidak valid.",
+      );
     }
 
     const serialized = JSON.stringify(input.contentJson);
@@ -55,7 +57,9 @@ export class NotificationContent {
 
     const plainText = (input.plainText ?? "").trim();
     if (plainText.length > 10000) {
-      throw new ValidationError("Teks konten melebihi batas maksimum 10.000 karakter.");
+      throw new ValidationError(
+        "Teks konten melebihi batas maksimum 10.000 karakter.",
+      );
     }
 
     let pushSummary = input.pushSummary?.trim() || null;

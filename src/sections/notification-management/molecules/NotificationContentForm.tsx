@@ -1,20 +1,24 @@
 // Files: src/sections/notification-management/molecules/NotificationContentForm.tsx
 "use client";
 
-import TextField from "@/shared-ui/component/TextField";
+import { Bell, Edit3 } from "lucide-react";
+import Image from "next/image";
 import RichTextEditorField from "@/shared-ui/component/RichTextEditor/RichTextEditorField";
-import { NotificationChannel } from "@/modules/notification/domain/types/NotificationTypes";
-import { Inbox, Bell } from "lucide-react";
+import TextField from "@/shared-ui/component/TextField";
 
 interface Props {
   title: string;
   onTitleChange: (val: string) => void;
   contentJson: Record<string, unknown>;
-  onContentChange: (val: { json: Record<string, unknown>; text: string; html: string }) => void;
+  onContentChange: (val: {
+    json: Record<string, unknown>;
+    text: string;
+    html: string;
+  }) => void;
   pushSummary: string;
   onPushSummaryChange: (val: string) => void;
-  channels: NotificationChannel[];
-  onChannelsChange: (channels: NotificationChannel[]) => void;
+  isPushEnabled: boolean;
+  plainText: string;
   errors?: Record<string, string>;
   disabled?: boolean;
 }
@@ -26,97 +30,140 @@ export default function NotificationContentForm({
   onContentChange,
   pushSummary,
   onPushSummaryChange,
-  channels,
-  onChannelsChange,
+  isPushEnabled,
+  plainText,
   errors,
   disabled = false,
 }: Props) {
-  const toggleChannel = (channel: NotificationChannel) => {
-    if (channels.includes(channel)) {
-      if (channels.length > 1) {
-        onChannelsChange(channels.filter((c) => c !== channel));
-      }
-    } else {
-      onChannelsChange([...channels, channel]);
-    }
-  };
+  const maxTitleLength = 150;
+  const maxPushLength = 200;
+
+  const effectivePushText =
+    pushSummary.trim() ||
+    plainText.trim() ||
+    "Jadwal ujian tersedia. Silakan periksa akun Anda.";
+  const charCount = plainText.length;
 
   return (
-    <div className="space-y-5 bg-white p-6 border border-slate-200 rounded-xl shadow-xs">
-      <div>
-        <h2 className="text-base font-bold text-slate-900">Konten Pengumuman</h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Tulis judul dan isi pengumuman menggunakan rich text editor.
-        </p>
-      </div>
-
-      <TextField
-        id="campaign-title"
-        label="Judul Pengumuman"
-        required
-        placeholder="Contoh: Jadwal Ujian Tengah Semester Ganjil"
-        value={title}
-        onChange={(e) => onTitleChange(e.target.value)}
-        error={errors?.title}
-        disabled={disabled}
-      />
-
-      <RichTextEditorField
-        id="campaign-content"
-        label="Isi Pengumuman"
-        required
-        value={contentJson}
-        onChange={onContentChange}
-        error={errors?.content}
-        disabled={disabled}
-        minHeight="220px"
-      />
-
-      <div>
-        <label className="text-xs font-semibold text-slate-700 block mb-2">
-          Saluran Pengiriman
-        </label>
-        <div className="flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-slate-700">
-            <input
-              type="checkbox"
-              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-              checked={channels.includes(NotificationChannel.IN_APP)}
-              onChange={() => toggleChannel(NotificationChannel.IN_APP)}
-              disabled={disabled}
-            />
-            <span className="flex items-center gap-1.5">
-              <Inbox className="w-4 h-4 text-slate-500" />
-              Inbox Aplikasi (In-App)
-            </span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-slate-700">
-            <input
-              type="checkbox"
-              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-              checked={channels.includes(NotificationChannel.PUSH)}
-              onChange={() => toggleChannel(NotificationChannel.PUSH)}
-              disabled={disabled}
-            />
-            <span className="flex items-center gap-1.5">
-              <Bell className="w-4 h-4 text-indigo-600" />
-              Push Notifikasi (FCM Perangkat)
-            </span>
-          </label>
+    <div className="space-y-6 bg-white p-5 sm:p-6 border border-slate-200/80 rounded-2xl shadow-xs">
+      {/* Header with edit icon */}
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center justify-center shrink-0">
+          <Edit3 className="w-4 h-4 text-blue-600" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-slate-900">
+            Konten Pengumuman
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Pesan yang akan ditampilkan di inbox penerima.
+          </p>
         </div>
       </div>
 
-      {channels.includes(NotificationChannel.PUSH) && (
+      {/* Judul Pengumuman */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="campaign-title"
+          className="text-xs font-semibold text-slate-700 block"
+        >
+          Judul Pengumuman
+        </label>
         <TextField
-          id="campaign-push-summary"
-          label="Ringkasan Push Notifikasi (Opsional)"
-          placeholder="Ringkasan singkat teks yang tampil di layar kunci perangkat..."
-          value={pushSummary}
-          onChange={(e) => onPushSummaryChange(e.target.value)}
-          helperText="Maksimal 200 karakter. Jika kosong, diambil dari awal isi pengumuman."
+          id="campaign-title"
+          placeholder="Informasi Jadwal Ujian Tengah Semester"
+          value={title}
+          onChange={(e) => {
+            if (e.target.value.length <= maxTitleLength) {
+              onTitleChange(e.target.value);
+            }
+          }}
+          error={errors?.title}
           disabled={disabled}
         />
+      </div>
+
+      {/* Isi Pengumuman with RichTextEditor */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="campaign-content"
+          className="text-xs font-semibold text-slate-700 block"
+        >
+          Isi Pengumuman
+        </label>
+        <RichTextEditorField
+          id="campaign-content"
+          value={contentJson}
+          onChange={onContentChange}
+          error={errors?.content}
+          disabled={disabled}
+          minHeight="280px"
+        />
+        <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+          <span>
+            Gunakan toolbar untuk memformat teks (judul, daftar, kutipan, dan
+            tautan).
+          </span>
+          <span className="font-medium">{charCount} karakter</span>
+        </div>
+      </div>
+
+      {/* Ringkasan Push */}
+      {isPushEnabled && (
+        <div className="space-y-4 pt-2 border-t border-slate-100">
+          <div className="space-y-1.5">
+            <label
+              htmlFor="campaign-push-summary"
+              className="text-xs font-semibold text-slate-700 block"
+            >
+              Ringkasan Push
+            </label>
+            <TextField
+              id="campaign-push-summary"
+              placeholder="Jadwal ujian tersedia. Silakan periksa akun Anda."
+              value={pushSummary}
+              onChange={(e) => {
+                if (e.target.value.length <= maxPushLength) {
+                  onPushSummaryChange(e.target.value);
+                }
+              }}
+              helperText="Teks singkat yang tampil pada notifikasi perangkat."
+              disabled={disabled}
+            />
+          </div>
+
+          {/* Compact Push Preview */}
+          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+              <Bell className="w-3.5 h-3.5 text-blue-600" />
+              <span>Pratinjau Push</span>
+            </div>
+
+            <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl shadow-xs flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0 overflow-hidden shadow-xs">
+                <Image
+                  src="/assets/images/logo/logo-light.png"
+                  alt="Aksaventra"
+                  width={24}
+                  height={24}
+                  className="object-contain"
+                  onError={(e) => {
+                    // Fallback to text if image not available
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-slate-900 text-sm truncate">
+                  {title || "Informasi Jadwal Ujian Tengah Semester"}
+                </div>
+                <div className="text-xs text-slate-500 truncate mt-0.5">
+                  {effectivePushText}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

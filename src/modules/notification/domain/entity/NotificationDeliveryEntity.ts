@@ -1,7 +1,7 @@
 // Files: src/modules/notification/domain/entity/NotificationDeliveryEntity.ts
 
 import {
-  NotificationChannel,
+  type NotificationChannel,
   NotificationDeliveryStatus,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
@@ -87,7 +87,9 @@ export class NotificationDeliveryEntity {
   }
 
   get isEligibleForRetry(): boolean {
-    return this._status === NotificationDeliveryStatus.FAILED && this._attempts < 3;
+    return (
+      this._status === NotificationDeliveryStatus.FAILED && this._attempts < 3
+    );
   }
 
   markAccepted(providerMessageId?: string): void {

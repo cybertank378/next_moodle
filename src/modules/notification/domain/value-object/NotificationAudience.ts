@@ -38,7 +38,10 @@ export class NotificationAudience {
 
       // Tenant can only target their own tenant
       if (spec.scope === NotificationAudienceScope.TENANT) {
-        if (spec.tenantIds && spec.tenantIds.some((id) => id !== actorTenantId)) {
+        if (
+          spec.tenantIds &&
+          spec.tenantIds.some((id) => id !== actorTenantId)
+        ) {
           throw new ForbiddenError("Tenant tidak dapat memilih tenant lain.");
         }
       }

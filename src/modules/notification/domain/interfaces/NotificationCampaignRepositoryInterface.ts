@@ -20,13 +20,25 @@ export interface CampaignFilterParams {
   sortOrder?: "asc" | "desc";
 }
 
+export interface CampaignSummaryStats {
+  total: number;
+  sent: number;
+  scheduled: number;
+  draft: number;
+}
+
 export interface NotificationCampaignRepositoryInterface {
-  create(campaign: NotificationCampaignEntity): Promise<NotificationCampaignEntity>;
+  create(
+    campaign: NotificationCampaignEntity,
+  ): Promise<NotificationCampaignEntity>;
   findById(id: string): Promise<NotificationCampaignEntity | null>;
-  update(campaign: NotificationCampaignEntity): Promise<NotificationCampaignEntity>;
+  update(
+    campaign: NotificationCampaignEntity,
+  ): Promise<NotificationCampaignEntity>;
   deleteDraft(id: string): Promise<void>;
   findMany(filter: CampaignFilterParams): Promise<{
     campaigns: NotificationCampaignEntity[];
     total: number;
+    summary?: CampaignSummaryStats;
   }>;
 }

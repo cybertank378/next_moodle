@@ -1,7 +1,21 @@
 // Files: src/modules/notification/__tests__/application/NotificationCampaignUseCases.test.ts
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { AppRole } from "@/core/rbac/AppRole";
+import { ArchiveNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ArchiveNotificationCampaignUseCase";
+import { CancelNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CancelNotificationCampaignUseCase";
+import { CreateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CreateNotificationCampaignUseCase";
+import { DeleteNotificationDraftUseCase } from "@/modules/notification/application/usecases/DeleteNotificationDraftUseCase";
+import { PreviewNotificationAudienceUseCase } from "@/modules/notification/application/usecases/PreviewNotificationAudienceUseCase";
+import { ScheduleNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ScheduleNotificationCampaignUseCase";
+import { SendNotificationCampaignUseCase } from "@/modules/notification/application/usecases/SendNotificationCampaignUseCase";
+import { UpdateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/UpdateNotificationCampaignUseCase";
 import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
+import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
+import type { NotificationContentRendererInterface } from "@/modules/notification/domain/interfaces/NotificationContentRendererInterface";
+import type { NotificationDeliveryRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeliveryRepositoryInterface";
+import type { NotificationRecipientProviderInterface } from "@/modules/notification/domain/interfaces/NotificationRecipientProviderInterface";
 import {
   NotificationAudienceScope,
   NotificationChannel,
@@ -9,20 +23,6 @@ import {
   NotificationDispatchStatus,
   NotificationOwnerScope,
 } from "@/modules/notification/domain/types/NotificationTypes";
-import { CreateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CreateNotificationCampaignUseCase";
-import { UpdateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/UpdateNotificationCampaignUseCase";
-import { SendNotificationCampaignUseCase } from "@/modules/notification/application/usecases/SendNotificationCampaignUseCase";
-import { CancelNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CancelNotificationCampaignUseCase";
-import { ScheduleNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ScheduleNotificationCampaignUseCase";
-import { ArchiveNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ArchiveNotificationCampaignUseCase";
-import { DeleteNotificationDraftUseCase } from "@/modules/notification/application/usecases/DeleteNotificationDraftUseCase";
-import { PreviewNotificationAudienceUseCase } from "@/modules/notification/application/usecases/PreviewNotificationAudienceUseCase";
-import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
-import type { NotificationDeliveryRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeliveryRepositoryInterface";
-import type { NotificationRecipientProviderInterface } from "@/modules/notification/domain/interfaces/NotificationRecipientProviderInterface";
-import type { NotificationContentRendererInterface } from "@/modules/notification/domain/interfaces/NotificationContentRendererInterface";
-import { ForbiddenError } from "@/core/errors/ForbiddenError";
-import { AppRole } from "@/core/rbac/AppRole";
 
 describe("Notification Campaign Application Use Cases", () => {
   let mockCampaignRepo: NotificationCampaignRepositoryInterface;
@@ -68,7 +68,12 @@ describe("Notification Campaign Application Use Cases", () => {
 
     mockRecipientProvider = {
       resolveRecipients: vi.fn(async () => [
-        { recipientId: "u-1", role: "STUDENT", tenantId: "tenant-abc", name: "Budi" },
+        {
+          recipientId: "u-1",
+          role: "STUDENT",
+          tenantId: "tenant-abc",
+          name: "Budi",
+        },
       ]),
       getAudienceCount: vi.fn(async () => 1),
       getRecipientOptions: vi.fn(async () => ({ roles: [] })),
@@ -82,7 +87,10 @@ describe("Notification Campaign Application Use Cases", () => {
 
   describe("CreateNotificationCampaignUseCase", () => {
     it("allows TENANT actor to create a campaign scoped to their tenant", async () => {
-      const useCase = new CreateNotificationCampaignUseCase(mockCampaignRepo, mockRenderer);
+      const useCase = new CreateNotificationCampaignUseCase(
+        mockCampaignRepo,
+        mockRenderer,
+      );
 
       const result = await useCase.execute(
         {
@@ -100,7 +108,10 @@ describe("Notification Campaign Application Use Cases", () => {
     });
 
     it("allows ADMIN actor to create a PLATFORM campaign", async () => {
-      const useCase = new CreateNotificationCampaignUseCase(mockCampaignRepo, mockRenderer);
+      const useCase = new CreateNotificationCampaignUseCase(
+        mockCampaignRepo,
+        mockRenderer,
+      );
 
       const result = await useCase.execute(
         {
@@ -117,7 +128,10 @@ describe("Notification Campaign Application Use Cases", () => {
     });
 
     it("throws ForbiddenError if STUDENT tries to create campaign", async () => {
-      const useCase = new CreateNotificationCampaignUseCase(mockCampaignRepo, mockRenderer);
+      const useCase = new CreateNotificationCampaignUseCase(
+        mockCampaignRepo,
+        mockRenderer,
+      );
 
       await expect(
         useCase.execute(
@@ -152,7 +166,10 @@ describe("Notification Campaign Application Use Cases", () => {
 
       vi.mocked(mockCampaignRepo.findById).mockResolvedValue(existing);
 
-      const useCase = new UpdateNotificationCampaignUseCase(mockCampaignRepo, mockRenderer);
+      const useCase = new UpdateNotificationCampaignUseCase(
+        mockCampaignRepo,
+        mockRenderer,
+      );
 
       await expect(
         useCase.execute(
@@ -193,7 +210,9 @@ describe("Notification Campaign Application Use Cases", () => {
 
   describe("PreviewNotificationAudienceUseCase", () => {
     it("returns estimated recipient count and sample recipients", async () => {
-      const useCase = new PreviewNotificationAudienceUseCase(mockRecipientProvider);
+      const useCase = new PreviewNotificationAudienceUseCase(
+        mockRecipientProvider,
+      );
 
       const result = await useCase.execute(
         { audienceSpec: { scope: NotificationAudienceScope.ALL } },

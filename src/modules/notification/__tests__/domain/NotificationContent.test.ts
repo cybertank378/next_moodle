@@ -1,8 +1,8 @@
 // Files: src/modules/notification/__tests__/domain/NotificationContent.test.ts
 
 import { describe, expect, it } from "vitest";
-import { NotificationContent } from "@/modules/notification/domain/value-object/NotificationContent";
 import { ValidationError } from "@/core/errors/ValidationError";
+import { NotificationContent } from "@/modules/notification/domain/value-object/NotificationContent";
 
 describe("NotificationContent Value Object", () => {
   it("creates valid content when all fields are within limits", () => {
@@ -10,7 +10,12 @@ describe("NotificationContent Value Object", () => {
       title: "Ujian Akhir Semester",
       contentJson: {
         type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text: "Selamat mengikuti ujian." }] }],
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Selamat mengikuti ujian." }],
+          },
+        ],
       },
       sanitizedHtml: "<p>Selamat mengikuti ujian.</p>",
       plainText: "Selamat mengikuti ujian.",

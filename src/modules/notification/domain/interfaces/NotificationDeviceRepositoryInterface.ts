@@ -23,7 +23,18 @@ export interface NotificationDeviceRepositoryInterface {
   register(input: NotificationDeviceInput): Promise<void>;
   unregister(token: string): Promise<void>;
   findActiveByRecipients(
-    recipients: Array<{ recipientId: string; role: string; tenantId: string | null }>,
-  ): Promise<Array<{ userId: string; role: string; token: string; tenantId: string | null }>>;
+    recipients: Array<{
+      recipientId: string;
+      role: string;
+      tenantId: string | null;
+    }>,
+  ): Promise<
+    Array<{
+      userId: string;
+      role: string;
+      token: string;
+      tenantId: string | null;
+    }>
+  >;
   findActiveByUserId(userId: string): Promise<NotificationDeviceRecord[]>;
 }

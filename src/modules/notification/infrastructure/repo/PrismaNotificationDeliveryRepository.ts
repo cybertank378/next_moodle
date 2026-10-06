@@ -87,7 +87,9 @@ export class PrismaNotificationDeliveryRepository
     });
   }
 
-  async getDeliverySummary(campaignId: string): Promise<NotificationDeliverySummary> {
+  async getDeliverySummary(
+    campaignId: string,
+  ): Promise<NotificationDeliverySummary> {
     const rows = await prisma.notificationDelivery.groupBy({
       by: ["channel", "status"],
       where: { campaignId },
@@ -132,7 +134,9 @@ export class PrismaNotificationDeliveryRepository
     };
   }
 
-  async findEligibleForRetry(campaignId: string): Promise<NotificationDeliveryEntity[]> {
+  async findEligibleForRetry(
+    campaignId: string,
+  ): Promise<NotificationDeliveryEntity[]> {
     const rows = await prisma.notificationDelivery.findMany({
       where: {
         campaignId,

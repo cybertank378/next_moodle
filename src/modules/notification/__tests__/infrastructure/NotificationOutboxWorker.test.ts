@@ -1,17 +1,16 @@
 // Files: src/modules/notification/__tests__/infrastructure/NotificationOutboxWorker.test.ts
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { NotificationOutboxWorker } from "@/modules/notification/infrastructure/workers/NotificationOutboxWorker";
-import type { OutboxWorkerDependencies } from "@/modules/notification/infrastructure/workers/NotificationOutboxWorker";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
+import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
+import { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
+import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import type {
   NotificationOutboxRepositoryInterface,
   OutboxJobRecord,
 } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
-import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
-import type { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
-import { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 import {
   NotificationAudienceScope,
   NotificationChannel,
@@ -19,7 +18,8 @@ import {
   NotificationOwnerScope,
   NotificationType,
 } from "@/modules/notification/domain/types/NotificationTypes";
-import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
+import type { OutboxWorkerDependencies } from "@/modules/notification/infrastructure/workers/NotificationOutboxWorker";
+import { NotificationOutboxWorker } from "@/modules/notification/infrastructure/workers/NotificationOutboxWorker";
 
 describe("NotificationOutboxWorker", () => {
   let mockOutboxRepo: {
@@ -66,11 +66,16 @@ describe("NotificationOutboxWorker", () => {
     };
 
     deps = {
-      outboxRepo: mockOutboxRepo as unknown as NotificationOutboxRepositoryInterface,
-      campaignRepo: mockCampaignRepo as unknown as NotificationCampaignRepositoryInterface,
-      notificationRepo: mockNotificationRepo as unknown as NotificationRepositoryInterface,
-      dispatchService: mockDispatchService as unknown as NotificationDispatchService,
-      pushAdapter: mockPushAdapter as unknown as PushNotificationAdapterInterface,
+      outboxRepo:
+        mockOutboxRepo as unknown as NotificationOutboxRepositoryInterface,
+      campaignRepo:
+        mockCampaignRepo as unknown as NotificationCampaignRepositoryInterface,
+      notificationRepo:
+        mockNotificationRepo as unknown as NotificationRepositoryInterface,
+      dispatchService:
+        mockDispatchService as unknown as NotificationDispatchService,
+      pushAdapter:
+        mockPushAdapter as unknown as PushNotificationAdapterInterface,
     };
 
     worker = new NotificationOutboxWorker(deps, "test-worker-1");
@@ -146,7 +151,9 @@ describe("NotificationOutboxWorker", () => {
     const result = await worker.processNextBatch();
 
     expect(result).toEqual({ processed: 1, succeeded: 1, failed: 0 });
-    expect(mockPushAdapter.dispatchNotification).toHaveBeenCalledWith(notification);
+    expect(mockPushAdapter.dispatchNotification).toHaveBeenCalledWith(
+      notification,
+    );
     expect(mockOutboxRepo.completeJob).toHaveBeenCalledWith("job-2");
   });
 
@@ -187,7 +194,11 @@ describe("NotificationOutboxWorker", () => {
     const result = await worker.processNextBatch();
 
     expect(result).toEqual({ processed: 1, succeeded: 0, failed: 1 });
-    expect(mockOutboxRepo.failJob).toHaveBeenCalledWith("job-4", false, expect.any(Number));
+    expect(mockOutboxRepo.failJob).toHaveBeenCalledWith(
+      "job-4",
+      false,
+      expect.any(Number),
+    );
   });
 
   it("should stop and clear timer on stop()", () => {

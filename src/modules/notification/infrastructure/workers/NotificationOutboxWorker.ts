@@ -1,10 +1,13 @@
 // Files: src/modules/notification/infrastructure/workers/NotificationOutboxWorker.ts
 
-import type { NotificationOutboxRepositoryInterface, OutboxJobRecord } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
+import type { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
 import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
+import type {
+  NotificationOutboxRepositoryInterface,
+  OutboxJobRecord,
+} from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
 import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
-import type { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
 
 export interface OutboxWorkerDependencies {
   outboxRepo: NotificationOutboxRepositoryInterface;
@@ -26,8 +29,15 @@ export class NotificationOutboxWorker {
     this.workerId = workerId || `worker-${crypto.randomUUID()}`;
   }
 
-  async processNextBatch(limit = 10, leaseDurationMs = 60_000): Promise<{ processed: number; succeeded: number; failed: number }> {
-    const jobs = await this.deps.outboxRepo.claimDueJobs(limit, this.workerId, leaseDurationMs);
+  async processNextBatch(
+    limit = 10,
+    leaseDurationMs = 60_000,
+  ): Promise<{ processed: number; succeeded: number; failed: number }> {
+    const jobs = await this.deps.outboxRepo.claimDueJobs(
+      limit,
+      this.workerId,
+      leaseDurationMs,
+    );
     let succeeded = 0;
     let failed = 0;
 
@@ -41,11 +51,14 @@ export class NotificationOutboxWorker {
         const attempts = job.attempts + 1;
         const canRetry = attempts < 5;
         // Exponential backoff with jitter: 2^attempts * 1000ms + random(500)
-        const baseBackoff = Math.min(60_000, Math.pow(2, attempts) * 1000);
+        const baseBackoff = Math.min(60_000, 2 ** attempts * 1000);
         const jitter = Math.floor(Math.random() * 500);
         const backoffMs = baseBackoff + jitter;
 
-        console.error(`[OutboxWorker] Job ${job.id} (${job.jobType}) failed:`, err);
+        console.error(
+          `[OutboxWorker] Job ${job.id} (${job.jobType}) failed:`,
+          err,
+        );
         await this.deps.outboxRepo.failJob(job.id, canRetry, backoffMs);
       }
     }
@@ -65,14 +78,19 @@ export class NotificationOutboxWorker {
       }
 
       case "RETRY_PUSH_DISPATCH": {
-        const notificationId = (job.payload?.notificationId as string) || job.campaignId;
-        const notification = await this.deps.notificationRepo.findById(notificationId);
+        const notificationId =
+          (job.payload?.notificationId as string) || job.campaignId;
+        const notification =
+          await this.deps.notificationRepo.findById(notificationId);
         if (!notification) {
           throw new Error(`Notification ${notificationId} not found`);
         }
-        const result = await this.deps.pushAdapter.dispatchNotification(notification);
+        const result =
+          await this.deps.pushAdapter.dispatchNotification(notification);
         if (result && result.outcome === "FAILED") {
-          throw new Error(`Push dispatch retry failed: ${result.errorCode || "UNKNOWN"}`);
+          throw new Error(
+            `Push dispatch retry failed: ${result.errorCode || "UNKNOWN"}`,
+          );
         }
         break;
       }
