@@ -1,3 +1,6 @@
+// Files: src/modules/questions/presentation/hooks/useQuestionApi.ts
+"use client";
+
 import { useCallback, useState } from "react";
 import { request } from "@/libs/apiClient";
 import type {
@@ -11,7 +14,7 @@ export function useQuestionApi() {
   const createQuestion = useCallback(async (dto: CreateQuestionRequestDto) => {
     setLoading(true);
     try {
-      const res = await request<any>("/api/questions", {
+      const res = await request<Record<string, unknown>>("/api/questions", {
         method: "POST",
         body: JSON.stringify(dto),
       });
@@ -25,7 +28,7 @@ export function useQuestionApi() {
     async (id: number, dto: UpdateQuestionRequestDto) => {
       setLoading(true);
       try {
-        const res = await request<any>(`/api/questions/${id}`, {
+        const res = await request<Record<string, unknown>>(`/api/questions/${id}`, {
           method: "PATCH",
           body: JSON.stringify(dto),
         });

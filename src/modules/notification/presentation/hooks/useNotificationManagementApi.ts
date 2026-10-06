@@ -12,7 +12,10 @@ import type {
   NotificationDeliveryItemDto,
   NotificationRecipientOptionsResponseDto,
 } from "@/modules/notification/domain/dto/NotificationCampaignResponseDto";
-import type { NotificationDeliverySummary } from "@/modules/notification/domain/types/NotificationTypes";
+import type {
+  NotificationAudienceSpec,
+  NotificationDeliverySummary,
+} from "@/modules/notification/domain/types/NotificationTypes";
 
 export function useNotificationManagementApi() {
   const [loading, setLoading] = useState(false);
@@ -145,7 +148,7 @@ export function useNotificationManagementApi() {
     }
   }, []);
 
-  const previewAudience = useCallback(async (audienceSpec: any) => {
+  const previewAudience = useCallback(async (audienceSpec: NotificationAudienceSpec) => {
     try {
       const res = await fetch("/api/notification-management/campaigns/dummy/preview", {
         method: "POST",

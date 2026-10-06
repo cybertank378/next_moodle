@@ -177,7 +177,7 @@ describe("MarkNotificationReadUseCase", () => {
 
     await useCase.execute({ notificationId: "n-1", scope: studentScope });
 
-    expect(repo.markAsRead).toHaveBeenCalledWith("n-1");
+    expect(repo.markAsRead).toHaveBeenCalledWith("n-1", studentScope);
   });
 
   it("should be idempotent when the notification is already read", async () => {

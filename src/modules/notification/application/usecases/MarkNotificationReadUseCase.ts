@@ -1,3 +1,4 @@
+// Files: src/modules/notification/application/usecases/MarkNotificationReadUseCase.ts
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { MarkNotificationReadRequestDto } from "@/modules/notification/domain/dto/NotificationRequestDto";
@@ -22,6 +23,6 @@ export class MarkNotificationReadUseCase {
     // Idempotent: keep the original readAt timestamp.
     if (notification.isRead) return;
 
-    await this.repo.markAsRead(notificationId);
+    await this.repo.markAsRead(notificationId, scope);
   }
 }

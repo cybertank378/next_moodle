@@ -4,6 +4,7 @@
 
 import { type ReactNode, useState } from "react";
 import { Role, type UserRole } from "@/libs/enums";
+import { NotificationProvider } from "@/modules/notification/presentation/context/NotificationContext";
 import AppSidebar from "@/shared-ui/layout/AppSidebar";
 import AppTopbar from "@/shared-ui/layout/AppTopbar";
 
@@ -37,32 +38,34 @@ export default function AppLayout({
   //////////////////////////////////////////////////////////////
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900   transition-colors duration-300">
-      {/* SIDEBAR */}
-      <AppSidebar
-        role={activeRole}
-        username={username}
-        mobileOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-      />
-
-      {/* RIGHT LAYOUT */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* TOPBAR */}
-        <AppTopbar
+    <NotificationProvider userKey={`${activeRole}:${username || ""}`}>
+      <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900 transition-colors duration-300">
+        {/* SIDEBAR */}
+        <AppSidebar
           role={activeRole}
           username={username}
-          onMenuClick={() => setMobileOpen(true)}
+          mobileOpen={mobileOpen}
+          onClose={() => setMobileOpen(false)}
         />
 
-        {/* SCROLLABLE CONTENT */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50  transition-colors duration-300 relative">
-          <div className="absolute inset-0 bg-[url('/images/ilustrator/noise.png')] opacity-10 mix-blend-overlay pointer-events-none hidden "></div>
-          <div className="min-h-full px-4 py-6 md:px-6 relative z-10">
-            {children}
-          </div>
-        </main>
+        {/* RIGHT LAYOUT */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* TOPBAR */}
+          <AppTopbar
+            role={activeRole}
+            username={username}
+            onMenuClick={() => setMobileOpen(true)}
+          />
+
+          {/* SCROLLABLE CONTENT */}
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 transition-colors duration-300 relative">
+            <div className="absolute inset-0 bg-[url('/images/ilustrator/noise.png')] opacity-10 mix-blend-overlay pointer-events-none hidden "></div>
+            <div className="min-h-full px-4 py-6 md:px-6 relative z-10">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </NotificationProvider>
   );
 }

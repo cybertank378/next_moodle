@@ -35,7 +35,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const { unreadCount } = useNotificationApi();
+  const { unreadCount, unregisterPush } = useNotificationApi();
 
   // Get dynamic avatar menu based on role
   const avatarMenu = getAvatarMenuByRole(role);
@@ -43,6 +43,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
   const handleLogout = async () => {
     try {
       setLoading(true);
+      await unregisterPush();
       await logout();
       router.push(ROUTES.AUTH.LOGIN);
       router.refresh();
@@ -111,6 +112,7 @@ export default function AppTopbar({ role, username, onMenuClick }: Props) {
               type="button"
               aria-label="Notifikasi"
               aria-expanded={notifOpen}
+              aria-controls="notification-panel"
               onClick={() => setNotifOpen((prev) => !prev)}
               className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500  hover:text-slate-900  hover:bg-slate-100  transition-colors"
             >

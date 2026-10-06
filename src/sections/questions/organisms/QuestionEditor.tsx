@@ -1,16 +1,15 @@
+// Files: src/sections/questions/organisms/QuestionEditor.tsx
 "use client";
 
-import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Strikethrough } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   type CreateQuestionRequestDto,
   QuestionType,
 } from "@/modules/questions/domain/types/QuestionTypes";
 import { useQuestionApi } from "@/modules/questions/presentation/hooks/useQuestionApi";
 import Button from "@/shared-ui/component/Button";
+import RichTextEditorField from "@/shared-ui/component/RichTextEditor/RichTextEditorField";
 import SelectField from "@/shared-ui/component/SelectField";
 import TextField from "@/shared-ui/component/TextField";
 
@@ -37,19 +36,18 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     options: existingQuestion?.options || [],
   });
 
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: formData.questionText,
-    onUpdate: ({ editor }) => {
-      setFormData({ ...formData, questionText: editor.getHTML() });
-    },
-    editorProps: {
-      attributes: {
-        class:
-          "prose max-w-none w-full px-3 py-2 rounded-b-md min-h-[150px] focus:outline-none bg-white ",
-      },
-    },
-  });
+  // Re-synchronize state whenever categoryId or existingQuestion changes
+  useEffect(() => {
+    setFormData({
+      categoryId,
+      name: existingQuestion?.name || "",
+      questionText: existingQuestion?.questionText || "",
+      type: existingQuestion?.type || QuestionType.MULTICHOICE,
+      defaultMark: existingQuestion?.defaultMark || 1,
+      options: existingQuestion?.options || [],
+    });
+    setError(null);
+  }, [categoryId, existingQuestion]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,15 +75,11 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     }
   };
 
-  const toggleBold = () => editor?.chain().focus().toggleBold().run();
-  const toggleItalic = () => editor?.chain().focus().toggleItalic().run();
-  const toggleStrike = () => editor?.chain().focus().toggleStrike().run();
-
   const isEditing = !!existingQuestion;
 
   return (
-    <div className="p-6 bg-white  rounded-lg shadow-sm border border-slate-200 ">
-      <h2 className="text-lg font-semibold mb-4 text-slate-800 ">
+    <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200">
+      <h2 className="text-lg font-semibold mb-4 text-slate-800">
         {isEditing ? "Edit Question" : "Create New Question"}
       </h2>
       {error && (
@@ -99,7 +93,10 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
             value={formData.type}
             disabled={isEditing}
             onChange={(e) =>
-              setFormData({ ...formData, type: e.target.value as QuestionType })
+              setFormData((prev) => ({
+                ...prev,
+                type: e.target.value as QuestionType,
+              }))
             }
           >
             {Object.values(QuestionType).map((t) => (
@@ -116,47 +113,24 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
             type="text"
             required
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, name: e.target.value }))
+            }
             placeholder="Question Name"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700  mb-1">
-            Question Text
-          </label>
-          <div className="border border-gray-300  rounded-md overflow-hidden">
-            {/* Toolbar */}
-            <div className="flex flex-wrap gap-1 border-b border-gray-300  p-2 bg-slate-50 ">
-              <Button
-                type="button"
-                onClick={toggleBold}
-                variant={editor?.isActive("bold") ? "filled" : "ghost"}
-                size="sm"
-                iconOnly
-                leftIcon={Bold}
-              />
-              <Button
-                type="button"
-                onClick={toggleItalic}
-                variant={editor?.isActive("italic") ? "filled" : "ghost"}
-                size="sm"
-                iconOnly
-                leftIcon={Italic}
-              />
-              <Button
-                type="button"
-                onClick={toggleStrike}
-                variant={editor?.isActive("strike") ? "filled" : "ghost"}
-                size="sm"
-                iconOnly
-                leftIcon={Strikethrough}
-              />
-            </div>
-
-            {/* Editor Content */}
-            <EditorContent editor={editor} />
-          </div>
+          <RichTextEditorField
+            label="Question Text"
+            required
+            value={formData.questionText}
+            onChange={({ html }) =>
+              setFormData((prev) => ({ ...prev, questionText: html }))
+            }
+            placeholder="Tulis teks pertanyaan di sini..."
+            minHeight="150px"
+          />
         </div>
 
         <div>
@@ -167,10 +141,10 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
             min="1"
             value={formData.defaultMark}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                defaultMark: parseInt(e.target.value, 10),
-              })
+              setFormData((prev) => ({
+                ...prev,
+                defaultMark: parseInt(e.target.value, 10) || 1,
+              }))
             }
           />
         </div>
