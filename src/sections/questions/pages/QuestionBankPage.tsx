@@ -1,3 +1,4 @@
+// Files: src/sections/questions/pages/QuestionBankPage.tsx
 "use client";
 
 import type React from "react";

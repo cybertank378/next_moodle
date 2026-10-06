@@ -1,5 +1,6 @@
 // Files: src/modules/notification/infrastructure/providers/NotificationContentRenderer.ts
 
+import katex from "katex";
 import type { NotificationContentRendererInterface } from "@/modules/notification/domain/interfaces/NotificationContentRendererInterface";
 
 interface TiptapNode {
@@ -29,6 +30,64 @@ export class NotificationContentRenderer
     return lines.join(" ").replace(/\s+/g, " ").trim();
   }
 
+  renderHtmlWithMath(rawHtml: string): string {
+    if (!rawHtml || typeof rawHtml !== "string") {
+      return "";
+    }
+
+    // 1. Sanitize raw HTML from dangerous scripts and event handlers
+    let sanitized = rawHtml
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+      .replace(/\son\w+\s*=\s*(["'][^"']*["']|[^\s>]+)/gi, "")
+      .replace(/href\s*=\s*["']\s*javascript:[^"']*["']/gi, 'href="#"');
+
+    // 2. Render inline math markers: <span ... data-type="inline-math" ...>
+    sanitized = sanitized.replace(
+      /<span\b([^>]*\bdata-type=["']inline-math["'][^>]*)>(?:[\s\S]*?)<\/span>/gi,
+      (full, attrs) => {
+        const match = attrs.match(/\bdata-latex=(["'])(.*?)\1/i);
+        const latex = match ? match[2] : "";
+        if (!latex) return full;
+        const unescaped = this.decodeHtmlEntities(latex);
+        try {
+          const mathHtml = katex.renderToString(unescaped, {
+            displayMode: false,
+            throwOnError: false,
+            trust: false,
+          });
+          return `<span class="math-inline inline-block align-middle" data-type="inline-math" data-latex="${this.escapeHtml(unescaped)}">${mathHtml}</span>`;
+        } catch {
+          return full;
+        }
+      },
+    );
+
+    // 3. Render block math markers: <div ... data-type="block-math" ...>
+    sanitized = sanitized.replace(
+      /<div\b([^>]*\bdata-type=["']block-math["'][^>]*)>(?:[\s\S]*?)<\/div>/gi,
+      (full, attrs) => {
+        const match = attrs.match(/\bdata-latex=(["'])(.*?)\1/i);
+        const latex = match ? match[2] : "";
+        if (!latex) return full;
+        const unescaped = this.decodeHtmlEntities(latex);
+        try {
+          const mathHtml = katex.renderToString(unescaped, {
+            displayMode: true,
+            throwOnError: false,
+            trust: false,
+          });
+          return `<div class="math-block overflow-x-auto my-3 py-1 text-center" data-type="block-math" data-latex="${this.escapeHtml(unescaped)}">${mathHtml}</div>`;
+        } catch {
+          return full;
+        }
+      },
+    );
+
+    return sanitized;
+  }
+
   private escapeHtml(str: string): string {
     return str
       .replace(/&/g, "&amp;")
@@ -36,6 +95,16 @@ export class NotificationContentRenderer
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  private decodeHtmlEntities(str: string): string {
+    return str
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&#x27;/g, "'");
   }
 
   private sanitizeUrl(url?: unknown): string {
@@ -53,7 +122,7 @@ export class NotificationContentRenderer
   }
 
   private renderNode(node: TiptapNode): string {
-    if (!node || !node.type) return "";
+    if (!node?.type) return "";
 
     if (node.type === "text") {
       let text = this.escapeHtml(node.text || "");
@@ -72,6 +141,38 @@ export class NotificationContentRenderer
         }
       }
       return text;
+    }
+
+    if (node.type === "inlineMath") {
+      const latex =
+        typeof node.attrs?.latex === "string" ? node.attrs.latex : "";
+      let mathHtml = "";
+      try {
+        mathHtml = katex.renderToString(latex, {
+          displayMode: false,
+          throwOnError: false,
+          trust: false,
+        });
+      } catch {
+        mathHtml = this.escapeHtml(latex);
+      }
+      return `<span class="math-inline inline-block align-middle" data-type="inline-math" data-latex="${this.escapeHtml(latex)}">${mathHtml}</span>`;
+    }
+
+    if (node.type === "blockMath") {
+      const latex =
+        typeof node.attrs?.latex === "string" ? node.attrs.latex : "";
+      let mathHtml = "";
+      try {
+        mathHtml = katex.renderToString(latex, {
+          displayMode: true,
+          throwOnError: false,
+          trust: false,
+        });
+      } catch {
+        mathHtml = this.escapeHtml(latex);
+      }
+      return `<div class="math-block overflow-x-auto my-3 py-1 text-center" data-type="block-math" data-latex="${this.escapeHtml(latex)}">${mathHtml}</div>`;
     }
 
     const childrenHtml =
@@ -108,6 +209,13 @@ export class NotificationContentRenderer
     if (!node) return;
     if (node.type === "text" && node.text) {
       acc.push(node.text);
+    }
+    if (
+      (node.type === "inlineMath" || node.type === "blockMath") &&
+      typeof node.attrs?.latex === "string" &&
+      node.attrs.latex.trim()
+    ) {
+      acc.push(node.attrs.latex.trim());
     }
     if (node.content && Array.isArray(node.content)) {
       for (const child of node.content) {

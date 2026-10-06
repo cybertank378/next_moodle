@@ -24,7 +24,10 @@ export default function RichTextEditorField({
         </label>
       )}
 
-      <RichTextEditor {...editorProps} ariaLabel={label || editorProps.ariaLabel} />
+      <RichTextEditor
+        {...editorProps}
+        ariaLabel={label || editorProps.ariaLabel}
+      />
 
       {error ? (
         <p className="text-xs text-rose-600 font-medium">{error}</p>

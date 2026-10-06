@@ -53,8 +53,8 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     e.preventDefault();
     setError(null);
 
-    let res;
-    if (existingQuestion && existingQuestion.id) {
+    let res: { data?: unknown; error?: unknown };
+    if (existingQuestion?.id) {
       res = await updateQuestion(existingQuestion.id, {
         name: formData.name,
         questionText: formData.questionText,

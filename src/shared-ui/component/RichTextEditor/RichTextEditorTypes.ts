@@ -4,7 +4,11 @@ export type NeutralRichTextDocument = Record<string, unknown>;
 
 export interface RichTextEditorProps {
   value?: NeutralRichTextDocument | string | null;
-  onChange?: (val: { json: NeutralRichTextDocument; text: string; html: string }) => void;
+  onChange?: (val: {
+    json: NeutralRichTextDocument;
+    text: string;
+    html: string;
+  }) => void;
   disabled?: boolean;
   readOnly?: boolean;
   placeholder?: string;

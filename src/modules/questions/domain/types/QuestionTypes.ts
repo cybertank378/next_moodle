@@ -1,3 +1,5 @@
+// Files: src/modules/questions/domain/types/QuestionTypes.ts
+
 export enum QuestionType {
   MULTICHOICE = "multichoice",
   TRUEFALSE = "truefalse",
