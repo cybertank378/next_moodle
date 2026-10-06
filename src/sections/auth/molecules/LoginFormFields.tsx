@@ -31,11 +31,11 @@ export default function LoginFormFields({
         disabled={disabled}
         error={identifierError}
         id="username"
-        label="Username"
+        label="Nama pengguna"
         leftIcon={User}
         name="username"
         onChangeAction={onChangeIdentifier}
-        placeholder="Masukkan username Anda"
+        placeholder="Masukkan nama pengguna"
         required
         touched={submitted}
         value={identifier}
@@ -45,11 +45,11 @@ export default function LoginFormFields({
         disabled={disabled}
         error={passwordError}
         id="password"
-        label="Kata Sandi"
+        label="Kata sandi"
         leftIcon={Lock}
         name="password"
         onChangeAction={onChangePassword}
-        placeholder="Masukkan kata sandi Anda"
+        placeholder="Masukkan kata sandi"
         required
         touched={submitted}
         type="password"

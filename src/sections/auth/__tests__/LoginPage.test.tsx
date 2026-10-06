@@ -35,7 +35,7 @@ vi.mock("@/modules/auth/presentation/hooks/useAuthApi", () => ({
   useAuthApi: vi.fn(),
 }));
 
-describe("EduNusa Auth Redesign Components", () => {
+describe("Aksaventra Auth Redesign Components", () => {
   const defaultMockAuth: MockAuthHook = {
     login:
       vi.fn<
@@ -52,51 +52,60 @@ describe("EduNusa Auth Redesign Components", () => {
   });
 
   describe("Atoms", () => {
-    it("AuthBrand renders title and subtitle without duplicate accessible label", () => {
+    it("AuthBrand renders dark logo asset for light background", () => {
       const html = renderToStaticMarkup(<AuthBrand size="md" variant="dark" />);
-      expect(html).toContain("EduNusa");
-      expect(html).toContain("Sistem Pembelajaran");
+      expect(html).toContain("logo-dark.png");
+      expect(html).toContain("Aksaventra Sistem Pembelajaran");
     });
 
-    it("AuthBrand renders light variant styling for navy panel", () => {
+    it("AuthBrand renders light logo asset for navy background", () => {
       const html = renderToStaticMarkup(
         <AuthBrand size="lg" variant="light" />,
       );
-      expect(html).toContain("EduNusa");
-      expect(html).toContain("text-white");
-      expect(html).toContain("text-slate-300");
+      expect(html).toContain("logo-light.png");
+      expect(html).toContain("Aksaventra Sistem Pembelajaran");
     });
 
-    it("AuthFeatureIcon renders label and icon", () => {
+    it("AuthFeatureIcon renders title, description, and icon", () => {
       const html = renderToStaticMarkup(
-        <AuthFeatureIcon icon={GraduationCap} label="Pembelajaran" />,
+        <AuthFeatureIcon
+          description="Akses materi kapan saja dan di mana saja."
+          icon={GraduationCap}
+          title="Pembelajaran"
+        />,
       );
       expect(html).toContain("Pembelajaran");
+      expect(html).toContain("Akses materi kapan saja dan di mana saja.");
       expect(html).toContain("<svg");
     });
   });
 
   describe("Molecules", () => {
-    it("LoginFeatureRow renders all three educational features", () => {
+    it("LoginFeatureRow renders all three educational features with descriptions", () => {
       const html = renderToStaticMarkup(<LoginFeatureRow />);
       expect(html).toContain("Pembelajaran");
+      expect(html).toContain("Akses materi kapan saja dan di mana saja.");
       expect(html).toContain("Ujian Online");
+      expect(html).toContain("Laksanakan ujian dengan aman dan terstandar.");
       expect(html).toContain("Manajemen Sekolah");
+      expect(html).toContain("Kelola kelas, pengguna, dan kegiatan akademik.");
     });
 
     it("LoginHelpPanel renders contact administrator message and help text", () => {
       const html = renderToStaticMarkup(<LoginHelpPanel />);
       expect(html).toContain("Mengalami kendala masuk?");
-      expect(html).toContain("Hubungi administrator sekolah Anda");
+      expect(html).toContain("Hubungi administrator sekolah Anda.");
     });
 
-    it("LoginFooter renders dynamic current year", () => {
+    it("LoginFooter renders dynamic current year and Aksaventra branding", () => {
       const currentYear = new Date().getFullYear();
       const html = renderToStaticMarkup(<LoginFooter />);
-      expect(html).toContain(`© ${currentYear} EduNusa. Hak cipta dilindungi.`);
+      expect(html).toContain(
+        `© ${currentYear} Aksaventra • Sistem Pembelajaran`,
+      );
     });
 
-    it("LoginFormFields renders accessible inputs with autocomplete", () => {
+    it("LoginFormFields renders accessible inputs with autocomplete and Indonesian labels", () => {
       const html = renderToStaticMarkup(
         <LoginFormFields
           identifier="testuser"
@@ -106,8 +115,10 @@ describe("EduNusa Auth Redesign Components", () => {
           submitted={false}
         />,
       );
+      expect(html).toContain("Nama pengguna");
       expect(html).toContain('name="username"');
       expect(html).toContain('autoComplete="username"');
+      expect(html).toContain("Kata sandi");
       expect(html).toContain('name="password"');
       expect(html).toContain('autoComplete="current-password"');
       expect(html).toContain('type="password"');
@@ -119,7 +130,7 @@ describe("EduNusa Auth Redesign Components", () => {
       const html = renderToStaticMarkup(
         <LoginFormFields
           identifier=""
-          identifierError="Username wajib diisi"
+          identifierError="Nama pengguna wajib diisi"
           onChangeIdentifier={vi.fn()}
           onChangePassword={vi.fn()}
           password=""
@@ -127,13 +138,13 @@ describe("EduNusa Auth Redesign Components", () => {
           submitted={true}
         />,
       );
-      expect(html).toContain("Username wajib diisi");
+      expect(html).toContain("Nama pengguna wajib diisi");
       expect(html).toContain("Kata sandi wajib diisi");
     });
   });
 
   describe("Organisms", () => {
-    it("LoginBrandPanel renders copy, illustration path, and feature row", () => {
+    it("LoginBrandPanel renders copy, illustration paths, and feature row", () => {
       const html = renderToStaticMarkup(<LoginBrandPanel />);
       expect(html).toContain("Belajar lebih terarah.");
       expect(html).toContain("Kelola pendidikan lebih mudah.");
@@ -141,21 +152,26 @@ describe("EduNusa Auth Redesign Components", () => {
         "Satu tempat untuk pembelajaran, ujian, dan pengelolaan sekolah.",
       );
       expect(html).toContain("book-and-schools.png");
+      expect(html).toContain("mobile-mockup.png");
+      expect(html).toContain("logo-light.png");
       expect(html).toContain("Pembelajaran");
       expect(html).toContain("Ujian Online");
       expect(html).toContain("Manajemen Sekolah");
     });
 
-    it("LoginForm renders header badge, form, help panel, and footer", () => {
+    it("LoginForm renders header badge, form, help panel, legal notice, and footer", () => {
       const html = renderToStaticMarkup(<LoginForm />);
-      expect(html).toContain("Selamat Datang");
+      expect(html).toContain("SELAMAT DATANG");
       expect(html).toContain("Masuk ke akun Anda");
       expect(html).toContain(
         "Gunakan akun yang diberikan sekolah atau administrator.",
       );
+      expect(html).toContain("Lupa kata sandi?");
       expect(html).toContain("Masuk");
       expect(html).toContain("Mengalami kendala masuk?");
-      expect(html).toContain("EduNusa. Hak cipta dilindungi.");
+      expect(html).toContain("Ketentuan Penggunaan");
+      expect(html).toContain("Kebijakan Privasi");
+      expect(html).toContain("Aksaventra • Sistem Pembelajaran");
     });
 
     it("LoginForm displays loading state on button when auth is pending", () => {
@@ -190,7 +206,7 @@ describe("EduNusa Auth Redesign Components", () => {
     it("AuthPage renders LoginPageSection when mode is login", () => {
       const html = renderToStaticMarkup(<AuthPage mode="login" />);
       expect(html).toContain("Masuk ke akun Anda");
-      expect(html).toContain("EduNusa");
+      expect(html).toContain("Aksaventra");
     });
 
     it("AuthPage renders AuthFeatureUnavailable for non-login modes without regression", () => {
@@ -201,7 +217,7 @@ describe("EduNusa Auth Redesign Components", () => {
   });
 
   describe("Validation & Submission Behavior Logic", () => {
-    it("prevents submission on first click when fields are empty", async () => {
+    it("prevents submission on first click when fields are empty", () => {
       const mockLogin =
         vi.fn<
           (input: { username: string; password: string }) => Promise<unknown>

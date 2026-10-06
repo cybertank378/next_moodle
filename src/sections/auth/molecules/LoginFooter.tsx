@@ -12,11 +12,11 @@ export default function LoginFooter({ className }: LoginFooterProps) {
   return (
     <footer
       className={clsx(
-        "text-center text-xs text-slate-400 dark:text-slate-500 select-none",
+        "text-center sm:text-right text-xs text-slate-400 dark:text-slate-500 select-none",
         className,
       )}
     >
-      <p>© {currentYear} EduNusa. Hak cipta dilindungi.</p>
+      <p>© {currentYear} Aksaventra • Sistem Pembelajaran</p>
     </footer>
   );
 }

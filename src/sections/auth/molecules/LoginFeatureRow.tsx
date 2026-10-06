@@ -1,7 +1,7 @@
 // Files: src/sections/auth/molecules/LoginFeatureRow.tsx
 
 import clsx from "clsx";
-import { Building2, FileCheck2, GraduationCap } from "lucide-react";
+import { BookOpen, FileText, Users } from "lucide-react";
 import AuthFeatureIcon from "@/sections/auth/atoms/AuthFeatureIcon";
 
 export interface LoginFeatureRowProps {
@@ -12,33 +12,37 @@ export default function LoginFeatureRow({ className }: LoginFeatureRowProps) {
   const features = [
     {
       id: "learning",
-      label: "Pembelajaran",
-      icon: GraduationCap,
+      title: "Pembelajaran",
+      description: "Akses materi kapan saja dan di mana saja.",
+      icon: BookOpen,
     },
     {
       id: "exams",
-      label: "Ujian Online",
-      icon: FileCheck2,
+      title: "Ujian Online",
+      description: "Laksanakan ujian dengan aman dan terstandar.",
+      icon: FileText,
     },
     {
       id: "management",
-      label: "Manajemen Sekolah",
-      icon: Building2,
+      title: "Manajemen Sekolah",
+      description: "Kelola kelas, pengguna, dan kegiatan akademik.",
+      icon: Users,
     },
   ];
 
   return (
     <div
       className={clsx(
-        "flex flex-wrap items-center gap-2.5 sm:gap-3",
+        "grid grid-cols-1 md:grid-cols-3 gap-5 xl:gap-6 w-full",
         className,
       )}
     >
       {features.map((feature) => (
         <AuthFeatureIcon
+          description={feature.description}
           icon={feature.icon}
           key={feature.id}
-          label={feature.label}
+          title={feature.title}
         />
       ))}
     </div>
