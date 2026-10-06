@@ -2,27 +2,33 @@
 "use client";
 
 import type { Editor } from "@tiptap/react";
+import clsx from "clsx";
 import {
   Bold,
-  Italic,
-  Strikethrough,
   Heading2,
   Heading3,
+  Italic,
   List,
   ListOrdered,
   Quote,
+  RemoveFormatting,
   RotateCcw,
   RotateCw,
-  RemoveFormatting,
+  Sigma,
+  Strikethrough,
 } from "lucide-react";
-import clsx from "clsx";
 
 interface RichTextEditorToolbarProps {
   editor: Editor | null;
   disabled?: boolean;
+  onOpenMathModal?: () => void;
 }
 
-export function RichTextEditorToolbar({ editor, disabled }: RichTextEditorToolbarProps) {
+export function RichTextEditorToolbar({
+  editor,
+  disabled,
+  onOpenMathModal,
+}: RichTextEditorToolbarProps) {
   if (!editor) return null;
 
   const btnClass = (isActive: boolean) =>
@@ -145,10 +151,26 @@ export function RichTextEditorToolbar({ editor, disabled }: RichTextEditorToolba
         title="Hapus Pemformatan"
         aria-label="Hapus Pemformatan"
         disabled={disabled}
-        onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+        onClick={() =>
+          editor.chain().focus().unsetAllMarks().clearNodes().run()
+        }
         className={btnClass(false)}
       >
         <RemoveFormatting className="w-4 h-4" />
+      </button>
+
+      <div className="w-[1px] h-4 bg-slate-200 mx-1" />
+
+      <button
+        type="button"
+        title="Rumus Matematika (LaTeX)"
+        aria-label="Sisipkan Rumus Matematika"
+        data-testid="toolbar-math-btn"
+        disabled={disabled}
+        onClick={onOpenMathModal}
+        className={btnClass(false)}
+      >
+        <Sigma className="w-4 h-4" />
       </button>
 
       <div className="w-[1px] h-4 bg-slate-200 mx-1" />

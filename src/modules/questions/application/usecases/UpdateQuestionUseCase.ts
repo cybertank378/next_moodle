@@ -1,3 +1,5 @@
+// Files: src/modules/questions/application/usecases/UpdateQuestionUseCase.ts
+
 import type { MoodleClient } from "@/core/moodle/types";
 import type { QuestionEntity } from "@/modules/questions/domain/entity/QuestionEntity";
 import type { QuestionRepositoryInterface } from "@/modules/questions/domain/interfaces/QuestionRepositoryInterface";
@@ -10,7 +12,7 @@ export class UpdateQuestionUseCase {
   async execute(
     client: MoodleClient,
     questionId: number,
-    dto: any,
+    dto: Record<string, unknown> | null,
   ): Promise<QuestionEntity> {
     const validationResult = UpdateQuestionDtoValidator.validate(dto);
     if (!validationResult.isSuccess) {

@@ -1,7 +1,10 @@
+// Files: src/modules/questions/domain/validators/QuestionValidator.ts
+
 import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
 import {
   type CreateQuestionRequestDto,
+  type UpdateQuestionRequestDto,
   QuestionType,
 } from "@/modules/questions/domain/types/QuestionTypes";
 
@@ -43,7 +46,12 @@ export class CreateQuestionDtoValidator {
 }
 
 export class UpdateQuestionDtoValidator {
-  static validate(dto: any): Result<any, ValidationError> {
+  static validate(
+    dto: Record<string, unknown> | null,
+  ): Result<UpdateQuestionRequestDto, ValidationError> {
+    if (!dto || typeof dto !== "object") {
+      return Result.fail(new ValidationError("Invalid DTO"));
+    }
     if (dto.name !== undefined && typeof dto.name !== "string") {
       return Result.fail(new ValidationError("Name must be a string"));
     }
@@ -56,6 +64,6 @@ export class UpdateQuestionDtoValidator {
     if (dto.defaultMark !== undefined && typeof dto.defaultMark !== "number") {
       return Result.fail(new ValidationError("Default mark must be a number"));
     }
-    return Result.ok(dto);
+    return Result.ok(dto as unknown as UpdateQuestionRequestDto);
   }
 }

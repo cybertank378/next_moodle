@@ -2,16 +2,19 @@
 "use client";
 
 import clsx from "clsx";
-import type { RichTextViewerProps } from "@/shared-ui/component/RichTextEditor/RichTextEditorTypes";
 import { NotificationContentRenderer } from "@/modules/notification/infrastructure/providers/NotificationContentRenderer";
+import type { RichTextViewerProps } from "@/shared-ui/component/RichTextEditor/RichTextEditorTypes";
 
 const renderer = new NotificationContentRenderer();
 
-export default function RichTextViewer({ content, className }: RichTextViewerProps) {
+export default function RichTextViewer({
+  content,
+  className,
+}: RichTextViewerProps) {
   let html = "";
 
   if (typeof content === "string") {
-    html = content;
+    html = renderer.renderHtmlWithMath(content);
   } else if (content && typeof content === "object") {
     html = renderer.renderToSanitizedHtml(content);
   }
@@ -19,9 +22,10 @@ export default function RichTextViewer({ content, className }: RichTextViewerPro
   return (
     <div
       className={clsx(
-        "prose prose-sm max-w-none text-slate-800 leading-relaxed",
+        "prose prose-sm max-w-none text-slate-800 dark:text-slate-200 leading-relaxed overflow-x-auto",
         className,
       )}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: Sanitized rich text with KaTeX
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

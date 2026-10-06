@@ -1,11 +1,10 @@
 // Files: src/sections/questions/__tests__/QuestionEditor.test.tsx
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { QuestionEditor } from "@/sections/questions/organisms/QuestionEditor";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QuestionType } from "@/modules/questions/domain/types/QuestionTypes";
 import * as questionHook from "@/modules/questions/presentation/hooks/useQuestionApi";
+import { QuestionEditor } from "@/sections/questions/organisms/QuestionEditor";
 
 vi.mock("@/modules/questions/presentation/hooks/useQuestionApi", () => ({
   useQuestionApi: vi.fn(),
@@ -54,6 +53,30 @@ describe("QuestionEditor", () => {
 
     expect(html).toContain("Edit Question");
     expect(html).toContain("Soal Matematika 1");
+    expect(html).toContain("Update Question");
+  });
+
+  it("should render edit question form preserving LaTeX math equation markers", () => {
+    const existingQuestion = {
+      id: 43,
+      name: "Soal Persamaan Kuadrat",
+      questionText:
+        '<p>Selesaikan persamaan <span data-type="inline-math" data-latex="x^2 + 5x + 6 = 0"></span> berikut:</p>' +
+        '<div data-type="block-math" data-latex="x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}"></div>',
+      type: QuestionType.MULTICHOICE,
+      defaultMark: 3,
+      options: [],
+    };
+
+    const html = renderToStaticMarkup(
+      <QuestionEditor
+        categoryId={1}
+        existingQuestion={existingQuestion}
+        onSuccess={mockOnSuccess}
+      />,
+    );
+
+    expect(html).toContain("Soal Persamaan Kuadrat");
     expect(html).toContain("Update Question");
   });
 });
