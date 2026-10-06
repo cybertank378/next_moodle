@@ -2,10 +2,8 @@
 "use client";
 
 import clsx from "clsx";
-import { NotificationContentRenderer } from "@/modules/notification/infrastructure/providers/NotificationContentRenderer";
 import type { RichTextViewerProps } from "@/shared-ui/component/RichTextEditor/RichTextEditorTypes";
-
-const renderer = new NotificationContentRenderer();
+import { richTextRenderer } from "@/shared-ui/component/RichTextEditor/richTextRenderer";
 
 export default function RichTextViewer({
   content,
@@ -13,10 +11,26 @@ export default function RichTextViewer({
 }: RichTextViewerProps) {
   let html = "";
 
-  if (typeof content === "string") {
-    html = renderer.renderHtmlWithMath(content);
-  } else if (content && typeof content === "object") {
-    html = renderer.renderToSanitizedHtml(content);
+  try {
+    if (typeof content === "string") {
+      const trimmed = content.trim();
+      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(trimmed) as Record<string, unknown>;
+          html = richTextRenderer.renderToSanitizedHtml(parsed);
+        } catch {
+          html = richTextRenderer.renderHtmlWithMath(content);
+        }
+      } else {
+        html = richTextRenderer.renderHtmlWithMath(content);
+      }
+    } else if (content && typeof content === "object") {
+      html = richTextRenderer.renderToSanitizedHtml(
+        content as Record<string, unknown>,
+      );
+    }
+  } catch {
+    html = "";
   }
 
   return (
