@@ -1,12 +1,13 @@
+// Files: src/sections/auth/pages/AuthPage.tsx
 "use client";
 
 import type { ReactNode } from "react";
 import ChangePasswordForm from "@/sections/auth/organisms/ChangePasswordForm";
 import ForgetPasswordForm from "@/sections/auth/organisms/ForgetPasswordForm";
-import LoginForm from "@/sections/auth/organisms/LoginForm";
 import RegisterForm from "@/sections/auth/organisms/RegisterForm";
 import ResetPasswordForm from "@/sections/auth/organisms/ResetPasswordForm";
 import VerifyEmailForm from "@/sections/auth/organisms/VerifyEmailForm";
+import LoginPageSection from "@/sections/auth/pages/LoginPageSection";
 
 export type AuthMode =
   | "login"
@@ -21,10 +22,12 @@ interface Props {
 }
 
 export default function AuthPage({ mode }: Props) {
+  if (mode === "login") {
+    return <LoginPageSection />;
+  }
+
   const resolveComponent = (): ReactNode => {
     switch (mode) {
-      case "login":
-        return <LoginForm />;
       case "register":
         return <RegisterForm />;
       case "forgot-password":
@@ -36,7 +39,7 @@ export default function AuthPage({ mode }: Props) {
       case "verify-email":
         return <VerifyEmailForm />;
       default:
-        return <LoginForm />;
+        return <LoginPageSection />;
     }
   };
 
