@@ -1,9 +1,11 @@
+// Files: src/modules/notification/application/usecases/CreateNotificationUseCase.ts
 import { ValidationError } from "@/core/errors/ValidationError";
 import type { CreateNotificationRequestDto } from "@/modules/notification/domain/dto/NotificationRequestDto";
 import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 
 import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
+import type { NotificationOutboxRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_BODY_LENGTH = 1000;
@@ -21,6 +23,7 @@ export class CreateNotificationUseCase {
   constructor(
     private readonly repo: NotificationRepositoryInterface,
     private readonly wsAdapter?: PushNotificationAdapterInterface,
+    private readonly outboxRepo?: NotificationOutboxRepositoryInterface,
   ) {}
 
   async execute(
@@ -55,10 +58,30 @@ export class CreateNotificationUseCase {
     });
 
     if (this.wsAdapter) {
-      // fire-and-forget to avoid blocking the response
-      this.wsAdapter.dispatchNotification(notification).catch((err) => {
+      try {
+        const result = await this.wsAdapter.dispatchNotification(notification);
+        if (
+          result &&
+          result.outcome === "FAILED" &&
+          result.isRetryable &&
+          this.outboxRepo
+        ) {
+          await this.outboxRepo.enqueue(
+            notification.id,
+            "RETRY_PUSH_DISPATCH",
+            { notificationId: notification.id },
+          );
+        }
+      } catch (err) {
         console.error("Failed to dispatch real-time notification:", err);
-      });
+        if (this.outboxRepo) {
+          await this.outboxRepo
+            .enqueue(notification.id, "RETRY_PUSH_DISPATCH", {
+              notificationId: notification.id,
+            })
+            .catch((e) => console.error("Failed to enqueue outbox:", e));
+        }
+      }
     }
 
     return notification;

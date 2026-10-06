@@ -1,3 +1,4 @@
+// Files: src/modules/notification/domain/interfaces/NotificationRepositoryInterface.ts
 import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 import type { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
 import type { NotificationScope } from "@/modules/notification/domain/value-object/NotificationScope";
@@ -32,7 +33,7 @@ export interface NotificationRepositoryInterface {
   ): Promise<FindByRecipientResult>;
   countUnread(scope: NotificationScope): Promise<number>;
   findById(id: string): Promise<NotificationEntity | null>;
-  markAsRead(id: string): Promise<NotificationEntity>;
+  markAsRead(id: string, scope?: NotificationScope): Promise<NotificationEntity>;
   markAllAsRead(scope: NotificationScope): Promise<number>;
   create(options: CreateNotificationOptions): Promise<NotificationEntity>;
 }

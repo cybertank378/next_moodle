@@ -1,3 +1,4 @@
+// Files: src/modules/notification/infrastructure/repo/PrismaNotificationRepository.ts
 import "server-only";
 
 import { prisma } from "@/libs/prisma";
@@ -13,7 +14,7 @@ import type { NotificationScope } from "@/modules/notification/domain/value-obje
 
 function mapPrismaToEntity(row: {
   id: string;
-  tenantId: string;
+  tenantId: string | null;
   recipientId: string;
   recipientRole: string;
   type: string;
@@ -39,10 +40,15 @@ function mapPrismaToEntity(row: {
   });
 }
 
+export type NotificationPrismaClient = Pick<
+  typeof prisma,
+  "notification" | "$transaction"
+>;
+
 export class PrismaNotificationRepository
   implements NotificationRepositoryInterface
 {
-  constructor(private readonly db: any = prisma) {}
+  constructor(private readonly db: NotificationPrismaClient = prisma) {}
 
   async findByRecipient(
     options: FindByRecipientOptions,
@@ -86,8 +92,28 @@ export class PrismaNotificationRepository
     return mapPrismaToEntity(row);
   }
 
-  async markAsRead(id: string): Promise<NotificationEntity> {
+  async markAsRead(
+    id: string,
+    scope?: NotificationScope,
+  ): Promise<NotificationEntity> {
     const now = new Date();
+    if (scope) {
+      await this.db.notification.updateMany({
+        where: {
+          id,
+          tenantId: scope.tenantId,
+          recipientId: scope.recipientId,
+          recipientRole: scope.recipientRole,
+        },
+        data: { isRead: true, readAt: now },
+      });
+      const updated = await this.findById(id);
+      if (!updated) {
+        throw new Error("Notifikasi tidak ditemukan.");
+      }
+      return updated;
+    }
+
     const row = await this.db.notification.update({
       where: { id },
       data: { isRead: true, readAt: now },

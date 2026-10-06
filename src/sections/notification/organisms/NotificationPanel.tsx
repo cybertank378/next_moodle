@@ -1,3 +1,4 @@
+// Files: src/sections/notification/organisms/NotificationPanel.tsx
 "use client";
 
 import { CheckCheck } from "lucide-react";
@@ -7,6 +8,7 @@ import type { NotificationResponseDto } from "@/modules/notification/domain/dto/
 import { useNotificationApi } from "@/modules/notification/presentation/hooks/useNotificationApi";
 import NotificationList from "@/sections/notification/molecules/NotificationList";
 import NotificationTabBar from "@/sections/notification/molecules/NotificationTabBar";
+import Button from "@/shared-ui/component/Button";
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -25,11 +27,14 @@ export default function NotificationPanel({
     listState,
     activeTab,
     page,
+    pushPermission,
+    pushLoading,
     switchTab,
     goToPage,
     markAsRead,
     markAllAsRead,
     openPanel,
+    requestPushPermission,
   } = useNotificationApi();
 
   // Load notifications when panel opens
@@ -49,6 +54,18 @@ export default function NotificationPanel({
     return () => document.removeEventListener("mousedown", handler);
   }, [isOpen, onClose]);
 
+  // Close on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handleNotificationClick = async (
     notification: NotificationResponseDto,
   ) => {
@@ -56,7 +73,11 @@ export default function NotificationPanel({
       await markAsRead(notification.id);
     }
     onClose();
-    if (notification.linkPath) {
+    if (
+      notification.linkPath &&
+      notification.linkPath.startsWith("/") &&
+      !notification.linkPath.startsWith("//")
+    ) {
       router.push(notification.linkPath);
     }
   };
@@ -66,26 +87,50 @@ export default function NotificationPanel({
   return (
     <div
       ref={panelRef}
+      id="notification-panel"
+      role="region"
+      aria-label="Panel Notifikasi"
       data-testid="notification-panel"
-      className="absolute right-0 top-full mt-2 w-[360px] max-h-[560px] flex flex-col bg-white  rounded-xl shadow-2xl border border-slate-200  overflow-hidden z-50"
+      className="absolute right-0 top-full mt-2 w-[min(360px,calc(100vw-24px))] sm:w-[360px] max-h-[560px] flex flex-col bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-50"
     >
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200  bg-slate-50 ">
-        <h2 className="text-sm font-semibold text-slate-900 ">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50">
+        <h2 className="text-sm font-semibold text-slate-900">
           Notifikasi
         </h2>
         {unreadCount > 0 && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             data-testid="mark-all-read-btn"
             onClick={() => void markAllAsRead()}
-            className="flex items-center gap-1 text-xs text-indigo-600  hover:text-indigo-800  transition-colors"
+            className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 transition-colors h-7 px-2"
           >
-            <CheckCheck size={14} />
+            <CheckCheck size={14} className="mr-1" />
             Tandai semua dibaca
-          </button>
+          </Button>
         )}
       </div>
+
+      {/* ── Push Permission Prompt (Explicit Action) ── */}
+      {pushPermission === "default" && (
+        <div className="px-3.5 py-2.5 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between text-xs text-indigo-900 gap-2">
+          <span className="leading-snug">
+            Aktifkan notifikasi untuk menerima info terbaru langsung di browser.
+          </span>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            loading={pushLoading}
+            onClick={() => void requestPushPermission()}
+            className="shrink-0 text-xs py-1 px-2.5"
+          >
+            Aktifkan
+          </Button>
+        </div>
+      )}
 
       {/* ── Tabs ── */}
       <NotificationTabBar
