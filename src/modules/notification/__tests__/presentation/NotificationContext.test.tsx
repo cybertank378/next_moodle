@@ -1,8 +1,8 @@
 // Files: src/modules/notification/__tests__/presentation/NotificationContext.test.tsx
 
-import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
 import {
   NotificationProvider,
   useNotificationContext,

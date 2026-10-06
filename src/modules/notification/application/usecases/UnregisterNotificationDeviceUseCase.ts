@@ -4,7 +4,9 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import type { NotificationDeviceRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeviceRepositoryInterface";
 
 export class UnregisterNotificationDeviceUseCase {
-  constructor(private readonly deviceRepo: NotificationDeviceRepositoryInterface) {}
+  constructor(
+    private readonly deviceRepo: NotificationDeviceRepositoryInterface,
+  ) {}
 
   async execute(token: string): Promise<void> {
     const trimmed = token?.trim();

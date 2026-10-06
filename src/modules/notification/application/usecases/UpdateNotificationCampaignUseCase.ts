@@ -1,14 +1,14 @@
 // Files: src/modules/notification/application/usecases/UpdateNotificationCampaignUseCase.ts
 
 import { NotFoundError } from "@/core/errors/NotFoundError";
-import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
-import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
-import type { NotificationContentRendererInterface } from "@/modules/notification/domain/interfaces/NotificationContentRendererInterface";
-import type { UpdateNotificationCampaignRequestDto } from "@/modules/notification/domain/dto/NotificationCampaignRequestDto";
 import {
   type CampaignActor,
   NotificationAuthorizationService,
 } from "@/modules/notification/application/services/NotificationAuthorizationService";
+import type { UpdateNotificationCampaignRequestDto } from "@/modules/notification/domain/dto/NotificationCampaignRequestDto";
+import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
+import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
+import type { NotificationContentRendererInterface } from "@/modules/notification/domain/interfaces/NotificationContentRendererInterface";
 import { NotificationAudience } from "@/modules/notification/domain/value-object/NotificationAudience";
 import { NotificationContent } from "@/modules/notification/domain/value-object/NotificationContent";
 
@@ -35,7 +35,9 @@ export class UpdateNotificationCampaignUseCase {
     const contentJson = dto.contentJson || campaign.contentJson;
 
     if (dto.contentJson) {
-      sanitizedHtml = this.contentRenderer.renderToSanitizedHtml(dto.contentJson);
+      sanitizedHtml = this.contentRenderer.renderToSanitizedHtml(
+        dto.contentJson,
+      );
       plainText = this.contentRenderer.extractPlainText(dto.contentJson);
     }
 
@@ -44,7 +46,8 @@ export class UpdateNotificationCampaignUseCase {
       contentJson,
       sanitizedHtml,
       plainText,
-      pushSummary: dto.pushSummary !== undefined ? dto.pushSummary : campaign.pushSummary,
+      pushSummary:
+        dto.pushSummary !== undefined ? dto.pushSummary : campaign.pushSummary,
     });
 
     let audienceSpec = campaign.audienceSpec;

@@ -1,17 +1,19 @@
 // Files: src/modules/notification/__tests__/domain/NotificationCampaignEntity.test.ts
 
 import { describe, expect, it } from "vitest";
+import { ValidationError } from "@/core/errors/ValidationError";
 import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
 import {
+  NotificationAudienceScope,
+  NotificationChannel,
   NotificationDispatchStatus,
   NotificationOwnerScope,
-  NotificationChannel,
-  NotificationAudienceScope,
 } from "@/modules/notification/domain/types/NotificationTypes";
-import { ValidationError } from "@/core/errors/ValidationError";
 
 describe("NotificationCampaignEntity", () => {
-  const createSampleCampaign = (status: NotificationDispatchStatus = NotificationDispatchStatus.DRAFT) => {
+  const createSampleCampaign = (
+    status: NotificationDispatchStatus = NotificationDispatchStatus.DRAFT,
+  ) => {
     return new NotificationCampaignEntity({
       id: "camp-123",
       ownerScope: NotificationOwnerScope.TENANT,
@@ -19,7 +21,15 @@ describe("NotificationCampaignEntity", () => {
       createdById: "user-1",
       createdByRole: "TENANT",
       title: "Pengumuman Ujian Semester",
-      contentJson: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Jadwal ujian." }] }] },
+      contentJson: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Jadwal ujian." }],
+          },
+        ],
+      },
       contentSchemaVersion: 1,
       sanitizedHtml: "<p>Jadwal ujian.</p>",
       plainText: "Jadwal ujian.",
@@ -59,7 +69,9 @@ describe("NotificationCampaignEntity", () => {
   it("throws ValidationError when scheduling in the past", () => {
     const campaign = createSampleCampaign();
     const pastDate = new Date(Date.now() - 3600 * 1000);
-    expect(() => campaign.schedule(pastDate, "Asia/Jakarta")).toThrow(ValidationError);
+    expect(() => campaign.schedule(pastDate, "Asia/Jakarta")).toThrow(
+      ValidationError,
+    );
   });
 
   it("allows cancelling a SCHEDULED campaign, returning it to CANCELLED or DRAFT", () => {

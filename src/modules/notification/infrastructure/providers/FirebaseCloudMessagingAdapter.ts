@@ -2,12 +2,12 @@
 import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
+import { normalizeFcmTopic } from "@/modules/notification/domain/helpers/fcmTopicHelper";
 import type {
   PushDispatchResult,
   PushNotificationAdapterInterface,
 } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
 import { NotificationMapper } from "@/modules/notification/domain/mapper/NotificationMapper";
-import { normalizeFcmTopic } from "@/modules/notification/domain/helpers/fcmTopicHelper";
 
 // Ensure Firebase is initialized
 if (!getApps().length) {

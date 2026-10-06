@@ -14,11 +14,16 @@ export interface CampaignActor {
 export class NotificationAuthorizationService {
   static assertCanManageCampaign(actor: CampaignActor): void {
     if (actor.role !== AppRole.ADMIN && actor.role !== AppRole.TENANT) {
-      throw new ForbiddenError("Hanya Administrator atau Pengelola Tenant yang memiliki akses manajemen notifikasi.");
+      throw new ForbiddenError(
+        "Hanya Administrator atau Pengelola Tenant yang memiliki akses manajemen notifikasi.",
+      );
     }
   }
 
-  static assertCanAccessCampaign(campaign: NotificationCampaignEntity, actor: CampaignActor): void {
+  static assertCanAccessCampaign(
+    campaign: NotificationCampaignEntity,
+    actor: CampaignActor,
+  ): void {
     this.assertCanManageCampaign(actor);
 
     if (actor.role === AppRole.ADMIN) {
@@ -30,7 +35,9 @@ export class NotificationAuthorizationService {
         campaign.ownerScope !== NotificationOwnerScope.TENANT ||
         campaign.ownerTenantId !== actor.tenantId
       ) {
-        throw new ForbiddenError("Anda tidak memiliki akses ke pengumuman/notifikasi tenant lain.");
+        throw new ForbiddenError(
+          "Anda tidak memiliki akses ke pengumuman/notifikasi tenant lain.",
+        );
       }
     }
   }

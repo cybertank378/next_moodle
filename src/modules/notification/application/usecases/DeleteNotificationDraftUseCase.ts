@@ -2,14 +2,16 @@
 
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { ValidationError } from "@/core/errors/ValidationError";
-import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import {
   type CampaignActor,
   NotificationAuthorizationService,
 } from "@/modules/notification/application/services/NotificationAuthorizationService";
+import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 
 export class DeleteNotificationDraftUseCase {
-  constructor(private readonly campaignRepo: NotificationCampaignRepositoryInterface) {}
+  constructor(
+    private readonly campaignRepo: NotificationCampaignRepositoryInterface,
+  ) {}
 
   async execute(campaignId: string, actor: CampaignActor): Promise<void> {
     const campaign = await this.campaignRepo.findById(campaignId);

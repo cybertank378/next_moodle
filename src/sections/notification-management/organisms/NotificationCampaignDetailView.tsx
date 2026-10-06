@@ -1,21 +1,21 @@
 // Files: src/sections/notification-management/organisms/NotificationCampaignDetailView.tsx
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { ArrowLeft, Clock, Calendar, Send, XCircle, RefreshCw } from "lucide-react";
-import Button from "@/shared-ui/component/Button";
-import NotificationCampaignStatusBadge from "@/sections/notification-management/atoms/NotificationCampaignStatusBadge";
-import NotificationChannelBadge from "@/sections/notification-management/atoms/NotificationChannelBadge";
-import NotificationDeliveryTable from "@/sections/notification-management/molecules/NotificationDeliveryTable";
-import RichTextViewer from "@/shared-ui/component/RichTextEditor/RichTextViewer";
-import { useNotificationManagementApi } from "@/modules/notification/presentation/hooks/useNotificationManagementApi";
+import { format } from "date-fns";
+import { id as localeId } from "date-fns/locale";
+import { ArrowLeft, Clock, RefreshCw, Send, XCircle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import type {
   NotificationCampaignResponseDto,
   NotificationDeliveryItemDto,
 } from "@/modules/notification/domain/dto/NotificationCampaignResponseDto";
 import type { NotificationDeliverySummary } from "@/modules/notification/domain/types/NotificationTypes";
-import { format } from "date-fns";
-import { id as localeId } from "date-fns/locale";
+import { useNotificationManagementApi } from "@/modules/notification/presentation/hooks/useNotificationManagementApi";
+import NotificationCampaignStatusBadge from "@/sections/notification-management/atoms/NotificationCampaignStatusBadge";
+import NotificationChannelBadge from "@/sections/notification-management/atoms/NotificationChannelBadge";
+import NotificationDeliveryTable from "@/sections/notification-management/molecules/NotificationDeliveryTable";
+import Button from "@/shared-ui/component/Button";
+import RichTextViewer from "@/shared-ui/component/RichTextEditor/RichTextViewer";
 
 interface Props {
   campaignId: string;
@@ -23,7 +23,11 @@ interface Props {
   onEdit: (id: string) => void;
 }
 
-export default function NotificationCampaignDetailView({ campaignId, onBack, onEdit }: Props) {
+export default function NotificationCampaignDetailView({
+  campaignId,
+  onBack,
+  onEdit,
+}: Props) {
   const {
     fetchCampaign,
     fetchDeliveryReport,
@@ -33,9 +37,14 @@ export default function NotificationCampaignDetailView({ campaignId, onBack, onE
     loading,
   } = useNotificationManagementApi();
 
-  const [campaign, setCampaign] = useState<NotificationCampaignResponseDto | null>(null);
-  const [deliveries, setDeliveries] = useState<NotificationDeliveryItemDto[]>([]);
-  const [summary, setSummary] = useState<NotificationDeliverySummary | undefined>();
+  const [campaign, setCampaign] =
+    useState<NotificationCampaignResponseDto | null>(null);
+  const [deliveries, setDeliveries] = useState<NotificationDeliveryItemDto[]>(
+    [],
+  );
+  const [summary, setSummary] = useState<
+    NotificationDeliverySummary | undefined
+  >();
   const [totalDeliveries, setTotalDeliveries] = useState(0);
   const [page, setPage] = useState(1);
   const [retrying, setRetrying] = useState(false);
@@ -80,7 +89,9 @@ export default function NotificationCampaignDetailView({ campaignId, onBack, onE
   if (!campaign) {
     return (
       <div className="p-8 text-center text-slate-500 text-sm">
-        {loading ? "Memuat detail pengumuman..." : "Pengumuman tidak ditemukan."}
+        {loading
+          ? "Memuat detail pengumuman..."
+          : "Pengumuman tidak ditemukan."}
       </div>
     );
   }
@@ -108,10 +119,14 @@ export default function NotificationCampaignDetailView({ campaignId, onBack, onE
               />
               <span className="text-xs text-slate-400">•</span>
               <span className="text-xs text-slate-500">
-                {format(new Date(campaign.createdAt), "dd MMMM yyyy, HH:mm", { locale: localeId })}
+                {format(new Date(campaign.createdAt), "dd MMMM yyyy, HH:mm", {
+                  locale: localeId,
+                })}
               </span>
             </div>
-            <h1 className="text-xl font-bold text-slate-900">{campaign.title}</h1>
+            <h1 className="text-xl font-bold text-slate-900">
+              {campaign.title}
+            </h1>
           </div>
         </div>
 
@@ -140,7 +155,8 @@ export default function NotificationCampaignDetailView({ campaignId, onBack, onE
             </>
           )}
 
-          {(campaign.dispatchStatus === "SCHEDULED" || campaign.dispatchStatus === "QUEUED") && (
+          {(campaign.dispatchStatus === "SCHEDULED" ||
+            campaign.dispatchStatus === "QUEUED") && (
             <Button
               type="button"
               variant="danger"
@@ -169,7 +185,9 @@ export default function NotificationCampaignDetailView({ campaignId, onBack, onE
       <div className="bg-white p-6 border border-slate-200 rounded-xl shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500">Saluran:</span>
+            <span className="text-xs font-semibold text-slate-500">
+              Saluran:
+            </span>
             {campaign.channels.map((ch) => (
               <NotificationChannelBadge key={ch} channel={ch} />
             ))}

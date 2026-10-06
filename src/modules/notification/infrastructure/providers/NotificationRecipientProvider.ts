@@ -2,15 +2,17 @@
 
 import { prisma } from "@/libs/prisma";
 import type {
-  NotificationAudienceSpec,
-  NotificationOwnerScope,
-} from "@/modules/notification/domain/types/NotificationTypes";
-import type {
   NotificationRecipientProviderInterface,
   ResolvedRecipient,
 } from "@/modules/notification/domain/interfaces/NotificationRecipientProviderInterface";
+import type {
+  NotificationAudienceSpec,
+  NotificationOwnerScope,
+} from "@/modules/notification/domain/types/NotificationTypes";
 
-export class NotificationRecipientProvider implements NotificationRecipientProviderInterface {
+export class NotificationRecipientProvider
+  implements NotificationRecipientProviderInterface
+{
   async resolveRecipients(
     audienceSpec: NotificationAudienceSpec,
     ownerScope: NotificationOwnerScope,
@@ -19,7 +21,11 @@ export class NotificationRecipientProvider implements NotificationRecipientProvi
     const targetTenantId = ownerScope === "TENANT" ? ownerTenantId : null;
 
     // 1. If explicit userIds provided
-    if (audienceSpec.scope === "USERS" && audienceSpec.userIds && audienceSpec.userIds.length > 0) {
+    if (
+      audienceSpec.scope === "USERS" &&
+      audienceSpec.userIds &&
+      audienceSpec.userIds.length > 0
+    ) {
       return audienceSpec.userIds.map((uid) => ({
         recipientId: uid,
         role: "STUDENT",
@@ -89,7 +95,11 @@ export class NotificationRecipientProvider implements NotificationRecipientProvi
     ownerScope: NotificationOwnerScope,
     ownerTenantId: string | null,
   ): Promise<number> {
-    const recipients = await this.resolveRecipients(audienceSpec, ownerScope, ownerTenantId);
+    const recipients = await this.resolveRecipients(
+      audienceSpec,
+      ownerScope,
+      ownerTenantId,
+    );
     return recipients.length;
   }
 

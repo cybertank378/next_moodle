@@ -17,16 +17,32 @@ import type {
   NotificationDeliverySummary,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
+export interface NotificationCampaignSummary {
+  total: number;
+  sent: number;
+  scheduled: number;
+  draft: number;
+}
+
 export function useNotificationManagementApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [campaigns, setCampaigns] = useState<NotificationCampaignResponseDto[]>([]);
+  const [campaigns, setCampaigns] = useState<NotificationCampaignResponseDto[]>(
+    [],
+  );
   const [total, setTotal] = useState(0);
+  const [summary, setSummary] = useState<NotificationCampaignSummary>({
+    total: 0,
+    sent: 0,
+    scheduled: 0,
+    draft: 0,
+  });
 
   const fetchCampaigns = useCallback(
     async (params?: {
       search?: string;
       status?: string;
+      channel?: string;
       isArchived?: boolean;
       page?: number;
       limit?: number;
@@ -36,18 +52,29 @@ export function useNotificationManagementApi() {
       try {
         const qs = new URLSearchParams();
         if (params?.search) qs.set("search", params.search);
-        if (params?.status && params.status !== "ALL") qs.set("status", params.status);
-        if (params?.isArchived !== undefined) qs.set("isArchived", String(params.isArchived));
+        if (params?.status && params.status !== "ALL")
+          qs.set("status", params.status);
+        if (params?.channel && params.channel !== "ALL")
+          qs.set("channel", params.channel);
+        if (params?.isArchived !== undefined)
+          qs.set("isArchived", String(params.isArchived));
         if (params?.page) qs.set("page", String(params.page));
         if (params?.limit) qs.set("limit", String(params.limit));
 
-        const res = await fetch(`/api/notification-management/campaigns?${qs.toString()}`);
+        const res = await fetch(
+          `/api/notification-management/campaigns?${qs.toString()}`,
+        );
         const json = await res.json();
         if (!res.ok || !json.success) {
-          throw new Error(json.error?.message || "Gagal memuat daftar pengumuman.");
+          throw new Error(
+            json.error?.message || "Gagal memuat daftar pengumuman.",
+          );
         }
         setCampaigns(json.data.items);
         setTotal(json.data.total);
+        if (json.data.summary) {
+          setSummary(json.data.summary);
+        }
         return json.data;
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
@@ -67,7 +94,9 @@ export function useNotificationManagementApi() {
       const res = await fetch(`/api/notification-management/campaigns/${id}`);
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || "Gagal memuat detail pengumuman.");
+        throw new Error(
+          json.error?.message || "Gagal memuat detail pengumuman.",
+        );
       }
       return json.data as NotificationCampaignResponseDto;
     } catch (err: unknown) {
@@ -79,42 +108,50 @@ export function useNotificationManagementApi() {
     }
   }, []);
 
-  const createCampaign = useCallback(async (dto: CreateNotificationCampaignRequestDto) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/notification-management/campaigns", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dto),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || "Gagal membuat pengumuman.");
+  const createCampaign = useCallback(
+    async (dto: CreateNotificationCampaignRequestDto) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/notification-management/campaigns", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dto),
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          throw new Error(json.error?.message || "Gagal membuat pengumuman.");
+        }
+        return json.data as NotificationCampaignResponseDto;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
+        setError(msg);
+        throw err;
+      } finally {
+        setLoading(false);
       }
-      return json.data as NotificationCampaignResponseDto;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
-      setError(msg);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const updateCampaign = useCallback(
     async (id: string, dto: UpdateNotificationCampaignRequestDto) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/notification-management/campaigns/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dto),
-        });
+        const res = await fetch(
+          `/api/notification-management/campaigns/${id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dto),
+          },
+        );
         const json = await res.json();
         if (!res.ok || !json.success) {
-          throw new Error(json.error?.message || "Gagal memperbarui pengumuman.");
+          throw new Error(
+            json.error?.message || "Gagal memperbarui pengumuman.",
+          );
         }
         return json.data as NotificationCampaignResponseDto;
       } catch (err: unknown) {
@@ -148,24 +185,30 @@ export function useNotificationManagementApi() {
     }
   }, []);
 
-  const previewAudience = useCallback(async (audienceSpec: NotificationAudienceSpec) => {
-    try {
-      const res = await fetch("/api/notification-management/campaigns/dummy/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audienceSpec }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || "Gagal memeriksa audiens.");
+  const previewAudience = useCallback(
+    async (audienceSpec: NotificationAudienceSpec) => {
+      try {
+        const res = await fetch(
+          "/api/notification-management/campaigns/dummy/preview",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ audienceSpec }),
+          },
+        );
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          throw new Error(json.error?.message || "Gagal memeriksa audiens.");
+        }
+        return json.data as NotificationAudiencePreviewResponseDto;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
+        setError(msg);
+        throw err;
       }
-      return json.data as NotificationAudiencePreviewResponseDto;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
-      setError(msg);
-      throw err;
-    }
-  }, []);
+    },
+    [],
+  );
 
   const fetchRecipientOptions = useCallback(async () => {
     try {
@@ -186,9 +229,12 @@ export function useNotificationManagementApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/notification-management/campaigns/${id}/send`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/notification-management/campaigns/${id}/send`,
+        {
+          method: "POST",
+        },
+      );
       const json = await res.json();
       if (!res.ok || !json.success) {
         throw new Error(json.error?.message || "Gagal mengirim pengumuman.");
@@ -208,14 +254,19 @@ export function useNotificationManagementApi() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/notification-management/campaigns/${id}/schedule`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ scheduledAt, timezone }),
-        });
+        const res = await fetch(
+          `/api/notification-management/campaigns/${id}/schedule`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ scheduledAt, timezone }),
+          },
+        );
         const json = await res.json();
         if (!res.ok || !json.success) {
-          throw new Error(json.error?.message || "Gagal menjadwalkan pengumuman.");
+          throw new Error(
+            json.error?.message || "Gagal menjadwalkan pengumuman.",
+          );
         }
         return json.data as NotificationCampaignResponseDto;
       } catch (err: unknown) {
@@ -233,9 +284,12 @@ export function useNotificationManagementApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/notification-management/campaigns/${id}/cancel`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/notification-management/campaigns/${id}/cancel`,
+        {
+          method: "POST",
+        },
+      );
       const json = await res.json();
       if (!res.ok || !json.success) {
         throw new Error(json.error?.message || "Gagal membatalkan pengumuman.");
@@ -254,12 +308,17 @@ export function useNotificationManagementApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/notification-management/campaigns/${id}/archive`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/notification-management/campaigns/${id}/archive`,
+        {
+          method: "POST",
+        },
+      );
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || "Gagal mengarsipkan pengumuman.");
+        throw new Error(
+          json.error?.message || "Gagal mengarsipkan pengumuman.",
+        );
       }
       return json.data as NotificationCampaignResponseDto;
     } catch (err: unknown) {
@@ -275,9 +334,12 @@ export function useNotificationManagementApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/notification-management/campaigns/${id}/retry`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/notification-management/campaigns/${id}/retry`,
+        {
+          method: "POST",
+        },
+      );
       const json = await res.json();
       if (!res.ok || !json.success) {
         throw new Error(json.error?.message || "Gagal mengulang pengiriman.");
@@ -292,36 +354,42 @@ export function useNotificationManagementApi() {
     }
   }, []);
 
-  const fetchDeliveryReport = useCallback(async (id: string, page = 1, limit = 20) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `/api/notification-management/campaigns/${id}/deliveries?page=${page}&limit=${limit}`,
-      );
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || "Gagal memuat laporan pengiriman.");
+  const fetchDeliveryReport = useCallback(
+    async (id: string, page = 1, limit = 20) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/notification-management/campaigns/${id}/deliveries?page=${page}&limit=${limit}`,
+        );
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          throw new Error(
+            json.error?.message || "Gagal memuat laporan pengiriman.",
+          );
+        }
+        return json.data as {
+          items: NotificationDeliveryItemDto[];
+          total: number;
+          summary: NotificationDeliverySummary;
+        };
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
+        setError(msg);
+        throw err;
+      } finally {
+        setLoading(false);
       }
-      return json.data as {
-        items: NotificationDeliveryItemDto[];
-        total: number;
-        summary: NotificationDeliverySummary;
-      };
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
-      setError(msg);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   return {
     loading,
     error,
     campaigns,
     total,
+    summary,
     fetchCampaigns,
     fetchCampaign,
     createCampaign,

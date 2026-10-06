@@ -23,5 +23,7 @@ export interface NotificationDeliveryRepositoryInterface {
     },
   ): Promise<void>;
   getDeliverySummary(campaignId: string): Promise<NotificationDeliverySummary>;
-  findEligibleForRetry(campaignId: string): Promise<NotificationDeliveryEntity[]>;
+  findEligibleForRetry(
+    campaignId: string,
+  ): Promise<NotificationDeliveryEntity[]>;
 }

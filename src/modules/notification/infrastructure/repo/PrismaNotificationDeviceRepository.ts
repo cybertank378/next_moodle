@@ -7,7 +7,9 @@ import type {
   NotificationDeviceRepositoryInterface,
 } from "@/modules/notification/domain/interfaces/NotificationDeviceRepositoryInterface";
 
-export class PrismaNotificationDeviceRepository implements NotificationDeviceRepositoryInterface {
+export class PrismaNotificationDeviceRepository
+  implements NotificationDeviceRepositoryInterface
+{
   async register(input: NotificationDeviceInput): Promise<void> {
     await prisma.notificationDevice.upsert({
       where: { token: input.token },
@@ -39,8 +41,19 @@ export class PrismaNotificationDeviceRepository implements NotificationDeviceRep
   }
 
   async findActiveByRecipients(
-    recipients: Array<{ recipientId: string; role: string; tenantId: string | null }>,
-  ): Promise<Array<{ userId: string; role: string; token: string; tenantId: string | null }>> {
+    recipients: Array<{
+      recipientId: string;
+      role: string;
+      tenantId: string | null;
+    }>,
+  ): Promise<
+    Array<{
+      userId: string;
+      role: string;
+      token: string;
+      tenantId: string | null;
+    }>
+  > {
     if (recipients.length === 0) return [];
 
     const userIds = [...new Set(recipients.map((r) => r.recipientId))];
@@ -61,7 +74,9 @@ export class PrismaNotificationDeviceRepository implements NotificationDeviceRep
     return devices;
   }
 
-  async findActiveByUserId(userId: string): Promise<NotificationDeviceRecord[]> {
+  async findActiveByUserId(
+    userId: string,
+  ): Promise<NotificationDeviceRecord[]> {
     return prisma.notificationDevice.findMany({
       where: { userId, active: true },
     });

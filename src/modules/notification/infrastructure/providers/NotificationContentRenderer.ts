@@ -10,7 +10,9 @@ interface TiptapNode {
   text?: string;
 }
 
-export class NotificationContentRenderer implements NotificationContentRendererInterface {
+export class NotificationContentRenderer
+  implements NotificationContentRendererInterface
+{
   renderToSanitizedHtml(contentJson: Record<string, unknown>): string {
     if (!contentJson || typeof contentJson !== "object") {
       return "";
@@ -72,9 +74,10 @@ export class NotificationContentRenderer implements NotificationContentRendererI
       return text;
     }
 
-    const childrenHtml = node.content && Array.isArray(node.content)
-      ? node.content.map((child) => this.renderNode(child)).join("")
-      : "";
+    const childrenHtml =
+      node.content && Array.isArray(node.content)
+        ? node.content.map((child) => this.renderNode(child)).join("")
+        : "";
 
     switch (node.type) {
       case "doc":

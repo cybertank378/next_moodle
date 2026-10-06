@@ -1,12 +1,12 @@
 // Files: src/modules/notification/__tests__/domain/NotificationAudience.test.ts
 
 import { describe, expect, it } from "vitest";
-import { NotificationAudience } from "@/modules/notification/domain/value-object/NotificationAudience";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import {
   NotificationAudienceScope,
   NotificationOwnerScope,
 } from "@/modules/notification/domain/types/NotificationTypes";
-import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { NotificationAudience } from "@/modules/notification/domain/value-object/NotificationAudience";
 
 describe("NotificationAudience Value Object", () => {
   it("enforces tenant actor can only target their own tenant", () => {
@@ -31,7 +31,10 @@ describe("NotificationAudience Value Object", () => {
 
   it("allows platform admin to target multiple tenants or all tenants", () => {
     const audience = NotificationAudience.create(
-      { scope: NotificationAudienceScope.TENANT, tenantIds: ["tenant-1", "tenant-2"] },
+      {
+        scope: NotificationAudienceScope.TENANT,
+        tenantIds: ["tenant-1", "tenant-2"],
+      },
       NotificationOwnerScope.PLATFORM,
       null,
     );

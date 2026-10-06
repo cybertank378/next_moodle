@@ -2,9 +2,9 @@
 "use client";
 
 import { useState } from "react";
-import NotificationManagementView from "@/sections/notification-management/organisms/NotificationManagementView";
-import NotificationCampaignFormView from "@/sections/notification-management/organisms/NotificationCampaignFormView";
 import NotificationCampaignDetailView from "@/sections/notification-management/organisms/NotificationCampaignDetailView";
+import NotificationCampaignFormView from "@/sections/notification-management/organisms/NotificationCampaignFormView";
+import NotificationManagementView from "@/sections/notification-management/organisms/NotificationManagementView";
 
 interface Props {
   role: "ADMIN" | "TENANT";
@@ -27,7 +27,7 @@ export default function NotificationManagementPageView({ role }: Props) {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 mx-auto">
       {mode === "LIST" && (
         <NotificationManagementView
           role={role}

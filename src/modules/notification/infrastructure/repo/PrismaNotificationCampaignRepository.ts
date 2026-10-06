@@ -1,18 +1,22 @@
 // Files: src/modules/notification/infrastructure/repo/PrismaNotificationCampaignRepository.ts
 
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/libs/prisma";
 import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
 import type {
   CampaignFilterParams,
+  CampaignSummaryStats,
   NotificationCampaignRepositoryInterface,
 } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import { NotificationCampaignMapper } from "@/modules/notification/domain/mapper/NotificationCampaignMapper";
-import type { Prisma } from "@prisma/client";
+import { NotificationDispatchStatus } from "@/modules/notification/domain/types/NotificationTypes";
 
 export class PrismaNotificationCampaignRepository
   implements NotificationCampaignRepositoryInterface
 {
-  async create(campaign: NotificationCampaignEntity): Promise<NotificationCampaignEntity> {
+  async create(
+    campaign: NotificationCampaignEntity,
+  ): Promise<NotificationCampaignEntity> {
     const created = await prisma.notificationCampaign.create({
       data: {
         id: campaign.id,
@@ -48,7 +52,9 @@ export class PrismaNotificationCampaignRepository
     return NotificationCampaignMapper.toEntity(found);
   }
 
-  async update(campaign: NotificationCampaignEntity): Promise<NotificationCampaignEntity> {
+  async update(
+    campaign: NotificationCampaignEntity,
+  ): Promise<NotificationCampaignEntity> {
     const updated = await prisma.notificationCampaign.update({
       where: { id: campaign.id },
       data: {
@@ -80,8 +86,11 @@ export class PrismaNotificationCampaignRepository
   async findMany(filter: CampaignFilterParams): Promise<{
     campaigns: NotificationCampaignEntity[];
     total: number;
+    summary?: CampaignSummaryStats;
   }> {
-    type NotificationCampaignWhereInput = NonNullable<Prisma.NotificationCampaignFindManyArgs["where"]>;
+    type NotificationCampaignWhereInput = NonNullable<
+      Prisma.NotificationCampaignFindManyArgs["where"]
+    >;
     const where: NotificationCampaignWhereInput = {};
 
     if (filter.ownerScope) {
@@ -92,6 +101,9 @@ export class PrismaNotificationCampaignRepository
     }
     if (filter.dispatchStatus) {
       where.dispatchStatus = filter.dispatchStatus;
+    }
+    if (filter.channel) {
+      where.channels = { has: filter.channel };
     }
     if (filter.isArchived !== undefined) {
       where.archivedAt = filter.isArchived ? { not: null } : null;
@@ -104,21 +116,56 @@ export class PrismaNotificationCampaignRepository
     const limit = Math.min(50, Math.max(1, filter.limit ?? 10));
     const skip = (page - 1) * limit;
 
-    const [rows, total] = await Promise.all([
-      prisma.notificationCampaign.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: {
-          [filter.sortBy || "createdAt"]: filter.sortOrder || "desc",
-        },
-      }),
-      prisma.notificationCampaign.count({ where }),
-    ]);
+    const baseScopeWhere: NotificationCampaignWhereInput = {};
+    if (filter.ownerScope) {
+      baseScopeWhere.ownerScope = filter.ownerScope;
+    }
+    if (filter.ownerTenantId !== undefined) {
+      baseScopeWhere.ownerTenantId = filter.ownerTenantId;
+    }
+    baseScopeWhere.archivedAt = null;
+
+    const [rows, total, totalActive, sentCount, scheduledCount, draftCount] =
+      await Promise.all([
+        prisma.notificationCampaign.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: {
+            [filter.sortBy || "createdAt"]: filter.sortOrder || "desc",
+          },
+        }),
+        prisma.notificationCampaign.count({ where }),
+        prisma.notificationCampaign.count({ where: baseScopeWhere }),
+        prisma.notificationCampaign.count({
+          where: {
+            ...baseScopeWhere,
+            dispatchStatus: NotificationDispatchStatus.COMPLETED,
+          },
+        }),
+        prisma.notificationCampaign.count({
+          where: {
+            ...baseScopeWhere,
+            dispatchStatus: NotificationDispatchStatus.SCHEDULED,
+          },
+        }),
+        prisma.notificationCampaign.count({
+          where: {
+            ...baseScopeWhere,
+            dispatchStatus: NotificationDispatchStatus.DRAFT,
+          },
+        }),
+      ]);
 
     return {
       campaigns: rows.map(NotificationCampaignMapper.toEntity),
       total,
+      summary: {
+        total: totalActive,
+        sent: sentCount,
+        scheduled: scheduledCount,
+        draft: draftCount,
+      },
     };
   }
 }

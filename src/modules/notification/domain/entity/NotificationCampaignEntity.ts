@@ -6,7 +6,7 @@ import {
   type NotificationAudienceSpec,
   NotificationChannel,
   NotificationDispatchStatus,
-  NotificationOwnerScope,
+  type NotificationOwnerScope,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
 export interface NotificationCampaignProps {
@@ -60,7 +60,9 @@ export class NotificationCampaignEntity {
       throw new ValidationError("Judul pengumuman/notifikasi wajib diisi.");
     }
     if (trimmedTitle.length > 200) {
-      throw new ValidationError("Judul notifikasi tidak boleh melebihi 200 karakter.");
+      throw new ValidationError(
+        "Judul notifikasi tidak boleh melebihi 200 karakter.",
+      );
     }
 
     this.id = props.id;
@@ -74,9 +76,13 @@ export class NotificationCampaignEntity {
     this._sanitizedHtml = props.sanitizedHtml || "";
     this._plainText = props.plainText || "";
     this._pushSummary = props.pushSummary?.trim() || null;
-    this._audienceSpec = props.audienceSpec || { scope: NotificationAudienceScope.ALL };
-    this._channels = props.channels.length > 0 ? props.channels : [NotificationChannel.IN_APP];
-    this._dispatchStatus = props.dispatchStatus ?? NotificationDispatchStatus.DRAFT;
+    this._audienceSpec = props.audienceSpec || {
+      scope: NotificationAudienceScope.ALL,
+    };
+    this._channels =
+      props.channels.length > 0 ? props.channels : [NotificationChannel.IN_APP];
+    this._dispatchStatus =
+      props.dispatchStatus ?? NotificationDispatchStatus.DRAFT;
     this._scheduledAt = props.scheduledAt ?? null;
     this._timezone = props.timezone ?? "Asia/Jakarta";
     this._archivedAt = props.archivedAt ?? null;
@@ -181,7 +187,9 @@ export class NotificationCampaignEntity {
     channels?: NotificationChannel[];
   }): void {
     if (!this.canEdit) {
-      throw new ValidationError("Campaign hanya dapat diubah saat berstatus DRAFT.");
+      throw new ValidationError(
+        "Campaign hanya dapat diubah saat berstatus DRAFT.",
+      );
     }
 
     const trimmedTitle = data.title.trim();
@@ -189,7 +197,9 @@ export class NotificationCampaignEntity {
       throw new ValidationError("Judul pengumuman/notifikasi wajib diisi.");
     }
     if (trimmedTitle.length > 200) {
-      throw new ValidationError("Judul notifikasi tidak boleh melebihi 200 karakter.");
+      throw new ValidationError(
+        "Judul notifikasi tidak boleh melebihi 200 karakter.",
+      );
     }
 
     this._title = trimmedTitle;
@@ -229,7 +239,9 @@ export class NotificationCampaignEntity {
 
   unschedule(): void {
     if (this._dispatchStatus !== NotificationDispatchStatus.SCHEDULED) {
-      throw new ValidationError("Hanya campaign terjadwal yang dapat dibatalkan jadwalnya.");
+      throw new ValidationError(
+        "Hanya campaign terjadwal yang dapat dibatalkan jadwalnya.",
+      );
     }
 
     this._scheduledAt = null;
@@ -243,7 +255,9 @@ export class NotificationCampaignEntity {
       this._dispatchStatus !== NotificationDispatchStatus.DRAFT &&
       this._dispatchStatus !== NotificationDispatchStatus.SCHEDULED
     ) {
-      throw new ValidationError("Campaign tidak dalam status yang dapat dikirim.");
+      throw new ValidationError(
+        "Campaign tidak dalam status yang dapat dikirim.",
+      );
     }
 
     this._dispatchStatus = NotificationDispatchStatus.QUEUED;
@@ -277,7 +291,9 @@ export class NotificationCampaignEntity {
 
   cancel(): void {
     if (!this.canCancel) {
-      throw new ValidationError("Campaign tidak dapat dibatalkan pada status saat ini.");
+      throw new ValidationError(
+        "Campaign tidak dapat dibatalkan pada status saat ini.",
+      );
     }
 
     this._dispatchStatus = NotificationDispatchStatus.CANCELLED;

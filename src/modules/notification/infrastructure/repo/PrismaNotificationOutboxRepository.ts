@@ -1,13 +1,15 @@
 // Files: src/modules/notification/infrastructure/repo/PrismaNotificationOutboxRepository.ts
 
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/libs/prisma";
 import type {
   NotificationOutboxRepositoryInterface,
   OutboxJobRecord,
 } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
-import type { Prisma } from "@prisma/client";
 
-export class PrismaNotificationOutboxRepository implements NotificationOutboxRepositoryInterface {
+export class PrismaNotificationOutboxRepository
+  implements NotificationOutboxRepositoryInterface
+{
   async enqueue(
     campaignId: string,
     jobType: string,
@@ -89,7 +91,11 @@ export class PrismaNotificationOutboxRepository implements NotificationOutboxRep
     });
   }
 
-  async failJob(id: string, canRetry: boolean, backoffMs = 5000): Promise<void> {
+  async failJob(
+    id: string,
+    canRetry: boolean,
+    backoffMs = 5000,
+  ): Promise<void> {
     const nextAvailable = new Date(Date.now() + backoffMs);
     await prisma.notificationOutbox.update({
       where: { id },

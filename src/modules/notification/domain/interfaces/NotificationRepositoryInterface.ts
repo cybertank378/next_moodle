@@ -33,7 +33,10 @@ export interface NotificationRepositoryInterface {
   ): Promise<FindByRecipientResult>;
   countUnread(scope: NotificationScope): Promise<number>;
   findById(id: string): Promise<NotificationEntity | null>;
-  markAsRead(id: string, scope?: NotificationScope): Promise<NotificationEntity>;
+  markAsRead(
+    id: string,
+    scope?: NotificationScope,
+  ): Promise<NotificationEntity>;
   markAllAsRead(scope: NotificationScope): Promise<number>;
   create(options: CreateNotificationOptions): Promise<NotificationEntity>;
 }

@@ -10,7 +10,9 @@ export interface RegisterDeviceActor {
 }
 
 export class RegisterNotificationDeviceUseCase {
-  constructor(private readonly deviceRepo: NotificationDeviceRepositoryInterface) {}
+  constructor(
+    private readonly deviceRepo: NotificationDeviceRepositoryInterface,
+  ) {}
 
   async execute(
     dto: { token: string; platform?: string },

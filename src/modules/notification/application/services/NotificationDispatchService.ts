@@ -90,7 +90,9 @@ export class NotificationDispatchService {
       }
 
       for (const recipient of recipients) {
-        const token = deviceMap.get(`${recipient.recipientId}_${recipient.role}`);
+        const token = deviceMap.get(
+          `${recipient.recipientId}_${recipient.role}`,
+        );
 
         if (!token) {
           const skippedDelivery = new NotificationDeliveryEntity({
@@ -136,7 +138,8 @@ export class NotificationDispatchService {
           hasSuccess = true;
         } catch (err: unknown) {
           hasFailure = true;
-          const errorMsg = err instanceof Error ? err.message : "PUSH_SEND_FAILED";
+          const errorMsg =
+            err instanceof Error ? err.message : "PUSH_SEND_FAILED";
           const failDelivery = new NotificationDeliveryEntity({
             id: crypto.randomUUID(),
             campaignId: campaign.id,
