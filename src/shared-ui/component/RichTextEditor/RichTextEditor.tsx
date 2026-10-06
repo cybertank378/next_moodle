@@ -4,7 +4,6 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import clsx from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NotificationContentRenderer } from "@/modules/notification/infrastructure/providers/NotificationContentRenderer";
 import { RichTextEditorToolbar } from "@/shared-ui/component/RichTextEditor/RichTextEditorToolbar";
 import type { RichTextEditorProps } from "@/shared-ui/component/RichTextEditor/RichTextEditorTypes";
 import RichTextMathModal from "@/shared-ui/component/RichTextEditor/RichTextMathModal";
@@ -12,8 +11,7 @@ import {
   getRichTextEditorExtensions,
   type MathType,
 } from "@/shared-ui/component/RichTextEditor/richTextEditorExtensions";
-
-const fallbackRenderer = new NotificationContentRenderer();
+import { richTextRenderer } from "@/shared-ui/component/RichTextEditor/richTextRenderer";
 
 interface MathModalState {
   open: boolean;
@@ -56,7 +54,7 @@ export default function RichTextEditor({
 
   const extensions = useRef(
     getRichTextEditorExtensions({
-      onMathClick: (type, latex, pos) => {
+      onMathClick: (type: MathType, latex: string, pos: number) => {
         mathClickRef.current?.(type, latex, pos);
       },
     }),
@@ -83,7 +81,7 @@ export default function RichTextEditor({
         const json = editor.getJSON();
         let text = editor.getText();
         if (!text.trim()) {
-          text = fallbackRenderer.extractPlainText(json);
+          text = richTextRenderer.extractPlainText(json);
         }
         const html = editor.getHTML();
         onChange({ json, text, html });

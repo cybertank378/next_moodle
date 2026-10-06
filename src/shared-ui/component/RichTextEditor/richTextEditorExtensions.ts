@@ -25,11 +25,20 @@ export function getRichTextEditorExtensions(
         keepMarks: true,
         keepAttributes: false,
       },
+      link: {
+        openOnClick: true,
+        HTMLAttributes: {
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+      },
     }),
+
     Mathematics.configure({
       katexOptions: {
         throwOnError: false,
         trust: false,
+        maxExpand: 1000,
       },
       inlineOptions: {
         onClick: (node, pos) => {
