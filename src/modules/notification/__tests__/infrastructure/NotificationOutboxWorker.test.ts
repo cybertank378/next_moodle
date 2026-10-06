@@ -3,7 +3,14 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NotificationOutboxWorker } from "@/modules/notification/infrastructure/workers/NotificationOutboxWorker";
 import type { OutboxWorkerDependencies } from "@/modules/notification/infrastructure/workers/NotificationOutboxWorker";
-import type { OutboxJobRecord } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
+import type {
+  NotificationOutboxRepositoryInterface,
+  OutboxJobRecord,
+} from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
+import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
+import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
+import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
+import type { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
 import { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 import {
   NotificationAudienceScope,
@@ -15,11 +22,25 @@ import {
 import { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
 
 describe("NotificationOutboxWorker", () => {
-  let mockOutboxRepo: any;
-  let mockCampaignRepo: any;
-  let mockNotificationRepo: any;
-  let mockDispatchService: any;
-  let mockPushAdapter: any;
+  let mockOutboxRepo: {
+    claimDueJobs: ReturnType<typeof vi.fn>;
+    completeJob: ReturnType<typeof vi.fn>;
+    failJob: ReturnType<typeof vi.fn>;
+    enqueue: ReturnType<typeof vi.fn>;
+  };
+  let mockCampaignRepo: {
+    findById: ReturnType<typeof vi.fn>;
+    save: ReturnType<typeof vi.fn>;
+  };
+  let mockNotificationRepo: {
+    findById: ReturnType<typeof vi.fn>;
+  };
+  let mockDispatchService: {
+    dispatchCampaign: ReturnType<typeof vi.fn>;
+  };
+  let mockPushAdapter: {
+    dispatchNotification: ReturnType<typeof vi.fn>;
+  };
   let deps: OutboxWorkerDependencies;
   let worker: NotificationOutboxWorker;
 
@@ -28,7 +49,7 @@ describe("NotificationOutboxWorker", () => {
       claimDueJobs: vi.fn(),
       completeJob: vi.fn(),
       failJob: vi.fn(),
-      enqueueJob: vi.fn(),
+      enqueue: vi.fn(),
     };
     mockCampaignRepo = {
       findById: vi.fn(),
@@ -45,11 +66,11 @@ describe("NotificationOutboxWorker", () => {
     };
 
     deps = {
-      outboxRepo: mockOutboxRepo,
-      campaignRepo: mockCampaignRepo,
-      notificationRepo: mockNotificationRepo,
-      dispatchService: mockDispatchService,
-      pushAdapter: mockPushAdapter,
+      outboxRepo: mockOutboxRepo as unknown as NotificationOutboxRepositoryInterface,
+      campaignRepo: mockCampaignRepo as unknown as NotificationCampaignRepositoryInterface,
+      notificationRepo: mockNotificationRepo as unknown as NotificationRepositoryInterface,
+      dispatchService: mockDispatchService as unknown as NotificationDispatchService,
+      pushAdapter: mockPushAdapter as unknown as PushNotificationAdapterInterface,
     };
 
     worker = new NotificationOutboxWorker(deps, "test-worker-1");

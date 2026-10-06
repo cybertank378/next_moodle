@@ -7,6 +7,7 @@ import type {
   NotificationDeliveryItemDto,
 } from "@/modules/notification/domain/dto/NotificationCampaignResponseDto";
 import {
+  NotificationAudienceScope,
   type NotificationAudienceSpec,
   NotificationChannel,
   NotificationDeliveryStatus,
@@ -50,7 +51,9 @@ export class NotificationCampaignMapper {
       sanitizedHtml: raw.sanitizedHtml,
       plainText: raw.plainText,
       pushSummary: raw.pushSummary,
-      audienceSpec: (raw.audienceSpec as NotificationAudienceSpec) || { scope: "ALL" as any },
+      audienceSpec: (raw.audienceSpec as NotificationAudienceSpec) || {
+        scope: NotificationAudienceScope.ALL,
+      },
       channels: raw.channels.map((c) => c as NotificationChannel),
       dispatchStatus: raw.dispatchStatus as NotificationDispatchStatus,
       scheduledAt: raw.scheduledAt,

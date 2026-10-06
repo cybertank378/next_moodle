@@ -20,13 +20,7 @@ describe("QuestionEditor", () => {
       createQuestion: vi.fn(),
       updateQuestion: vi.fn(),
       loading: false,
-      error: null,
-      getQuestions: vi.fn(),
-      getQuestion: vi.fn(),
-      deleteQuestion: vi.fn(),
-      categories: [],
-      questions: [],
-    } as any);
+    });
   });
 
   it("should render create question form properly", () => {

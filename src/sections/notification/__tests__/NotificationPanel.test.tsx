@@ -5,6 +5,8 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import NotificationPanel from "@/sections/notification/organisms/NotificationPanel";
 import * as notificationHook from "@/modules/notification/presentation/hooks/useNotificationApi";
+import type { NotificationContextValue } from "@/modules/notification/presentation/context/NotificationContext";
+import { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -23,7 +25,7 @@ describe("NotificationPanel", () => {
     vi.clearAllMocks();
   });
 
-  const defaultMockHook = {
+  const defaultMockHook: NotificationContextValue = {
     unreadCount: 3,
     countLoading: false,
     listState: {
@@ -31,7 +33,7 @@ describe("NotificationPanel", () => {
         items: [
           {
             id: "n-1",
-            type: "INFO",
+            type: NotificationType.ANNOUNCEMENT,
             title: "Ujian Segera Dimulai",
             body: "Siapkan diri Anda.",
             linkPath: "/student/exams",
@@ -65,7 +67,7 @@ describe("NotificationPanel", () => {
   };
 
   it("should not render markup when isOpen is false", () => {
-    vi.mocked(notificationHook.useNotificationApi).mockReturnValue(defaultMockHook as any);
+    vi.mocked(notificationHook.useNotificationApi).mockReturnValue(defaultMockHook);
     const html = renderToStaticMarkup(
       <NotificationPanel isOpen={false} onClose={mockOnClose} />,
     );
@@ -73,7 +75,7 @@ describe("NotificationPanel", () => {
   });
 
   it("should render panel, items, and push prompt when isOpen is true", () => {
-    vi.mocked(notificationHook.useNotificationApi).mockReturnValue(defaultMockHook as any);
+    vi.mocked(notificationHook.useNotificationApi).mockReturnValue(defaultMockHook);
     const html = renderToStaticMarkup(
       <NotificationPanel isOpen={true} onClose={mockOnClose} />,
     );
@@ -87,7 +89,7 @@ describe("NotificationPanel", () => {
     vi.mocked(notificationHook.useNotificationApi).mockReturnValue({
       ...defaultMockHook,
       pushPermission: "granted",
-    } as any);
+    });
     const html = renderToStaticMarkup(
       <NotificationPanel isOpen={true} onClose={mockOnClose} />,
     );
@@ -98,7 +100,7 @@ describe("NotificationPanel", () => {
     vi.mocked(notificationHook.useNotificationApi).mockReturnValue({
       ...defaultMockHook,
       unreadCount: 0,
-    } as any);
+    });
     const html = renderToStaticMarkup(
       <NotificationPanel isOpen={true} onClose={mockOnClose} />,
     );

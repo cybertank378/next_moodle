@@ -25,7 +25,7 @@ import {
   NotificationDispatchStatus,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
-function respond(response: ApiResponse<any>): Response {
+function respond(response: ApiResponse<unknown>): Response {
   return Response.json(response.body, { status: response.status });
 }
 
@@ -74,9 +74,13 @@ export class NotificationManagementController {
       const page = Number(searchParams.get("page")) || 1;
       const limit = Number(searchParams.get("limit")) || 10;
 
-      const dispatchStatus = statusParam && Object.values(NotificationDispatchStatus).includes(statusParam as any)
-        ? (statusParam as NotificationDispatchStatus)
-        : undefined;
+      const dispatchStatus =
+        statusParam &&
+        Object.values(NotificationDispatchStatus).includes(
+          statusParam as NotificationDispatchStatus,
+        )
+          ? (statusParam as NotificationDispatchStatus)
+          : undefined;
 
       const isArchived = isArchivedParam === "true" ? true : isArchivedParam === "false" ? false : undefined;
 

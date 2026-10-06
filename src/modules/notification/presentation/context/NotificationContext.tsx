@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import type { MessagePayload, Messaging } from "firebase/messaging";
 import { request } from "@/libs/apiClient";
 import type {
   PaginatedNotificationsResponseDto,
@@ -249,13 +250,13 @@ export function NotificationProvider({ children, userKey }: NotificationProvider
   }, [fetchNotifications]);
 
   // ── 8. Coordinated Push Setup & Foreground Message Listener ──
-  const setupForegroundListener = useCallback((messaging: any) => {
+  const setupForegroundListener = useCallback((messaging: Messaging) => {
     if (unsubscribeForegroundRef.current) {
       unsubscribeForegroundRef.current();
     }
 
     import("@/libs/firebase").then(({ onMessage }) => {
-      unsubscribeForegroundRef.current = onMessage(messaging, (payload: any) => {
+      unsubscribeForegroundRef.current = onMessage(messaging, (payload: MessagePayload) => {
         if (!payload?.data) return;
 
         const notifId = payload.data.id;
