@@ -1,3 +1,4 @@
+// Files: src/sections/auth/atoms/AuthTextField.tsx
 "use client";
 
 import { CheckCircle, type LucideIcon } from "lucide-react";
