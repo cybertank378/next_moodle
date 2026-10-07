@@ -2,7 +2,7 @@
 "use client";
 
 import { Bell, Edit3 } from "lucide-react";
-import Image from "next/image";
+import BrandLogo from "@/shared-ui/component/BrandLogo";
 import RichTextEditorField from "@/shared-ui/component/RichTextEditor/RichTextEditorField";
 import TextField from "@/shared-ui/component/TextField";
 
@@ -141,16 +141,11 @@ export default function NotificationContentForm({
 
             <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl shadow-xs flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0 overflow-hidden shadow-xs">
-                <Image
-                  src="/assets/images/logo/logo-light.png"
-                  alt="Aksaventra"
-                  width={24}
-                  height={24}
-                  className="object-contain"
-                  onError={(e) => {
-                    // Fallback to text if image not available
-                    e.currentTarget.style.display = "none";
-                  }}
+                <BrandLogo
+                  className="h-7 w-7"
+                  decorative
+                  surfaceTone="dark"
+                  variant="mark"
                 />
               </div>
               <div className="min-w-0 flex-1">

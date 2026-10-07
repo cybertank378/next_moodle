@@ -1,13 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { APP_NAME } from "@/libs/branding";
+import BrandLogo from "@/shared-ui/component/BrandLogo";
 
 interface Props {
   variant?: "global" | "inline";
 }
-
-const MotionImage = motion.create(Image);
 
 export default function Loading({ variant = "inline" }: Props) {
   /* ================= GLOBAL LOADING ================= */
@@ -28,20 +27,24 @@ export default function Loading({ variant = "inline" }: Props) {
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-cyan-400/10 to-purple-500/10 blur-2xl -z-10" />
 
           <div className="relative w-24 h-24 flex items-center justify-center">
-            <MotionImage
-              src="/assets/images/logo/logo_dark.png"
-              alt="logo"
-              width={72}
-              height={72}
-              className="object-contain"
-              priority
+            <motion.div
+              aria-label={`${APP_NAME} sedang memuat`}
+              className="h-[72px] w-[72px]"
               animate={{ scale: [1, 1.05, 1] }}
               transition={{
                 repeat: Infinity,
                 duration: 1.6,
                 ease: "easeInOut",
               }}
-            />
+            >
+              <BrandLogo
+                className="h-full w-full"
+                decorative
+                preload
+                surfaceTone="light"
+                variant="mark"
+              />
+            </motion.div>
 
             <motion.div
               className="absolute inset-0 rounded-full border-[3px] border-transparent"

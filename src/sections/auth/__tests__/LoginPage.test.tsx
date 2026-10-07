@@ -53,16 +53,18 @@ describe("Aksaventra Auth Redesign Components", () => {
 
   describe("Atoms", () => {
     it("AuthBrand renders dark logo asset for light background", () => {
-      const html = renderToStaticMarkup(<AuthBrand size="md" variant="dark" />);
-      expect(html).toContain("logo-dark.png");
+      const html = renderToStaticMarkup(
+        <AuthBrand size="md" surfaceTone="light" />,
+      );
+      expect(html).toContain("aksaventra-logo-on-light.svg");
       expect(html).toContain("Aksaventra Sistem Pembelajaran");
     });
 
     it("AuthBrand renders light logo asset for navy background", () => {
       const html = renderToStaticMarkup(
-        <AuthBrand size="lg" variant="light" />,
+        <AuthBrand size="lg" surfaceTone="dark" />,
       );
-      expect(html).toContain("logo-light.png");
+      expect(html).toContain("aksaventra-logo-on-dark.svg");
       expect(html).toContain("Aksaventra Sistem Pembelajaran");
     });
 
@@ -153,7 +155,7 @@ describe("Aksaventra Auth Redesign Components", () => {
       );
       expect(html).toContain("book-and-schools.png");
       expect(html).toContain("mobile-mockup.png");
-      expect(html).toContain("logo-light.png");
+      expect(html).toContain("aksaventra-logo-on-dark.svg");
       expect(html).toContain("Pembelajaran");
       expect(html).toContain("Ujian Online");
       expect(html).toContain("Manajemen Sekolah");

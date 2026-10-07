@@ -1,24 +1,22 @@
 // Files: src/sections/auth/atoms/AuthBrand.tsx
 
 import clsx from "clsx";
-import Image from "next/image";
+import { APP_NAME, type BrandSurfaceTone } from "@/libs/branding";
+import BrandLogo from "@/shared-ui/component/BrandLogo";
 
 export interface AuthBrandProps {
-  readonly variant?: "light" | "dark";
+  readonly surfaceTone?: BrandSurfaceTone;
   readonly size?: "sm" | "md" | "lg";
   readonly className?: string;
+  readonly preload?: boolean;
 }
 
 export default function AuthBrand({
-  variant = "dark",
+  surfaceTone = "light",
   size = "md",
   className,
+  preload = false,
 }: AuthBrandProps) {
-  const isLight = variant === "light";
-  const logoSrc = isLight
-    ? "/assets/images/logo/logo-dark.png"
-    : "/assets/images/logo/logo-light.png";
-
   const sizeClasses = {
     sm: "h-8 w-auto",
     md: "h-10 w-auto",
@@ -32,13 +30,11 @@ export default function AuthBrand({
         className,
       )}
     >
-      <Image
-        alt="Aksaventra Sistem Pembelajaran"
-        className={clsx(sizeClasses, "object-contain")}
-        height={60}
-        priority
-        src={logoSrc}
-        width={180}
+      <BrandLogo
+        accessibleName={`${APP_NAME} Sistem Pembelajaran`}
+        className={sizeClasses}
+        preload={preload}
+        surfaceTone={surfaceTone}
       />
     </div>
   );

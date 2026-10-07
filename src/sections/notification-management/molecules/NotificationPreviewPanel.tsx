@@ -2,6 +2,7 @@
 "use client";
 
 import { Bell, Inbox, Smartphone } from "lucide-react";
+import { APP_NAME } from "@/libs/branding";
 import RichTextViewer from "@/shared-ui/component/RichTextEditor/RichTextViewer";
 
 interface Props {
@@ -56,7 +57,7 @@ export default function NotificationPreviewPanel({
             <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
               <span className="flex items-center gap-1.5 font-semibold text-slate-200">
                 <Bell className="w-3.5 h-3.5 text-blue-400" />
-                Aksaventra
+                {APP_NAME}
               </span>
               <span>Baru saja</span>
             </div>

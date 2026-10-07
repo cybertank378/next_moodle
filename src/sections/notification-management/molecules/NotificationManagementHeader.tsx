@@ -2,6 +2,7 @@
 "use client";
 
 import { Plus, RefreshCw } from "lucide-react";
+import { APP_NAME } from "@/libs/branding";
 import Button from "@/shared-ui/component/Button";
 
 interface Props {
@@ -26,7 +27,7 @@ export default function NotificationManagementHeader({
       {/* Breadcrumb matching Mockup 1 with Aksaventra branding */}
       <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
         <span>
-          Aksaventra /{" "}
+          {APP_NAME} /{" "}
           {currentRole === "ADMIN" ? "Admin Platform" : "Admin Sekolah"} /{" "}
           Pengelolaan Notifikasi
         </span>

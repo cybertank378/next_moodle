@@ -1,8 +1,27 @@
-import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+import type { UserRole } from "@/libs/enums";
 import { canAccess, PERMISSIONS } from "@/libs/permissions";
-import { getSidebarMenu } from "@/shared-ui/layout/AppSidebar";
+import AppSidebar, { getSidebarMenu } from "@/shared-ui/layout/AppSidebar";
 
 describe("Sidebar Navigation and Permission Guards", () => {
+  it("renders the on-dark horizontal Aksaventra logo on desktop and mobile drawer", () => {
+    const html = renderToStaticMarkup(
+      createElement(AppSidebar, {
+        mobileOpen: true,
+        onClose: vi.fn(),
+        role: "ADMIN",
+        username: "admin",
+      }),
+    );
+
+    expect(html.match(/<img[^>]*aksaventra-logo-on-dark\.svg/g)).toHaveLength(
+      2,
+    );
+    expect(html).not.toContain(">Moodle<");
+  });
+
   describe("getSidebarMenu configuration", () => {
     it("configures ADMIN sidebar with tenant management permissions", () => {
       const menu = getSidebarMenu("ADMIN");
@@ -55,7 +74,7 @@ describe("Sidebar Navigation and Permission Guards", () => {
     });
 
     it("returns empty array for invalid or unknown role", () => {
-      const menu = getSidebarMenu("UNKNOWN" as any);
+      const menu = getSidebarMenu("UNKNOWN" as UserRole);
       expect(menu).toEqual([]);
     });
   });
