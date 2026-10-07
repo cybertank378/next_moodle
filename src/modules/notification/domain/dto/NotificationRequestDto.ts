@@ -30,6 +30,6 @@ export interface CreateNotificationRequestDto {
   type: NotificationType;
   title: string;
   body: string;
-  /** Internal app path only, e.g. `/student/grades`. */
+  /** Internal app path only, e.g. `/dashboard/results`. */
   linkPath?: string | null;
 }

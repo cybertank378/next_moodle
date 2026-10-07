@@ -19,12 +19,12 @@ export enum AppRole {
 ## 2. Page Boundary
 
 ```text
-/admin/*    → ADMIN
-/tenant/*   → TENANT
-/student/*  → STUDENT
+/dashboard/* → authenticated actor; akses fitur dibatasi role dan permission
 ```
 
-> Page boundary untuk TEACHER akan ditambahkan pada issue berikutnya (`/teacher/*` atau `/dashboard/teacher/*`).
+Semua role menggunakan dashboard terpadu. Layout `(protected)` memvalidasi sesi dan
+tenant context, sedangkan setiap halaman fitur mempertahankan guard role/permission
+yang sesuai.
 
 Guard dilakukan pada server layout dan tidak menggantikan API authorization.
 
