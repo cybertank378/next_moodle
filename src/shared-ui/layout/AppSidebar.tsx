@@ -5,29 +5,32 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Award,
+  Bell,
   BookOpen,
-  FileText,
-  GraduationCap,
-  LayoutDashboard,
-  Palette,
-  Settings,
-  ShieldCheck,
-  Users,
   Calendar,
   CalendarDays,
-  Megaphone,
-  Bell,
-  Clock,
-  User,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  FileText,
+  GraduationCap,
+  LayoutDashboard,
+  Megaphone,
+  Palette,
+  Settings,
+  ShieldCheck,
+  User,
+  Users,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { APP_NAME } from "@/libs/branding";
 import { Role, type UserRole } from "@/libs/enums";
 import { PERMISSIONS } from "@/libs/permissions";
 import { ROUTES } from "@/libs/routes";
+import BrandLogo from "@/shared-ui/component/BrandLogo";
 import {
   RecursiveSidebarItem,
   type SidebarItem,
@@ -36,6 +39,21 @@ import {
 export interface SidebarGroup {
   label?: string;
   items: SidebarItem[];
+}
+
+function getSidebarHome(role: UserRole): string {
+  switch (role) {
+    case Role.ADMIN:
+      return ROUTES.ADMIN.ROOT;
+    case Role.TENANT:
+      return ROUTES.TENANT.ROOT;
+    case Role.TEACHER:
+      return ROUTES.TEACHER.ROOT;
+    case Role.STUDENT:
+      return ROUTES.STUDENT.ROOT;
+    default:
+      return ROUTES.HOME;
+  }
 }
 
 export function getSidebarMenu(role: UserRole): SidebarGroup[] {
@@ -239,8 +257,8 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               path: "/student/settings",
               icon: Settings,
             },
-          ]
-        }
+          ],
+        },
       ];
 
     case Role.TEACHER:
@@ -304,39 +322,42 @@ export default function AppSidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mobileOpen, onClose]);
 
-  const sidebarContent = (
+  const renderSidebarContent = (collapsed: boolean) => (
     <div
       className={`flex h-screen flex-col bg-slate-900 text-slate-300 border-r border-slate-800 transition-all duration-300 ${
-        isCollapsed ? "w-20" : "w-72"
+        collapsed ? "w-20" : "w-72"
       }`}
     >
       <div className="border-b border-slate-800 px-4 py-5">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
-              <GraduationCap size={24} />
-            </div>
-
-            {!isCollapsed && (
-              <div className="overflow-hidden">
-                <h1 className="text-base font-extrabold tracking-tight text-white truncate">
-                  Moodle
-                </h1>
-                <p className="mt-0.5 text-xs font-medium text-slate-400 truncate">
-                  Sistem Pembelajaran
-                </p>
-              </div>
-            )}
-          </div>
+        <div
+          className={
+            collapsed
+              ? "flex flex-col items-center gap-3"
+              : "flex items-center justify-between gap-2"
+          }
+        >
+          <Link
+            aria-label={APP_NAME}
+            className="flex min-w-0 items-center"
+            href={getSidebarHome(role)}
+          >
+            <BrandLogo
+              className={collapsed ? "h-10 w-10" : "h-10 w-auto max-w-44"}
+              decorative
+              preload
+              surfaceTone="dark"
+              variant={collapsed ? "mark" : "horizontal"}
+            />
+          </Link>
 
           {/* Desktop collapse button */}
           <button
             type="button"
-            aria-label={isCollapsed ? "Perluas sidebar" : "Perkecil sidebar"}
+            aria-label={collapsed ? "Perluas sidebar" : "Perkecil sidebar"}
             onClick={() => setIsCollapsed((prev) => !prev)}
             className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
           >
-            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
 
           {/* Mobile close button */}
@@ -351,7 +372,7 @@ export default function AppSidebar({
         </div>
 
         {/* Role Identity Card */}
-        {!isCollapsed && role === Role.ADMIN && (
+        {!collapsed && role === Role.ADMIN && (
           <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-800/60 px-4 py-3 shadow-sm">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs uppercase shadow-sm">
               AD
@@ -368,7 +389,7 @@ export default function AppSidebar({
           </div>
         )}
 
-        {!isCollapsed && role !== Role.ADMIN && role !== Role.STUDENT && (
+        {!collapsed && role !== Role.ADMIN && role !== Role.STUDENT && (
           <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-4 py-3 shadow-sm">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400 border border-slate-700 shadow-md">
               <LayoutDashboard size={18} />
@@ -390,7 +411,7 @@ export default function AppSidebar({
         <div className="space-y-7">
           {groups.map((group, index) => (
             <div key={`group-${group.label ?? index}`}>
-              {group.label && !isCollapsed && (
+              {group.label && !collapsed && (
                 <div className="mb-3 px-3">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                     {group.label}
@@ -423,14 +444,14 @@ export default function AppSidebar({
           <div className="space-y-3">
             <div
               className={`flex items-center ${
-                isCollapsed ? "justify-center" : "justify-between"
+                collapsed ? "justify-center" : "justify-between"
               } rounded-2xl border border-slate-700/60 bg-slate-800/50 p-2.5 shadow-sm`}
             >
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs">
                   {username ? username.slice(0, 2).toUpperCase() : "AD"}
                 </div>
-                {!isCollapsed && (
+                {!collapsed && (
                   <div className="overflow-hidden">
                     <p className="text-xs font-bold text-white truncate">
                       {username || "Administrator"}
@@ -441,7 +462,7 @@ export default function AppSidebar({
                   </div>
                 )}
               </div>
-              {!isCollapsed && (
+              {!collapsed && (
                 <ChevronDown
                   size={14}
                   className="text-slate-400 shrink-0"
@@ -450,10 +471,10 @@ export default function AppSidebar({
               )}
             </div>
 
-            {!isCollapsed && (
+            {!collapsed && (
               <div className="text-center">
                 <p className="text-[11px] font-medium text-slate-500">
-                  © {new Date().getFullYear()} Moodle. All rights reserved.
+                  © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
                 </p>
               </div>
             )}
@@ -463,7 +484,7 @@ export default function AppSidebar({
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
               <GraduationCap className="h-5 w-5" />
             </div>
-            {!isCollapsed && (
+            {!collapsed && (
               <div className="overflow-hidden">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Jenjang Sekolah • SMP
@@ -477,7 +498,7 @@ export default function AppSidebar({
         ) : (
           <div className="rounded-2xl px-4 py-2 text-center">
             <p className="text-xs font-medium text-slate-500">
-              © {new Date().getFullYear()} Moodle. All rights reserved.
+              © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
             </p>
           </div>
         )}
@@ -487,7 +508,9 @@ export default function AppSidebar({
 
   return (
     <>
-      <aside className="hidden md:flex">{sidebarContent}</aside>
+      <aside className="hidden md:flex">
+        {renderSidebarContent(isCollapsed)}
+      </aside>
 
       <AnimatePresence>
         {mobileOpen && (
@@ -514,7 +537,7 @@ export default function AppSidebar({
                 damping: 26,
               }}
             >
-              {sidebarContent}
+              {renderSidebarContent(false)}
             </motion.aside>
           </>
         )}

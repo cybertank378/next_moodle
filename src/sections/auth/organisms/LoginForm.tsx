@@ -48,7 +48,8 @@ export default function LoginForm() {
     <div className="w-full max-w-[420px] mx-auto flex flex-col justify-between py-6 px-4 sm:px-0">
       {/* Mobile top logo (visible on mobile only) */}
       <div className="lg:hidden mb-6 flex items-center justify-between">
-        <AuthBrand size="md" variant="dark" />
+        <AuthBrand className="dark:hidden" size="md" surfaceTone="light" />
+        <AuthBrand className="hidden dark:flex" size="md" surfaceTone="dark" />
       </div>
 
       {/* Header section: Welcome badge and title */}

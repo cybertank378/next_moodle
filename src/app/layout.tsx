@@ -4,14 +4,28 @@ import "@/styles/globals.css";
 import "katex/dist/katex.min.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { APP_DESCRIPTION, APP_NAME } from "@/libs/branding";
 import AppToastProvider from "@/shared-ui/layout/AppToastProvider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Exam SaaS",
-    template: "%s | Exam SaaS",
+    default: APP_NAME,
+    template: `%s | ${APP_NAME}`,
   },
-  description: "Platform SaaS Ujian Berbasis Moodle Multi-Tenant.",
+  applicationName: APP_NAME,
+  description: APP_DESCRIPTION,
+  manifest: "/manifest.webmanifest",
+  openGraph: {
+    description: APP_DESCRIPTION,
+    siteName: APP_NAME,
+    title: APP_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    description: APP_DESCRIPTION,
+    title: APP_NAME,
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

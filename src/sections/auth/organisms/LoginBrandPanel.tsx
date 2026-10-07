@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import Image from "next/image";
+import { APP_NAME } from "@/libs/branding";
 import AuthBrand from "@/sections/auth/atoms/AuthBrand";
 import LoginFeatureRow from "@/sections/auth/molecules/LoginFeatureRow";
 
@@ -12,7 +13,7 @@ export interface LoginBrandPanelProps {
 export default function LoginBrandPanel({ className }: LoginBrandPanelProps) {
   return (
     <aside
-      aria-label="Informasi Platform Aksaventra"
+      aria-label={`Informasi Platform ${APP_NAME}`}
       className={clsx(
         "relative flex h-full w-full flex-col justify-between overflow-hidden p-8 lg:p-12 xl:p-14",
         "bg-gradient-to-br from-[#061743] via-[#0A266F] to-[#041235] text-white",
@@ -35,7 +36,7 @@ export default function LoginBrandPanel({ className }: LoginBrandPanelProps) {
 
       {/* Brand header */}
       <div className="relative z-10">
-        <AuthBrand size="lg" variant="light" />
+        <AuthBrand preload size="lg" surfaceTone="dark" />
       </div>
 
       {/* Main copy and illustration */}

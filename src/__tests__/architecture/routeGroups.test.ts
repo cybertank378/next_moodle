@@ -23,6 +23,9 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     expect(exists("src/app/layout.tsx")).toBe(true);
     expect(exists("src/app/page.tsx")).toBe(true);
     expect(exists("src/app/favicon.ico")).toBe(true);
+    expect(exists("src/app/icon.png")).toBe(true);
+    expect(exists("src/app/apple-icon.png")).toBe(true);
+    expect(exists("src/app/manifest.ts")).toBe(true);
   });
 
   it("has one public and one protected UI route group", () => {
@@ -102,7 +105,14 @@ describe("Architecture Guard: consolidated App Router structure", () => {
 
     const allowedDirectories = new Set(["(protected)", "(public)", "api"]);
 
-    const allowedFiles = new Set(["favicon.ico", "layout.tsx", "page.tsx"]);
+    const allowedFiles = new Set([
+      "apple-icon.png",
+      "favicon.ico",
+      "icon.png",
+      "layout.tsx",
+      "manifest.ts",
+      "page.tsx",
+    ]);
 
     for (const entry of entries) {
       const allowed = entry.isDirectory()
