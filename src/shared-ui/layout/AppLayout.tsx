@@ -13,6 +13,7 @@ export interface AppLayoutProps {
   role?: UserRole;
   userRole?: UserRole;
   username?: string;
+  institutionName?: string;
 }
 
 export default function AppLayout({
@@ -20,6 +21,7 @@ export default function AppLayout({
   role,
   userRole,
   username,
+  institutionName,
 }: AppLayoutProps) {
   //////////////////////////////////////////////////////////////
   // RESOLVE ACTIVE ROLE
@@ -44,6 +46,7 @@ export default function AppLayout({
         <AppSidebar
           role={activeRole}
           username={username}
+          institutionName={institutionName}
           mobileOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}
         />

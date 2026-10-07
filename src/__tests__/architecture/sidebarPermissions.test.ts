@@ -22,6 +22,22 @@ describe("Sidebar Navigation and Permission Guards", () => {
     expect(html).not.toContain(">Moodle<");
   });
 
+  it("renders the student's tenant name without a hardcoded school", () => {
+    const html = renderToStaticMarkup(
+      createElement(AppSidebar, {
+        institutionName: "SMA Negeri 2 Bandung",
+        mobileOpen: false,
+        onClose: vi.fn(),
+        role: "STUDENT",
+        username: "siswa",
+      }),
+    );
+
+    expect(html).toContain("SMA Negeri 2 Bandung");
+    expect(html).not.toContain("SMP Negeri 1 Jakarta");
+    expect(html).not.toContain("Jenjang Sekolah • SMP");
+  });
+
   describe("getSidebarMenu configuration", () => {
     it("configures ADMIN sidebar with tenant management permissions", () => {
       const menu = getSidebarMenu("ADMIN");

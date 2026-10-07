@@ -305,6 +305,7 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
 interface Props {
   role: UserRole;
   username?: string;
+  institutionName?: string;
   mobileOpen: boolean;
   onClose: () => void;
 }
@@ -312,6 +313,7 @@ interface Props {
 export default function AppSidebar({
   role,
   username,
+  institutionName,
   mobileOpen,
   onClose,
 }: Props) {
@@ -494,10 +496,10 @@ export default function AppSidebar({
             {!collapsed && (
               <div className="overflow-hidden">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Jenjang Sekolah • SMP
+                  Institusi Pendidikan
                 </p>
                 <p className="text-xs font-semibold text-white truncate">
-                  SMP Negeri 1 Jakarta
+                  {institutionName || "Nama sekolah belum tersedia"}
                 </p>
               </div>
             )}
