@@ -66,7 +66,12 @@ export default function LoginForm() {
       </div>
 
       {/* Login form */}
-      <form className="space-y-4" noValidate onSubmit={handleSubmit}>
+      <form
+        className="space-y-4"
+        method="post"
+        noValidate
+        onSubmit={handleSubmit}
+      >
         <LoginFormFields
           disabled={auth.loading}
           identifier={identifier}
