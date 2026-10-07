@@ -1,3 +1,5 @@
+const DASHBOARD_ROOT = "/dashboard";
+
 export const ROUTES = {
   HOME: "/",
   AUTH: {
@@ -7,66 +9,64 @@ export const ROUTES = {
     CHANGE_PASSWORD: "/change-password",
   },
   ADMIN: {
-    ROOT: "/admin",
-    TENANTS: "/admin/tenants",
-    NOTIFICATIONS: "/admin/notifications",
-    AUDIT: "/admin/audit",
-    SETTINGS: "/admin/settings",
+    ROOT: DASHBOARD_ROOT,
+    TENANTS: `${DASHBOARD_ROOT}/tenants`,
+    NOTIFICATIONS: `${DASHBOARD_ROOT}/notifications`,
+    AUDIT: `${DASHBOARD_ROOT}/audit`,
+    SETTINGS: `${DASHBOARD_ROOT}/settings`,
   },
   TENANT: {
-    ROOT: "/tenant",
-    USERS: "/tenant/users",
-    ENROLMENTS: "/tenant/enrolments",
-    GROUPS: "/tenant/groups",
-    COURSES: "/tenant/courses",
-    QUESTIONS: "/tenant/questions",
-    EXAMS: "/tenant/exams",
-    RESULTS: "/tenant/results",
-    NOTIFICATIONS: "/tenant/notifications",
-    BRANDING: "/tenant/branding",
-    AUDIT: "/tenant/audit",
+    ROOT: DASHBOARD_ROOT,
+    USERS: `${DASHBOARD_ROOT}/users`,
+    ENROLMENTS: `${DASHBOARD_ROOT}/enrolments`,
+    GROUPS: `${DASHBOARD_ROOT}/groups`,
+    COURSES: `${DASHBOARD_ROOT}/courses`,
+    QUESTIONS: `${DASHBOARD_ROOT}/questions`,
+    EXAMS: `${DASHBOARD_ROOT}/exams`,
+    RESULTS: `${DASHBOARD_ROOT}/results`,
+    NOTIFICATIONS: `${DASHBOARD_ROOT}/notifications`,
+    BRANDING: `${DASHBOARD_ROOT}/branding`,
+    AUDIT: `${DASHBOARD_ROOT}/audit`,
+    PROCTOR: `${DASHBOARD_ROOT}/proctor`,
   },
   STUDENT: {
-    ROOT: "/student",
-    COURSES: "/student/courses",
-    EXAMS: "/student/exams",
-    RESULTS: "/student/results",
+    ROOT: DASHBOARD_ROOT,
+    COURSES: `${DASHBOARD_ROOT}/courses`,
+    EXAMS: `${DASHBOARD_ROOT}/exams`,
+    RESULTS: `${DASHBOARD_ROOT}/results`,
   },
   TEACHER: {
-    ROOT: "/teacher",
-    COURSES: "/teacher/courses",
-    QUESTIONS: "/teacher/questions",
-    EXAMS: "/teacher/exams",
-    RESULTS: "/teacher/results",
+    ROOT: DASHBOARD_ROOT,
+    COURSES: `${DASHBOARD_ROOT}/courses`,
+    QUESTIONS: `${DASHBOARD_ROOT}/questions`,
+    EXAMS: `${DASHBOARD_ROOT}/exams`,
+    RESULTS: `${DASHBOARD_ROOT}/results`,
   },
 } as const;
 
 export type AppRoutes = typeof ROUTES;
 
-export class AppRouteConstants {
-  static readonly HOME = ROUTES.HOME;
-  static readonly LOGIN = ROUTES.AUTH.LOGIN;
-  static readonly REGISTER = ROUTES.AUTH.REGISTER;
+export const AppRouteConstants = {
+  HOME: ROUTES.HOME,
+  LOGIN: ROUTES.AUTH.LOGIN,
+  REGISTER: ROUTES.AUTH.REGISTER,
 
-  // Aliases to avoid breaking existing UI components (defaulting to tenant paths where applicable)
-  static readonly DASHBOARD = ROUTES.TENANT.ROOT;
-  static readonly COURSES = ROUTES.TENANT.COURSES;
-  static readonly EXAMS = ROUTES.TENANT.EXAMS;
-  static readonly USERS = ROUTES.TENANT.USERS;
-  static readonly TENANTS = ROUTES.ADMIN.TENANTS;
+  // Shared dashboard aliases used by feature UI.
+  DASHBOARD: DASHBOARD_ROOT,
+  COURSES: ROUTES.TENANT.COURSES,
+  EXAMS: ROUTES.TENANT.EXAMS,
+  USERS: ROUTES.TENANT.USERS,
+  TENANTS: ROUTES.ADMIN.TENANTS,
 
-  static courseDetail(id: number | string): string {
+  courseDetail(id: number | string): string {
     return `${ROUTES.TENANT.COURSES}/${id}`;
-  }
+  },
 
-  static examDetail(id: number | string): string {
+  examDetail(id: number | string): string {
     return `${ROUTES.TENANT.EXAMS}/${id}`;
-  }
+  },
 
-  static examAttempt(
-    quizId: number | string,
-    attemptId: number | string,
-  ): string {
+  examAttempt(quizId: number | string, attemptId: number | string): string {
     return `${ROUTES.STUDENT.EXAMS}/${quizId}/attempt/${attemptId}`;
-  }
-}
+  },
+} as const;

@@ -194,6 +194,7 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
     case Role.STUDENT:
       return [
         {
+          label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
@@ -206,40 +207,46 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               icon: BookOpen,
             },
             {
+              label: "Jadwal Ujian",
+              path: ROUTES.STUDENT.EXAMS,
+              icon: FileText,
+              permission: PERMISSIONS.EXAM_TAKE,
+            },
+            {
               label: "Tugas",
-              path: "/student/assignments",
+              path: "/dashboard/assignments",
               icon: FileText,
             },
             {
               label: "Kalender",
-              path: "/student/calendar",
+              path: "/dashboard/calendar",
               icon: Calendar,
             },
             {
               label: "Jadwal Pelajaran",
-              path: "/student/schedule",
+              path: "/dashboard/schedule",
               icon: CalendarDays,
             },
             {
-              label: "Nilai",
+              label: "Hasil & Nilai",
               path: ROUTES.STUDENT.RESULTS,
               icon: Award,
               permission: PERMISSIONS.RESULT_VIEW_OWN,
             },
             {
               label: "Pengumuman",
-              path: "/student/announcements",
+              path: "/dashboard/announcements",
               icon: Megaphone,
             },
             {
               label: "Notifikasi",
-              path: "/student/notifications",
+              path: "/dashboard/notifications",
               icon: Bell,
               // Ideally there would be a badge here, but we'll add it to the item type if needed
             },
             {
               label: "Aktivitas Terbaru",
-              path: "/student/activities",
+              path: "/dashboard/activities",
               icon: Clock,
             },
           ],
@@ -249,12 +256,12 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Profil",
-              path: "/student/profile",
+              path: "/dashboard/profile",
               icon: User,
             },
             {
               label: "Pengaturan",
-              path: "/student/settings",
+              path: "/dashboard/settings",
               icon: Settings,
             },
           ],

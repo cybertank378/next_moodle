@@ -50,6 +50,7 @@ describe("Architecture Guard: consolidated App Router structure", () => {
       "src/app/(protected)/dashboard/component/AdminDashboard.tsx",
       "src/app/(protected)/dashboard/component/TenantDashboard.tsx",
       "src/app/(protected)/dashboard/component/StudentDashboard.tsx",
+      "src/app/(protected)/dashboard/component/TeacherDashboard.tsx",
     ]) {
       expect(exists(file), `Dashboard file missing: ${file}`).toBe(true);
     }
@@ -90,6 +91,8 @@ describe("Architecture Guard: consolidated App Router structure", () => {
       "src/app/(protected)/dashboard/branding/page.tsx",
       "src/app/(protected)/dashboard/audit/page.tsx",
       "src/app/(protected)/dashboard/settings/page.tsx",
+      "src/app/(protected)/dashboard/notifications/page.tsx",
+      "src/app/(protected)/dashboard/proctor/page.tsx",
     ];
 
     for (const page of pages) {
@@ -109,6 +112,8 @@ describe("Architecture Guard: consolidated App Router structure", () => {
       "apple-icon.png",
       "favicon.ico",
       "icon.png",
+      "icon0.svg",
+      "icon1.png",
       "layout.tsx",
       "manifest.ts",
       "page.tsx",

@@ -176,6 +176,13 @@ describe("Aksaventra Auth Redesign Components", () => {
       expect(html).toContain("Aksaventra • Sistem Pembelajaran");
     });
 
+    it("LoginForm falls back to POST so credentials never enter the URL before hydration", () => {
+      const html = renderToStaticMarkup(<LoginForm />);
+
+      expect(html).toMatch(/<form[^>]*method="post"/);
+      expect(html).not.toMatch(/action="[^"]*[?&](username|password)=/);
+    });
+
     it("LoginForm displays loading state on button when auth is pending", () => {
       vi.mocked(authHook.useAuthApi).mockReturnValue({
         ...defaultMockAuth,

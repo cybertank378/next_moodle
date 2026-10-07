@@ -7,12 +7,12 @@ import NotificationCampaignFormView from "@/sections/notification-management/org
 import NotificationManagementView from "@/sections/notification-management/organisms/NotificationManagementView";
 
 interface Props {
-  role: "ADMIN" | "TENANT";
+  actorRole: "ADMIN" | "TENANT";
 }
 
 type ViewMode = "LIST" | "CREATE" | "EDIT" | "DETAIL";
 
-export default function NotificationManagementPageView({ role }: Props) {
+export default function NotificationManagementPageView({ actorRole }: Props) {
   const [mode, setMode] = useState<ViewMode>("LIST");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -30,7 +30,7 @@ export default function NotificationManagementPageView({ role }: Props) {
     <div className="p-4 sm:p-6 mx-auto">
       {mode === "LIST" && (
         <NotificationManagementView
-          role={role}
+          role={actorRole}
           onNewCampaign={() => {
             setSelectedId(null);
             setMode("CREATE");
@@ -48,7 +48,7 @@ export default function NotificationManagementPageView({ role }: Props) {
 
       {(mode === "CREATE" || mode === "EDIT") && (
         <NotificationCampaignFormView
-          role={role}
+          role={actorRole}
           campaignId={selectedId}
           onBack={handleBackToList}
           onSaved={handleSaved}
