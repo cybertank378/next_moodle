@@ -122,13 +122,19 @@ export class AuthController {
         result.sessionCookie.value,
         result.sessionCookie.expiresAt,
       );
-      await recordSaasAudit({
-        actor: result.actor,
-        tenantId: result.actor.tenantId ?? null,
-        action: "auth.login",
-        resource: "session",
-        details: { event: "auth.login" },
-      });
+      // Authentication must not return HTTP 500 after the session was created.
+      // An audit outage must be visible to operations, never hidden.
+      try {
+        await recordSaasAudit({
+          actor: result.actor,
+          tenantId: result.actor.tenantId ?? null,
+          action: "auth.login",
+          resource: "session",
+          details: { event: "auth.login" },
+        });
+      } catch (auditError) {
+        console.error("[AuthController] Login succeeded but audit persistence failed", auditError);
+      }
       return response;
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
