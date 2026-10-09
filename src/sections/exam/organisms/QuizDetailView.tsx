@@ -16,10 +16,10 @@ import { ROUTES } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
+import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
 import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import { showErrorToast } from "@/shared-ui/component/Toast";
-import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
 
 interface Props {
   quizId: number;
@@ -111,7 +111,8 @@ export default function QuizDetailView({ quizId }: Props) {
                       {quiz.name}
                     </h2>
                     <p className="text-xs text-slate-500 ">
-                      ID Kuis: {quiz.id} • Modul Mata Pelajaran: {quiz.courseModuleId}
+                      ID Kuis: {quiz.id} • Modul Mata Pelajaran:{" "}
+                      {quiz.courseModuleId}
                     </p>
                   </div>
                 </div>
@@ -132,10 +133,7 @@ export default function QuizDetailView({ quizId }: Props) {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
                 <div className="rounded-lg border border-slate-200  bg-slate-50  p-3.5 space-y-1">
                   <div className="flex items-center gap-2 text-xs text-slate-500 ">
-                    <Clock
-                      size={14}
-                      className="text-indigo-500 "
-                    />
+                    <Clock size={14} className="text-indigo-500 " />
                     <span>Batas Waktu Pengerjaan</span>
                   </div>
                   <p className="text-sm font-semibold text-slate-900 ">
@@ -147,10 +145,7 @@ export default function QuizDetailView({ quizId }: Props) {
 
                 <div className="rounded-lg border border-slate-200  bg-slate-50  p-3.5 space-y-1">
                   <div className="flex items-center gap-2 text-xs text-slate-500 ">
-                    <Calendar
-                      size={14}
-                      className="text-amber-500 "
-                    />
+                    <Calendar size={14} className="text-amber-500 " />
                     <span>Maksimal Percobaan</span>
                   </div>
                   <p className="text-sm font-semibold text-slate-900 ">
@@ -232,10 +227,7 @@ export default function QuizDetailView({ quizId }: Props) {
 
               <div className="rounded-lg bg-slate-50  p-3.5 text-[11px] text-slate-600  space-y-1.5 border border-slate-200 ">
                 <div className="flex items-center gap-1.5 font-medium text-slate-800 ">
-                  <AlertCircle
-                    size={13}
-                    className="text-indigo-500 "
-                  />
+                  <AlertCircle size={13} className="text-indigo-500 " />
                   <span>Catatan Integritas Ujian</span>
                 </div>
                 <p>

@@ -1,9 +1,9 @@
-import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 // Files: src/app/api/firebase/subscribe/route.ts
 import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 import { NextResponse } from "next/server";
 import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 
 import { normalizeFcmTopic } from "@/modules/notification/domain/helpers/fcmTopicHelper";
 
@@ -64,7 +64,6 @@ async function originalDELETE(req: Request) {
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
-
 
 export const POST = withAuditedMutation(originalPOST, "firebase/subscribe");
 export const DELETE = withAuditedMutation(originalDELETE, "firebase/subscribe");

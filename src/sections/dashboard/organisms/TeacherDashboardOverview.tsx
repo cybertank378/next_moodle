@@ -6,11 +6,11 @@ import { ROUTES } from "@/libs/routes";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
 import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
-import Card from "@/shared-ui/component/Card";
 import Button from "@/shared-ui/component/Button";
+import Card from "@/shared-ui/component/Card";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import Typography from "@/shared-ui/component/Typography";
 import { showErrorToast } from "@/shared-ui/component/Toast";
+import Typography from "@/shared-ui/component/Typography";
 
 export default function TeacherDashboardOverview() {
   const router = useRouter();

@@ -1,8 +1,8 @@
-import type { Result } from "@/core/base/Result";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
-import type { ExamMonitorRepositoryInterface } from "@/modules/exam-monitor/domain/interfaces/ExamMonitorRepositoryInterface";
-import type { ExamMonitorActionRequestDto } from "@/modules/exam-monitor/domain/dto/ExamMonitorDto";
+import type { Result } from "@/core/base/Result";
 import { authorizeExamMonitorOperation } from "@/modules/exam-monitor/application/services/ExamMonitorAuthorizationService";
+import type { ExamMonitorActionRequestDto } from "@/modules/exam-monitor/domain/dto/ExamMonitorDto";
+import type { ExamMonitorRepositoryInterface } from "@/modules/exam-monitor/domain/interfaces/ExamMonitorRepositoryInterface";
 
 export class LockAttemptUseCase {
   constructor(private readonly repo: ExamMonitorRepositoryInterface) {}

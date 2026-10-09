@@ -1,7 +1,7 @@
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require("node:fs");
+const path = require("node:path");
 
-const srcDir = path.resolve('d:/Project/Website/next-moodle/src');
+const srcDir = path.resolve("d:/Project/Website/next-moodle/src");
 
 function walk(dir) {
   let results = [];
@@ -12,7 +12,7 @@ function walk(dir) {
     if (stat.isDirectory()) {
       results = results.concat(walk(fullPath));
     } else {
-      if (fullPath.endsWith('.ts') || fullPath.endsWith('.tsx')) {
+      if (fullPath.endsWith(".ts") || fullPath.endsWith(".tsx")) {
         results.push(fullPath);
       }
     }
@@ -23,25 +23,26 @@ function walk(dir) {
 const files = walk(srcDir);
 let changedFiles = 0;
 
-files.forEach(file => {
-  let content = fs.readFileSync(file, 'utf8');
+files.forEach((file) => {
+  let content = fs.readFileSync(file, "utf8");
   const originalContent = content;
-  
-  const regex = /(from|import|export|vi\.mock|jest\.mock)\s*\(?\s*['"](\.[^'"]+)['"]/g;
-  
+
+  const regex =
+    /(from|import|export|vi\.mock|jest\.mock)\s*\(?\s*['"](\.[^'"]+)['"]/g;
+
   content = content.replace(regex, (match, _keyword, relativePath) => {
     const fileDir = path.dirname(file);
     const resolvedPath = path.resolve(fileDir, relativePath);
-    
+
     if (resolvedPath.startsWith(srcDir)) {
-      const aliasPath = resolvedPath.replace(srcDir, '@').replace(/\\/g, '/');
+      const aliasPath = resolvedPath.replace(srcDir, "@").replace(/\\/g, "/");
       return match.replace(relativePath, aliasPath);
     }
     return match;
   });
 
   if (content !== originalContent) {
-    fs.writeFileSync(file, content, 'utf8');
+    fs.writeFileSync(file, content, "utf8");
     changedFiles++;
   }
 });

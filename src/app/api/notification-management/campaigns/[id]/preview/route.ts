@@ -8,4 +8,7 @@ async function originalPOST(req: Request): Promise<Response> {
   return createNotificationManagementController().previewAudience(req);
 }
 
-export const POST = withAuditedMutation(originalPOST, "notification-management/campaigns/:id/preview");
+export const POST = withAuditedMutation(
+  originalPOST,
+  "notification-management/campaigns/:id/preview",
+);

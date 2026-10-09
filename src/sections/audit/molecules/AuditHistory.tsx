@@ -1,15 +1,164 @@
 "use client";
-import type {AuditListItemDTO} from "@/modules/audit/domain/dto/AuditResponseDTO";
-import {AuditActorLabel} from "@/sections/audit/atoms/AuditActorLabel";
+import { CheckCircle2, Eye, LockKeyhole } from "lucide-react";
+import type { AuditListItemDTO } from "@/modules/audit/domain/dto/AuditResponseDTO";
+import { AuditActorLabel } from "@/sections/audit/atoms/AuditActorLabel";
 import Button from "@/shared-ui/component/Button";
 import EmptyState from "@/shared-ui/component/EmptyState";
-import {Eye,LockKeyhole,CheckCircle2} from "lucide-react";
-import {Table,TableHead,TableBody,TableHeaderCell,TableRow,TableCell} from "@/shared-ui/component/Table";
-const wib=(iso:string)=>new Intl.DateTimeFormat("id-ID",{timeZone:"Asia/Jakarta",dateStyle:"medium",timeStyle:"short"}).format(new Date(iso));
-export function AuditHistory({items,loading,onDetail,retentionCutoff}:{items:AuditListItemDTO[];loading:boolean;onDetail:(id:string)=>void;retentionCutoff?:string}){
- if(loading)return <div role="status" aria-label="Memuat riwayat audit" className="space-y-3 p-4">{Array.from({length:6},(_,i)=><div key={i} className="h-14 animate-pulse rounded-lg bg-slate-100"/>)}</div>;
- if(!items.length)return <EmptyState title="Tidak ada aktivitas audit" description="Belum ada log sesuai filter yang dipilih."/>;
- const eligible=(item:AuditListItemDTO)=>Boolean(retentionCutoff&&item.createdAt<=retentionCutoff);
- const status=(item:AuditListItemDTO)=>eligible(item)?<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"><CheckCircle2 size={13}/> Layak dibersihkan</span>:<span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700"><LockKeyhole size={13}/> Terlindungi</span>;
- return <><div className="hidden overflow-x-auto lg:block"><Table><TableHead><TableRow>{["ID Log","Waktu WIB","Pengguna","Aksi / Resource","Tenant","Status","Detail"].map(h=><TableHeaderCell key={h}>{h}</TableHeaderCell>)}</TableRow></TableHead><TableBody>{items.map(item=><TableRow key={item.id}><TableCell><span title={item.id} className="font-mono text-xs text-slate-500">{item.id.slice(0,8)}</span></TableCell><TableCell><span className="whitespace-nowrap text-xs text-slate-600">{wib(item.createdAt)}</span></TableCell><TableCell><AuditActorLabel name={item.actorName}/></TableCell><TableCell><p className="max-w-56 break-words font-medium text-slate-800">{item.action}</p><p className="text-xs text-slate-500">{item.resource}</p></TableCell><TableCell><span className="text-sm text-slate-600">{item.tenantName}</span></TableCell><TableCell>{status(item)}</TableCell><TableCell><Button variant="outline" color="secondary" leftIcon={Eye} className="min-h-11" onClick={()=>onDetail(item.id)}>Detail</Button></TableCell></TableRow>)}</TableBody></Table></div><div className="grid gap-3 lg:hidden">{items.map(item=><article key={item.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-2"><AuditActorLabel name={item.actorName}/><span className="shrink-0 text-xs text-slate-500">{wib(item.createdAt)}</span></div><p className="mt-4 break-words font-semibold text-slate-900">{item.action}</p><p className="text-sm text-slate-500">{item.resource} · {item.tenantName}</p><div className="mt-4 flex items-center justify-between gap-2">{status(item)}<Button variant="outline" color="secondary" leftIcon={Eye} onClick={()=>onDetail(item.id)}>Detail</Button></div></article>)}</div></>
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "@/shared-ui/component/Table";
+
+const wib = (iso: string) =>
+  new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(iso));
+export function AuditHistory({
+  items,
+  loading,
+  onDetail,
+  retentionCutoff,
+}: {
+  items: AuditListItemDTO[];
+  loading: boolean;
+  onDetail: (id: string) => void;
+  retentionCutoff?: string;
+}) {
+  if (loading)
+    return (
+      <div
+        role="status"
+        aria-label="Memuat riwayat audit"
+        className="space-y-3 p-4"
+      >
+        {Array.from({ length: 6 }, (_, i) => (
+          <div key={i} className="h-14 animate-pulse rounded-lg bg-slate-100" />
+        ))}
+      </div>
+    );
+  if (!items.length)
+    return (
+      <EmptyState
+        title="Tidak ada aktivitas audit"
+        description="Belum ada log sesuai filter yang dipilih."
+      />
+    );
+  const eligible = (item: AuditListItemDTO) =>
+    Boolean(retentionCutoff && item.createdAt <= retentionCutoff);
+  const status = (item: AuditListItemDTO) =>
+    eligible(item) ? (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+        <CheckCircle2 size={13} /> Layak dibersihkan
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+        <LockKeyhole size={13} /> Terlindungi
+      </span>
+    );
+  return (
+    <>
+      <div className="hidden overflow-x-auto lg:block">
+        <Table>
+          <TableHead>
+            <TableRow>
+              {[
+                "ID Log",
+                "Waktu WIB",
+                "Pengguna",
+                "Aksi / Resource",
+                "Tenant",
+                "Status",
+                "Detail",
+              ].map((h) => (
+                <TableHeaderCell key={h}>{h}</TableHeaderCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <span
+                    title={item.id}
+                    className="font-mono text-xs text-slate-500"
+                  >
+                    {item.id.slice(0, 8)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="whitespace-nowrap text-xs text-slate-600">
+                    {wib(item.createdAt)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <AuditActorLabel name={item.actorName} />
+                </TableCell>
+                <TableCell>
+                  <p className="max-w-56 break-words font-medium text-slate-800">
+                    {item.action}
+                  </p>
+                  <p className="text-xs text-slate-500">{item.resource}</p>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-slate-600">
+                    {item.tenantName}
+                  </span>
+                </TableCell>
+                <TableCell>{status(item)}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="outline"
+                    color="secondary"
+                    leftIcon={Eye}
+                    className="min-h-11"
+                    onClick={() => onDetail(item.id)}
+                  >
+                    Detail
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="grid gap-3 lg:hidden">
+        {items.map((item) => (
+          <article
+            key={item.id}
+            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <AuditActorLabel name={item.actorName} />
+              <span className="shrink-0 text-xs text-slate-500">
+                {wib(item.createdAt)}
+              </span>
+            </div>
+            <p className="mt-4 break-words font-semibold text-slate-900">
+              {item.action}
+            </p>
+            <p className="text-sm text-slate-500">
+              {item.resource} · {item.tenantName}
+            </p>
+            <div className="mt-4 flex items-center justify-between gap-2">
+              {status(item)}
+              <Button
+                variant="outline"
+                color="secondary"
+                leftIcon={Eye}
+                onClick={() => onDetail(item.id)}
+              >
+                Detail
+              </Button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
 }

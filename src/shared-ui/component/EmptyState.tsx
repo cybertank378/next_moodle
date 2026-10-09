@@ -1,7 +1,8 @@
 // Files: src/shared-ui/component/EmptyState.tsx
-import type { ReactNode } from "react";
-import { Inbox } from "lucide-react";
+
 import clsx from "clsx";
+import { Inbox } from "lucide-react";
+import type { ReactNode } from "react";
 
 export interface EmptyStateProps {
   title?: string;
@@ -29,7 +30,9 @@ export default function EmptyState({
         {icon || <Inbox className="w-6 h-6" />}
       </div>
       <p className="text-sm font-semibold text-slate-800">{title}</p>
-      {description && <p className="mt-1 text-xs text-slate-500 max-w-sm">{description}</p>}
+      {description && (
+        <p className="mt-1 text-xs text-slate-500 max-w-sm">{description}</p>
+      )}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

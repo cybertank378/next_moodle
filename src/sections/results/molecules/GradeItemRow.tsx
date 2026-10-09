@@ -31,9 +31,7 @@ export default function GradeItemRow({
           {getIcon()}
         </div>
         <div>
-          <h4 className="font-semibold text-slate-900 ">
-            {item.itemName}
-          </h4>
+          <h4 className="font-semibold text-slate-900 ">{item.itemName}</h4>
           <p className="text-xs text-slate-500 ">
             Tipe: {item.itemModule || item.itemType} • Batas Kelulusan:{" "}
             {item.gradePass !== null ? item.gradePass : "-"}
@@ -52,9 +50,7 @@ export default function GradeItemRow({
             <span className="text-lg font-bold text-slate-900 ">
               {item.gradeFormatted}
             </span>
-            <span className="text-xs text-slate-500 ">
-              / {item.gradeMax}
-            </span>
+            <span className="text-xs text-slate-500 ">/ {item.gradeMax}</span>
           </div>
           {item.percentageFormatted && (
             <p className="text-xs text-slate-500  font-medium">

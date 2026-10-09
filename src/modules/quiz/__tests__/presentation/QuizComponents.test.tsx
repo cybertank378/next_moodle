@@ -1,9 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import type { QuizSummaryResponseDTO } from "@/modules/quiz/domain/dto/QuizResponseDto";
 import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
 import QuizTimeLimitBadge from "@/sections/exam/atoms/QuizTimeLimitBadge";
 import QuizCard from "@/sections/exam/molecules/QuizCard";
-import type { QuizSummaryResponseDTO } from "@/modules/quiz/domain/dto/QuizResponseDto";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

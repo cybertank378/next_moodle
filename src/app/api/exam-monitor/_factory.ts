@@ -2,15 +2,14 @@ import { DefaultMoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentialProvider";
 import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { prisma } from "@/libs/prisma";
-import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
-
-import { MoodleExamMonitorRepository } from "@/modules/exam-monitor/infrastructure/repo/MoodleExamMonitorRepository";
-import { ExamMonitorController } from "@/modules/exam-monitor/infrastructure/http/ExamMonitorController";
+import { ExtendTimeUseCase } from "@/modules/exam-monitor/application/usecases/ExtendTimeUseCase";
+import { ForceFinishAttemptUseCase } from "@/modules/exam-monitor/application/usecases/ForceFinishAttemptUseCase";
 import { GetExamMonitorUseCase } from "@/modules/exam-monitor/application/usecases/GetExamMonitorUseCase";
 import { LockAttemptUseCase } from "@/modules/exam-monitor/application/usecases/LockAttemptUseCase";
 import { UnlockAttemptUseCase } from "@/modules/exam-monitor/application/usecases/UnlockAttemptUseCase";
-import { ForceFinishAttemptUseCase } from "@/modules/exam-monitor/application/usecases/ForceFinishAttemptUseCase";
-import { ExtendTimeUseCase } from "@/modules/exam-monitor/application/usecases/ExtendTimeUseCase";
+import { ExamMonitorController } from "@/modules/exam-monitor/infrastructure/http/ExamMonitorController";
+import { MoodleExamMonitorRepository } from "@/modules/exam-monitor/infrastructure/repo/MoodleExamMonitorRepository";
+import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
 
 let _controller: ExamMonitorController;
 let _clientFactory: DefaultMoodleClientFactory;

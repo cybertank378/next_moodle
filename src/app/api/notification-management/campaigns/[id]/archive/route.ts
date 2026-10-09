@@ -12,4 +12,7 @@ async function originalPOST(
   return createNotificationManagementController().archiveCampaign(req, id);
 }
 
-export const POST = withAuditedMutation(originalPOST, "notification-management/campaigns/:id/archive");
+export const POST = withAuditedMutation(
+  originalPOST,
+  "notification-management/campaigns/:id/archive",
+);

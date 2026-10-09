@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { AppRole } from "@/core/rbac/AppRole";
 import { Result } from "@/core/base/Result";
-import type { ExamMonitorRepositoryInterface } from "@/modules/exam-monitor/domain/interfaces/ExamMonitorRepositoryInterface";
+import { AppRole } from "@/core/rbac/AppRole";
+import { ExtendTimeUseCase } from "@/modules/exam-monitor/application/usecases/ExtendTimeUseCase";
+import { ForceFinishAttemptUseCase } from "@/modules/exam-monitor/application/usecases/ForceFinishAttemptUseCase";
 import { GetExamMonitorUseCase } from "@/modules/exam-monitor/application/usecases/GetExamMonitorUseCase";
 import { LockAttemptUseCase } from "@/modules/exam-monitor/application/usecases/LockAttemptUseCase";
-import { ForceFinishAttemptUseCase } from "@/modules/exam-monitor/application/usecases/ForceFinishAttemptUseCase";
-import { ExtendTimeUseCase } from "@/modules/exam-monitor/application/usecases/ExtendTimeUseCase";
+import type { ExamMonitorRepositoryInterface } from "@/modules/exam-monitor/domain/interfaces/ExamMonitorRepositoryInterface";
 
 describe("ExamMonitorUseCases", () => {
   const actor = {
@@ -71,7 +71,11 @@ describe("ExamMonitorUseCases", () => {
     it("calls repository extendAttemptTime", async () => {
       const repo = createMockRepo();
       const usecase = new ExtendTimeUseCase(repo);
-      await usecase.execute(actor, { tenantId: "tenant-1", attemptId: 5, extraTimeMinutes: 10 });
+      await usecase.execute(actor, {
+        tenantId: "tenant-1",
+        attemptId: 5,
+        extraTimeMinutes: 10,
+      });
       expect(repo.extendAttemptTime).toHaveBeenCalledWith({
         tenantId: "tenant-1",
         attemptId: 5,

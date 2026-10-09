@@ -1,11 +1,13 @@
-import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 import { cookies } from "next/headers";
+import { getAuthRepository } from "@/app/api/auth/_factory";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import type { SessionRepository } from "@/core/auth/SessionRepository";
-import { getAuthRepository } from "@/app/api/auth/_factory";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 
-export async function extractTokenFromRequest(request: Request): Promise<string | null> {
+export async function extractTokenFromRequest(
+  request: Request,
+): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.substring("Bearer ".length).trim();

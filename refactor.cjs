@@ -17,7 +17,9 @@ function moveDirContents(srcDir, destDir) {
         moveDirContents(srcPath, destPath);
         try {
           fs.rmdirSync(srcPath);
-        } catch { /* Ignore non-empty directory during migration. */ }
+        } catch {
+          /* Ignore non-empty directory during migration. */
+        }
       } else {
         // file conflict, just overwrite or log
         fs.renameSync(srcPath, destPath);
@@ -28,7 +30,9 @@ function moveDirContents(srcDir, destDir) {
   }
   try {
     fs.rmdirSync(srcDir);
-  } catch { /* Ignore non-empty directory during migration. */ }
+  } catch {
+    /* Ignore non-empty directory during migration. */
+  }
 }
 
 // 1. Move quiz-attempts -> quiz

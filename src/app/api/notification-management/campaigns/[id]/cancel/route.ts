@@ -12,4 +12,7 @@ async function originalPOST(
   return createNotificationManagementController().cancelCampaign(req, id);
 }
 
-export const POST = withAuditedMutation(originalPOST, "notification-management/campaigns/:id/cancel");
+export const POST = withAuditedMutation(
+  originalPOST,
+  "notification-management/campaigns/:id/cancel",
+);

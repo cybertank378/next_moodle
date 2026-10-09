@@ -1,11 +1,11 @@
 // Files: src/app/(protected)/dashboard/notifications/__tests__/NotificationsPage.test.tsx
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import React from "react";
+import { redirect } from "next/navigation";
+import type React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import NotificationsPage from "@/app/(protected)/dashboard/notifications/page";
 import * as authServer from "@/modules/auth/server/requireDashboardRoles";
-import { redirect } from "next/navigation";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
@@ -18,11 +18,14 @@ vi.mock("@/modules/auth/server/requireDashboardRoles", () => ({
   requireDashboardRoles: vi.fn(),
 }));
 
-vi.mock("@/sections/notification-management/pages/NotificationManagementPageView", () => ({
-  default: ({ actorRole }: { actorRole: string }) => (
-    <div data-testid="notification-management-page">{actorRole}</div>
-  ),
-}));
+vi.mock(
+  "@/sections/notification-management/pages/NotificationManagementPageView",
+  () => ({
+    default: ({ actorRole }: { actorRole: string }) => (
+      <div data-testid="notification-management-page">{actorRole}</div>
+    ),
+  }),
+);
 
 vi.mock("@/sections/notification/pages/NotificationPageView", () => ({
   default: ({ userRole }: { userRole?: string }) => (

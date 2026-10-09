@@ -1,5 +1,5 @@
-import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 import type { NextRequest } from "next/server";
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 import { getExamMonitorController } from "../_factory";
 
 async function originalPOST(req: NextRequest) {

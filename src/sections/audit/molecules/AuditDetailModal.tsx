@@ -1,9 +1,100 @@
 "use client";
-import type {AuditDetailDTO} from "@/modules/audit/domain/dto/AuditResponseDTO";
-import {AuditDialog} from "@/sections/audit/atoms/AuditDialog";
-import {AuditActorLabel} from "@/sections/audit/atoms/AuditActorLabel";
+import type { AuditDetailDTO } from "@/modules/audit/domain/dto/AuditResponseDTO";
+import { AuditActorLabel } from "@/sections/audit/atoms/AuditActorLabel";
+import { AuditDialog } from "@/sections/audit/atoms/AuditDialog";
 import Button from "@/shared-ui/component/Button";
-export function AuditDetailModal({open,detail,loading,error,onClose,retentionCutoff}:{open:boolean;detail:AuditDetailDTO|null;loading:boolean;error:string|null;onClose:()=>void;retentionCutoff?:string}){
- const fields=detail?[["ID Log",detail.id],["Waktu WIB",new Intl.DateTimeFormat("id-ID",{timeZone:"Asia/Jakarta",dateStyle:"full",timeStyle:"medium"}).format(new Date(detail.createdAt))],["Nama pengguna",detail.actorName??"Nama pengguna tidak tersedia"],["Tenant",detail.tenantName],["Aksi",detail.action],["Resource",detail.resource],["Resource ID",detail.resourceId],["Alamat IP",detail.ipAddress],["User Agent",detail.userAgent]]:[];
- return <AuditDialog open={open} onClose={onClose} title="Detail Aktivitas Audit">{loading?<p role="status">Memuat detail aktivitas...</p>:error?<p role="alert" className="text-red-600">{error}</p>:detail?<div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]"><section className="rounded-xl border border-slate-200 p-4"><h3 className="mb-4 font-semibold">Informasi Utama</h3><AuditActorLabel name={detail.actorName}/><dl className="mt-4 space-y-3">{fields.map(([label,value])=><div key={label} className="grid grid-cols-[110px_1fr] gap-3 border-b border-slate-100 pb-2 text-sm"><dt className="text-slate-500">{label}</dt><dd className="min-w-0 break-all font-medium text-slate-800">{value??"—"}</dd></div>)}</dl></section><div className="space-y-4"><section className="rounded-xl border border-slate-200 p-4"><h3 className="font-semibold">Status Retensi</h3><p className="mt-3 text-sm font-semibold text-amber-700">{!retentionCutoff||detail.createdAt>retentionCutoff?"Terlindungi":"Layak dibersihkan oleh ADMIN"}</p></section><section className="rounded-xl border border-slate-200 p-4"><h3 className="mb-3 font-semibold">Detail Metadata</h3><pre className="max-h-60 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-slate-50 p-3 text-xs text-slate-700">{JSON.stringify(detail.details,null,2)}</pre></section></div><div className="flex justify-end gap-2 lg:col-span-2"><Button variant="outline" color="secondary" onClick={onClose}>Tutup</Button><Button onClick={()=>void navigator.clipboard.writeText(detail.id)}>Salin ID Log</Button></div></div>:<p>Detail tidak tersedia.</p>}</AuditDialog>
+export function AuditDetailModal({
+  open,
+  detail,
+  loading,
+  error,
+  onClose,
+  retentionCutoff,
+}: {
+  open: boolean;
+  detail: AuditDetailDTO | null;
+  loading: boolean;
+  error: string | null;
+  onClose: () => void;
+  retentionCutoff?: string;
+}) {
+  const fields = detail
+    ? [
+        ["ID Log", detail.id],
+        [
+          "Waktu WIB",
+          new Intl.DateTimeFormat("id-ID", {
+            timeZone: "Asia/Jakarta",
+            dateStyle: "full",
+            timeStyle: "medium",
+          }).format(new Date(detail.createdAt)),
+        ],
+        ["Nama pengguna", detail.actorName ?? "Nama pengguna tidak tersedia"],
+        ["Tenant", detail.tenantName],
+        ["Aksi", detail.action],
+        ["Resource", detail.resource],
+        ["Resource ID", detail.resourceId],
+        ["Alamat IP", detail.ipAddress],
+        ["User Agent", detail.userAgent],
+      ]
+    : [];
+  return (
+    <AuditDialog open={open} onClose={onClose} title="Detail Aktivitas Audit">
+      {loading ? (
+        <p role="status">Memuat detail aktivitas...</p>
+      ) : error ? (
+        <p role="alert" className="text-red-600">
+          {error}
+        </p>
+      ) : detail ? (
+        <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+          <section className="rounded-xl border border-slate-200 p-4">
+            <h3 className="mb-4 font-semibold">Informasi Utama</h3>
+            <AuditActorLabel name={detail.actorName} />
+            <dl className="mt-4 space-y-3">
+              {fields.map(([label, value]) => (
+                <div
+                  key={label}
+                  className="grid grid-cols-[110px_1fr] gap-3 border-b border-slate-100 pb-2 text-sm"
+                >
+                  <dt className="text-slate-500">{label}</dt>
+                  <dd className="min-w-0 break-all font-medium text-slate-800">
+                    {value ?? "—"}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+          <div className="space-y-4">
+            <section className="rounded-xl border border-slate-200 p-4">
+              <h3 className="font-semibold">Status Retensi</h3>
+              <p className="mt-3 text-sm font-semibold text-amber-700">
+                {!retentionCutoff || detail.createdAt > retentionCutoff
+                  ? "Terlindungi"
+                  : "Layak dibersihkan oleh ADMIN"}
+              </p>
+            </section>
+            <section className="rounded-xl border border-slate-200 p-4">
+              <h3 className="mb-3 font-semibold">Detail Metadata</h3>
+              <pre className="max-h-60 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
+                {JSON.stringify(detail.details, null, 2)}
+              </pre>
+            </section>
+          </div>
+          <div className="flex justify-end gap-2 lg:col-span-2">
+            <Button variant="outline" color="secondary" onClick={onClose}>
+              Tutup
+            </Button>
+            <Button
+              onClick={() => void navigator.clipboard.writeText(detail.id)}
+            >
+              Salin ID Log
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <p>Detail tidak tersedia.</p>
+      )}
+    </AuditDialog>
+  );
 }

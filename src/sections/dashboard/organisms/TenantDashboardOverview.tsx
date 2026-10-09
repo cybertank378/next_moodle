@@ -1,17 +1,17 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { ArrowRight } from "lucide-react";
 import { ROUTES } from "@/libs/routes";
-import Card from "@/shared-ui/component/Card";
-import Button from "@/shared-ui/component/Button";
-import Typography from "@/shared-ui/component/Typography";
-import { showErrorToast } from "@/shared-ui/component/Toast";
-import StatCard from "@/sections/dashboard/molecules/StatCard";
-import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
-import UpcomingExamsTable from "@/sections/dashboard/molecules/UpcomingExamsTable";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
+import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
+import StatCard from "@/sections/dashboard/molecules/StatCard";
+import UpcomingExamsTable from "@/sections/dashboard/molecules/UpcomingExamsTable";
+import Button from "@/shared-ui/component/Button";
+import Card from "@/shared-ui/component/Card";
+import { showErrorToast } from "@/shared-ui/component/Toast";
+import Typography from "@/shared-ui/component/Typography";
 
 export default function TenantDashboardOverview() {
   const router = useRouter();
@@ -84,7 +84,10 @@ export default function TenantDashboardOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card className="shadow-xl shadow-blue-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden h-full transition-colors">
-            <UpcomingExamsTable exams={data?.upcomingExams ?? []} loading={loading} />
+            <UpcomingExamsTable
+              exams={data?.upcomingExams ?? []}
+              loading={loading}
+            />
           </Card>
         </div>
 
@@ -112,11 +115,18 @@ export default function TenantDashboardOverview() {
             </Typography>
             <div className="space-y-4">
               <div className="bg-white/80  p-4 rounded-lg border border-amber-200/60  shadow-sm">
-                <Typography variant="h3" className="font-semibold text-sm text-slate-900 ">
+                <Typography
+                  variant="h3"
+                  className="font-semibold text-sm text-slate-900 "
+                >
                   Soal Belum Ada
                 </Typography>
-                <Typography variant="body" className="text-xs text-slate-600  mt-1 leading-relaxed">
-                  "World History: Module 4" dijadwalkan untuk 2 Nov memiliki 0 soal.
+                <Typography
+                  variant="body"
+                  className="text-xs text-slate-600  mt-1 leading-relaxed"
+                >
+                  "World History: Module 4" dijadwalkan untuk 2 Nov memiliki 0
+                  soal.
                 </Typography>
                 <Button
                   onClick={handleNavigateToExams}
@@ -130,11 +140,18 @@ export default function TenantDashboardOverview() {
                 </Button>
               </div>
               <div className="bg-white/80 p-4 rounded-lg border border-amber-200/60 shadow-sm">
-                <Typography variant="h3" className="font-semibold text-sm text-slate-900">
+                <Typography
+                  variant="h3"
+                  className="font-semibold text-sm text-slate-900"
+                >
                   Insiden Mencurigakan
                 </Typography>
-                <Typography variant="body" className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  3 peserta ditandai keluar dari browser berulang kali dalam 24 jam terakhir.
+                <Typography
+                  variant="body"
+                  className="text-xs text-slate-600 mt-1 leading-relaxed"
+                >
+                  3 peserta ditandai keluar dari browser berulang kali dalam 24
+                  jam terakhir.
                 </Typography>
                 <Button
                   onClick={handleNavigateToAudit}

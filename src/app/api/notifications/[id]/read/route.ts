@@ -11,4 +11,7 @@ async function originalPATCH(
   return getNotificationController().markAsRead(id, req);
 }
 
-export const PATCH = withAuditedMutation(originalPATCH, "notifications/:id/read");
+export const PATCH = withAuditedMutation(
+  originalPATCH,
+  "notifications/:id/read",
+);

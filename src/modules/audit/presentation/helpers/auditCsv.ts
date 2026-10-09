@@ -1,4 +1,43 @@
-import type {AuditListItemDTO} from "@/modules/audit/domain/dto/AuditResponseDTO";
-export function escapeCsvCell(value:unknown){let text=String(value??"");if(/^[\s\u0000-\u001f]*[=+\-@]/u.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"'}
-export function createAuditCsv(items:AuditListItemDTO[]){const rows=[["ID Log","Waktu UTC","Nama Pengguna","Aksi","Resource","Resource ID","Tenant","IP Address"],...items.map(item=>[item.id,item.createdAt,item.actorName?.trim()||"Nama pengguna tidak tersedia",item.action,item.resource,item.resourceId,item.tenantName,item.ipAddress])];return rows.map(row=>row.map(escapeCsvCell).join(",")).join("\r\n")}
-export function downloadAuditCsv(items:AuditListItemDTO[]){const url=URL.createObjectURL(new Blob(["\uFEFF",createAuditCsv(items)],{type:"text/csv;charset=utf-8"}));const anchor=document.createElement("a");anchor.href=url;anchor.download="aksaventra-audit-halaman.csv";anchor.click();setTimeout(()=>URL.revokeObjectURL(url),0)}
+import type { AuditListItemDTO } from "@/modules/audit/domain/dto/AuditResponseDTO";
+export function escapeCsvCell(value: unknown) {
+  let text = String(value ?? "");
+  if (/^[\s\u0000-\u001f]*[=+\-@]/u.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+export function createAuditCsv(items: AuditListItemDTO[]) {
+  const rows = [
+    [
+      "ID Log",
+      "Waktu UTC",
+      "Nama Pengguna",
+      "Aksi",
+      "Resource",
+      "Resource ID",
+      "Tenant",
+      "IP Address",
+    ],
+    ...items.map((item) => [
+      item.id,
+      item.createdAt,
+      item.actorName?.trim() || "Nama pengguna tidak tersedia",
+      item.action,
+      item.resource,
+      item.resourceId,
+      item.tenantName,
+      item.ipAddress,
+    ]),
+  ];
+  return rows.map((row) => row.map(escapeCsvCell).join(",")).join("\r\n");
+}
+export function downloadAuditCsv(items: AuditListItemDTO[]) {
+  const url = URL.createObjectURL(
+    new Blob(["\uFEFF", createAuditCsv(items)], {
+      type: "text/csv;charset=utf-8",
+    }),
+  );
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "aksaventra-audit-halaman.csv";
+  anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}

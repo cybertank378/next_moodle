@@ -1,5 +1,79 @@
-import {Activity,Clock3,ShieldCheck,Archive} from "lucide-react";
-export function AuditStatistics({total,today,protectedCount,eligibleCount,isAdmin}:{total:number;today:number;protectedCount?:number;eligibleCount?:number;isAdmin:boolean}){
- const cards=[{label:"Total Aktivitas",value:total,icon:Activity,color:"text-sky-600 bg-sky-50"},{label:"Aktivitas Hari Ini",value:today,icon:Clock3,color:"text-indigo-600 bg-indigo-50"},...(isAdmin?[{label:"Log Terlindungi",value:protectedCount,icon:ShieldCheck,color:"text-amber-600 bg-amber-50"},{label:"Layak Dibersihkan",value:eligibleCount,icon:Archive,color:"text-emerald-600 bg-emerald-50"}]:[])];
- return <section aria-label="Ringkasan audit" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(({label,value,icon:Icon,color})=><article key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-slate-500">{label}</p><p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{value===undefined?"—":value.toLocaleString("id-ID")}</p></div><div className={`rounded-xl p-3 ${color}`}><Icon size={22} aria-hidden="true"/></div></div><p className="mt-2 text-xs text-slate-400">{label==="Aktivitas Hari Ini"?"Waktu Asia/Jakarta":label==="Log Terlindungi"?"Belum mencapai tiga bulan":label==="Layak Dibersihkan"?"Memenuhi batas retensi":"Berdasarkan filter aktif"}</p></article>)}</section>
+import { Activity, Archive, Clock3, ShieldCheck } from "lucide-react";
+export function AuditStatistics({
+  total,
+  today,
+  protectedCount,
+  eligibleCount,
+  isAdmin,
+}: {
+  total: number;
+  today: number;
+  protectedCount?: number;
+  eligibleCount?: number;
+  isAdmin: boolean;
+}) {
+  const cards = [
+    {
+      label: "Total Aktivitas",
+      value: total,
+      icon: Activity,
+      color: "text-sky-600 bg-sky-50",
+    },
+    {
+      label: "Aktivitas Hari Ini",
+      value: today,
+      icon: Clock3,
+      color: "text-indigo-600 bg-indigo-50",
+    },
+    ...(isAdmin
+      ? [
+          {
+            label: "Log Terlindungi",
+            value: protectedCount,
+            icon: ShieldCheck,
+            color: "text-amber-600 bg-amber-50",
+          },
+          {
+            label: "Layak Dibersihkan",
+            value: eligibleCount,
+            icon: Archive,
+            color: "text-emerald-600 bg-emerald-50",
+          },
+        ]
+      : []),
+  ];
+  return (
+    <section
+      aria-label="Ringkasan audit"
+      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+    >
+      {cards.map(({ label, value, icon: Icon, color }) => (
+        <article
+          key={label}
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-slate-500">{label}</p>
+              <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
+                {value === undefined ? "—" : value.toLocaleString("id-ID")}
+              </p>
+            </div>
+            <div className={`rounded-xl p-3 ${color}`}>
+              <Icon size={22} aria-hidden="true" />
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-slate-400">
+            {label === "Aktivitas Hari Ini"
+              ? "Waktu Asia/Jakarta"
+              : label === "Log Terlindungi"
+                ? "Belum mencapai tiga bulan"
+                : label === "Layak Dibersihkan"
+                  ? "Memenuhi batas retensi"
+                  : "Berdasarkan filter aktif"}
+          </p>
+        </article>
+      ))}
+    </section>
+  );
 }

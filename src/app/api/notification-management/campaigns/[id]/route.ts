@@ -28,5 +28,11 @@ async function originalDELETE(
   return createNotificationManagementController().deleteDraft(req, id);
 }
 
-export const PATCH = withAuditedMutation(originalPATCH, "notification-management/campaigns/:id");
-export const DELETE = withAuditedMutation(originalDELETE, "notification-management/campaigns/:id");
+export const PATCH = withAuditedMutation(
+  originalPATCH,
+  "notification-management/campaigns/:id",
+);
+export const DELETE = withAuditedMutation(
+  originalDELETE,
+  "notification-management/campaigns/:id",
+);

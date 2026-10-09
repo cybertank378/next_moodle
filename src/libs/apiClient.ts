@@ -36,7 +36,8 @@ export async function request<T>(
     if (!response.ok || !body.success || body.data === undefined) {
       let errorMsg = body.error?.message ?? "Permintaan gagal.";
       if (errorMsg.toLowerCase().includes("internal server error")) {
-        errorMsg = "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.";
+        errorMsg =
+          "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.";
       }
       return { data: null, error: errorMsg };
     }

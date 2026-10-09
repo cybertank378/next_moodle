@@ -1,12 +1,12 @@
 // Files: src/sections/notification/__tests__/NotificationInboxView.test.tsx
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import NotificationInboxView from "@/sections/notification/organisms/NotificationInboxView";
-import * as notificationHook from "@/modules/notification/presentation/hooks/useNotificationApi";
-import type { NotificationContextValue } from "@/modules/notification/presentation/context/NotificationContext";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
+import type { NotificationContextValue } from "@/modules/notification/presentation/context/NotificationContext";
+import * as notificationHook from "@/modules/notification/presentation/hooks/useNotificationApi";
+import NotificationInboxView from "@/sections/notification/organisms/NotificationInboxView";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -65,7 +65,9 @@ describe("NotificationInboxView", () => {
   };
 
   it("renders page header, unread count badge, and push prompt when permission is default", () => {
-    vi.mocked(notificationHook.useNotificationApi).mockReturnValue(defaultMockHook);
+    vi.mocked(notificationHook.useNotificationApi).mockReturnValue(
+      defaultMockHook,
+    );
     const html = renderToStaticMarkup(<NotificationInboxView />);
 
     expect(html).toContain("Notifikasi");

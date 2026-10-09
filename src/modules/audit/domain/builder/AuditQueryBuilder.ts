@@ -1,7 +1,80 @@
 import { ValidationError } from "@/core/errors/ValidationError";
-export interface AuditQuery { page:number; pageSize:number; sortOrder:"asc"|"desc"; search?:string; actorRole?:string; action?:string; resource?:string; tenantId?:string; from?:string; to?:string }
-const fields=new Set(["page","pageSize","sortOrder","search","actorRole","action","resource","tenantId","from","to"]);
-function numberValue(s:string|null, fallback:number,max:number){if(s===null)return fallback;if(!/^[1-9]\d*$/.test(s)||!Number.isSafeInteger(Number(s))||Number(s)>max)throw new ValidationError("Pagination tidak valid.");return Number(s)}
-function word(s:string|null,max=150){if(s===null)return undefined;const v=s.trim();if(!v||v.length>max)throw new ValidationError("Parameter teks tidak valid.");return v}
-function date(s:string|null){if(s===null)return undefined;if(!/^\d{4}-\d{2}-\d{2}$/.test(s))throw new ValidationError("Format tanggal harus YYYY-MM-DD.");const [y,m,d]=s.split("-").map(Number);const t=new Date(Date.UTC(y,m-1,d));if(t.getUTCFullYear()!==y||t.getUTCMonth()!==m-1||t.getUTCDate()!==d)throw new ValidationError("Tanggal tidak valid.");return s}
-export function parseAuditQuery(p:URLSearchParams):AuditQuery{for(const k of p.keys())if(!fields.has(k)||p.getAll(k).length!==1)throw new ValidationError("Parameter query tidak dikenal atau berulang.");const sort=p.get("sortOrder")??"desc";if(sort!=="asc"&&sort!=="desc")throw new ValidationError("Sort tidak valid.");const from=date(p.get("from"));const to=date(p.get("to"));if(from&&to&&from>to)throw new ValidationError("Tanggal awal melebihi akhir.");return {page:numberValue(p.get("page"),1,1000000),pageSize:numberValue(p.get("pageSize"),10,100),sortOrder:sort,search:word(p.get("search")),actorRole:word(p.get("actorRole"),50),action:word(p.get("action"),100),resource:word(p.get("resource"),100),tenantId:word(p.get("tenantId"),100),from,to}}
+export interface AuditQuery {
+  page: number;
+  pageSize: number;
+  sortOrder: "asc" | "desc";
+  search?: string;
+  actorRole?: string;
+  action?: string;
+  resource?: string;
+  tenantId?: string;
+  from?: string;
+  to?: string;
+}
+const fields = new Set([
+  "page",
+  "pageSize",
+  "sortOrder",
+  "search",
+  "actorRole",
+  "action",
+  "resource",
+  "tenantId",
+  "from",
+  "to",
+]);
+function numberValue(s: string | null, fallback: number, max: number) {
+  if (s === null) return fallback;
+  if (
+    !/^[1-9]\d*$/.test(s) ||
+    !Number.isSafeInteger(Number(s)) ||
+    Number(s) > max
+  )
+    throw new ValidationError("Pagination tidak valid.");
+  return Number(s);
+}
+function word(s: string | null, max = 150) {
+  if (s === null) return undefined;
+  const v = s.trim();
+  if (!v || v.length > max)
+    throw new ValidationError("Parameter teks tidak valid.");
+  return v;
+}
+function date(s: string | null) {
+  if (s === null) return undefined;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s))
+    throw new ValidationError("Format tanggal harus YYYY-MM-DD.");
+  const [y, m, d] = s.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d));
+  if (
+    t.getUTCFullYear() !== y ||
+    t.getUTCMonth() !== m - 1 ||
+    t.getUTCDate() !== d
+  )
+    throw new ValidationError("Tanggal tidak valid.");
+  return s;
+}
+export function parseAuditQuery(p: URLSearchParams): AuditQuery {
+  for (const k of p.keys())
+    if (!fields.has(k) || p.getAll(k).length !== 1)
+      throw new ValidationError("Parameter query tidak dikenal atau berulang.");
+  const sort = p.get("sortOrder") ?? "desc";
+  if (sort !== "asc" && sort !== "desc")
+    throw new ValidationError("Sort tidak valid.");
+  const from = date(p.get("from"));
+  const to = date(p.get("to"));
+  if (from && to && from > to)
+    throw new ValidationError("Tanggal awal melebihi akhir.");
+  return {
+    page: numberValue(p.get("page"), 1, 1000000),
+    pageSize: numberValue(p.get("pageSize"), 10, 100),
+    sortOrder: sort,
+    search: word(p.get("search")),
+    actorRole: word(p.get("actorRole"), 50),
+    action: word(p.get("action"), 100),
+    resource: word(p.get("resource"), 100),
+    tenantId: word(p.get("tenantId"), 100),
+    from,
+    to,
+  };
+}

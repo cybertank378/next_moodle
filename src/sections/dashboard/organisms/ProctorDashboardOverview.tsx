@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import Card from "@/shared-ui/component/Card";
-import Typography from "@/shared-ui/component/Typography";
-import StatCard from "@/sections/dashboard/molecules/StatCard";
-import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
-import ActiveMonitoringTable from "@/sections/dashboard/molecules/ActiveMonitoringTable";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
-
+import ActiveMonitoringTable from "@/sections/dashboard/molecules/ActiveMonitoringTable";
+import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
+import StatCard from "@/sections/dashboard/molecules/StatCard";
+import Card from "@/shared-ui/component/Card";
 import { showErrorToast } from "@/shared-ui/component/Toast";
+import Typography from "@/shared-ui/component/Typography";
 
 export default function ProctorDashboardOverview() {
   const { proctorState, fetchProctorOverview } = useDashboardApi();
@@ -62,7 +61,10 @@ export default function ProctorDashboardOverview() {
 
       <div className="grid grid-cols-1 gap-6">
         <Card className="shadow-xl shadow-indigo-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden transition-colors">
-          <ActiveMonitoringTable sessions={data?.sessions ?? []} loading={loading} />
+          <ActiveMonitoringTable
+            sessions={data?.sessions ?? []}
+            loading={loading}
+          />
         </Card>
       </div>
     </div>

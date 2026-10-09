@@ -3,4 +3,3 @@ import AdminDashboardOverview from "@/sections/dashboard/organisms/AdminDashboar
 export default function AdminDashboardPage() {
   return <AdminDashboardOverview />;
 }
-

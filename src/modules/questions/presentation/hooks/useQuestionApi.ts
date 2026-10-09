@@ -28,10 +28,13 @@ export function useQuestionApi() {
     async (id: number, dto: UpdateQuestionRequestDto) => {
       setLoading(true);
       try {
-        const res = await request<Record<string, unknown>>(`/api/questions/${id}`, {
-          method: "PATCH",
-          body: JSON.stringify(dto),
-        });
+        const res = await request<Record<string, unknown>>(
+          `/api/questions/${id}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(dto),
+          },
+        );
         return res;
       } finally {
         setLoading(false);

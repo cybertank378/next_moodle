@@ -11,10 +11,12 @@ import { useEffect, useState } from "react";
 import { useCourseApi } from "@/modules/course/presentation/hooks/useCourseApi";
 import type { EnrolUserRequestDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
 import { useEnrolmentApi } from "@/modules/enrolment/presentation/hooks/useEnrolmentApi";
+import EnrolmentRoleBadge from "@/sections/enrolments/atoms/EnrolmentRoleBadge";
+import EnrolmentFilterBar from "@/sections/enrolments/molecules/EnrolmentFilterBar";
+import EnrolUserModal from "@/sections/enrolments/organisms/EnrolUserModal";
 import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import { showErrorToast } from "@/shared-ui/component/Toast";
 import {
   Table,
   TableBody,
@@ -23,9 +25,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import EnrolmentRoleBadge from "@/sections/enrolments/atoms/EnrolmentRoleBadge";
-import EnrolmentFilterBar from "@/sections/enrolments/molecules/EnrolmentFilterBar";
-import EnrolUserModal from "@/sections/enrolments/organisms/EnrolUserModal";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 const PAGE_SIZE = 10;
 const SKELETON_KEYS = [
@@ -168,8 +168,8 @@ export default function EnrolmentListView() {
             Pendaftaran Mata Pelajaran (Enrolments)
           </h1>
           <p className="text-sm text-slate-500  mt-1">
-            Kelola pendaftaran peserta dan penugasan peran guru di setiap
-            mata pelajaran.
+            Kelola pendaftaran peserta dan penugasan peran guru di setiap mata
+            pelajaran.
           </p>
         </div>
       </div>
@@ -283,8 +283,8 @@ export default function EnrolmentListView() {
                     Pilih mata pelajaran terlebih dahulu
                   </p>
                   <p className="text-xs mt-1">
-                    Silakan pilih salah satu mata pelajaran di atas untuk melihat data
-                    pendaftaran peserta.
+                    Silakan pilih salah satu mata pelajaran di atas untuk
+                    melihat data pendaftaran peserta.
                   </p>
                 </div>
               </TableCell>

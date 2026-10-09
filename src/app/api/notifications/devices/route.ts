@@ -13,4 +13,7 @@ async function originalDELETE(req: Request): Promise<Response> {
 }
 
 export const POST = withAuditedMutation(originalPOST, "notifications/devices");
-export const DELETE = withAuditedMutation(originalDELETE, "notifications/devices");
+export const DELETE = withAuditedMutation(
+  originalDELETE,
+  "notifications/devices",
+);

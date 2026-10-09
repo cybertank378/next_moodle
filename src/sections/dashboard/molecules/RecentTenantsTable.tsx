@@ -2,11 +2,13 @@
 
 "use client";
 
-import { useId, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useId, useMemo, useState } from "react";
+import { ROUTES } from "@/libs/routes";
 import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import { formatDisplayDate } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
+import RecentTenantActionButtons from "@/sections/dashboard/atoms/RecentTenantActionButtons";
 import Avatar from "@/shared-ui/component/Avatar";
 import Badge from "@/shared-ui/component/Badge";
 import Button from "@/shared-ui/component/Button";
@@ -24,8 +26,6 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import RecentTenantActionButtons from "@/sections/dashboard/atoms/RecentTenantActionButtons";
-import { ROUTES } from "@/libs/routes";
 
 const SKELETON_ROWS = 3;
 const COLUMN_COUNT = 5;
@@ -46,9 +46,7 @@ export function filterRecentTenants(
       tenant.slug.toLowerCase().includes(query);
 
     const matchesStatus =
-      !status ||
-      status === "ALL" ||
-      tenant.status.toUpperCase() === status;
+      !status || status === "ALL" || tenant.status.toUpperCase() === status;
 
     return matchesSearch && matchesStatus;
   });
@@ -176,8 +174,12 @@ export default function RecentTenantsTable({
               <TableHeaderCell className="py-3 px-4">TENANT</TableHeaderCell>
               <TableHeaderCell className="py-3 px-4">SLUG</TableHeaderCell>
               <TableHeaderCell className="py-3 px-4">STATUS</TableHeaderCell>
-              <TableHeaderCell className="py-3 px-4">TANGGAL DAFTAR</TableHeaderCell>
-              <TableHeaderCell className="py-3 px-4 text-right">AKSI</TableHeaderCell>
+              <TableHeaderCell className="py-3 px-4">
+                TANGGAL DAFTAR
+              </TableHeaderCell>
+              <TableHeaderCell className="py-3 px-4 text-right">
+                AKSI
+              </TableHeaderCell>
             </tr>
           </TableHead>
           <TableBody>
@@ -193,10 +195,7 @@ export default function RecentTenantsTable({
               )
             ) : paginatedTenants.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={COLUMN_COUNT}
-                  className="py-8 text-center"
-                >
+                <TableCell colSpan={COLUMN_COUNT} className="py-8 text-center">
                   <EmptyState
                     title="Tidak ada tenant ditemukan"
                     description={
@@ -239,12 +238,20 @@ export default function RecentTenantsTable({
                     {/* Status Badge */}
                     <TableCell className="py-3.5 px-4">
                       {statusNormalized === "ACTIVE" ? (
-                        <Badge color="success" variant="soft" className="gap-1.5">
+                        <Badge
+                          color="success"
+                          variant="soft"
+                          className="gap-1.5"
+                        >
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           Aktif
                         </Badge>
                       ) : statusNormalized === "MAINTENANCE" ? (
-                        <Badge color="warning" variant="soft" className="gap-1.5">
+                        <Badge
+                          color="warning"
+                          variant="soft"
+                          className="gap-1.5"
+                        >
                           <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                           Pemeliharaan
                         </Badge>
@@ -268,7 +275,9 @@ export default function RecentTenantsTable({
                         tenantId={tenant.id}
                         onDetail={() => handleNavigateToTenantDetail(tenant)}
                         onEdit={() => handleNavigateToTenantEdit(tenant)}
-                        onVisit={() => handleNavigateToTenantSearch(tenant.slug)}
+                        onVisit={() =>
+                          handleNavigateToTenantSearch(tenant.slug)
+                        }
                       />
                     </TableCell>
                   </TableRow>
@@ -282,7 +291,8 @@ export default function RecentTenantsTable({
       {/* Table Footer */}
       <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 bg-white">
         <p>
-          Menampilkan {paginatedTenants.length} dari {totalItems} tenant terbaru.
+          Menampilkan {paginatedTenants.length} dari {totalItems} tenant
+          terbaru.
         </p>
 
         {totalItems > ITEMS_PER_PAGE && (
@@ -299,4 +309,3 @@ export default function RecentTenantsTable({
     </Card>
   );
 }
-

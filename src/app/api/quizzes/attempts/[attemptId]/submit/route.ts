@@ -29,4 +29,7 @@ async function originalPOST(
   );
 }
 
-export const POST = withAuditedMutation(originalPOST, "quizzes/attempts/:id/submit");
+export const POST = withAuditedMutation(
+  originalPOST,
+  "quizzes/attempts/:id/submit",
+);

@@ -12,4 +12,7 @@ async function originalPOST(
   return createNotificationManagementController().scheduleCampaign(req, id);
 }
 
-export const POST = withAuditedMutation(originalPOST, "notification-management/campaigns/:id/schedule");
+export const POST = withAuditedMutation(
+  originalPOST,
+  "notification-management/campaigns/:id/schedule",
+);

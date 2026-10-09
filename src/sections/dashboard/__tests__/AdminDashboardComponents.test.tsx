@@ -1,19 +1,19 @@
 // Files: src/sections/dashboard/__tests__/AdminDashboardComponents.test.tsx
 
-import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
 import { Role, TenantStatus } from "@/libs/enums";
 import { ROUTES } from "@/libs/routes";
-import { getSidebarMenu } from "@/shared-ui/layout/AppSidebar";
+import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import AdminTenantAttentionBanner, {
   calculateAttentionCount,
 } from "@/sections/dashboard/molecules/AdminTenantAttentionBanner";
 import RecentTenantsTable, {
   filterRecentTenants,
 } from "@/sections/dashboard/molecules/RecentTenantsTable";
-import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import TenantGrowthChart from "@/sections/dashboard/molecules/TenantGrowthChart";
 import TenantStatusChart from "@/sections/dashboard/molecules/TenantStatusChart";
+import { getSidebarMenu } from "@/shared-ui/layout/AppSidebar";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -44,7 +44,9 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
         />,
       );
       expect(html).toContain("3 tenant memerlukan perhatian");
-      expect(html).toContain("Tinjau tenant dalam pemeliharaan atau ditangguhkan");
+      expect(html).toContain(
+        "Tinjau tenant dalam pemeliharaan atau ditangguhkan",
+      );
       expect(html).toContain("Tinjau tenant");
     });
 
@@ -112,7 +114,11 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
       expect(result).toHaveLength(1);
       expect(result[0].slug).toBe("sma-nusantara");
 
-      const noMatch = filterRecentTenants(sampleTenants, "nusantara", "MAINTENANCE");
+      const noMatch = filterRecentTenants(
+        sampleTenants,
+        "nusantara",
+        "MAINTENANCE",
+      );
       expect(noMatch).toHaveLength(0);
     });
   });
@@ -244,4 +250,3 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
     });
   });
 });
-

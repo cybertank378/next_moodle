@@ -80,7 +80,9 @@ function getRoleIdentity(
         initials: username ? username.slice(0, 2).toUpperCase() : "TN",
         title: username
           ? username.toUpperCase()
-          : (institutionName ? institutionName.toUpperCase() : "TENANT"),
+          : institutionName
+            ? institutionName.toUpperCase()
+            : "TENANT",
         subtitle: "Operator Institusi / Tenant",
       };
     case Role.TEACHER:
@@ -448,25 +450,26 @@ export default function AppSidebar({
         </div>
 
         {/* Role Identity Card */}
-        {!collapsed && (() => {
-          const identity = getRoleIdentity(role, username, institutionName);
-          return (
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-800/60 px-4 py-3 shadow-sm">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs uppercase shadow-sm">
-                {identity.initials}
-              </div>
+        {!collapsed &&
+          (() => {
+            const identity = getRoleIdentity(role, username, institutionName);
+            return (
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-800/60 px-4 py-3 shadow-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs uppercase shadow-sm">
+                  {identity.initials}
+                </div>
 
-              <div className="overflow-hidden">
-                <p className="text-xs font-bold uppercase tracking-wider text-white truncate">
-                  {identity.title}
-                </p>
-                <p className="text-[11px] font-medium text-slate-400 truncate">
-                  {identity.subtitle}
-                </p>
+                <div className="overflow-hidden">
+                  <p className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                    {identity.title}
+                  </p>
+                  <p className="text-[11px] font-medium text-slate-400 truncate">
+                    {identity.subtitle}
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
       </div>
 
       <nav className="flex-1 overflow-y-auto bg-slate-900 px-3 py-5">
@@ -541,7 +544,9 @@ export default function AppSidebar({
               </div>
             )}
           </div>
-        ) : role === Role.STUDENT || role === Role.TEACHER || role === Role.TENANT ? (
+        ) : role === Role.STUDENT ||
+          role === Role.TEACHER ||
+          role === Role.TENANT ? (
           <div className="flex items-center gap-3 rounded-2xl bg-slate-800/50 p-3 shadow-sm border border-slate-700/50">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
               <GraduationCap className="h-5 w-5" />

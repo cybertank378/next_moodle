@@ -12,4 +12,7 @@ async function originalPOST(req: Request): Promise<Response> {
   return createNotificationManagementController().createCampaign(req);
 }
 
-export const POST = withAuditedMutation(originalPOST, "notification-management/campaigns");
+export const POST = withAuditedMutation(
+  originalPOST,
+  "notification-management/campaigns",
+);

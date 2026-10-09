@@ -97,9 +97,10 @@ export class TenantController {
         actor: actorToAuthorization(actor),
         data: parseCreateTenantBody(await parseJson(req)),
       });
-      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
       const saved = result.getValue();
-      return respond(ApiResponse.success(saved,undefined,HttpStatus.CREATED));
+      return respond(ApiResponse.success(saved, undefined, HttpStatus.CREATED));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -116,7 +117,8 @@ export class TenantController {
         tenantId,
         data: parseUpdateTenantBody(await parseJson(req)),
       });
-      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
       return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
@@ -134,7 +136,8 @@ export class TenantController {
         tenantId,
         status: parseStatusBody(await parseJson(req)),
       });
-      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
       return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
@@ -164,7 +167,8 @@ export class TenantController {
         tenantId,
         data: parseCredentialBody(await parseJson(req)),
       });
-      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
       return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));

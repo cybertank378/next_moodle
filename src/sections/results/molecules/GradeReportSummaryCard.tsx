@@ -39,7 +39,9 @@ export default function GradeReportSummaryCard({
               </h2>
               <div className="flex items-center gap-2 text-xs text-slate-500 ">
                 <BookOpen size={13} />
-                <span>{courseTitle || `Mata Pelajaran ID #${report.courseId}`}</span>
+                <span>
+                  {courseTitle || `Mata Pelajaran ID #${report.courseId}`}
+                </span>
               </div>
             </div>
           </div>
@@ -75,9 +77,7 @@ export default function GradeReportSummaryCard({
                 {passedCount} / {totalItems}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 ">
-              Komponen Ujian
-            </p>
+            <p className="text-[11px] text-slate-500 ">Komponen Ujian</p>
           </div>
         </div>
       </div>

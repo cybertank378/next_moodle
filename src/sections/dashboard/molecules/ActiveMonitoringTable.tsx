@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Badge from "@/shared-ui/component/Badge";
+import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import {
@@ -12,8 +14,6 @@ import {
   TableRow,
 } from "@/shared-ui/component/Table";
 import Typography from "@/shared-ui/component/Typography";
-import Badge from "@/shared-ui/component/Badge";
-import Button from "@/shared-ui/component/Button";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -32,12 +32,18 @@ interface ActiveMonitoringTableProps {
   loading: boolean;
 }
 
-export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonitoringTableProps) {
+export default function ActiveMonitoringTable({
+  sessions,
+  loading,
+}: ActiveMonitoringTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalItems = sessions.length;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedSessions = sessions.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedSessions = sessions.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
 
   return (
     <div className="w-full">
@@ -68,7 +74,10 @@ export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonit
             ))
           ) : paginatedSessions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="py-8 text-center text-slate-500 ">
+              <TableCell
+                colSpan={5}
+                className="py-8 text-center text-slate-500 "
+              >
                 Tidak ada sesi ujian aktif.
               </TableCell>
             </TableRow>
@@ -76,7 +85,9 @@ export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonit
             paginatedSessions.map((session) => (
               <TableRow key={session.id}>
                 <TableCell>
-                  <div className="font-semibold text-slate-900 ">{session.examName}</div>
+                  <div className="font-semibold text-slate-900 ">
+                    {session.examName}
+                  </div>
                   <div className="text-xs text-slate-500  mt-1">
                     Dimulai: {session.startTime}
                   </div>
@@ -108,7 +119,7 @@ export default function ActiveMonitoringTable({ sessions, loading }: ActiveMonit
           )}
         </TableBody>
       </Table>
-      
+
       {!loading && totalItems > 0 && (
         <div className="px-6 py-4 bg-white/70  border border-t-0 border-slate-200/60  rounded-b-lg">
           <Pagination

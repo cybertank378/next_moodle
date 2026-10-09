@@ -49,7 +49,8 @@ describe("mapErrorToHttpResponse", () => {
       success: false,
       error: {
         code: "INTERNAL_ERROR",
-        message: "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.",
+        message:
+          "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.",
       },
       meta: {
         requestId: "req_secret",

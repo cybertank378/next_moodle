@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Eye, Edit, ExternalLink } from "lucide-react";
+import { Edit, ExternalLink, Eye } from "lucide-react";
 import Button from "@/shared-ui/component/Button";
 
 interface RecentTenantActionButtonsProps {

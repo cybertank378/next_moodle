@@ -12,4 +12,7 @@ async function originalPOST(
   return createNotificationManagementController().retryDelivery(req, id);
 }
 
-export const POST = withAuditedMutation(originalPOST, "notification-management/campaigns/:id/retry");
+export const POST = withAuditedMutation(
+  originalPOST,
+  "notification-management/campaigns/:id/retry",
+);

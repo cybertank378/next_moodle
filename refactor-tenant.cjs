@@ -17,7 +17,9 @@ function moveDirContents(srcDir, destDir) {
         moveDirContents(srcPath, destPath);
         try {
           fs.rmdirSync(srcPath);
-        } catch { /* Ignore non-empty directory during migration. */ }
+        } catch {
+          /* Ignore non-empty directory during migration. */
+        }
       } else {
         fs.renameSync(srcPath, destPath);
       }
@@ -27,7 +29,9 @@ function moveDirContents(srcDir, destDir) {
   }
   try {
     fs.rmdirSync(srcDir);
-  } catch { /* Ignore non-empty directory during migration. */ }
+  } catch {
+    /* Ignore non-empty directory during migration. */
+  }
 }
 
 // Move sections

@@ -5,15 +5,15 @@ import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
+import type { ExtendTimeUseCase } from "@/modules/exam-monitor/application/usecases/ExtendTimeUseCase";
+import type { ForceFinishAttemptUseCase } from "@/modules/exam-monitor/application/usecases/ForceFinishAttemptUseCase";
 import type { GetExamMonitorUseCase } from "@/modules/exam-monitor/application/usecases/GetExamMonitorUseCase";
 import type { LockAttemptUseCase } from "@/modules/exam-monitor/application/usecases/LockAttemptUseCase";
 import type { UnlockAttemptUseCase } from "@/modules/exam-monitor/application/usecases/UnlockAttemptUseCase";
-import type { ForceFinishAttemptUseCase } from "@/modules/exam-monitor/application/usecases/ForceFinishAttemptUseCase";
-import type { ExtendTimeUseCase } from "@/modules/exam-monitor/application/usecases/ExtendTimeUseCase";
 import {
-  parseGetExamMonitorQuery,
   parseExamMonitorActionBody,
   parseExtendTimeBody,
+  parseGetExamMonitorQuery,
 } from "@/modules/exam-monitor/infrastructure/validators/examMonitorValidator";
 
 function respond(response: ApiResponse): Response {
@@ -33,10 +33,16 @@ export class ExamMonitorController {
     try {
       const actor = await resolveCurrentActor(req).catch(() => null);
       if (!actor) {
-        return respond(mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")));
+        return respond(
+          mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")),
+        );
       }
       if (!actor.tenantId) {
-        return respond(mapErrorToHttpResponse(new ValidationError("Tenant ID tidak ditemukan pada sesi Anda.")));
+        return respond(
+          mapErrorToHttpResponse(
+            new ValidationError("Tenant ID tidak ditemukan pada sesi Anda."),
+          ),
+        );
       }
 
       const url = new URL(req.url);
@@ -58,8 +64,16 @@ export class ExamMonitorController {
   async lockAttempt(req: Request): Promise<Response> {
     try {
       const actor = await resolveCurrentActor(req).catch(() => null);
-      if (!actor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")));
-      if (!actor.tenantId) return respond(mapErrorToHttpResponse(new ValidationError("Tenant ID tidak ditemukan.")));
+      if (!actor)
+        return respond(
+          mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")),
+        );
+      if (!actor.tenantId)
+        return respond(
+          mapErrorToHttpResponse(
+            new ValidationError("Tenant ID tidak ditemukan."),
+          ),
+        );
 
       const body = await req.json();
       const parsed = parseExamMonitorActionBody(body);
@@ -69,7 +83,9 @@ export class ExamMonitorController {
         attemptId: parsed.attemptId,
       });
 
-      return result.isFailure ? respond(mapErrorToHttpResponse(result.getError())) : respond(ApiResponse.success(result.getValue()));
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -78,8 +94,16 @@ export class ExamMonitorController {
   async unlockAttempt(req: Request): Promise<Response> {
     try {
       const actor = await resolveCurrentActor(req).catch(() => null);
-      if (!actor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")));
-      if (!actor.tenantId) return respond(mapErrorToHttpResponse(new ValidationError("Tenant ID tidak ditemukan.")));
+      if (!actor)
+        return respond(
+          mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")),
+        );
+      if (!actor.tenantId)
+        return respond(
+          mapErrorToHttpResponse(
+            new ValidationError("Tenant ID tidak ditemukan."),
+          ),
+        );
 
       const body = await req.json();
       const parsed = parseExamMonitorActionBody(body);
@@ -89,7 +113,9 @@ export class ExamMonitorController {
         attemptId: parsed.attemptId,
       });
 
-      return result.isFailure ? respond(mapErrorToHttpResponse(result.getError())) : respond(ApiResponse.success(result.getValue()));
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -98,8 +124,16 @@ export class ExamMonitorController {
   async forceFinishAttempt(req: Request): Promise<Response> {
     try {
       const actor = await resolveCurrentActor(req).catch(() => null);
-      if (!actor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")));
-      if (!actor.tenantId) return respond(mapErrorToHttpResponse(new ValidationError("Tenant ID tidak ditemukan.")));
+      if (!actor)
+        return respond(
+          mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")),
+        );
+      if (!actor.tenantId)
+        return respond(
+          mapErrorToHttpResponse(
+            new ValidationError("Tenant ID tidak ditemukan."),
+          ),
+        );
 
       const body = await req.json();
       const parsed = parseExamMonitorActionBody(body);
@@ -109,7 +143,9 @@ export class ExamMonitorController {
         attemptId: parsed.attemptId,
       });
 
-      return result.isFailure ? respond(mapErrorToHttpResponse(result.getError())) : respond(ApiResponse.success(result.getValue()));
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -118,8 +154,16 @@ export class ExamMonitorController {
   async extendTime(req: Request): Promise<Response> {
     try {
       const actor = await resolveCurrentActor(req).catch(() => null);
-      if (!actor) return respond(mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")));
-      if (!actor.tenantId) return respond(mapErrorToHttpResponse(new ValidationError("Tenant ID tidak ditemukan.")));
+      if (!actor)
+        return respond(
+          mapErrorToHttpResponse(new UnauthorizedError("Sesi tidak valid.")),
+        );
+      if (!actor.tenantId)
+        return respond(
+          mapErrorToHttpResponse(
+            new ValidationError("Tenant ID tidak ditemukan."),
+          ),
+        );
 
       const body = await req.json();
       const parsed = parseExtendTimeBody(body);
@@ -130,7 +174,9 @@ export class ExamMonitorController {
         extraTimeMinutes: parsed.extraTimeMinutes,
       });
 
-      return result.isFailure ? respond(mapErrorToHttpResponse(result.getError())) : respond(ApiResponse.success(result.getValue()));
+      return result.isFailure
+        ? respond(mapErrorToHttpResponse(result.getError()))
+        : respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
