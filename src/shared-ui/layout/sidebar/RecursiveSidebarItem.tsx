@@ -5,8 +5,7 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type React from "react";
 import { useMemo } from "react";
 import type { UserRole } from "@/libs/enums";
@@ -50,9 +49,10 @@ export function RecursiveSidebarItem({
   setOpenKey,
 }: Props) {
   ////////////////////////////////////////////////////////////
-  // PATHNAME
+  // ROUTER & PATHNAME
   ////////////////////////////////////////////////////////////
 
+  const router = useRouter();
   const pathname = usePathname();
 
   ////////////////////////////////////////////////////////////
@@ -141,6 +141,17 @@ export function RecursiveSidebarItem({
   };
 
   ////////////////////////////////////////////////////////////
+  // ITEM CLICK
+  ////////////////////////////////////////////////////////////
+
+  const handleItemClick = () => {
+    onNavigate?.();
+    if (item.path) {
+      router.push(item.path);
+    }
+  };
+
+  ////////////////////////////////////////////////////////////
   // RENDER
   ////////////////////////////////////////////////////////////
 
@@ -196,11 +207,11 @@ export function RecursiveSidebarItem({
         </button>
       ) : (
         /* ================================================ */
-        /* LINK */
+        /* ITEM BUTTON */
         /* ================================================ */
-        <Link
-          href={item.path ?? "#"}
-          onClick={onNavigate}
+        <button
+          type="button"
+          onClick={handleItemClick}
           style={{
             paddingLeft,
           }}
@@ -221,7 +232,7 @@ export function RecursiveSidebarItem({
 
             <span className="truncate text-sm">{item.label}</span>
           </div>
-        </Link>
+        </button>
       )}
 
       {/* ================================================== */}

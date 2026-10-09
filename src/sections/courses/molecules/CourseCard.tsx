@@ -2,7 +2,7 @@
 
 import { ArrowRight, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AppRouteConstants } from "@/libs/routes";
+import { ROUTES } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import type { CourseSummaryResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
 import CourseCategoryBadge from "@/sections/courses/atoms/CourseCategoryBadge";
@@ -16,6 +16,10 @@ interface Props {
 export default function CourseCard({ course }: Props) {
   const router = useRouter();
   const cleanSummary = stripHtml(course.summary);
+
+  const handleNavigateToCourseDetail = () => {
+    router.push(ROUTES.DASHBOARD.COURSE_DETAIL(course.id));
+  };
 
   return (
     <div className="flex flex-col justify-between rounded-xl border border-slate-200  bg-white  p-5 shadow-sm transition-all duration-200 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5">
@@ -57,7 +61,7 @@ export default function CourseCard({ course }: Props) {
           variant="filled"
           fullWidth
           rightIcon={ArrowRight}
-          onClick={() => router.push(AppRouteConstants.courseDetail(course.id))}
+          onClick={handleNavigateToCourseDetail}
         >
           Buka Mata Pelajaran
         </Button>

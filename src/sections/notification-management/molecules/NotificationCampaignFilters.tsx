@@ -109,19 +109,25 @@ export default function NotificationCampaignFilters({
     { value: "PUSH", label: "Push" },
   ];
 
+  const handleClearSearch = () => {
+    onSearchChange("");
+  };
+
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
       {/* Top Status Tabs */}
       <div className="flex items-center gap-2 px-6 pt-2 border-b border-slate-200 overflow-x-auto scrollbar-none">
         {tabs.map((tab) => (
-          <button
+          <Button
             key={tab.id}
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={tab.onClick}
-            className={`flex items-center gap-2 py-3.5 px-2 text-sm font-semibold border-b-2 whitespace-nowrap transition-colors ${
+            className={`flex items-center gap-2 py-3.5 px-2 text-sm font-semibold rounded-none border-b-2 whitespace-nowrap transition-colors h-auto ${
               tab.isActive
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-600 hover:text-slate-900"
+                ? "border-blue-600 text-blue-600 hover:text-blue-700 hover:bg-transparent"
+                : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-transparent"
             }`}
           >
             <span>{tab.label}</span>
@@ -136,7 +142,7 @@ export default function NotificationCampaignFilters({
                 {tab.count}
               </span>
             )}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -152,14 +158,16 @@ export default function NotificationCampaignFilters({
             leftIcon={Search}
           />
           {search && (
-            <button
+            <Button
               type="button"
-              onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full"
+              variant="ghost"
+              size="sm"
+              iconOnly
+              leftIcon={X}
+              onClick={handleClearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full h-6 w-6"
               aria-label="Hapus pencarian"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+            />
           )}
         </div>
 
@@ -229,11 +237,11 @@ export default function NotificationCampaignFilters({
               type="button"
               variant="outline"
               size="sm"
+              leftIcon={RotateCcw}
               onClick={onResetFilters}
-              className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900"
+              className="text-xs text-slate-600 hover:text-slate-900"
               aria-label="Reset semua filter"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
               Reset Filter
             </Button>
           )}

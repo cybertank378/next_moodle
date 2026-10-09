@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/libs/routes";
 import type { TenantSummaryResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
 import TenantEmptyState from "@/sections/tenant/atoms/TenantEmptyState";
 import TenantStatusBadge from "@/sections/tenant/atoms/TenantStatusBadge";
+import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import {
   Table,
@@ -23,6 +25,16 @@ export default function TenantTable({
   tenants: TenantSummaryResponseDTO[];
   loading: boolean;
 }) {
+  const router = useRouter();
+
+  const handleNavigateToTenantDetail = (tenantId: string) => {
+    router.push(ROUTES.ADMIN.TENANT_DETAIL(tenantId));
+  };
+
+  const handleNavigateToTenantEdit = (tenantId: string) => {
+    router.push(ROUTES.ADMIN.TENANT_EDIT(tenantId));
+  };
+
   return (
     <Table>
       <TableHead>
@@ -68,19 +80,25 @@ export default function TenantTable({
               </TableCell>
               <TableCell>{tenant.customDomain ?? "—"}</TableCell>
               <TableCell>
-                <div className="flex gap-3">
-                  <Link
-                    className="text-indigo-600 hover:underline"
-                    href={`/dashboard/tenants/${tenant.id}`}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    color="primary"
+                    onClick={() => handleNavigateToTenantDetail(tenant.id)}
+                    className="text-xs h-7 px-2"
                   >
                     Detail
-                  </Link>
-                  <Link
-                    className="text-slate-600 hover:underline"
-                    href={`/dashboard/tenants/${tenant.id}/edit`}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    color="secondary"
+                    onClick={() => handleNavigateToTenantEdit(tenant.id)}
+                    className="text-xs h-7 px-2"
                   >
                     Edit
-                  </Link>
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>

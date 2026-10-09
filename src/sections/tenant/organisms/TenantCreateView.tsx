@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ROUTES } from "@/libs/routes";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {
   type TenantFormValue,
@@ -22,7 +23,7 @@ export default function TenantCreateView() {
       setError(result.error ?? "Gagal membuat tenant.");
       return;
     }
-    router.push(`/dashboard/tenants/${result.data.id}`);
+    router.push(ROUTES.ADMIN.TENANT_DETAIL(result.data.id));
   }
 
   return (

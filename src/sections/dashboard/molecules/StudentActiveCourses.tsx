@@ -1,6 +1,10 @@
+"use client";
+
 import { BookOpen, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/libs/routes";
 import type { CourseSummaryDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
+import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
 
 interface Props {
@@ -8,18 +12,28 @@ interface Props {
 }
 
 export function StudentActiveCourses({ courses }: Props) {
+  const router = useRouter();
+
+  const handleNavigateToAllCourses = () => {
+    router.push(ROUTES.STUDENT.COURSES);
+  };
+
   return (
     <Card className="border-slate-100 shadow-sm p-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-extrabold flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-slate-700" /> Mata Pelajaran
         </h3>
-        <Link
-          href="/dashboard/courses"
-          className="text-blue-600 text-sm font-semibold flex items-center hover:text-blue-700"
+        <Button
+          size="sm"
+          variant="ghost"
+          color="primary"
+          rightIcon={ChevronRight}
+          onClick={handleNavigateToAllCourses}
+          className="text-blue-600 text-sm font-semibold hover:text-blue-700 h-auto p-0"
         >
-          Lihat Semua <ChevronRight className="w-4 h-4 ml-0.5" />
-        </Link>
+          Lihat Semua
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

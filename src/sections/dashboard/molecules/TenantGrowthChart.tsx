@@ -5,6 +5,7 @@
 import { useMemo } from "react";
 import type { TenantGrowthPoint } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { formatPeriodLabel } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
+import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
 import Skeleton from "@/shared-ui/component/Skeleton";
 
@@ -43,6 +44,14 @@ export default function TenantGrowthChart({
 
   const totalNew = points.reduce((sum, p) => sum + p.newTenants, 0);
 
+  const handleSelectSixMonths = () => {
+    onSelectMonths?.(6);
+  };
+
+  const handleSelectTwelveMonths = () => {
+    onSelectMonths?.(12);
+  };
+
   return (
     <Card className="border border-slate-200/80 bg-white shadow-sm p-5 rounded-2xl">
       {/* Header */}
@@ -60,32 +69,34 @@ export default function TenantGrowthChart({
           aria-label="Pilihan periode grafik pertumbuhan tenant"
           className="inline-flex items-center rounded-xl bg-slate-100 p-1 self-start sm:self-auto text-xs font-semibold"
         >
-          <button
+          <Button
             type="button"
             role="radio"
             aria-checked={selectedMonths === 6}
-            onClick={() => onSelectMonths?.(6)}
+            variant={selectedMonths === 6 ? "filled" : "ghost"}
+            color={selectedMonths === 6 ? "primary" : "secondary"}
+            size="sm"
+            onClick={handleSelectSixMonths}
             className={`rounded-lg px-3 py-1.5 transition-all ${
-              selectedMonths === 6
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+              selectedMonths === 6 ? "shadow-sm" : ""
             }`}
           >
             6 bulan
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             role="radio"
             aria-checked={selectedMonths === 12}
-            onClick={() => onSelectMonths?.(12)}
+            variant={selectedMonths === 12 ? "filled" : "ghost"}
+            color={selectedMonths === 12 ? "primary" : "secondary"}
+            size="sm"
+            onClick={handleSelectTwelveMonths}
             className={`rounded-lg px-3 py-1.5 transition-all ${
-              selectedMonths === 12
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+              selectedMonths === 12 ? "shadow-sm" : ""
             }`}
           >
             12 bulan
-          </button>
+          </Button>
         </div>
       </div>
 

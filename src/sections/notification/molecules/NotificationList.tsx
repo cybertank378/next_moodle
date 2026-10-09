@@ -40,13 +40,6 @@ export default function NotificationList({
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-6 text-center text-sm text-rose-500">
-        <p>{error}</p>
-      </div>
-    );
-  }
 
   if (items.length === 0) {
     return (

@@ -1,6 +1,6 @@
 // Files: src/sections/dashboard/__tests__/AdminDashboardComponents.test.tsx
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Role, TenantStatus } from "@/libs/enums";
 import { ROUTES } from "@/libs/routes";
@@ -12,6 +12,14 @@ import RecentTenantsTable, {
   filterRecentTenants,
 } from "@/sections/dashboard/molecules/RecentTenantsTable";
 import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
 
 describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
   describe("calculateAttentionCount", () => {
@@ -36,7 +44,6 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
       expect(html).toContain("3 tenant memerlukan perhatian");
       expect(html).toContain("Tinjau tenant dalam pemeliharaan atau ditangguhkan");
       expect(html).toContain("Tinjau tenant");
-      expect(html).toContain(ROUTES.ADMIN.TENANTS);
     });
 
     it("returns null when count is 0", () => {

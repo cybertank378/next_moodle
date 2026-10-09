@@ -5,6 +5,14 @@ import type { TenantSummaryResponseDTO } from "@/modules/tenant/domain/dto/Tenan
 import TenantTable from "@/sections/tenant/molecules/TenantTable";
 import Pagination from "@/shared-ui/component/Pagination";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
+
 describe("TenantTable & Pagination Component Testing", () => {
   const sampleTenants: TenantSummaryResponseDTO[] = [
     {
@@ -75,11 +83,9 @@ describe("TenantTable & Pagination Component Testing", () => {
       expect(html).toContain("ujian.smkn1.sch.id");
       expect(html).toContain("—");
 
-      // Action links
-      expect(html).toContain('/dashboard/tenants/tenant-1"');
-      expect(html).toContain('/dashboard/tenants/tenant-1/edit"');
-      expect(html).toContain('/dashboard/tenants/tenant-2"');
-      expect(html).toContain('/dashboard/tenants/tenant-2/edit"');
+      // Action buttons
+      expect(html).toContain("Detail");
+      expect(html).toContain("Edit");
     });
   });
 

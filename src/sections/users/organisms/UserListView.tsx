@@ -7,8 +7,10 @@ import type {
   CreateUserRequestDto,
 } from "@/modules/user/domain/dto/UserRequestDto";
 import { useUserApi } from "@/modules/user/presentation/hooks/useUserApi";
+import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import {
   Table,
   TableBody,
@@ -75,6 +77,16 @@ export default function UserListView() {
     return null;
   };
 
+  const handleDismissToast = () => {
+    setToastMessage(null);
+  };
+
+  useEffect(() => {
+    if (usersState.error) {
+      showErrorToast(usersState.error);
+    }
+  }, [usersState.error]);
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -84,13 +96,15 @@ export default function UserListView() {
             <CheckCircle2 size={18} />
             <span>{toastMessage}</span>
           </div>
-          <button
+          <Button
             type="button"
-            onClick={() => setToastMessage(null)}
+            variant="ghost"
+            size="sm"
+            onClick={handleDismissToast}
             className="text-xs font-semibold hover:underline"
           >
             Tutup
-          </button>
+          </Button>
         </div>
       )}
 

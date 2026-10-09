@@ -86,6 +86,14 @@ export default function ExamAttemptInterface({
     }
   };
 
+  const handleOpenSubmitModal = () => {
+    setIsSubmitModalOpen(true);
+  };
+
+  const handleCloseSubmitModal = () => {
+    setIsSubmitModalOpen(false);
+  };
+
   const handleConfirmSubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -171,7 +179,7 @@ export default function ExamAttemptInterface({
                   variant="filled"
                   color="warning"
                   leftIcon={Send}
-                  onClick={() => setIsSubmitModalOpen(true)}
+                  onClick={handleOpenSubmitModal}
                 >
                   Kumpulkan Ujian
                 </Button>
@@ -204,7 +212,7 @@ export default function ExamAttemptInterface({
               color="warning"
               fullWidth
               leftIcon={Send}
-              onClick={() => setIsSubmitModalOpen(true)}
+              onClick={handleOpenSubmitModal}
             >
               Selesaikan Ujian
             </Button>
@@ -215,7 +223,7 @@ export default function ExamAttemptInterface({
       {/* Final Submit Confirmation Modal */}
       <SubmitConfirmationModal
         isOpen={isSubmitModalOpen}
-        onClose={() => setIsSubmitModalOpen(false)}
+        onClose={handleCloseSubmitModal}
         onConfirmSubmit={handleConfirmSubmit}
         totalQuestions={questions.length}
         answeredCount={answeredCount}

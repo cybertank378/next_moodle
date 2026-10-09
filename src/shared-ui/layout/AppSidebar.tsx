@@ -24,13 +24,14 @@ import {
   Users,
   X,
 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { APP_NAME } from "@/libs/branding";
 import { Role, type UserRole } from "@/libs/enums";
 import { PERMISSIONS } from "@/libs/permissions";
 import { ROUTES } from "@/libs/routes";
 import BrandLogo from "@/shared-ui/component/BrandLogo";
+import Button from "@/shared-ui/component/Button";
 import {
   RecursiveSidebarItem,
   type SidebarItem,
@@ -214,17 +215,17 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
             },
             {
               label: "Tugas",
-              path: "/dashboard/assignments",
+              path: ROUTES.STUDENT.ASSIGNMENTS,
               icon: FileText,
             },
             {
               label: "Kalender",
-              path: "/dashboard/calendar",
+              path: ROUTES.STUDENT.CALENDAR,
               icon: Calendar,
             },
             {
               label: "Jadwal Pelajaran",
-              path: "/dashboard/schedule",
+              path: ROUTES.STUDENT.SCHEDULE,
               icon: CalendarDays,
             },
             {
@@ -235,18 +236,18 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
             },
             {
               label: "Pengumuman",
-              path: "/dashboard/announcements",
+              path: ROUTES.STUDENT.ANNOUNCEMENTS,
               icon: Megaphone,
             },
             {
               label: "Notifikasi",
-              path: "/dashboard/notifications",
+              path: ROUTES.STUDENT.NOTIFICATIONS,
               icon: Bell,
               // Ideally there would be a badge here, but we'll add it to the item type if needed
             },
             {
               label: "Aktivitas Terbaru",
-              path: "/dashboard/activities",
+              path: ROUTES.STUDENT.ACTIVITIES,
               icon: Clock,
             },
           ],
@@ -256,12 +257,12 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Profil",
-              path: "/dashboard/profile",
+              path: ROUTES.STUDENT.PROFILE,
               icon: User,
             },
             {
               label: "Pengaturan",
-              path: "/dashboard/settings",
+              path: ROUTES.STUDENT.SETTINGS,
               icon: Settings,
             },
           ],
@@ -293,6 +294,11 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               path: ROUTES.TEACHER.RESULTS,
               icon: Award,
             },
+            {
+              label: "Notifikasi",
+              path: ROUTES.TEACHER.NOTIFICATIONS,
+              icon: Bell,
+            },
           ],
         },
       ];
@@ -317,9 +323,14 @@ export default function AppSidebar({
   mobileOpen,
   onClose,
 }: Props) {
+  const router = useRouter();
   const groups = getSidebarMenu(role);
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const handleNavigateHome = () => {
+    router.push(getSidebarHome(role));
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -345,10 +356,11 @@ export default function AppSidebar({
               : "flex items-center justify-between gap-2"
           }
         >
-          <Link
+          <Button
+            variant="ghost"
             aria-label={APP_NAME}
-            className="flex min-w-0 items-center"
-            href={getSidebarHome(role)}
+            className="flex min-w-0 items-center p-0 h-auto bg-transparent hover:bg-transparent"
+            onClick={handleNavigateHome}
           >
             <BrandLogo
               className={collapsed ? "h-10 w-10" : "h-10 w-auto max-w-44"}
@@ -357,7 +369,7 @@ export default function AppSidebar({
               surfaceTone="dark"
               variant={collapsed ? "mark" : "horizontal"}
             />
-          </Link>
+          </Button>
 
           {/* Desktop collapse button */}
           <button

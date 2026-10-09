@@ -17,9 +17,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useExamAdminApi } from "@/modules/exam/presentation/hooks/useExamAdminApi";
 import Button from "@/shared-ui/component/Button";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface QuestionItem {
   id: string;
@@ -107,6 +108,12 @@ export function QuizCompositionEditor({
     }
   };
 
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
+
   const handleSave = async () => {
     const payload = items.map((i) => ({
       questionId: i.questionId,
@@ -119,16 +126,15 @@ export function QuizCompositionEditor({
     <div className="max-w-3xl mx-auto p-6 bg-gray-50 rounded-xl">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Quiz Composition</h2>
-        <Button onClick={handleSave} disabled={loading} variant="primary">
-          {loading ? "Saving..." : "Save Order"}
+        <Button
+          onClick={handleSave}
+          loading={loading}
+          variant="filled"
+          color="primary"
+        >
+          Save Order
         </Button>
       </div>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
-          {error}
-        </div>
-      )}
 
       <DndContext
         sensors={sensors}

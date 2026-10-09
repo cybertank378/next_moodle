@@ -4,11 +4,13 @@
 import { CheckCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { ROUTES } from "@/libs/routes";
 import type { NotificationResponseDto } from "@/modules/notification/domain/dto/NotificationResponseDto";
 import { useNotificationApi } from "@/modules/notification/presentation/hooks/useNotificationApi";
 import NotificationList from "@/sections/notification/molecules/NotificationList";
 import NotificationTabBar from "@/sections/notification/molecules/NotificationTabBar";
 import Button from "@/shared-ui/component/Button";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -41,6 +43,12 @@ export default function NotificationPanel({
   useEffect(() => {
     if (isOpen) openPanel();
   }, [isOpen, openPanel]);
+
+  useEffect(() => {
+    if (listState.error) {
+      showErrorToast(listState.error);
+    }
+  }, [listState.error]);
 
   // Close on outside click
   useEffect(() => {
@@ -82,6 +90,19 @@ export default function NotificationPanel({
     }
   };
 
+  const handleMarkAllAsRead = () => {
+    void markAllAsRead();
+  };
+
+  const handleRequestPushPermission = () => {
+    void requestPushPermission();
+  };
+
+  const handleNavigateToAllNotifications = () => {
+    onClose();
+    router.push(ROUTES.DASHBOARD.NOTIFICATIONS);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -104,10 +125,10 @@ export default function NotificationPanel({
             variant="ghost"
             size="sm"
             data-testid="mark-all-read-btn"
-            onClick={() => void markAllAsRead()}
-            className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 transition-colors h-7 px-2"
+            leftIcon={CheckCheck}
+            onClick={handleMarkAllAsRead}
+            className="text-xs text-indigo-600 hover:text-indigo-800 h-7 px-2"
           >
-            <CheckCheck size={14} className="mr-1" />
             Tandai semua dibaca
           </Button>
         )}
@@ -121,10 +142,11 @@ export default function NotificationPanel({
           </span>
           <Button
             type="button"
-            variant="primary"
+            variant="filled"
+            color="primary"
             size="sm"
             loading={pushLoading}
-            onClick={() => void requestPushPermission()}
+            onClick={handleRequestPushPermission}
             className="shrink-0 text-xs py-1 px-2.5"
           >
             Aktifkan
@@ -152,6 +174,21 @@ export default function NotificationPanel({
           onPageChange={goToPage}
           onNotificationClick={(n) => void handleNotificationClick(n)}
         />
+      </div>
+
+      {/* ── Footer ── */}
+      <div className="border-t border-slate-200 bg-slate-50 p-2 text-center">
+        <Button
+          type="button"
+          variant="ghost"
+          color="primary"
+          size="sm"
+          fullWidth
+          onClick={handleNavigateToAllNotifications}
+          className="text-xs font-semibold"
+        >
+          Lihat semua notifikasi
+        </Button>
       </div>
     </div>
   );

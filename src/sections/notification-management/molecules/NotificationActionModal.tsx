@@ -64,12 +64,13 @@ export default function NotificationActionModal({
           </Button>
           <Button
             type="button"
-            variant={isDanger ? "danger" : "primary"}
+            variant="filled"
+            color={isDanger ? "danger" : "primary"}
             size="sm"
             onClick={onConfirm}
-            disabled={loading}
+            loading={loading}
           >
-            {loading ? "Memproses..." : confirmLabel}
+            {confirmLabel}
           </Button>
         </div>
       </div>

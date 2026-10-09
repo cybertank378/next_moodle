@@ -79,6 +79,51 @@ export default function NotificationCampaignTable({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
+  const handleToggleMenu = (id: string) => {
+    setOpenMenuId((prev) => (prev === id ? null : id));
+  };
+
+  const handleViewCampaign = (id: string) => {
+    setOpenMenuId(null);
+    onView(id);
+  };
+
+  const handleEditCampaign = (id: string) => {
+    setOpenMenuId(null);
+    onEdit(id);
+  };
+
+  const handleSendCampaign = (id: string) => {
+    setOpenMenuId(null);
+    onSend(id);
+  };
+
+  const handleDeleteCampaign = (id: string) => {
+    setOpenMenuId(null);
+    onDelete(id);
+  };
+
+  const handleArchiveCampaign = (id: string) => {
+    setOpenMenuId(null);
+    onArchive(id);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < Math.ceil(total / pageSize)) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  const handleSelectPage = (p: number) => {
+    onPageChange(p);
+  };
+
   if (loading) {
     return (
       <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs">
@@ -129,11 +174,12 @@ export default function NotificationCampaignTable({
         {onResetFilters && (
           <Button
             variant="outline"
+            color="secondary"
             size="sm"
+            leftIcon={RotateCcw}
             onClick={onResetFilters}
-            className="flex items-center gap-1.5 mx-auto text-xs"
+            className="mx-auto text-xs"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
             Reset Filter
           </Button>
         )}
@@ -189,11 +235,11 @@ export default function NotificationCampaignTable({
         {onNewCampaign && (
           <Button
             variant="outline"
+            color="primary"
             size="sm"
+            leftIcon={Plus}
             onClick={onNewCampaign}
-            className="flex items-center gap-2 font-semibold border-blue-600 text-blue-600 hover:bg-blue-50 bg-white whitespace-nowrap px-4 py-2 rounded-xl text-xs"
           >
-            <Plus className="w-4 h-4" />
             Buat Pengumuman
           </Button>
         )}
@@ -334,82 +380,88 @@ export default function NotificationCampaignTable({
                     className="relative inline-block text-left"
                     ref={openMenuId === camp.id ? menuRef : undefined}
                   >
-                    <button
+                    <Button
                       type="button"
-                      onClick={() =>
-                        setOpenMenuId(openMenuId === camp.id ? null : camp.id)
-                      }
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      variant="ghost"
+                      color="secondary"
+                      size="sm"
+                      iconOnly
+                      leftIcon={MoreHorizontal}
+                      onClick={() => handleToggleMenu(camp.id)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                       aria-label="Aksi pengumuman"
-                    >
-                      <MoreHorizontal className="w-5 h-5" />
-                    </button>
+                    />
 
                     {openMenuId === camp.id && (
-                      <div className="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1.5 text-xs text-slate-700 animate-in fade-in zoom-in-95 duration-100">
-                        <button
+                      <div className="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1.5 text-xs text-slate-700 animate-in fade-in zoom-in-95 duration-100 space-y-0.5">
+                        <Button
                           type="button"
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onView(camp.id);
-                          }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 transition-colors"
+                          variant="ghost"
+                          color="secondary"
+                          size="sm"
+                          fullWidth
+                          leftIcon={Eye}
+                          onClick={() => handleViewCampaign(camp.id)}
+                          className="justify-start px-3.5 py-2 text-xs rounded-none font-normal"
                         >
-                          <Eye className="w-4 h-4 text-slate-500" />
                           Lihat Detail
-                        </button>
+                        </Button>
 
                         {camp.dispatchStatus === "DRAFT" && (
                           <>
-                            <button
+                            <Button
                               type="button"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                onEdit(camp.id);
-                              }}
-                              className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 transition-colors"
+                              variant="ghost"
+                              color="secondary"
+                              size="sm"
+                              fullWidth
+                              leftIcon={Edit2}
+                              onClick={() => handleEditCampaign(camp.id)}
+                              className="justify-start px-3.5 py-2 text-xs rounded-none font-normal"
                             >
-                              <Edit2 className="w-4 h-4 text-slate-500" />
                               Ubah Draft
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               type="button"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                onSend(camp.id);
-                              }}
-                              className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-blue-600 transition-colors"
+                              variant="ghost"
+                              color="primary"
+                              size="sm"
+                              fullWidth
+                              leftIcon={Send}
+                              onClick={() => handleSendCampaign(camp.id)}
+                              className="justify-start px-3.5 py-2 text-xs rounded-none font-normal text-blue-600"
                             >
-                              <Send className="w-4 h-4 text-blue-600" />
                               Kirim Sekarang
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               type="button"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                onDelete(camp.id);
-                              }}
-                              className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-rose-50 text-rose-600 transition-colors"
+                              variant="ghost"
+                              color="danger"
+                              size="sm"
+                              fullWidth
+                              leftIcon={Trash2}
+                              onClick={() => handleDeleteCampaign(camp.id)}
+                              className="justify-start px-3.5 py-2 text-xs rounded-none font-normal text-rose-600"
                             >
-                              <Trash2 className="w-4 h-4 text-rose-600" />
                               Hapus Draft
-                            </button>
+                            </Button>
                           </>
                         )}
 
                         <div className="my-1 border-t border-slate-100" />
 
-                        <button
+                        <Button
                           type="button"
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onArchive(camp.id);
-                          }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-600 transition-colors"
+                          variant="ghost"
+                          color="secondary"
+                          size="sm"
+                          fullWidth
+                          leftIcon={Archive}
+                          onClick={() => handleArchiveCampaign(camp.id)}
+                          className="justify-start px-3.5 py-2 text-xs rounded-none font-normal"
                         >
-                          <Archive className="w-4 h-4 text-slate-400" />
                           {camp.archivedAt ? "Batal Arsip" : "Arsipkan"}
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -427,15 +479,18 @@ export default function NotificationCampaignTable({
           {Math.min(currentPage * pageSize, total)} dari {total} pengumuman
         </div>
         <div className="flex items-center gap-1.5">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            color="secondary"
+            size="sm"
+            iconOnly
+            leftIcon={ChevronLeft}
             disabled={currentPage <= 1}
-            onClick={() => onPageChange(currentPage - 1)}
-            className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs transition-colors"
+            onClick={handlePrevPage}
+            className="w-8 h-8 rounded-lg"
             aria-label="Halaman sebelumnya"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+          />
           {Array.from(
             { length: Math.max(1, Math.ceil(total / pageSize)) },
             (_, idx) => idx + 1,
@@ -447,28 +502,30 @@ export default function NotificationCampaignTable({
                 Math.abs(p - currentPage) <= 1,
             )
             .map((p) => (
-              <button
+              <Button
                 key={p}
                 type="button"
-                onClick={() => onPageChange(p)}
-                className={`w-8 h-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-colors ${
-                  currentPage === p
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "border border-slate-200 text-slate-700 hover:bg-slate-50"
-                }`}
+                variant={currentPage === p ? "filled" : "outline"}
+                color={currentPage === p ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => handleSelectPage(p)}
+                className="w-8 h-8 rounded-lg text-xs font-semibold p-0"
               >
                 {p}
-              </button>
+              </Button>
             ))}
-          <button
+          <Button
             type="button"
+            variant="outline"
+            color="secondary"
+            size="sm"
+            iconOnly
+            leftIcon={ChevronRight}
             disabled={currentPage >= Math.ceil(total / pageSize)}
-            onClick={() => onPageChange(currentPage + 1)}
-            className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs transition-colors"
+            onClick={handleNextPage}
+            className="w-8 h-8 rounded-lg"
             aria-label="Halaman selanjutnya"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          />
         </div>
       </div>
     </div>

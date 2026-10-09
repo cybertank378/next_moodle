@@ -67,10 +67,11 @@ export default function EnrolmentFilterBar({
         <Button
           variant="filled"
           color="primary"
+          size="sm"
           onClick={onEnrolClick}
           disabled={!selectedCourseId}
           leftIcon={UserPlus}
-          className="text-sm font-medium w-full sm:w-auto"
+          className="w-full sm:w-auto"
         >
           Daftarkan Peserta
         </Button>

@@ -257,6 +257,14 @@ export default function NotificationCampaignFormView({
     }
   };
 
+  const handleOpenPreview = () => {
+    setPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Breadcrumb & Back button matching Mockup 2 */}
@@ -269,14 +277,17 @@ export default function NotificationCampaignFormView({
           </span>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="text"
+          color="primary"
+          size="sm"
+          leftIcon={ArrowLeft}
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors mb-2"
+          className="p-0 h-auto text-xs font-semibold mb-2"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Kembali</span>
-        </button>
+          Kembali
+        </Button>
 
         {/* Top Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -307,45 +318,37 @@ export default function NotificationCampaignFormView({
             <Button
               type="button"
               variant="outline"
+              color="secondary"
               size="sm"
-              onClick={() => setPreviewOpen(true)}
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 border-slate-200"
+              leftIcon={Eye}
+              onClick={handleOpenPreview}
+              className="text-xs font-medium border-slate-200"
             >
-              <Eye className="w-3.5 h-3.5 text-blue-600" />
               Pratinjau
             </Button>
 
             <Button
               type="button"
               variant="outline"
+              color="secondary"
               size="sm"
+              leftIcon={FileText}
               onClick={handleSaveDraft}
-              disabled={submitting || loading}
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 border-slate-200"
+              loading={submitting || loading}
             >
-              <FileText className="w-3.5 h-3.5 text-blue-600" />
               Simpan Draft
             </Button>
 
             <Button
               type="button"
-              variant="primary"
+              variant="filled"
+              color="primary"
               size="sm"
+              leftIcon={scheduledAt ? Calendar : Send}
               onClick={handleSendOrSchedule}
-              disabled={submitting || loading}
-              className="flex items-center gap-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-xs"
+              loading={submitting || loading}
             >
-              {scheduledAt ? (
-                <>
-                  <Calendar className="w-3.5 h-3.5 text-white" />
-                  Jadwalkan
-                </>
-              ) : (
-                <>
-                  <Send className="w-3.5 h-3.5 text-white" />
-                  Kirim Sekarang
-                </>
-              )}
+              {scheduledAt ? "Jadwalkan" : "Kirim Sekarang"}
             </Button>
           </div>
         </div>
@@ -438,7 +441,7 @@ export default function NotificationCampaignFormView({
       {/* Pratinjau Modal */}
       <Modal
         open={previewOpen}
-        onClose={() => setPreviewOpen(false)}
+        onClose={handleClosePreview}
         title="Pratinjau Pengumuman"
         subtitle="Lihat bagaimana pengumuman ditampilkan di web portal dan ponsel."
         size="lg"

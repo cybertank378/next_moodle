@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AppRouteConstants } from "@/libs/routes";
+import { ROUTES } from "@/libs/routes";
 import type {
   CourseModuleResponseDTO,
   CourseSectionResponseDTO,
@@ -18,6 +18,7 @@ import type {
 import { useCourseApi } from "@/modules/course/presentation/hooks/useCourseApi";
 import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface CourseDetailViewProps {
   courseId: number;
@@ -27,11 +28,25 @@ export default function CourseDetailView({ courseId }: CourseDetailViewProps) {
   const router = useRouter();
   const { contentsState, getCourseContents } = useCourseApi();
 
+  const handleNavigateToCourses = () => {
+    router.push(ROUTES.DASHBOARD.COURSES);
+  };
+
+  const handleNavigateToExams = () => {
+    router.push(ROUTES.DASHBOARD.EXAMS);
+  };
+
   useEffect(() => {
     if (courseId) {
       void getCourseContents(courseId);
     }
   }, [courseId, getCourseContents]);
+
+  useEffect(() => {
+    if (contentsState.error) {
+      showErrorToast(contentsState.error);
+    }
+  }, [contentsState.error]);
 
   const sections: CourseSectionResponseDTO[] = contentsState.data ?? [];
   const loading = contentsState.loading;
@@ -45,7 +60,7 @@ export default function CourseDetailView({ courseId }: CourseDetailViewProps) {
           color="secondary"
           iconOnly
           leftIcon={ArrowLeft}
-          onClick={() => router.push(AppRouteConstants.COURSES)}
+          onClick={handleNavigateToCourses}
           aria-label="Kembali ke daftar mata pelajaran"
         />
         <div>
@@ -163,7 +178,7 @@ export default function CourseDetailView({ courseId }: CourseDetailViewProps) {
                             variant="label"
                             color="warning"
                             leftIcon={CheckCircle2}
-                            onClick={() => router.push(AppRouteConstants.EXAMS)}
+                            onClick={handleNavigateToExams}
                           >
                             Lihat Ujian
                           </Button>
