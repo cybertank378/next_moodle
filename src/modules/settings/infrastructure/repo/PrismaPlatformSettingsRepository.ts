@@ -73,6 +73,7 @@ export class PrismaPlatformSettingsRepository implements PlatformSettingsReposit
         tenantId:null,actorId,actorRole:"ADMIN",action:"platform.settings.update",
         resource:"platform_settings",resourceId:PLATFORM_SETTINGS_ID,
         details:{event:"platform.settings.update",changedFields:changed,
+          before:before as Prisma.InputJsonObject,after:after as Prisma.InputJsonObject,
           previousRevision:revision,nextRevision:row.revision} as Prisma.InputJsonObject,
       }});
       return {kind:"updated" as const,row};

@@ -1,6 +1,7 @@
 "use client";
 
 import {useMemo,useState} from "react";
+import Image from "next/image";
 import {useRouter} from "next/navigation";
 import {Save,Undo2,RefreshCw,ShieldCheck} from "lucide-react";
 import type {PlatformSettingsDTO,PlatformSettingsFields} from "@/modules/settings/domain/dto/PlatformSettingsDTO";
@@ -79,7 +80,7 @@ export function SettingsManagementView({initial}:{initial:PlatformSettingsDTO}){
       <aside className="space-y-4"><div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="font-semibold">Pratinjau identitas</h2>
         <div className="mt-4 flex items-center gap-3 rounded-xl bg-slate-50 p-4">
-          <img src={getBrandAsset({surfaceTone:"light",variant:"mark"})} alt="Logo Aksaventra" className="h-12 w-12 object-contain"/>
+          <Image src={getBrandAsset({surfaceTone:"light",variant:"mark"})} alt="Logo Aksaventra" width={48} height={48} className="h-12 w-12 object-contain"/>
           <div><p className="font-bold text-slate-900">{draft.applicationName||"Nama aplikasi"}</p><p className="text-xs text-slate-500">{draft.applicationShortName}</p></div>
         </div>
         <p className="mt-4 text-xs text-slate-500">{draft.applicationDescription}</p>
