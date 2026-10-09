@@ -1,0 +1,11 @@
+"use client";
+import type { AuditListItemDTO } from "@/modules/audit/domain/dto/AuditResponseDTO";
+import Button from "@/shared-ui/component/Button";
+import EmptyState from "@/shared-ui/component/EmptyState";
+import {Table,TableHead,TableBody,TableHeaderCell,TableRow,TableCell} from "@/shared-ui/component/Table";
+const wib=(iso:string)=>new Intl.DateTimeFormat("id-ID",{timeZone:"Asia/Jakarta",dateStyle:"medium",timeStyle:"short"}).format(new Date(iso));
+export function AuditHistory({items,loading,onDetail}:{items:AuditListItemDTO[];loading:boolean;onDetail:(id:string)=>void}){
+ if(loading)return <div role="status" aria-label="Memuat riwayat" className="space-y-3 rounded-xl bg-white p-5">{Array.from({length:5},(_,i)=><div key={i} className="h-14 animate-pulse rounded bg-slate-100"/>)}</div>;
+ if(!items.length)return <EmptyState title="Tidak ada aktivitas audit" description="Belum ada log pada cakupan dan filter yang dipilih."/>;
+ return <><div className="hidden lg:block"><Table><TableHead><TableRow>{["Waktu WIB","Aktor / role","Aksi / resource","Tenant","IP","Detail"].map(h=><TableHeaderCell key={h}>{h}</TableHeaderCell>)}</TableRow></TableHead><TableBody>{items.map(item=><TableRow key={item.id}><TableCell>{wib(item.createdAt)}</TableCell><TableCell><div className="max-w-40 truncate">{item.actorId}</div><span className="text-xs text-slate-500">{item.actorRole}</span></TableCell><TableCell>{item.action}<p className="text-xs text-slate-500">{item.resource}</p></TableCell><TableCell>{item.tenantName}</TableCell><TableCell>{item.ipAddress??"—"}</TableCell><TableCell><Button variant="outline" className="min-h-11" onClick={()=>onDetail(item.id)}>Detail</Button></TableCell></TableRow>)}</TableBody></Table></div><div className="grid gap-3 lg:hidden">{items.map(item=><article key={item.id} className="rounded-xl border border-slate-200 bg-white p-4"><p className="font-semibold">{item.action}</p><p className="text-sm text-slate-500">{item.resource} · {item.actorRole}</p><p className="mt-2 text-xs">{wib(item.createdAt)}</p><p className="mt-2 break-all text-sm">{item.actorId} · {item.tenantName}</p><Button variant="outline" fullWidth className="mt-3 min-h-11" onClick={()=>onDetail(item.id)}>Detail</Button></article>)}</div></>
+}

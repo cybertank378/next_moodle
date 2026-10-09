@@ -1,0 +1,2 @@
+import {describe,it,expect} from "vitest";import {sanitizeAuditMetadata} from "@/modules/audit/domain/mapper/AuditMetadataSanitizer";
+describe("audit metadata",()=>{it("only allows safe fields",()=>{expect(sanitizeAuditMetadata({event:"tenant.updated",password:"abc",headers:{authorization:"secret"},changedFields:["name"]})).toEqual({event:"tenant.updated",changedFields:["name"]})});it("redacts secrets in allowed values",()=>{expect(sanitizeAuditMetadata({operation:"Bearer abc"}).operation).toBe("[REDACTED]")})});

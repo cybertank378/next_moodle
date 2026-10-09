@@ -1,0 +1,4 @@
+import type { AuditListItemDTO } from "@/modules/audit/domain/dto/AuditResponseDTO";
+export function escapeCsvCell(value:unknown){let s=String(value??"");if(/^[\s\u0000-\u001f]*[=+\-@]/u.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'}
+export function createAuditCsv(items:AuditListItemDTO[]){const rows=[["ID","Waktu UTC","Aktor","Role","Aksi","Resource","Resource ID","Tenant ID","Tenant","IP"],...items.map(i=>[i.id,i.createdAt,i.actorId,i.actorRole,i.action,i.resource,i.resourceId,i.tenantId,i.tenantName,i.ipAddress])];return rows.map(r=>r.map(escapeCsvCell).join(",")).join("\r\n")}
+export function downloadAuditCsv(items:AuditListItemDTO[]){const url=URL.createObjectURL(new Blob(["\uFEFF",createAuditCsv(items)],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="aksaventra-audit-halaman.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),0)}

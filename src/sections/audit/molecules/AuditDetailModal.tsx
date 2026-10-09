@@ -1,0 +1,8 @@
+"use client";
+import type { AuditDetailDTO } from "@/modules/audit/domain/dto/AuditResponseDTO";
+import { AuditDialog } from "@/sections/audit/atoms/AuditDialog";
+import Button from "@/shared-ui/component/Button";
+export function AuditDetailModal({open,detail,loading,error,onClose}:{open:boolean;detail:AuditDetailDTO|null;loading:boolean;error:string|null;onClose:()=>void}){
+ const fields=detail?[["ID Log",detail.id],["Waktu WIB",new Intl.DateTimeFormat("id-ID",{timeZone:"Asia/Jakarta",dateStyle:"full",timeStyle:"medium"}).format(new Date(detail.createdAt))],["Aktor",detail.actorId],["Role",detail.actorRole],["Tenant",detail.tenantName],["Aksi",detail.action],["Resource",detail.resource],["Resource ID",detail.resourceId],["IP",detail.ipAddress],["User Agent",detail.userAgent]]:[];
+ return <AuditDialog open={open} onClose={onClose} title="Detail aktivitas audit">{loading?<p role="status">Memuat detail...</p>:error?<p role="alert" className="text-red-600">{error}</p>:detail?<div className="space-y-5"><dl className="grid gap-3 sm:grid-cols-2">{fields.map(([label,value])=><div key={label} className="min-w-0 rounded-lg bg-slate-50 p-3"><dt className="text-xs text-slate-500">{label}</dt><dd className="break-all text-sm">{value??"—"}</dd></div>)}</dl><h3 className="font-semibold">Metadata aman</h3><pre className="max-h-56 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-slate-900 p-3 text-xs text-white">{JSON.stringify(detail.details,null,2)}</pre><div className="flex justify-end gap-2"><Button variant="outline" onClick={onClose}>Tutup</Button><Button onClick={()=>void navigator.clipboard.writeText(detail.id)}>Salin ID</Button></div></div>:<p>Detail tidak tersedia.</p>}</AuditDialog>
+}
