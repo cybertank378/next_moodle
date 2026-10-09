@@ -1,5 +1,5 @@
-import type { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
+import type { PrismaClient } from "@prisma/client";
 
 export class TenantSeeder {
   constructor(private prisma: PrismaClient) {}
@@ -54,6 +54,8 @@ export class TenantSeeder {
     });
 
     console.log(`✅ Tenant 'localhost' created! (Moodle URL: ${MOODLE_URL})`);
-    console.log(`✅ Non-active Tenant 'inactive-school' created with status SUSPENDED!`);
+    console.log(
+      `✅ Non-active Tenant 'inactive-school' created with status SUSPENDED!`,
+    );
   }
 }

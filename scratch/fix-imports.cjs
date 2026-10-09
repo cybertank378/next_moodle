@@ -25,7 +25,7 @@ let changedFiles = 0;
 
 files.forEach(file => {
   let content = fs.readFileSync(file, 'utf8');
-  let originalContent = content;
+  const originalContent = content;
   
   const regex = /(from|import|export|vi\.mock|jest\.mock)\s*\(?\s*['"](\.[^'"]+)['"]/g;
   
@@ -34,7 +34,7 @@ files.forEach(file => {
     const resolvedPath = path.resolve(fileDir, relativePath);
     
     if (resolvedPath.startsWith(srcDir)) {
-      let aliasPath = resolvedPath.replace(srcDir, '@').replace(/\\/g, '/');
+      const aliasPath = resolvedPath.replace(srcDir, '@').replace(/\\/g, '/');
       return match.replace(relativePath, aliasPath);
     }
     return match;
@@ -46,4 +46,4 @@ files.forEach(file => {
   }
 });
 
-console.log('Replaced relative imports in ' + changedFiles + ' files.');
+console.log(`Replaced relative imports in ${changedFiles} files.`);
