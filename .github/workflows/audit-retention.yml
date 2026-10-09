@@ -1,0 +1,32 @@
+name: SaaS Audit Retention Cleanup
+on:
+  schedule:
+    # Every day at 02:00 WIB (19:00 UTC).
+    - cron: "0 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate deployment secrets
+        env:
+          BASE_URL: ${{ secrets.AUDIT_RETENTION_BASE_URL }}
+          TOKEN: ${{ secrets.AUDIT_RETENTION_CRON_SECRET }}
+        run: |
+          test -n "$BASE_URL" || { echo "Missing AUDIT_RETENTION_BASE_URL"; exit 1; }
+          test -n "$TOKEN" || { echo "Missing AUDIT_RETENTION_CRON_SECRET"; exit 1; }
+      - name: Remove audit records older than three months
+        env:
+          BASE_URL: ${{ secrets.AUDIT_RETENTION_BASE_URL }}
+          TOKEN: ${{ secrets.AUDIT_RETENTION_CRON_SECRET }}
+        run: |
+          curl --fail-with-body --retry 3 --retry-delay 10 \
+            --silent --show-error --max-time 60 \
+            -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            "${BASE_URL%/}/api/cron/audit-retention"
