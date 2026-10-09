@@ -57,6 +57,53 @@ function getSidebarHome(role: UserRole): string {
   }
 }
 
+interface RoleIdentity {
+  initials: string;
+  title: string;
+  subtitle: string;
+}
+
+function getRoleIdentity(
+  role: UserRole,
+  username?: string,
+  institutionName?: string,
+): RoleIdentity {
+  switch (role) {
+    case Role.ADMIN:
+      return {
+        initials: username ? username.slice(0, 2).toUpperCase() : "AD",
+        title: username ? username.toUpperCase() : "ADMIN",
+        subtitle: "Administrator Platform",
+      };
+    case Role.TENANT:
+      return {
+        initials: username ? username.slice(0, 2).toUpperCase() : "TN",
+        title: username
+          ? username.toUpperCase()
+          : (institutionName ? institutionName.toUpperCase() : "TENANT"),
+        subtitle: "Operator Institusi / Tenant",
+      };
+    case Role.TEACHER:
+      return {
+        initials: username ? username.slice(0, 2).toUpperCase() : "GR",
+        title: username ? username.toUpperCase() : "GURU",
+        subtitle: "Guru / Tenaga Pendidik",
+      };
+    case Role.STUDENT:
+      return {
+        initials: username ? username.slice(0, 2).toUpperCase() : "SW",
+        title: username ? username.toUpperCase() : "SISWA",
+        subtitle: "Siswa / Peserta Didik",
+      };
+    default:
+      return {
+        initials: username ? username.slice(0, 2).toUpperCase() : "US",
+        title: (role as string).replaceAll("_", " "),
+        subtitle: "Pengguna",
+      };
+  }
+}
+
 export function getSidebarMenu(role: UserRole): SidebarGroup[] {
   switch (role) {
     case Role.ADMIN:
@@ -328,6 +375,10 @@ export default function AppSidebar({
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const handleToggleCollapse = () => {
+    setIsCollapsed((prev) => !prev);
+  };
+
   const handleNavigateHome = () => {
     router.push(getSidebarHome(role));
   };
@@ -372,60 +423,50 @@ export default function AppSidebar({
           </Button>
 
           {/* Desktop collapse button */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
+            iconOnly
+            leftIcon={collapsed ? ChevronRight : ChevronLeft}
             aria-label={collapsed ? "Perluas sidebar" : "Perkecil sidebar"}
-            onClick={() => setIsCollapsed((prev) => !prev)}
+            onClick={handleToggleCollapse}
             className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
-          >
-            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
+          />
 
           {/* Mobile close button */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
+            iconOnly
+            leftIcon={X}
             aria-label="Tutup menu sidebar"
             onClick={onClose}
             className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
-          >
-            <X size={18} />
-          </button>
+          />
         </div>
 
         {/* Role Identity Card */}
-        {!collapsed && role === Role.ADMIN && (
-          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-800/60 px-4 py-3 shadow-sm">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs uppercase shadow-sm">
-              AD
-            </div>
+        {!collapsed && (() => {
+          const identity = getRoleIdentity(role, username, institutionName);
+          return (
+            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-800/60 px-4 py-3 shadow-sm">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs uppercase shadow-sm">
+                {identity.initials}
+              </div>
 
-            <div className="overflow-hidden">
-              <p className="text-xs font-bold uppercase tracking-wider text-white">
-                ADMIN
-              </p>
-              <p className="text-[11px] font-medium text-slate-400 truncate">
-                Administrator Platform
-              </p>
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                  {identity.title}
+                </p>
+                <p className="text-[11px] font-medium text-slate-400 truncate">
+                  {identity.subtitle}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-
-        {!collapsed && role !== Role.ADMIN && role !== Role.STUDENT && (
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-4 py-3 shadow-sm">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400 border border-slate-700 shadow-md">
-              <LayoutDashboard size={18} />
-            </div>
-
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Role Aktif
-              </p>
-              <p className="text-sm font-semibold text-white">
-                {role.replaceAll("_", " ")}
-              </p>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       <nav className="flex-1 overflow-y-auto bg-slate-900 px-3 py-5">
@@ -500,7 +541,7 @@ export default function AppSidebar({
               </div>
             )}
           </div>
-        ) : role === Role.STUDENT ? (
+        ) : role === Role.STUDENT || role === Role.TEACHER || role === Role.TENANT ? (
           <div className="flex items-center gap-3 rounded-2xl bg-slate-800/50 p-3 shadow-sm border border-slate-700/50">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
               <GraduationCap className="h-5 w-5" />
