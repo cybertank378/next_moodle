@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
 import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 
@@ -68,4 +68,71 @@ describe("AuthRepository", () => {
       else process.env.NEXTAUTH_SECRET = nextAuthSecret;
     }
   });
+
+  describe("resolveLoginTenant", () => {
+    it("denies access when tenant is non-active (SUSPENDED)", async () => {
+      const mockPrisma = {
+        tenant: {
+          findFirst: vi.fn().mockResolvedValue({
+            id: "tenant-suspended-id",
+            slug: "inactive-school",
+            status: "SUSPENDED",
+            credential: {
+              moodleUrl: "https://moodle.local",
+            },
+          }),
+        },
+      } as unknown as import("@prisma/client").PrismaClient;
+
+      const repository = new AuthRepository({ secret }, mockPrisma);
+
+      await expect(
+        repository.resolveLoginTenant("inactive-school"),
+      ).rejects.toThrow("Tenant tidak aktif.");
+    });
+
+    it("denies access when tenant is in MAINTENANCE", async () => {
+      const mockPrisma = {
+        tenant: {
+          findFirst: vi.fn().mockResolvedValue({
+            id: "tenant-maint-id",
+            slug: "maintenance-school",
+            status: "MAINTENANCE",
+            credential: {
+              moodleUrl: "https://moodle.local",
+            },
+          }),
+        },
+      } as unknown as import("@prisma/client").PrismaClient;
+
+      const repository = new AuthRepository({ secret }, mockPrisma);
+
+      await expect(
+        repository.resolveLoginTenant("maintenance-school"),
+      ).rejects.toThrow("Tenant tidak aktif.");
+    });
+
+    it("allows access when tenant is ACTIVE", async () => {
+      const mockPrisma = {
+        tenant: {
+          findFirst: vi.fn().mockResolvedValue({
+            id: "tenant-active-id",
+            slug: "localhost",
+            status: "ACTIVE",
+            credential: {
+              moodleUrl: "https://moodle.local",
+            },
+          }),
+        },
+      } as unknown as import("@prisma/client").PrismaClient;
+
+      const repository = new AuthRepository({ secret }, mockPrisma);
+
+      const tenant = await repository.resolveLoginTenant("localhost");
+      expect(tenant.tenantId).toBe("tenant-active-id");
+      expect(tenant.status).toBe("ACTIVE");
+      expect(tenant.slug).toBe("localhost");
+    });
+  });
 });
+
