@@ -65,6 +65,7 @@ model SaasAuditLog {
   id         String   @id @default(uuid())
   tenantId   String?
   actorId    String
+  actorName  String?
   actorRole  String
   action     String
   resource   String
