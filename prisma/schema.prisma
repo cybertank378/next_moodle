@@ -225,3 +225,20 @@ model NotificationDevice {
   @@map("notification_devices")
 }
 
+
+model PlatformSettings {
+  id                     String   @id @default("platform")
+  applicationName        String
+  applicationShortName   String
+  applicationDescription String
+  supportEmail           String?
+  supportUrl             String?
+  pwaThemeColor          String
+  pwaBackgroundColor     String
+  revision               Int      @default(1)
+  updatedById            String?
+  updatedAt              DateTime @updatedAt
+  createdAt              DateTime @default(now())
+
+  @@map("platform_settings")
+}

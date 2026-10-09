@@ -1,6 +1,7 @@
 // Files: src/sections/auth/pages/AuthPage.tsx
 "use client";
 
+import type { PublicPlatformSettingsDTO } from "@/modules/settings/domain/dto/PlatformSettingsDTO";
 import type { ReactNode } from "react";
 import ChangePasswordForm from "@/sections/auth/organisms/ChangePasswordForm";
 import ForgetPasswordForm from "@/sections/auth/organisms/ForgetPasswordForm";
@@ -19,11 +20,12 @@ export type AuthMode =
 
 interface Props {
   readonly mode: AuthMode;
+  readonly platformSettings?: PublicPlatformSettingsDTO;
 }
 
-export default function AuthPage({ mode }: Props) {
+export default function AuthPage({ mode, platformSettings }: Props) {
   if (mode === "login") {
-    return <LoginPageSection />;
+    return <LoginPageSection platformSettings={platformSettings} />;
   }
 
   const resolveComponent = (): ReactNode => {

@@ -5,9 +5,10 @@ import { APP_NAME } from "@/libs/branding";
 
 export interface LoginFooterProps {
   readonly className?: string;
+  readonly applicationName?: string;
 }
 
-export default function LoginFooter({ className }: LoginFooterProps) {
+export default function LoginFooter({ className, applicationName = APP_NAME }: LoginFooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -18,7 +19,7 @@ export default function LoginFooter({ className }: LoginFooterProps) {
       )}
     >
       <p>
-        © {currentYear} {APP_NAME} • Sistem Pembelajaran
+        © {currentYear} {applicationName} • Sistem Pembelajaran
       </p>
     </footer>
   );

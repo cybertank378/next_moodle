@@ -1,29 +1,18 @@
 import type { MetadataRoute } from "next";
-import { APP_DESCRIPTION, APP_NAME } from "@/libs/branding";
+import { loadPublicPlatformSettings } from "@/modules/settings/presentation/server/loadPublicPlatformSettings";
 
-export default function manifest(): MetadataRoute.Manifest {
+export const dynamic = "force-dynamic";
+
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const settings=await loadPublicPlatformSettings();
   return {
-    name: APP_NAME,
-    short_name: APP_NAME,
-    description: APP_DESCRIPTION,
-    start_url: "/",
-    scope: "/",
-    display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#082d61",
-    icons: [
-      {
-        src: "/assets/images/logo/web-app-manifest-192x192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: "/assets/images/logo/web-app-manifest-512x512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
-      },
+    name:settings.applicationName,short_name:settings.applicationShortName,
+    description:settings.applicationDescription,
+    start_url:"/",scope:"/",display:"standalone",
+    background_color:settings.pwaBackgroundColor,theme_color:settings.pwaThemeColor,
+    icons:[
+      {src:"/assets/images/logo/web-app-manifest-192x192.png",sizes:"192x192",type:"image/png",purpose:"any"},
+      {src:"/assets/images/logo/web-app-manifest-512x512.png",sizes:"512x512",type:"image/png",purpose:"maskable"},
     ],
   };
 }

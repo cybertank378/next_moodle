@@ -8,12 +8,13 @@ import LoginFeatureRow from "@/sections/auth/molecules/LoginFeatureRow";
 
 export interface LoginBrandPanelProps {
   readonly className?: string;
+  readonly applicationName?: string;
 }
 
-export default function LoginBrandPanel({ className }: LoginBrandPanelProps) {
+export default function LoginBrandPanel({ className, applicationName = APP_NAME }: LoginBrandPanelProps) {
   return (
     <aside
-      aria-label={`Informasi Platform ${APP_NAME}`}
+      aria-label={`Informasi Platform ${applicationName}`}
       className={clsx(
         "relative flex h-full w-full flex-col justify-between overflow-hidden p-8 lg:p-12 xl:p-14",
         "bg-gradient-to-br from-[#061743] via-[#0A266F] to-[#041235] text-white",
