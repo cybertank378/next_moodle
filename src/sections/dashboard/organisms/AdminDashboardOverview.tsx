@@ -34,6 +34,11 @@ export default function AdminDashboardOverview() {
     ADMIN_DASHBOARD_DEFAULT_MONTHS,
   );
 
+  const handleSelectMonths = (months: number) => {
+    setSelectedMonths(months);
+    void fetchAdminOverview(months);
+  };
+
   const handleNavigateToRegisterTenant = () => {
     router.push(`${ROUTES.ADMIN.TENANTS}?action=create`);
   };
@@ -180,10 +185,7 @@ export default function AdminDashboardOverview() {
             points={data?.growth ?? []}
             loading={loading && !data}
             selectedMonths={selectedMonths}
-            onSelectMonths={(m) => {
-              setSelectedMonths(m);
-              void fetchAdminOverview(m);
-            }}
+            onSelectMonths={handleSelectMonths}
           />
         </div>
         <div>

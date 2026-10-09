@@ -2,10 +2,23 @@
 
 "use client";
 
+import { useMemo } from "react";
+import { DonutChart, themes } from "@derpdaderp/chartkit";
 import type { TenantStatusSummary } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { formatCount } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import Card from "@/shared-ui/component/Card";
 import Skeleton from "@/shared-ui/component/Skeleton";
+
+// Harmonize semantic status palette in ChartKit silver theme
+if (themes?.silver) {
+  themes.silver.colors = [
+    "#10b981", // Emerald -> Aktif
+    "#f59e0b", // Amber -> Pemeliharaan
+    "#ef4444", // Rose -> Ditangguhkan
+    "#3b82f6",
+    "#8b5cf6",
+  ];
+}
 
 interface TenantStatusChartProps {
   summary: TenantStatusSummary;
@@ -21,23 +34,13 @@ export default function TenantStatusChart({
   const suspended = summary?.suspended ?? 0;
   const total = summary?.total ?? active + maintenance + suspended;
 
-  // Donut SVG circumference math
-  const radius = 60;
-  const strokeWidth = 18;
-  const circumference = 2 * Math.PI * radius;
-
-  const activeRatio = total > 0 ? active / total : 0;
-  const maintenanceRatio = total > 0 ? maintenance / total : 0;
-  const suspendedRatio = total > 0 ? suspended / total : 0;
-
-  const activeDash = activeRatio * circumference;
-  const maintenanceDash = maintenanceRatio * circumference;
-  const suspendedDash = suspendedRatio * circumference;
-
-  // Offsets
-  const activeOffset = 0;
-  const maintenanceOffset = -activeDash;
-  const suspendedOffset = -(activeDash + maintenanceDash);
+  const chartData = useMemo(() => {
+    return [
+      { status: "Aktif", count: active },
+      { status: "Pemeliharaan", count: maintenance },
+      { status: "Ditangguhkan", count: suspended },
+    ];
+  }, [active, maintenance, suspended]);
 
   return (
     <Card className="border border-slate-200/80 bg-white shadow-sm p-5 rounded-2xl flex flex-col justify-between">
@@ -48,120 +51,36 @@ export default function TenantStatusChart({
         </p>
       </div>
 
-      <div className="py-6 flex flex-col sm:flex-row items-center justify-around gap-6">
+      <div className="py-4 flex items-center justify-center min-h-[220px]">
         {loading ? (
           <Skeleton circle width={160} height={160} />
+        ) : total === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500">
+            <p className="text-sm font-medium">Belum ada data status tenant.</p>
+          </div>
         ) : (
-          /* Donut Chart with Center Text */
-          <div className="relative flex items-center justify-center shrink-0">
-            <svg
-              width="160"
-              height="160"
-              viewBox="0 0 160 160"
-              className="-rotate-90 transform"
-            >
-              {/* Background ring */}
-              <circle
-                cx="80"
-                cy="80"
-                r={radius}
-                stroke="#f1f5f9"
-                strokeWidth={strokeWidth}
-                fill="none"
-              />
-
-              {total > 0 && (
-                <>
-                  {/* Active Segment (Green) */}
-                  {active > 0 && (
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r={radius}
-                      stroke="#10b981"
-                      strokeWidth={strokeWidth}
-                      fill="none"
-                      strokeDasharray={`${activeDash} ${circumference}`}
-                      strokeDashoffset={activeOffset}
-                      strokeLinecap="round"
-                    />
-                  )}
-
-                  {/* Maintenance Segment (Amber) */}
-                  {maintenance > 0 && (
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r={radius}
-                      stroke="#f59e0b"
-                      strokeWidth={strokeWidth}
-                      fill="none"
-                      strokeDasharray={`${maintenanceDash} ${circumference}`}
-                      strokeDashoffset={maintenanceOffset}
-                      strokeLinecap="round"
-                    />
-                  )}
-
-                  {/* Suspended Segment (Rose) */}
-                  {suspended > 0 && (
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r={radius}
-                      stroke="#ef4444"
-                      strokeWidth={strokeWidth}
-                      fill="none"
-                      strokeDasharray={`${suspendedDash} ${circumference}`}
-                      strokeDashoffset={suspendedOffset}
-                      strokeLinecap="round"
-                    />
-                  )}
-                </>
-              )}
-            </svg>
-
-            {/* Inner Center Label */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-slate-900 tracking-tight">
-                {formatCount(total)}
-              </span>
-              <span className="text-[11px] font-medium text-slate-400">
-                Total tenant
-              </span>
-            </div>
-          </div>
+          <DonutChart
+            data={chartData}
+            dataKey="count"
+            labelKey="status"
+            theme="silver"
+            size={170}
+            innerRadius={0.65}
+            showLegend={true}
+            legendPosition="right"
+            padAngle={3}
+            cornerRadius={4}
+            format={(val) => `${formatCount(val)} tenant`}
+            centerContent={
+              <div className="flex flex-col items-center justify-center text-center">
+                <span className="text-xl font-black text-slate-900 tracking-tight">
+                  {formatCount(total)}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400">Total</span>
+              </div>
+            }
+          />
         )}
-
-        {/* Legend */}
-        <div className="flex flex-col gap-3 min-w-[130px]">
-          <div className="flex items-center justify-between gap-3 text-xs">
-            <span className="flex items-center gap-2 text-slate-600 font-medium">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shrink-0" />
-              Aktif
-            </span>
-            <span className="font-bold text-slate-900">{formatCount(active)}</span>
-          </div>
-
-          <div className="flex items-center justify-between gap-3 text-xs">
-            <span className="flex items-center gap-2 text-slate-600 font-medium">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-500 shrink-0" />
-              Pemeliharaan
-            </span>
-            <span className="font-bold text-slate-900">
-              {formatCount(maintenance)}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between gap-3 text-xs">
-            <span className="flex items-center gap-2 text-slate-600 font-medium">
-              <span className="h-2.5 w-2.5 rounded-full bg-rose-500 shrink-0" />
-              Ditangguhkan
-            </span>
-            <span className="font-bold text-slate-900">
-              {formatCount(suspended)}
-            </span>
-          </div>
-        </div>
       </div>
     </Card>
   );

@@ -3,6 +3,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { LineChart } from "@derpdaderp/chartkit";
 import type { TenantGrowthPoint } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { formatPeriodLabel } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import Button from "@/shared-ui/component/Button";
@@ -26,23 +27,15 @@ export default function TenantGrowthChart({
 }: TenantGrowthChartProps) {
   const chartData = useMemo(() => {
     return points.map((p) => ({
-      label: formatPeriodLabel(p.period),
-      value: p.newTenants,
+      period: formatPeriodLabel(p.period),
+      newTenants: p.newTenants,
+      cumulativeTenants: p.cumulativeTenants,
     }));
   }, [points]);
 
-  const maxVal = useMemo(() => {
-    const rawMax = Math.max(...chartData.map((d) => d.value), 5);
-    return Math.ceil(rawMax / 2) * 2; // round up to nearest even number
-  }, [chartData]);
-
-  const yTicks = useMemo(() => {
-    const count = 5;
-    const step = maxVal / count;
-    return Array.from({ length: count + 1 }, (_, i) => Math.round(i * step));
-  }, [maxVal]);
-
-  const totalNew = points.reduce((sum, p) => sum + p.newTenants, 0);
+  const totalNew = useMemo(() => {
+    return points.reduce((sum, p) => sum + p.newTenants, 0);
+  }, [points]);
 
   const handleSelectSixMonths = () => {
     onSelectMonths?.(6);
@@ -113,112 +106,29 @@ export default function TenantGrowthChart({
           </p>
         </div>
       ) : (
-        <div className="relative w-full" style={{ height: CHART_HEIGHT }}>
-          <svg
-            className="w-full h-full overflow-visible"
-            viewBox="0 0 500 200"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2563eb" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#2563eb" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-
-            {/* Horizontal Grid lines */}
-            {yTicks.map((tick, i) => {
-              const y = 170 - (tick / maxVal) * 140;
-              return (
-                <g key={`ytick-${tick}-${i}`}>
-                  <line
-                    x1="30"
-                    y1={y}
-                    x2="495"
-                    y2={y}
-                    stroke="#f1f5f9"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x="20"
-                    y={y + 3}
-                    textAnchor="end"
-                    className="fill-slate-400 text-[10px] font-medium"
-                  >
-                    {tick}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Area Path */}
-            {(() => {
-              const count = chartData.length;
-              const stepX = (490 - 45) / Math.max(count - 1, 1);
-              const coords = chartData.map((d, index) => {
-                const x = 45 + index * stepX;
-                const y = 170 - (d.value / maxVal) * 140;
-                return { x, y, value: d.value, label: d.label };
-              });
-
-              const linePoints = coords
-                .map((c, i) => `${i === 0 ? "M" : "L"} ${c.x} ${c.y}`)
-                .join(" ");
-
-              const areaPoints = `${linePoints} L ${coords[coords.length - 1].x} 170 L ${coords[0].x} 170 Z`;
-
-              return (
-                <>
-                  {/* Shaded Area */}
-                  <path d={areaPoints} fill="url(#areaGradient)" />
-
-                  {/* Connecting Line */}
-                  <path
-                    d={linePoints}
-                    fill="none"
-                    stroke="#2563eb"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-
-                  {/* Points & Value Badges */}
-                  {coords.map((c, i) => (
-                    <g key={`pt-${i}`}>
-                      {/* Outer Dot */}
-                      <circle
-                        cx={c.x}
-                        cy={c.y}
-                        r="4.5"
-                        fill="#2563eb"
-                        stroke="#ffffff"
-                        strokeWidth="2"
-                        className="transition-transform hover:scale-125"
-                      />
-                      {/* Data Value above dot */}
-                      <text
-                        x={c.x}
-                        y={c.y - 8}
-                        textAnchor="middle"
-                        className="fill-blue-600 font-bold text-[10px]"
-                      >
-                        {c.value}
-                      </text>
-                      {/* X-axis Label below axis */}
-                      <text
-                        x={c.x}
-                        y="190"
-                        textAnchor="middle"
-                        className="fill-slate-500 font-medium text-[10px]"
-                      >
-                        {c.label}
-                      </text>
-                    </g>
-                  ))}
-                </>
-              );
-            })()}
-          </svg>
+        <div className="w-full" style={{ height: CHART_HEIGHT }}>
+          <LineChart
+            data={chartData}
+            timeKey="period"
+            series={[
+              {
+                key: "newTenants",
+                label: "Tenant Baru",
+                area: true,
+                areaOpacity: 0.18,
+                color: "#2563eb",
+                strokeWidth: 2.5,
+              },
+            ]}
+            theme="silver"
+            curve="monotone"
+            showDots={true}
+            dotSize={4}
+            height={CHART_HEIGHT}
+            responsive={true}
+            unit="tenant"
+            showLegend={false}
+          />
         </div>
       )}
     </Card>
