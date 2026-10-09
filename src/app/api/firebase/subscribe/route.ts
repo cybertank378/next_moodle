@@ -3,6 +3,7 @@ import { applicationDefault, getApps, initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 import { NextResponse } from "next/server";
 import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 
 import { normalizeFcmTopic } from "@/modules/notification/domain/helpers/fcmTopicHelper";
 
@@ -16,7 +17,7 @@ if (!getApps().length) {
   }
 }
 
-export async function POST(req: Request) {
+async function originalPOST(req: Request) {
   try {
     const actor = await resolveCurrentActor(req);
     if (!actor) {
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+async function originalDELETE(req: Request) {
   try {
     const actor = await resolveCurrentActor(req);
     if (!actor) {
@@ -64,3 +65,5 @@ export async function DELETE(req: Request) {
   }
 }
 
+export const POST = withAuditedMutation(originalPOST, "firebase/subscribe");
+export const DELETE = withAuditedMutation(originalDELETE, "firebase/subscribe");

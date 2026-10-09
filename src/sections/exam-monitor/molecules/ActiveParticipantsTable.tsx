@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import type { ExamMonitorParticipantDto } from "@/modules/exam-monitor/domain/dto/ExamMonitorDto";
+import { useExamMonitorApi } from "@/modules/exam-monitor/presentation/hooks/useExamMonitorApi";
+import Badge from "@/shared-ui/component/Badge";
+import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import {
@@ -11,12 +15,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import Typography from "@/shared-ui/component/Typography";
-import Badge from "@/shared-ui/component/Badge";
-import Button from "@/shared-ui/component/Button";
 import { showErrorToast } from "@/shared-ui/component/Toast";
-import type { ExamMonitorParticipantDto } from "@/modules/exam-monitor/domain/dto/ExamMonitorDto";
-import { useExamMonitorApi } from "@/modules/exam-monitor/presentation/hooks/useExamMonitorApi";
+import Typography from "@/shared-ui/component/Typography";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -26,7 +26,11 @@ interface ActiveParticipantsTableProps {
   loading: boolean;
 }
 
-export default function ActiveParticipantsTable({ quizId, participants, loading }: ActiveParticipantsTableProps) {
+export default function ActiveParticipantsTable({
+  quizId,
+  participants,
+  loading,
+}: ActiveParticipantsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -40,20 +44,43 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
 
   const totalItems = participants.length;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedParticipants = participants.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedParticipants = participants.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
 
   const formatState = (state: string) => {
     switch (state) {
       case "inprogress":
-        return <Badge color="primary" variant="soft">Sedang Berjalan</Badge>;
+        return (
+          <Badge color="primary" variant="soft">
+            Sedang Berjalan
+          </Badge>
+        );
       case "finished":
-        return <Badge color="success" variant="soft">Selesai</Badge>;
+        return (
+          <Badge color="success" variant="soft">
+            Selesai
+          </Badge>
+        );
       case "abandoned":
-        return <Badge color="error" variant="soft">Ditinggalkan</Badge>;
+        return (
+          <Badge color="error" variant="soft">
+            Ditinggalkan
+          </Badge>
+        );
       case "overdue":
-        return <Badge color="warning" variant="soft">Terlambat</Badge>;
+        return (
+          <Badge color="warning" variant="soft">
+            Terlambat
+          </Badge>
+        );
       default:
-        return <Badge color="secondary" variant="soft">{state}</Badge>;
+        return (
+          <Badge color="secondary" variant="soft">
+            {state}
+          </Badge>
+        );
     }
   };
 
@@ -62,7 +89,9 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
       await action();
       await fetchMonitor(quizId);
     } catch (error) {
-      showErrorToast(error instanceof Error ? error.message : "Terjadi kesalahan");
+      showErrorToast(
+        error instanceof Error ? error.message : "Terjadi kesalahan",
+      );
     }
   };
 
@@ -75,7 +104,9 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
   };
 
   const handleExtendTime = (attemptId: number) => {
-    void handleAction(() => extendTimeAttempt({ attemptId, extraTimeMinutes: 10 }));
+    void handleAction(() =>
+      extendTimeAttempt({ attemptId, extraTimeMinutes: 10 }),
+    );
   };
 
   const handleForceFinish = (attemptId: number) => {
@@ -113,7 +144,10 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
               ))
             ) : paginatedParticipants.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="py-8 text-center text-slate-500 ">
+                <TableCell
+                  colSpan={4}
+                  className="py-8 text-center text-slate-500 "
+                >
                   Belum ada kandidat.
                 </TableCell>
               </TableRow>
@@ -121,7 +155,9 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
               paginatedParticipants.map((p) => (
                 <TableRow key={p.attemptId}>
                   <TableCell>
-                    <div className="font-semibold text-slate-900 ">{p.fullname}</div>
+                    <div className="font-semibold text-slate-900 ">
+                      {p.fullname}
+                    </div>
                     <div className="text-xs text-slate-500  mt-1">
                       Attempt ID: {p.attemptId}
                     </div>
@@ -130,19 +166,23 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
                     <div className="flex items-center space-x-2">
                       {formatState(p.state)}
                       {p.isLocked && (
-                         <Badge color="error" variant="soft">Terkunci</Badge>
+                        <Badge color="error" variant="soft">
+                          Terkunci
+                        </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell className="font-medium text-slate-600 ">
-                    {p.timeRemaining !== undefined ? `${Math.floor(p.timeRemaining / 60)}m ${p.timeRemaining % 60}s` : "-"}
+                    {p.timeRemaining !== undefined
+                      ? `${Math.floor(p.timeRemaining / 60)}m ${p.timeRemaining % 60}s`
+                      : "-"}
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       {p.isLocked ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           color="primary"
                           disabled={isMutating}
                           onClick={() => handleUnlock(p.attemptId)}
@@ -150,9 +190,9 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
                           Buka Kunci
                         </Button>
                       ) : (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           color="danger"
                           disabled={isMutating || p.state === "finished"}
                           onClick={() => handleLock(p.attemptId)}
@@ -160,18 +200,18 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
                           Kunci
                         </Button>
                       )}
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         color="secondary"
                         disabled={isMutating || p.state === "finished"}
                         onClick={() => handleExtendTime(p.attemptId)}
                       >
                         +10m
                       </Button>
-                      <Button 
-                        variant="filled" 
-                        size="sm" 
+                      <Button
+                        variant="filled"
+                        size="sm"
                         color="danger"
                         disabled={isMutating || p.state === "finished"}
                         onClick={() => handleForceFinish(p.attemptId)}
@@ -186,7 +226,7 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
           </TableBody>
         </Table>
       </div>
-      
+
       {!loading && totalItems > 0 && (
         <div className="px-6 py-4 bg-white/70  border border-t-0 border-slate-200/60  rounded-b-lg">
           <Pagination

@@ -9,10 +9,10 @@ import {
 } from "@/modules/questions/domain/types/QuestionTypes";
 import { useQuestionApi } from "@/modules/questions/presentation/hooks/useQuestionApi";
 import Button from "@/shared-ui/component/Button";
-import { showErrorToast } from "@/shared-ui/component/Toast";
 import RichTextEditorField from "@/shared-ui/component/RichTextEditor/RichTextEditorField";
 import SelectField from "@/shared-ui/component/SelectField";
 import TextField from "@/shared-ui/component/TextField";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface QuestionEditorProps {
   categoryId: number;
@@ -154,7 +154,12 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
         </div>
 
         <div className="pt-4 flex justify-end space-x-3">
-          <Button type="submit" loading={loading} variant="filled" color="primary">
+          <Button
+            type="submit"
+            loading={loading}
+            variant="filled"
+            color="primary"
+          >
             {isEditing ? "Update Question" : "Save Question"}
           </Button>
         </div>

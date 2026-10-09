@@ -10,7 +10,11 @@ export function getErrorMessage(error?: unknown): string {
     msg = error;
   } else if (error instanceof Error) {
     msg = error.message;
-  } else if (typeof error === "object" && error !== null && "message" in error) {
+  } else if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error
+  ) {
     msg = String((error as { message: unknown }).message);
   } else {
     msg = "Terjadi kesalahan tidak terduga.";

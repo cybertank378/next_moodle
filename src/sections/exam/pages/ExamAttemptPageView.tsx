@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { ROUTES } from "@/libs/routes";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
-import Skeleton from "@/shared-ui/component/Skeleton";
 import ExamAttemptInterface from "@/sections/exam/organisms/ExamAttemptInterface";
+import Skeleton from "@/shared-ui/component/Skeleton";
 
 export interface ExamAttemptPageViewProps {
   quizId: number;

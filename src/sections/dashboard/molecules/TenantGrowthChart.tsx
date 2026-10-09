@@ -2,8 +2,8 @@
 
 "use client";
 
-import { useMemo } from "react";
 import { LineChart } from "@derpdaderp/chartkit";
+import { useMemo } from "react";
 import type { TenantGrowthPoint } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { formatPeriodLabel } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import Button from "@/shared-ui/component/Button";
@@ -50,7 +50,9 @@ export default function TenantGrowthChart({
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Pertumbuhan Tenant</h2>
+          <h2 className="text-lg font-bold text-slate-900">
+            Pertumbuhan Tenant
+          </h2>
           <p className="text-xs text-slate-500 mt-0.5">
             Tenant baru yang terdaftar setiap bulan.
           </p>

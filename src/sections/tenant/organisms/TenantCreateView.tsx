@@ -1,8 +1,8 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { ROUTES } from "@/libs/routes";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {
@@ -47,8 +47,8 @@ export default function TenantCreateView() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Tambah tenant</h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Buat metadata tenant terlebih dahulu. Credential dikonfigurasi setelah
-            tenant tersedia.
+            Buat metadata tenant terlebih dahulu. Credential dikonfigurasi
+            setelah tenant tersedia.
           </p>
         </div>
       </div>

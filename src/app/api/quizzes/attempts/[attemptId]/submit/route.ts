@@ -1,3 +1,4 @@
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 import "server-only";
 
 import type { NextRequest, NextResponse } from "next/server";
@@ -10,7 +11,7 @@ import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
 
 type AttemptRouteContext = RouteContext<{ attemptId: string }>;
 
-export async function POST(
+async function originalPOST(
   req: NextRequest,
   context: AttemptRouteContext,
 ): Promise<NextResponse> {
@@ -27,3 +28,8 @@ export async function POST(
     req,
   );
 }
+
+export const POST = withAuditedMutation(
+  originalPOST,
+  "quizzes/attempts/:id/submit",
+);

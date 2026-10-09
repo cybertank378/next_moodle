@@ -2,13 +2,13 @@ import "server-only";
 
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { SecurityError } from "@/core/errors/SecurityError";
+import type { MoodleCredentials } from "@/core/moodle/types";
 import type { TenantEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { SsrfValidator } from "@/core/security/SsrfValidator";
 import {
   type TenantContext,
   validateTenantContext,
 } from "@/core/tenant/TenantContext";
-import type { MoodleCredentials } from "@/core/moodle/types";
 
 export type MoodleServiceCredential = "admin" | "proctor";
 

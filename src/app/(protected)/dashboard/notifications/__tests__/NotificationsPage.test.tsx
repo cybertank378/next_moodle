@@ -1,11 +1,11 @@
 // Files: src/app/(protected)/dashboard/notifications/__tests__/NotificationsPage.test.tsx
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import React from "react";
+import { redirect } from "next/navigation";
+import type React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import NotificationsPage from "@/app/(protected)/dashboard/notifications/page";
 import * as authServer from "@/modules/auth/server/requireDashboardRoles";
-import { redirect } from "next/navigation";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
@@ -18,11 +18,14 @@ vi.mock("@/modules/auth/server/requireDashboardRoles", () => ({
   requireDashboardRoles: vi.fn(),
 }));
 
-vi.mock("@/sections/notification-management/pages/NotificationManagementPageView", () => ({
-  default: ({ actorRole }: { actorRole: string }) => (
-    <div data-testid="notification-management-page">{actorRole}</div>
-  ),
-}));
+vi.mock(
+  "@/sections/notification-management/pages/NotificationManagementPageView",
+  () => ({
+    default: ({ actorRole }: { actorRole: string }) => (
+      <div data-testid="notification-management-page">{actorRole}</div>
+    ),
+  }),
+);
 
 vi.mock("@/sections/notification/pages/NotificationPageView", () => ({
   default: ({ userRole }: { userRole?: string }) => (
@@ -37,11 +40,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationManagementPageView for ADMIN role", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-admin",
+      userId: "u-admin",
       role: "ADMIN",
       username: "admin",
       tenantId: null,
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);
@@ -52,11 +55,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationManagementPageView for TENANT role", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-tenant",
+      userId: "u-tenant",
       role: "TENANT",
       username: "tenant",
       tenantId: "t-1",
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);
@@ -67,11 +70,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationPageView for STUDENT role instead of redirecting", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-student",
+      userId: "u-student",
       role: "STUDENT",
       username: "student",
       tenantId: "t-1",
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);
@@ -83,11 +86,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationPageView for TEACHER role", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-teacher",
+      userId: "u-teacher",
       role: "TEACHER",
       username: "teacher",
       tenantId: "t-1",
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);

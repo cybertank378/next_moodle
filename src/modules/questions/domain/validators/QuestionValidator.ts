@@ -4,8 +4,8 @@ import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
 import {
   type CreateQuestionRequestDto,
-  type UpdateQuestionRequestDto,
   QuestionType,
+  type UpdateQuestionRequestDto,
 } from "@/modules/questions/domain/types/QuestionTypes";
 
 export class CreateQuestionDtoValidator {

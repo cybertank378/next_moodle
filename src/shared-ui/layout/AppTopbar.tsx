@@ -17,7 +17,6 @@ import Button from "@/shared-ui/component/Button";
 import { DropdownItem } from "@/shared-ui/component/DropdownItem";
 import SearchField from "@/shared-ui/component/SearchField";
 
-
 interface Props {
   role: UserRole;
   username?: string;

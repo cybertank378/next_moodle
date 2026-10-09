@@ -3,11 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: [
-    '@fullcalendar/common',
-    '@fullcalendar/core',
-    '@fullcalendar/react',
-    '@fullcalendar/daygrid',
-    '@fullcalendar/timegrid'
+    "@fullcalendar/common",
+    "@fullcalendar/core",
+    "@fullcalendar/react",
+    "@fullcalendar/daygrid",
+    "@fullcalendar/timegrid",
   ],
 
   // Disable X-Powered-By header to reduce response overhead and enhance security

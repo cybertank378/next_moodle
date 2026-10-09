@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 function moveDirContents(srcDir, destDir) {
   if (!fs.existsSync(srcDir)) return;
@@ -17,7 +17,9 @@ function moveDirContents(srcDir, destDir) {
         moveDirContents(srcPath, destPath);
         try {
           fs.rmdirSync(srcPath);
-        } catch (e) {}
+        } catch {
+          /* Ignore non-empty directory during migration. */
+        }
       } else {
         fs.renameSync(srcPath, destPath);
       }
@@ -27,7 +29,9 @@ function moveDirContents(srcDir, destDir) {
   }
   try {
     fs.rmdirSync(srcDir);
-  } catch (e) {}
+  } catch {
+    /* Ignore non-empty directory during migration. */
+  }
 }
 
 // Move sections

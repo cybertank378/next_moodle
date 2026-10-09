@@ -1,8 +1,8 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { ROUTES } from "@/libs/routes";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {

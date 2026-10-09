@@ -2,8 +2,8 @@
 
 "use client";
 
-import { useMemo } from "react";
 import { DonutChart, themes } from "@derpdaderp/chartkit";
+import { useMemo } from "react";
 import type { TenantStatusSummary } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { formatCount } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import Card from "@/shared-ui/component/Card";
@@ -76,7 +76,9 @@ export default function TenantStatusChart({
                 <span className="text-xl font-black text-slate-900 tracking-tight">
                   {formatCount(total)}
                 </span>
-                <span className="text-[10px] font-medium text-slate-400">Total</span>
+                <span className="text-[10px] font-medium text-slate-400">
+                  Total
+                </span>
               </div>
             }
           />

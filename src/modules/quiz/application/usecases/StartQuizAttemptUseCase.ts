@@ -1,9 +1,9 @@
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { Permission } from "@/core/rbac/Permission";
+import { authorizeAttemptOperation } from "@/modules/quiz/application/services/QuizAttemptAuthorizationService";
 import type { QuizAttemptResponseDto } from "@/modules/quiz/domain/dto/QuizAttemptResponseDto";
 import type { QuizAttemptRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizAttemptRepositoryInterface";
 import { QuizAttemptMapper } from "@/modules/quiz/domain/mapper/QuizAttemptMapper";
-import { authorizeAttemptOperation } from "@/modules/quiz/application/services/QuizAttemptAuthorizationService";
 
 export interface StartQuizAttemptInput {
   actor: AuthorizationActor;

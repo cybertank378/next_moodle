@@ -1,12 +1,12 @@
 // Files: src/sections/dashboard/molecules/StatCard.tsx
 
 import type { ElementType, ReactNode } from "react";
-import StatValue from "@/sections/dashboard/atoms/StatValue";
 import {
   type StatAccent,
   StatAccentDot,
   StatAccentGlow,
 } from "@/sections/dashboard/atoms/StatAccent";
+import StatValue from "@/sections/dashboard/atoms/StatValue";
 import Card from "@/shared-ui/component/Card";
 
 interface StatCardProps {

@@ -25,12 +25,8 @@ export default function ResultsEmptyState({
         <FileQuestion size={24} />
       </div>
 
-      <h4 className="mt-3 text-sm font-semibold text-slate-900 ">
-        {title}
-      </h4>
-      <p className="mt-1 max-w-sm text-xs text-slate-500 ">
-        {description}
-      </p>
+      <h4 className="mt-3 text-sm font-semibold text-slate-900 ">{title}</h4>
+      <p className="mt-1 max-w-sm text-xs text-slate-500 ">{description}</p>
 
       {onRetry && (
         <div className="mt-4">

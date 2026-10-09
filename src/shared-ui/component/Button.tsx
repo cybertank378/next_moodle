@@ -129,8 +129,7 @@ const colorMap: Record<
     outline:
       "border border-indigo-500 text-indigo-600  hover:bg-indigo-50  active:bg-indigo-100",
     text: "text-indigo-600  hover:bg-indigo-50  active:bg-indigo-100",
-    ghost:
-      "text-indigo-600  hover:bg-indigo-50  active:bg-indigo-100",
+    ghost: "text-indigo-600  hover:bg-indigo-50  active:bg-indigo-100",
   },
 
   secondary: {
@@ -141,32 +140,27 @@ const colorMap: Record<
     outline:
       "border border-slate-300  text-slate-700  hover:bg-slate-100  active:bg-slate-200",
     text: "text-slate-700  hover:bg-slate-100  active:bg-slate-200",
-    ghost:
-      "text-slate-700  hover:bg-slate-100  active:bg-slate-200",
+    ghost: "text-slate-700  hover:bg-slate-100  active:bg-slate-200",
   },
 
   error: {
     filled:
       "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus:ring-red-400",
-    label:
-      "bg-red-100  text-red-600  hover:bg-red-200  active:bg-red-300",
+    label: "bg-red-100  text-red-600  hover:bg-red-200  active:bg-red-300",
     outline:
       "border border-red-500 text-red-500 hover:bg-red-50  active:bg-red-100",
     text: "text-red-500 hover:bg-red-50  active:bg-red-100",
-    ghost:
-      "text-red-500 hover:bg-red-50  active:bg-red-100",
+    ghost: "text-red-500 hover:bg-red-50  active:bg-red-100",
   },
 
   danger: {
     filled:
       "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus:ring-red-400",
-    label:
-      "bg-red-100  text-red-600  hover:bg-red-200  active:bg-red-300",
+    label: "bg-red-100  text-red-600  hover:bg-red-200  active:bg-red-300",
     outline:
       "border border-red-500 text-red-500 hover:bg-red-50  active:bg-red-100",
     text: "text-red-500 hover:bg-red-50  active:bg-red-100",
-    ghost:
-      "text-red-500 hover:bg-red-50  active:bg-red-100",
+    ghost: "text-red-500 hover:bg-red-50  active:bg-red-100",
   },
 
   warning: {
@@ -177,20 +171,17 @@ const colorMap: Record<
     outline:
       "border border-yellow-500 text-yellow-600 hover:bg-yellow-50  active:bg-yellow-100",
     text: "text-yellow-600 hover:bg-yellow-50  active:bg-yellow-100",
-    ghost:
-      "text-yellow-600 hover:bg-yellow-50  active:bg-yellow-100",
+    ghost: "text-yellow-600 hover:bg-yellow-50  active:bg-yellow-100",
   },
 
   info: {
     filled:
       "bg-cyan-500 text-white hover:bg-cyan-600 active:bg-cyan-700 focus:ring-cyan-400",
-    label:
-      "bg-cyan-100  text-cyan-600  hover:bg-cyan-200  active:bg-cyan-300",
+    label: "bg-cyan-100  text-cyan-600  hover:bg-cyan-200  active:bg-cyan-300",
     outline:
       "border border-cyan-500 text-cyan-500 hover:bg-cyan-50  active:bg-cyan-100",
     text: "text-cyan-500 hover:bg-cyan-50  active:bg-cyan-100",
-    ghost:
-      "text-cyan-500 hover:bg-cyan-50  active:bg-cyan-100",
+    ghost: "text-cyan-500 hover:bg-cyan-50  active:bg-cyan-100",
   },
 
   success: {
@@ -201,8 +192,7 @@ const colorMap: Record<
     outline:
       "border border-green-500 text-green-500 hover:bg-green-50  active:bg-green-100",
     text: "text-green-500 hover:bg-green-50  active:bg-green-100",
-    ghost:
-      "text-green-500 hover:bg-green-50  active:bg-green-100",
+    ghost: "text-green-500 hover:bg-green-50  active:bg-green-100",
   },
 };
 

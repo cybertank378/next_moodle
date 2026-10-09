@@ -2,6 +2,8 @@
 
 import { Eye, User } from "lucide-react";
 import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
+import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
+import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
 import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import {
@@ -12,8 +14,6 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
-import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
 
 export interface CourseGradesTableProps {
   reports: UserGradeReportResponseDto[];

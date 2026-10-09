@@ -3,8 +3,8 @@
 import { useCallback, useState } from "react";
 import { request } from "@/libs/apiClient";
 import type {
-  ExamMonitorResponseDto,
   ExamMonitorActionRequestDto,
+  ExamMonitorResponseDto,
   ExtendAttemptTimeRequestDto,
 } from "../../domain/dto/ExamMonitorDto";
 
@@ -25,7 +25,10 @@ export function useExamMonitorApi() {
 
   const fetchMonitor = useCallback(async (quizId: number) => {
     setMonitorState((prev) => ({ ...prev, loading: true, error: null }));
-    const res = await request<ExamMonitorResponseDto>(`/api/exam-monitor?quizId=${quizId}`, { method: "GET" });
+    const res = await request<ExamMonitorResponseDto>(
+      `/api/exam-monitor?quizId=${quizId}`,
+      { method: "GET" },
+    );
     if (res.error || !res.data) {
       setMonitorState((prev) => ({
         data: prev.data,
@@ -73,17 +76,20 @@ export function useExamMonitorApi() {
     }
   }, []);
 
-  const extendTimeAttempt = useCallback(async (req: { attemptId: number; extraTimeMinutes: number }) => {
-    setIsMutating(true);
-    const res = await request<void>("/api/exam-monitor/extend-time", {
-      method: "POST",
-      body: JSON.stringify(req),
-    });
-    setIsMutating(false);
-    if (res.error) {
-      throw new Error(res.error);
-    }
-  }, []);
+  const extendTimeAttempt = useCallback(
+    async (req: { attemptId: number; extraTimeMinutes: number }) => {
+      setIsMutating(true);
+      const res = await request<void>("/api/exam-monitor/extend-time", {
+        method: "POST",
+        body: JSON.stringify(req),
+      });
+      setIsMutating(false);
+      if (res.error) {
+        throw new Error(res.error);
+      }
+    },
+    [],
+  );
 
   return {
     monitorState,

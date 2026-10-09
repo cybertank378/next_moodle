@@ -5,8 +5,10 @@ import { SecurityError } from "@/core/errors/SecurityError";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { createLogger } from "@/core/logger/createLogger";
 import type { Logger } from "@/core/logger/Logger";
-import { SsrfValidator } from "@/core/security/SsrfValidator";
-import { buildCacheKey, type CacheAdapter } from "@/core/moodle/MoodleCacheAdapter";
+import {
+  buildCacheKey,
+  type CacheAdapter,
+} from "@/core/moodle/MoodleCacheAdapter";
 import { encodeMoodleParams } from "@/core/moodle/MoodleEncoder";
 import { MoodleErrorMapper } from "@/core/moodle/MoodleErrorMapper";
 import type {
@@ -14,6 +16,7 @@ import type {
   MoodleCredentials,
   MoodleRequestOptions,
 } from "@/core/moodle/types";
+import { SsrfValidator } from "@/core/security/SsrfValidator";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_RETRY_DELAY_MS = 100;

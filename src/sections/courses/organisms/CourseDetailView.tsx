@@ -105,7 +105,8 @@ export default function CourseDetailView({ courseId }: CourseDetailViewProps) {
             Belum ada konten mata pelajaran
           </h3>
           <p className="mt-1 text-xs text-slate-500  max-w-sm mx-auto">
-            Mata Pelajaran ini belum memiliki topik atau modul pembelajaran di Moodle.
+            Mata Pelajaran ini belum memiliki topik atau modul pembelajaran di
+            Moodle.
           </p>
         </div>
       )}
@@ -118,10 +119,7 @@ export default function CourseDetailView({ courseId }: CourseDetailViewProps) {
               className="rounded-xl border border-slate-200  bg-white  p-5 space-y-4 shadow-sm"
             >
               <div className="flex items-center gap-2 border-b border-slate-200  pb-3">
-                <Layers
-                  size={18}
-                  className="text-indigo-600 "
-                />
+                <Layers size={18} className="text-indigo-600 " />
                 <h3 className="text-base font-semibold text-slate-900 ">
                   {section.name || `Topik ${section.sectionNumber}`}
                 </h3>

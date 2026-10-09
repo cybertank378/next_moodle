@@ -7,7 +7,9 @@ export function parseGetExamMonitorQuery(searchParams: URLSearchParams) {
   }
   const quizId = Number(quizIdParam);
   if (!Number.isInteger(quizId) || quizId <= 0) {
-    throw new ValidationError("Parameter 'quizId' harus bilangan bulat positif.");
+    throw new ValidationError(
+      "Parameter 'quizId' harus bilangan bulat positif.",
+    );
   }
   return { quizId };
 }
@@ -18,7 +20,9 @@ export function parseExamMonitorActionBody(body: any) {
   }
   const attemptId = Number(body.attemptId);
   if (!Number.isInteger(attemptId) || attemptId <= 0) {
-    throw new ValidationError("Parameter 'attemptId' harus bilangan bulat positif.");
+    throw new ValidationError(
+      "Parameter 'attemptId' harus bilangan bulat positif.",
+    );
   }
   return { attemptId };
 }
@@ -27,7 +31,9 @@ export function parseExtendTimeBody(body: any) {
   const base = parseExamMonitorActionBody(body);
   const extraTimeMinutes = Number(body.extraTimeMinutes);
   if (!Number.isInteger(extraTimeMinutes) || extraTimeMinutes <= 0) {
-    throw new ValidationError("Parameter 'extraTimeMinutes' harus bilangan bulat positif.");
+    throw new ValidationError(
+      "Parameter 'extraTimeMinutes' harus bilangan bulat positif.",
+    );
   }
   return { attemptId: base.attemptId, extraTimeMinutes };
 }

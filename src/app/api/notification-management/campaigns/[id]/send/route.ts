@@ -1,12 +1,18 @@
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 // Files: src/app/api/notification-management/campaigns/[id]/send/route.ts
 import "server-only";
 
 import { createNotificationManagementController } from "@/app/api/notification-management/_factory";
 
-export async function POST(
+async function originalPOST(
   req: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await context.params;
   return createNotificationManagementController().sendCampaign(req, id);
 }
+
+export const POST = withAuditedMutation(
+  originalPOST,
+  "notification-management/campaigns/:id/send",
+);

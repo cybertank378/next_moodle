@@ -3,9 +3,9 @@
 import { BellOff } from "lucide-react";
 import type { NotificationResponseDto } from "@/modules/notification/domain/dto/NotificationResponseDto";
 import type { NotificationTab } from "@/modules/notification/domain/types/NotificationTypes";
+import NotificationItem from "@/sections/notification/atoms/NotificationItem";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import NotificationItem from "@/sections/notification/atoms/NotificationItem";
 
 interface NotificationListProps {
   items: NotificationResponseDto[];
@@ -39,7 +39,6 @@ export default function NotificationList({
       </div>
     );
   }
-
 
   if (items.length === 0) {
     return (

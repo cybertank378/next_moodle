@@ -131,9 +131,7 @@ describe("QuizAttemptController", () => {
       execute: vi
         .fn()
         .mockRejectedValue(
-          new AuthorizationError(
-            "Akses ditolak: bukan attempt milik siswa",
-          ),
+          new AuthorizationError("Akses ditolak: bukan attempt milik siswa"),
         ),
     } as unknown as SaveQuizAnswerUseCase;
 

@@ -1,3 +1,4 @@
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 import "server-only";
 
 import type { NextRequest, NextResponse } from "next/server";
@@ -12,9 +13,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     : unauthorizedResponse();
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+async function originalPOST(req: NextRequest): Promise<NextResponse> {
   const actor = await getCurrentUser();
   return actor
     ? getTenantsController().create(actor, req)
     : unauthorizedResponse();
 }
+
+export const POST = withAuditedMutation(originalPOST, "tenant");
