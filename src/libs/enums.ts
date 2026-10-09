@@ -17,6 +17,7 @@ export enum Role {
   ADMIN = "ADMIN",
   TENANT = "TENANT",
   STUDENT = "STUDENT",
+  TEACHER = "TEACHER",
 }
 
-export type UserRole = "ADMIN" | "TENANT" | "STUDENT";
+export type UserRole = "ADMIN" | "TENANT" | "STUDENT" | "TEACHER";

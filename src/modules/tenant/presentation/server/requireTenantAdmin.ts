@@ -15,7 +15,7 @@ export async function requireTenantAdmin(): Promise<void> {
   }
 
   if (actor.role !== AppRole.ADMIN) {
-    redirect(ROUTES.DASHBOARD.ROOT);
+    redirect(ROUTES.HOME);
   }
 
   requirePermission(

@@ -69,11 +69,11 @@ const sizeMap: Record<Size, string> = {
 };
 
 const variantMap: Record<Variant, string> = {
-  outlined: "border bg-white",
+  outlined: "border border-gray-300  bg-white ",
 
-  filled: "bg-gray-100 border border-transparent",
+  filled: "bg-gray-100  border border-transparent",
 
-  custom: "border rounded-xl bg-white",
+  custom: "border border-gray-300  rounded-xl bg-white ",
 };
 
 const TextField = forwardRef<HTMLInputElement, Props>(
@@ -210,29 +210,29 @@ const TextField = forwardRef<HTMLInputElement, Props>(
             className={clsx(
               "w-full rounded-lg outline-none transition-all",
 
-              "text-gray-800",
+              "text-gray-800 ",
 
-              "placeholder:text-gray-600",
+              "placeholder:text-gray-400 ",
 
               sizeMap[size],
 
               variantMap[variant],
 
-              finalError && "border-red-500 focus:ring-2 focus:ring-red-200",
+              finalError && "border-red-500 focus:ring-2 focus:ring-red-200 ",
 
               success &&
                 !finalError &&
-                "border-green-500 focus:ring-2 focus:ring-green-200",
+                "border-green-500 focus:ring-2 focus:ring-green-200 ",
 
               !finalError &&
                 !success &&
-                "border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200",
+                "border-gray-300  focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 ",
 
               LeftIcon && "pl-9",
 
               (RightIcon || (enablePasswordToggle && isPassword)) && "pr-9",
 
-              disabled && "bg-gray-100 text-gray-400 cursor-not-allowed",
+              disabled && "bg-gray-100  text-gray-400  cursor-not-allowed",
 
               className,
             )}
@@ -244,9 +244,12 @@ const TextField = forwardRef<HTMLInputElement, Props>(
           {enablePasswordToggle && isPassword && (
             <button
               type="button"
+              aria-label={
+                showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+              }
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 text-gray-400 hover:text-gray-600 cursor-pointer"
-              tabIndex={-1}
+              className="absolute right-1 text-gray-400 hover:text-gray-600 cursor-pointer min-w-11 min-h-11 flex items-center justify-center"
+              tabIndex={0}
             >
               <ToggleIcon size={18} />
             </button>
@@ -258,7 +261,7 @@ const TextField = forwardRef<HTMLInputElement, Props>(
             <button
               type="button"
               onClick={onRightIconClick}
-              className="absolute right-3 text-gray-400 hover:text-gray-600 cursor-pointer"
+              className="absolute right-3 text-gray-400 hover:text-gray-600   cursor-pointer"
               tabIndex={-1}
             >
               <RightIcon size={16} />

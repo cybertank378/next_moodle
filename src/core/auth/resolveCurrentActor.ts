@@ -1,29 +1,23 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { EncryptedCookieSessionManager } from "@/modules/auth/infrastructure/providers/EncryptedCookieSessionManager";
-import type { CurrentActor } from "./CurrentActor";
-import type { SessionRepository } from "./SessionRepository";
+import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
+import { cookies } from "next/headers";
+import type { CurrentActor } from "@/core/auth/CurrentActor";
+import type { SessionRepository } from "@/core/auth/SessionRepository";
+import { getAuthRepository } from "@/app/api/auth/_factory";
 
-function extractTokenFromRequest(request: Request): string | null {
+export async function extractTokenFromRequest(request: Request): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.substring("Bearer ".length).trim();
     if (token) return token;
   }
 
-  const cookieHeader = request.headers.get("cookie");
-  if (cookieHeader) {
-    const cookies = cookieHeader.split(";").map((c) => c.trim());
-    for (const cookie of cookies) {
-      if (cookie.startsWith("session_token=")) {
-        const token = cookie.substring("session_token=".length).trim();
-        if (token) return token;
-      }
-      if (cookie.startsWith("auth_token=")) {
-        const token = cookie.substring("auth_token=".length).trim();
-        if (token) return token;
-      }
-    }
-  }
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session_token")?.value;
+  if (sessionToken) return sessionToken;
+
+  const authToken = cookieStore.get("auth_token")?.value;
+  if (authToken) return authToken;
 
   return null;
 }
@@ -32,15 +26,14 @@ export async function resolveCurrentActor(
   request: Request,
   sessionRepository?: SessionRepository,
 ): Promise<CurrentActor> {
-  const token = extractTokenFromRequest(request);
+  const token = await extractTokenFromRequest(request);
 
   if (!token) {
     throw new UnauthorizedError("Authentication token is missing");
   }
 
   if (!sessionRepository) {
-    return (await new EncryptedCookieSessionManager().resolveSession(token))
-      .actor;
+    return (await getAuthRepository().resolveSession(token)).actor;
   }
 
   const session = await sessionRepository.findByToken(token);

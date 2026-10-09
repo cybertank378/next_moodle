@@ -8,6 +8,16 @@ export const Permission = {
   TENANT_CONNECTION_TEST: "tenant.connection.test",
   PLATFORM_AUDIT_READ: "platform.audit.read",
 
+  // NOTIFICATION MANAGEMENT
+  NOTIFICATION_MANAGE: "notification.manage",
+  NOTIFICATION_CAMPAIGN_CREATE: "notification.campaign.create",
+  NOTIFICATION_CAMPAIGN_READ: "notification.campaign.read",
+  NOTIFICATION_CAMPAIGN_UPDATE: "notification.campaign.update",
+  NOTIFICATION_CAMPAIGN_SEND: "notification.campaign.send",
+  NOTIFICATION_CAMPAIGN_CANCEL: "notification.campaign.cancel",
+  NOTIFICATION_CAMPAIGN_ARCHIVE: "notification.campaign.archive",
+  NOTIFICATION_REPORT_READ: "notification.report.read",
+
   // TENANT
   TENANT_DASHBOARD_READ: "tenant.dashboard.read",
   TENANT_BRANDING_READ: "tenant.branding.read",
@@ -45,6 +55,12 @@ export const Permission = {
   ATTEMPT_SUBMIT_OWN: "attempt.submit.own",
   ATTEMPT_REVIEW_OWN: "attempt.review.own",
   GRADE_READ_OWN: "grade.read.own",
+
+  // TEACHER
+  TEACHER_DASHBOARD_READ: "teacher.dashboard.read",
+  TEACHER_COURSE_READ: "teacher.course.read",
+  TEACHER_QUIZ_READ: "teacher.quiz.read",
+  TEACHER_GRADE_READ: "teacher.grade.read",
 } as const;
 
 export type PermissionType = (typeof Permission)[keyof typeof Permission];

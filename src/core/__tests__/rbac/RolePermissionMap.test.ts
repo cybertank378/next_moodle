@@ -107,6 +107,9 @@ describe("RolePermissionMap & hasPermission", () => {
       expect(
         hasPermission(AppRole.STUDENT, Permission.EXAM_MONITOR_ACTION),
       ).toBe(false);
+      expect(hasPermission(AppRole.STUDENT, Permission.EXAM_MONITOR_READ)).toBe(
+        false,
+      );
       expect(hasPermission(AppRole.STUDENT, Permission.TENANT_CREATE)).toBe(
         false,
       );
@@ -114,10 +117,95 @@ describe("RolePermissionMap & hasPermission", () => {
   });
 
   describe("RolePermissionMap structure", () => {
-    it("should define permission arrays for all roles", () => {
+    it("should define permission arrays for all 4 roles", () => {
       expect(Array.isArray(RolePermissionMap[AppRole.ADMIN])).toBe(true);
       expect(Array.isArray(RolePermissionMap[AppRole.TENANT])).toBe(true);
       expect(Array.isArray(RolePermissionMap[AppRole.STUDENT])).toBe(true);
+      expect(Array.isArray(RolePermissionMap[AppRole.TEACHER])).toBe(true);
+    });
+  });
+
+  describe("TEACHER permissions", () => {
+    it("should allow all TENANT capabilities except user management", () => {
+      // Teacher-specific
+      expect(
+        hasPermission(AppRole.TEACHER, Permission.TEACHER_DASHBOARD_READ),
+      ).toBe(true);
+      expect(
+        hasPermission(AppRole.TEACHER, Permission.TEACHER_COURSE_READ),
+      ).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.TEACHER_QUIZ_READ)).toBe(
+        true,
+      );
+      expect(
+        hasPermission(AppRole.TEACHER, Permission.TEACHER_GRADE_READ),
+      ).toBe(true);
+      // Shared with TENANT
+      expect(hasPermission(AppRole.TEACHER, Permission.COURSE_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.QUIZ_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_READ)).toBe(
+        true,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_CREATE)).toBe(
+        true,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_UPDATE)).toBe(
+        true,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.QUESTION_DELETE)).toBe(
+        true,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_CREATE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_UPDATE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_DELETE)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.EXAM_MONITOR_READ)).toBe(
+        true,
+      );
+      expect(
+        hasPermission(AppRole.TEACHER, Permission.EXAM_MONITOR_ACTION),
+      ).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.GRADE_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.ENROLMENT_READ)).toBe(
+        true,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.ENROLMENT_MANAGE)).toBe(
+        true,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.GROUP_READ)).toBe(true);
+      expect(hasPermission(AppRole.TEACHER, Permission.GROUP_MANAGE)).toBe(
+        true,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.TENANT_AUDIT_READ)).toBe(
+        true,
+      );
+    });
+
+    it("should deny user management (the only exclusion from TENANT)", () => {
+      expect(hasPermission(AppRole.TEACHER, Permission.USER_READ)).toBe(false);
+      expect(hasPermission(AppRole.TEACHER, Permission.USER_CREATE)).toBe(
+        false,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.USER_UPDATE)).toBe(
+        false,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.USER_DEACTIVATE)).toBe(
+        false,
+      );
+      expect(hasPermission(AppRole.TEACHER, Permission.USER_IMPORT)).toBe(
+        false,
+      );
+    });
+
+    it("should deny platform-level admin permissions", () => {
+      expect(hasPermission(AppRole.TEACHER, Permission.TENANT_CREATE)).toBe(
+        false,
+      );
+      expect(
+        hasPermission(AppRole.TEACHER, Permission.PLATFORM_AUDIT_READ),
+      ).toBe(false);
+      expect(hasPermission(AppRole.TEACHER, Permission.ATTEMPT_START)).toBe(
+        false,
+      );
     });
   });
 });

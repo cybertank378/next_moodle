@@ -1,13 +1,21 @@
+import { redirect } from "next/navigation";
+import { ROUTES } from "@/libs/routes";
+import { resolveUserRole } from "@/libs/utils";
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import ResultsPageView from "@/sections/results/pages/ResultsPageView";
 
 export default async function ResultsPage() {
-  await requireDashboardRoles(["TENANT", "STUDENT"]);
+  const actor = await requireDashboardRoles([
+    "ADMIN",
+    "TENANT",
+    "TEACHER",
+    "STUDENT",
+  ]);
+  const role = resolveUserRole(actor?.role);
 
-  return (
-    <DashboardRoutePlaceholder
-      title="Hasil & Nilai"
-      description="Route daftar hasil ujian."
-    />
-  );
+  if (!role) {
+    redirect(ROUTES.AUTH.LOGIN);
+  }
+
+  return <ResultsPageView userRole={role} />;
 }

@@ -1,5 +1,5 @@
-import LoginPageSection from "@/sections/auth/pages/LoginPageSection";
+import AuthSection from "@/sections/auth/pages/AuthPage";
 
 export default function LoginPage() {
-  return <LoginPageSection />;
+  return <AuthSection mode="login" />;
 }

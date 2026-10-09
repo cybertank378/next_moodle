@@ -1,7 +1,7 @@
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { AppRole } from "./AppRole";
-import type { AuthorizationActor } from "./AuthorizationContext";
-import { AuthorizationError } from "./AuthorizationError";
+import { AppRole } from "@/core/rbac/AppRole";
+import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { AuthorizationError } from "@/core/rbac/AuthorizationError";
 
 export function requireRole(
   actor: AuthorizationActor | null | undefined,
@@ -20,7 +20,11 @@ export function requireRole(
     );
   }
 
-  if (expectedRole === AppRole.TENANT || expectedRole === AppRole.STUDENT) {
+  if (
+    expectedRole === AppRole.TENANT ||
+    expectedRole === AppRole.STUDENT ||
+    expectedRole === AppRole.TEACHER
+  ) {
     if (!actor.tenantId || actor.tenantId.trim().length === 0) {
       throw new AuthorizationError(
         `Konteks tenant wajib ada untuk role '${expectedRole}'.`,

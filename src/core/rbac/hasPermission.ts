@@ -1,6 +1,6 @@
-import type { AppRole } from "./AppRole";
-import type { PermissionType } from "./Permission";
-import { RolePermissionMap } from "./RolePermissionMap";
+import type { AppRole } from "@/core/rbac/AppRole";
+import type { PermissionType } from "@/core/rbac/Permission";
+import { RolePermissionMap } from "@/core/rbac/RolePermissionMap";
 
 export function hasPermission(
   role: AppRole,

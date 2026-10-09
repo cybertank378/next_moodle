@@ -1,4 +1,4 @@
-import type { CurrentActor } from "./CurrentActor";
+import type { CurrentActor } from "@/core/auth/CurrentActor";
 
 export interface Session {
   id: string;

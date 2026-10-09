@@ -33,9 +33,11 @@ const sizeMap: Record<Size, string> = {
 };
 
 const variantMap: Record<Variant, string> = {
-  outlined: "border bg-white",
-  filled: "border border-transparent bg-gray-100",
-  custom: "rounded-xl border bg-white",
+  outlined:
+    "border border-gray-300  bg-white ",
+  filled: "border border-transparent bg-gray-100 ",
+  custom:
+    "rounded-xl border border-gray-300  bg-white ",
 };
 
 const SelectField = forwardRef<HTMLSelectElement, Props>(
@@ -77,17 +79,19 @@ const SelectField = forwardRef<HTMLSelectElement, Props>(
             data-field={name}
             disabled={disabled}
             className={clsx(
-              "w-full appearance-none rounded-lg pr-10 text-gray-800 outline-none transition-all",
+              "w-full appearance-none rounded-lg pr-10 text-gray-800  outline-none transition-all",
               sizeMap[size],
               variantMap[variant],
-              finalError && "border-red-500 focus:ring-2 focus:ring-red-200",
+              finalError &&
+                "border-red-500 focus:ring-2 focus:ring-red-200 ",
               success &&
                 !finalError &&
-                "border-green-500 focus:ring-2 focus:ring-green-200",
+                "border-green-500 focus:ring-2 focus:ring-green-200 ",
               !finalError &&
                 !success &&
-                "border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200",
-              disabled && "cursor-not-allowed bg-gray-100 text-gray-400",
+                "border-gray-300  focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 ",
+              disabled &&
+                "cursor-not-allowed bg-gray-100  text-gray-400 ",
               className,
             )}
             {...props}
@@ -95,7 +99,7 @@ const SelectField = forwardRef<HTMLSelectElement, Props>(
             {children}
           </select>
 
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500 ">
             <ChevronDown size={16} />
           </div>
         </div>

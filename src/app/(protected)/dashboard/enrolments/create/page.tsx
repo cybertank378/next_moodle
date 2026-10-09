@@ -3,11 +3,10 @@ import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlace
 
 export default async function CreateEnrolmentPage() {
   await requireDashboardRoles(["TENANT"]);
-
   return (
     <DashboardRoutePlaceholder
       title="Tambah Enrolment"
-      description="Route pembuatan enrolment."
+      description="Daftarkan pengguna ke course."
     />
   );
 }

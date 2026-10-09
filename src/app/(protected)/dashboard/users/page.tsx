@@ -1,13 +1,7 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import UsersPageView from "@/sections/users/pages/UsersPageView";
 
 export default async function UsersPage() {
-  await requireDashboardRoles(["TENANT"]);
-
-  return (
-    <DashboardRoutePlaceholder
-      title="Pengguna"
-      description="Route daftar pengguna."
-    />
-  );
+  await requireDashboardRoles(["ADMIN", "TENANT"]);
+  return <UsersPageView />;
 }

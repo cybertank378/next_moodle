@@ -23,17 +23,20 @@ export interface MoodleSiteInfo {
 export interface MoodleLoginResult {
   readonly token: string;
   readonly siteInfo: MoodleSiteInfo;
+  readonly serviceUsed: string;
+  readonly capabilities?: any;
 }
 
 export interface TenantAuthResolver {
   resolveLoginTenant(identifier: string): Promise<LoginTenant>;
 }
 
-export interface MoodleAuthProvider {
+export interface IMoodleClient {
   authenticateStudent(input: {
     readonly tenant: LoginTenant;
     readonly username: string;
     readonly password: string;
+    readonly service?: string;
   }): Promise<MoodleLoginResult>;
 }
 
@@ -47,7 +50,7 @@ export interface CreatedAppSession {
   readonly expiresAt: Date;
 }
 
-export interface AuthSessionManager {
+export interface IAuthRepository {
   createSession(payload: AppSessionPayload): Promise<CreatedAppSession>;
   resolveSession(cookieValue: string): Promise<AppSessionPayload>;
   refreshSession(cookieValue: string): Promise<CreatedAppSession>;

@@ -13,5 +13,6 @@ export function validateLoginRequest(input: LoginRequestDto): LoginRequestDto {
     tenant,
     username,
     password: input.password,
+    service: input.service,
   };
 }

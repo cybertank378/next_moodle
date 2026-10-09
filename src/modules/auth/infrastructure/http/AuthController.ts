@@ -21,6 +21,19 @@ export interface AuthControllerDependencies {
 
 const SESSION_COOKIE = "session_token";
 
+function tenantIdentifierFromRequest(req: Request): string {
+  const hostHeader = req.headers.get("host");
+  const hostname = hostHeader
+    ? hostHeader.split(":")[0].trim()
+    : new URL(req.url).hostname;
+
+  if (!hostname) {
+    throw new UnauthorizedError("Tenant tidak dapat ditentukan dari domain.");
+  }
+
+  return hostname;
+}
+
 function respond(response: ApiResponse): NextResponse {
   return NextResponse.json(response.body, { status: response.status });
 }
@@ -45,28 +58,36 @@ function readSessionCookie(req: Request): string {
 }
 
 function setSessionCookie(
+  req: Request,
   response: NextResponse,
   value: string,
   expiresAt: Date,
 ): void {
+  const isHttps =
+    req.headers.get("x-forwarded-proto") === "https" ||
+    new URL(req.url).protocol === "https:";
+
   response.cookies.set({
     name: SESSION_COOKIE,
     value,
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps || process.env.NODE_ENV === "production",
     path: "/",
     expires: expiresAt,
   });
 }
 
-function clearSessionCookie(response: NextResponse): void {
+function clearSessionCookie(req: Request, response: NextResponse): void {
+  const isHttps =
+    req.headers.get("x-forwarded-proto") === "https" ||
+    new URL(req.url).protocol === "https:";
   response.cookies.set({
     name: SESSION_COOKIE,
     value: "",
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps || process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 0,
   });
@@ -77,9 +98,13 @@ export class AuthController {
 
   async login(req: Request): Promise<NextResponse> {
     try {
-      const result = await this.deps.login.execute(
-        parseLoginBody(await parseJson(req)),
-      );
+      const result = await this.deps.login.execute({
+        ...parseLoginBody(await parseJson(req)),
+        tenant: tenantIdentifierFromRequest(req),
+      });
+
+      console.log(`[AUTH] User '${result.actor.username}' logged in successfully as role: ${result.actor.role}`);
+
       const response = respond(
         ApiResponse.success(
           {
@@ -91,6 +116,7 @@ export class AuthController {
         ),
       );
       setSessionCookie(
+        req,
         response,
         result.sessionCookie.value,
         result.sessionCookie.expiresAt,
@@ -120,7 +146,7 @@ export class AuthController {
       const response = respond(
         ApiResponse.success({ expiresAt: session.expiresAt.toISOString() }),
       );
-      setSessionCookie(response, session.cookieValue, session.expiresAt);
+      setSessionCookie(req, response, session.cookieValue, session.expiresAt);
       return response;
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
@@ -131,7 +157,7 @@ export class AuthController {
     try {
       await this.deps.logout.execute(readSessionCookie(req));
       const response = respond(ApiResponse.success({ loggedOut: true }));
-      clearSessionCookie(response);
+      clearSessionCookie(req, response);
       return response;
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
@@ -147,7 +173,7 @@ export class AuthController {
         session.actor.id || session.actor.userId,
       );
       const response = respond(ApiResponse.success({ loggedOut: true }));
-      clearSessionCookie(response);
+      clearSessionCookie(req, response);
       return response;
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));

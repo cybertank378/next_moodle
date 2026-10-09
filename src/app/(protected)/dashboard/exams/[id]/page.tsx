@@ -1,13 +1,12 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import QuizDetailView from "@/sections/exam/organisms/QuizDetailView";
 
-export default async function ExamDetailPage() {
-  await requireDashboardRoles(["TENANT", "STUDENT"]);
+interface ExamDetailPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  return (
-    <DashboardRoutePlaceholder
-      title="Detail Ujian"
-      description="Route detail ujian."
-    />
-  );
+export default async function ExamDetailPage({ params }: ExamDetailPageProps) {
+  await requireDashboardRoles(["TENANT", "TEACHER", "STUDENT"]);
+  const { id } = await params;
+  return <QuizDetailView quizId={Number(id) || 0} />;
 }

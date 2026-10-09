@@ -13,7 +13,9 @@
       "!.next",
       "!dist",
       "!build",
-      "!coverage"
+      "!coverage",
+      "!.worktrees",
+      "!.kilo"
     ]
   },
   "formatter": {

@@ -23,6 +23,9 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     expect(exists("src/app/layout.tsx")).toBe(true);
     expect(exists("src/app/page.tsx")).toBe(true);
     expect(exists("src/app/favicon.ico")).toBe(true);
+    expect(exists("src/app/icon.png")).toBe(true);
+    expect(exists("src/app/apple-icon.png")).toBe(true);
+    expect(exists("src/app/manifest.ts")).toBe(true);
   });
 
   it("has one public and one protected UI route group", () => {
@@ -47,6 +50,7 @@ describe("Architecture Guard: consolidated App Router structure", () => {
       "src/app/(protected)/dashboard/component/AdminDashboard.tsx",
       "src/app/(protected)/dashboard/component/TenantDashboard.tsx",
       "src/app/(protected)/dashboard/component/StudentDashboard.tsx",
+      "src/app/(protected)/dashboard/component/TeacherDashboard.tsx",
     ]) {
       expect(exists(file), `Dashboard file missing: ${file}`).toBe(true);
     }
@@ -87,6 +91,14 @@ describe("Architecture Guard: consolidated App Router structure", () => {
       "src/app/(protected)/dashboard/branding/page.tsx",
       "src/app/(protected)/dashboard/audit/page.tsx",
       "src/app/(protected)/dashboard/settings/page.tsx",
+      "src/app/(protected)/dashboard/notifications/page.tsx",
+      "src/app/(protected)/dashboard/proctor/page.tsx",
+      "src/app/(protected)/dashboard/assignments/page.tsx",
+      "src/app/(protected)/dashboard/calendar/page.tsx",
+      "src/app/(protected)/dashboard/schedule/page.tsx",
+      "src/app/(protected)/dashboard/announcements/page.tsx",
+      "src/app/(protected)/dashboard/activities/page.tsx",
+      "src/app/(protected)/dashboard/profile/page.tsx",
     ];
 
     for (const page of pages) {
@@ -100,15 +112,16 @@ describe("Architecture Guard: consolidated App Router structure", () => {
     const appRoot = path.resolve(process.cwd(), "src/app");
     const entries = fs.readdirSync(appRoot, { withFileTypes: true });
 
-    const allowedDirectories = new Set([
-      "(protected)",
-      "(public)",
-      "api",
-    ]);
+    const allowedDirectories = new Set(["(protected)", "(public)", "api"]);
 
     const allowedFiles = new Set([
+      "apple-icon.png",
       "favicon.ico",
+      "icon.png",
+      "icon0.svg",
+      "icon1.png",
       "layout.tsx",
+      "manifest.ts",
       "page.tsx",
     ]);
 
@@ -141,7 +154,7 @@ describe("Architecture Guard: consolidated App Router structure", () => {
 
   it("keeps internal API routes outside the UI route consolidation", () => {
     expect(exists("src/app/api")).toBe(true);
-    expect(exists("src/app/api/tenants/route.ts")).toBe(true);
+    expect(exists("src/app/api/tenant/route.ts")).toBe(true);
   });
 
   it("removes obsolete route-group gitkeep placeholders", () => {

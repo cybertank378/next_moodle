@@ -26,6 +26,12 @@ describe("requireRole & requirePermission", () => {
     tenantId: "tenant-123",
   };
 
+  const teacherActor: AuthorizationActor = {
+    id: "teacher-1",
+    role: AppRole.TEACHER,
+    tenantId: "tenant-123",
+  };
+
   describe("requireRole", () => {
     it("should throw UnauthorizedError when actor is not provided", () => {
       expect(() => requireRole(null, AppRole.ADMIN)).toThrowError(
@@ -54,15 +60,27 @@ describe("requireRole & requirePermission", () => {
       expect(requireRole(studentActor, AppRole.STUDENT)).toEqual(studentActor);
     });
 
-    it("should throw AuthorizationError if TENANT or STUDENT has no tenantId", () => {
+    it("should throw AuthorizationError if TENANT, STUDENT, or TEACHER has no tenantId", () => {
       const invalidTenant: AuthorizationActor = {
         id: "t-2",
         role: AppRole.TENANT,
         tenantId: null,
       };
+      const invalidTeacher: AuthorizationActor = {
+        id: "tc-2",
+        role: AppRole.TEACHER,
+        tenantId: null,
+      };
       expect(() => requireRole(invalidTenant, AppRole.TENANT)).toThrowError(
         AuthorizationError,
       );
+      expect(() => requireRole(invalidTeacher, AppRole.TEACHER)).toThrowError(
+        AuthorizationError,
+      );
+    });
+
+    it("should succeed for TEACHER actor with valid tenantId", () => {
+      expect(requireRole(teacherActor, AppRole.TEACHER)).toEqual(teacherActor);
     });
   });
 

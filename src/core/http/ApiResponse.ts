@@ -1,5 +1,5 @@
-import type { ApiErrorDetail, ApiErrorResponseBody } from "./ApiErrorResponse";
-import { HttpStatus, type HttpStatusCode } from "./HttpStatus";
+import type { ApiErrorDetail, ApiErrorResponseBody } from "@/core/http/ApiErrorResponse";
+import { HttpStatus, type HttpStatusCode } from "@/core/http/HttpStatus";
 
 export type { ApiErrorDetail, ApiErrorResponseBody };
 

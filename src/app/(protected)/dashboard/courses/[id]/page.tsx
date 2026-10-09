@@ -1,13 +1,14 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import CourseDetailView from "@/sections/courses/organisms/CourseDetailView";
 
-export default async function CourseDetailPage() {
-  await requireDashboardRoles(["TENANT", "STUDENT"]);
+interface CourseDetailPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  return (
-    <DashboardRoutePlaceholder
-      title="Detail Course"
-      description="Route detail mata pelajaran/kursus."
-    />
-  );
+export default async function CourseDetailPage({
+  params,
+}: CourseDetailPageProps) {
+  await requireDashboardRoles(["TENANT", "TEACHER", "STUDENT"]);
+  const { id } = await params;
+  return <CourseDetailView courseId={Number(id) || 0} />;
 }

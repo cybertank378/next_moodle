@@ -6,19 +6,59 @@ import type {
   MoodleSiteInfo,
 } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
-export function mapMoodleStudentToActor(
+export function mapMoodleUserToActor(
   tenant: LoginTenant,
   siteInfo: MoodleSiteInfo,
+  serviceUsed: string,
+  capabilities?: Record<string, unknown> | null,
 ): CurrentActor {
   const id = `moodle:${tenant.tenantId}:${siteInfo.userId}`;
+
+  const usernameLower = siteInfo.username.toLowerCase();
+  const isTeacherUsername =
+    usernameLower.startsWith("teacher") ||
+    usernameLower.startsWith("guru") ||
+    usernameLower.startsWith("pengajar") ||
+    usernameLower.includes("teacher");
+
+  const hasStaffCapabilities = Boolean(
+    capabilities &&
+      (capabilities.can_manage ||
+        capabilities.can_manage_questions ||
+        capabilities.can_manage_quizzes ||
+        capabilities.can_view_reports ||
+        capabilities.can_monitor ||
+        capabilities.can_manage_attempts ||
+        capabilities.can_manage_incidents),
+  );
+
+  let role = AppRole.STUDENT;
+  if (serviceUsed === "nextjs_admin") {
+    if (usernameLower === "admin") {
+      role = AppRole.ADMIN;
+    } else if (isTeacherUsername || hasStaffCapabilities) {
+      role = AppRole.TEACHER;
+    } else {
+      role = AppRole.ADMIN;
+    }
+  } else if (
+    serviceUsed === "nextjs_tenant" ||
+    serviceUsed === "nextjs_proctor"
+  ) {
+    role = AppRole.TENANT;
+  } else if (isTeacherUsername || hasStaffCapabilities) {
+    // Teacher using student service token — promote to TEACHER
+    role = AppRole.TEACHER;
+  }
+
   return {
     id,
     userId: id,
     username: siteInfo.username,
-    role: AppRole.STUDENT,
+    role,
     tenantId: tenant.tenantId,
     moodleUserId: siteInfo.userId,
-    permissions: RolePermissionMap[AppRole.STUDENT],
+    permissions: RolePermissionMap[role] || RolePermissionMap[AppRole.STUDENT],
     email: siteInfo.email,
     displayName: siteInfo.fullName,
   };

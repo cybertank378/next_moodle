@@ -3,11 +3,10 @@ import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlace
 
 export default async function BrandingPage() {
   await requireDashboardRoles(["TENANT"]);
-
   return (
     <DashboardRoutePlaceholder
       title="Branding"
-      description="Route pengaturan branding tenant."
+      description="Kelola identitas visual tenant."
     />
   );
 }

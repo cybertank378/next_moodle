@@ -2,12 +2,11 @@ import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRol
 import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
 
 export default async function QuestionDetailPage() {
-  await requireDashboardRoles(["TENANT"]);
-
+  await requireDashboardRoles(["TENANT", "TEACHER"]);
   return (
     <DashboardRoutePlaceholder
       title="Detail Soal"
-      description="Route detail soal."
+      description="Lihat detail soal Moodle."
     />
   );
 }

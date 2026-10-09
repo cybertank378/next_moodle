@@ -1,5 +1,5 @@
 import { requireTenantAdmin } from "@/modules/tenant/presentation/server/requireTenantAdmin";
-import TenantEditView from "@/sections/tenants/organisms/TenantEditView";
+import TenantEditView from "@/sections/tenant/organisms/TenantEditView";
 
 export default async function TenantEditPage() {
   await requireTenantAdmin();

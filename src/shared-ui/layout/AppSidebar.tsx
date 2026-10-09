@@ -5,18 +5,33 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Award,
+  Bell,
   BookOpen,
+  Calendar,
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
   FileText,
   GraduationCap,
   LayoutDashboard,
+  Megaphone,
   Palette,
   Settings,
   ShieldCheck,
+  User,
   Users,
+  X,
 } from "lucide-react";
-import { useState } from "react";
-import type { UserRole } from "@/libs/enums";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { APP_NAME } from "@/libs/branding";
+import { Role, type UserRole } from "@/libs/enums";
+import { PERMISSIONS } from "@/libs/permissions";
 import { ROUTES } from "@/libs/routes";
+import BrandLogo from "@/shared-ui/component/BrandLogo";
+import Button from "@/shared-ui/component/Button";
 import {
   RecursiveSidebarItem,
   type SidebarItem,
@@ -27,22 +42,43 @@ export interface SidebarGroup {
   items: SidebarItem[];
 }
 
+function getSidebarHome(role: UserRole): string {
+  switch (role) {
+    case Role.ADMIN:
+      return ROUTES.ADMIN.ROOT;
+    case Role.TENANT:
+      return ROUTES.TENANT.ROOT;
+    case Role.TEACHER:
+      return ROUTES.TEACHER.ROOT;
+    case Role.STUDENT:
+      return ROUTES.STUDENT.ROOT;
+    default:
+      return ROUTES.HOME;
+  }
+}
+
 export function getSidebarMenu(role: UserRole): SidebarGroup[] {
   switch (role) {
-    case "ADMIN":
+    case Role.ADMIN:
       return [
         {
           label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.DASHBOARD.ROOT,
+              path: ROUTES.ADMIN.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Manajemen Tenant",
-              path: ROUTES.DASHBOARD.TENANTS,
+              path: ROUTES.ADMIN.TENANTS,
               icon: Users,
+              permission: PERMISSIONS.TENANT_MANAGE,
+            },
+            {
+              label: "Pengelolaan Notifikasi",
+              path: ROUTES.ADMIN.NOTIFICATIONS,
+              icon: Bell,
             },
           ],
         },
@@ -51,76 +87,91 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Log Audit",
-              path: ROUTES.DASHBOARD.AUDIT,
+              path: ROUTES.ADMIN.AUDIT,
               icon: ShieldCheck,
             },
             {
               label: "Pengaturan",
-              path: ROUTES.DASHBOARD.SETTINGS,
+              path: ROUTES.ADMIN.SETTINGS,
               icon: Settings,
             },
           ],
         },
       ];
 
-    case "TENANT":
+    case Role.TENANT:
       return [
         {
           label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.DASHBOARD.ROOT,
+              path: ROUTES.TENANT.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Pengguna & Grup",
-              path: ROUTES.DASHBOARD.USERS,
+              path: ROUTES.TENANT.USERS,
               icon: Users,
+              permission: PERMISSIONS.USER_MANAGE,
               children: [
                 {
                   label: "Daftar Pengguna",
-                  path: ROUTES.DASHBOARD.USERS,
+                  path: ROUTES.TENANT.USERS,
+                  permission: PERMISSIONS.USER_MANAGE,
                 },
                 {
                   label: "Enrolment Manual",
-                  path: ROUTES.DASHBOARD.ENROLMENTS,
+                  path: ROUTES.TENANT.ENROLMENTS,
+                  permission: PERMISSIONS.USER_MANAGE,
                 },
                 {
                   label: "Rombel & Grup",
-                  path: ROUTES.DASHBOARD.GROUPS,
+                  path: ROUTES.TENANT.GROUPS,
+                  permission: PERMISSIONS.USER_MANAGE,
                 },
               ],
             },
             {
-              label: "Kursus & Bank Soal",
-              path: ROUTES.DASHBOARD.COURSES,
+              label: "Mata Pelajaran & Bank Soal",
+              path: ROUTES.TENANT.COURSES,
               icon: BookOpen,
+              permission: PERMISSIONS.EXAM_MANAGE,
               children: [
                 {
                   label: "Mata Pelajaran",
-                  path: ROUTES.DASHBOARD.COURSES,
+                  path: ROUTES.TENANT.COURSES,
+                  permission: PERMISSIONS.EXAM_MANAGE,
                 },
                 {
                   label: "Bank Soal",
-                  path: ROUTES.DASHBOARD.QUESTIONS,
+                  path: ROUTES.TENANT.QUESTIONS,
+                  permission: PERMISSIONS.EXAM_MANAGE,
                 },
               ],
             },
             {
               label: "Ujian & Hasil",
-              path: ROUTES.DASHBOARD.EXAMS,
+              path: ROUTES.TENANT.EXAMS,
               icon: FileText,
+              permission: PERMISSIONS.EXAM_MANAGE,
               children: [
                 {
                   label: "Jadwal Ujian",
-                  path: ROUTES.DASHBOARD.EXAMS,
+                  path: ROUTES.TENANT.EXAMS,
+                  permission: PERMISSIONS.EXAM_MANAGE,
                 },
                 {
                   label: "Hasil & Nilai",
-                  path: ROUTES.DASHBOARD.RESULTS,
+                  path: ROUTES.TENANT.RESULTS,
+                  permission: PERMISSIONS.RESULT_VIEW_ALL,
                 },
               ],
+            },
+            {
+              label: "Pengumuman",
+              path: ROUTES.TENANT.NOTIFICATIONS,
+              icon: Bell,
             },
           ],
         },
@@ -129,42 +180,124 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
           items: [
             {
               label: "Branding",
-              path: ROUTES.DASHBOARD.BRANDING,
+              path: ROUTES.TENANT.BRANDING,
               icon: Palette,
             },
             {
               label: "Log Audit",
-              path: ROUTES.DASHBOARD.AUDIT,
+              path: ROUTES.TENANT.AUDIT,
               icon: ShieldCheck,
             },
           ],
         },
       ];
 
-    case "STUDENT":
+    case Role.STUDENT:
       return [
         {
           label: "Menu Utama",
           items: [
             {
               label: "Dashboard",
-              path: ROUTES.DASHBOARD.ROOT,
+              path: ROUTES.STUDENT.ROOT,
               icon: LayoutDashboard,
             },
             {
               label: "Mata Pelajaran",
-              path: ROUTES.DASHBOARD.COURSES,
+              path: ROUTES.STUDENT.COURSES,
               icon: BookOpen,
             },
             {
               label: "Jadwal Ujian",
-              path: ROUTES.DASHBOARD.EXAMS,
+              path: ROUTES.STUDENT.EXAMS,
+              icon: FileText,
+              permission: PERMISSIONS.EXAM_TAKE,
+            },
+            {
+              label: "Tugas",
+              path: ROUTES.STUDENT.ASSIGNMENTS,
               icon: FileText,
             },
             {
+              label: "Kalender",
+              path: ROUTES.STUDENT.CALENDAR,
+              icon: Calendar,
+            },
+            {
+              label: "Jadwal Pelajaran",
+              path: ROUTES.STUDENT.SCHEDULE,
+              icon: CalendarDays,
+            },
+            {
               label: "Hasil & Nilai",
-              path: ROUTES.DASHBOARD.RESULTS,
+              path: ROUTES.STUDENT.RESULTS,
               icon: Award,
+              permission: PERMISSIONS.RESULT_VIEW_OWN,
+            },
+            {
+              label: "Pengumuman",
+              path: ROUTES.STUDENT.ANNOUNCEMENTS,
+              icon: Megaphone,
+            },
+            {
+              label: "Notifikasi",
+              path: ROUTES.STUDENT.NOTIFICATIONS,
+              icon: Bell,
+              // Ideally there would be a badge here, but we'll add it to the item type if needed
+            },
+            {
+              label: "Aktivitas Terbaru",
+              path: ROUTES.STUDENT.ACTIVITIES,
+              icon: Clock,
+            },
+          ],
+        },
+        {
+          label: "LAINNYA",
+          items: [
+            {
+              label: "Profil",
+              path: ROUTES.STUDENT.PROFILE,
+              icon: User,
+            },
+            {
+              label: "Pengaturan",
+              path: ROUTES.STUDENT.SETTINGS,
+              icon: Settings,
+            },
+          ],
+        },
+      ];
+
+    case Role.TEACHER:
+      return [
+        {
+          label: "Menu Utama",
+          items: [
+            {
+              label: "Dashboard Guru",
+              path: ROUTES.TEACHER.ROOT,
+              icon: LayoutDashboard,
+            },
+            {
+              label: "Mata Pelajaran",
+              path: ROUTES.TEACHER.COURSES,
+              icon: BookOpen,
+            },
+            {
+              label: "Bank Soal",
+              path: ROUTES.TEACHER.QUESTIONS,
+              icon: FileText,
+            },
+            {
+              label: "Hasil & Penilaian",
+              path: ROUTES.TEACHER.RESULTS,
+              icon: Award,
+            },
+            {
+              label: "Notifikasi",
+              path: ROUTES.TEACHER.NOTIFICATIONS,
+              icon: Bell,
             },
           ],
         },
@@ -177,55 +310,131 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
 
 interface Props {
   role: UserRole;
+  username?: string;
+  institutionName?: string;
   mobileOpen: boolean;
   onClose: () => void;
 }
 
-export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
+export default function AppSidebar({
+  role,
+  username,
+  institutionName,
+  mobileOpen,
+  onClose,
+}: Props) {
+  const router = useRouter();
   const groups = getSidebarMenu(role);
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const sidebarContent = (
-    <div className="flex h-screen w-72 flex-col bg-sky-950 text-slate-200">
-      <div className="border-b border-slate-700 px-5 py-5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-indigo-600 text-white shadow-md">
-            <GraduationCap size={28} />
-          </div>
+  const handleNavigateHome = () => {
+    router.push(getSidebarHome(role));
+  };
 
-          <div>
-            <h1 className="text-base font-bold tracking-wide text-white">
-              Exam SaaS
-            </h1>
-            <p className="mt-0.5 text-xs text-slate-400">
-              Platform Ujian Terpusat
-            </p>
-          </div>
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen, onClose]);
+
+  const renderSidebarContent = (collapsed: boolean) => (
+    <div
+      className={`flex h-screen flex-col bg-slate-900 text-slate-300 border-r border-slate-800 transition-all duration-300 ${
+        collapsed ? "w-20" : "w-72"
+      }`}
+    >
+      <div className="border-b border-slate-800 px-4 py-5">
+        <div
+          className={
+            collapsed
+              ? "flex flex-col items-center gap-3"
+              : "flex items-center justify-between gap-2"
+          }
+        >
+          <Button
+            variant="ghost"
+            aria-label={APP_NAME}
+            className="flex min-w-0 items-center p-0 h-auto bg-transparent hover:bg-transparent"
+            onClick={handleNavigateHome}
+          >
+            <BrandLogo
+              className={collapsed ? "h-10 w-10" : "h-10 w-auto max-w-44"}
+              decorative
+              preload
+              surfaceTone="dark"
+              variant={collapsed ? "mark" : "horizontal"}
+            />
+          </Button>
+
+          {/* Desktop collapse button */}
+          <button
+            type="button"
+            aria-label={collapsed ? "Perluas sidebar" : "Perkecil sidebar"}
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          >
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+
+          {/* Mobile close button */}
+          <button
+            type="button"
+            aria-label="Tutup menu sidebar"
+            onClick={onClose}
+            className="md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-sky-900/60 px-4 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow">
-            <LayoutDashboard size={18} />
-          </div>
+        {/* Role Identity Card */}
+        {!collapsed && role === Role.ADMIN && (
+          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-800/60 px-4 py-3 shadow-sm">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs uppercase shadow-sm">
+              AD
+            </div>
 
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
-              Role Aktif
-            </p>
-            <p className="text-sm font-semibold text-white">
-              {role.replaceAll("_", " ")}
-            </p>
+            <div className="overflow-hidden">
+              <p className="text-xs font-bold uppercase tracking-wider text-white">
+                ADMIN
+              </p>
+              <p className="text-[11px] font-medium text-slate-400 truncate">
+                Administrator Platform
+              </p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {!collapsed && role !== Role.ADMIN && role !== Role.STUDENT && (
+          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-800/50 px-4 py-3 shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-blue-400 border border-slate-700 shadow-md">
+              <LayoutDashboard size={18} />
+            </div>
+
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Role Aktif
+              </p>
+              <p className="text-sm font-semibold text-white">
+                {role.replaceAll("_", " ")}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto bg-sky-950 px-3 py-5">
+      <nav className="flex-1 overflow-y-auto bg-slate-900 px-3 py-5">
         <div className="space-y-7">
           {groups.map((group, index) => (
             <div key={`group-${group.label ?? index}`}>
-              {group.label && (
+              {group.label && !collapsed && (
                 <div className="mb-3 px-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                     {group.label}
                   </p>
                 </div>
@@ -251,19 +460,78 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
         </div>
       </nav>
 
-      <div className="border-t border-slate-700 bg-sky-950 px-5 py-4">
-        <div className="rounded-2xl px-4 py-2">
-          <p className="text-xs font-medium text-slate-400">
-            © {new Date().getFullYear()} Exam SaaS Moodle
-          </p>
-        </div>
+      <div className="border-t border-slate-800 bg-slate-900 px-4 py-4">
+        {role === Role.ADMIN ? (
+          <div className="space-y-3">
+            <div
+              className={`flex items-center ${
+                collapsed ? "justify-center" : "justify-between"
+              } rounded-2xl border border-slate-700/60 bg-slate-800/50 p-2.5 shadow-sm`}
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600/30 text-blue-400 border border-blue-500/30 font-bold text-xs">
+                  {username ? username.slice(0, 2).toUpperCase() : "AD"}
+                </div>
+                {!collapsed && (
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-white truncate">
+                      {username || "Administrator"}
+                    </p>
+                    <p className="text-[11px] font-medium text-slate-400 truncate">
+                      Administrator platform
+                    </p>
+                  </div>
+                )}
+              </div>
+              {!collapsed && (
+                <ChevronDown
+                  size={14}
+                  className="text-slate-400 shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+
+            {!collapsed && (
+              <div className="text-center">
+                <p className="text-[11px] font-medium text-slate-500">
+                  © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : role === Role.STUDENT ? (
+          <div className="flex items-center gap-3 rounded-2xl bg-slate-800/50 p-3 shadow-sm border border-slate-700/50">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            {!collapsed && (
+              <div className="overflow-hidden">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Institusi Pendidikan
+                </p>
+                <p className="text-xs font-semibold text-white truncate">
+                  {institutionName || "Nama sekolah belum tersedia"}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-2xl px-4 py-2 text-center">
+            <p className="text-xs font-medium text-slate-500">
+              © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
 
   return (
     <>
-      <aside className="hidden md:flex">{sidebarContent}</aside>
+      <aside className="hidden md:flex">
+        {renderSidebarContent(isCollapsed)}
+      </aside>
 
       <AnimatePresence>
         {mobileOpen && (
@@ -277,6 +545,9 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
             />
 
             <motion.aside
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu navigasi samping"
               className="fixed left-0 top-0 z-50 md:hidden"
               initial={{ x: -320 }}
               animate={{ x: 0 }}
@@ -287,7 +558,7 @@ export default function AppSidebar({ role, mobileOpen, onClose }: Props) {
                 damping: 26,
               }}
             >
-              {sidebarContent}
+              {renderSidebarContent(false)}
             </motion.aside>
           </>
         )}

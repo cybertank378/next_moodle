@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum TenantStatus {
@@ -23,7 +22,9 @@ model Tenant {
   updatedAt    DateTime          @updatedAt
   credential   TenantCredential?
   branding     TenantBranding?
-  auditLogs    SaasAuditLog[]
+  auditLogs     SaasAuditLog[]
+  notifications Notification[]
+  campaigns     NotificationCampaign[]
 
   @@index([status])
   @@index([name])
@@ -78,3 +79,148 @@ model SaasAuditLog {
   @@index([createdAt])
   @@map("saas_audit_logs")
 }
+
+enum NotificationType {
+  EXAM_RESULT_AVAILABLE
+  ASSIGNMENT_SUBMITTED
+  ASSIGNMENT_GRADED
+  STUDENT_ENROLLED
+  STUDENT_IMPORT_COMPLETE
+  STUDENT_IMPORT_FAILED
+  TENANT_REGISTERED
+  CREDENTIAL_FAILED
+  SYSTEM_ERROR
+  ANNOUNCEMENT
+}
+
+/// In-app notification (SaaS operational metadata, not Moodle data).
+/// tenantId = null  → platform-scoped notification for ADMIN recipients.
+/// tenantId != null → tenant-scoped notification (TENANT/TEACHER/STUDENT).
+model Notification {
+  id            String                @id @default(uuid())
+  tenantId      String?
+  recipientId   String
+  recipientRole String
+  type          NotificationType
+  title         String
+  body          String
+  linkPath      String?
+  isRead        Boolean               @default(false)
+  readAt        DateTime?
+  campaignId    String?
+  createdAt     DateTime              @default(now())
+  tenant        Tenant?               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign      NotificationCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, recipientId, recipientRole, isRead])
+  @@index([tenantId, recipientId, createdAt])
+  @@index([campaignId])
+  @@map("notifications")
+}
+
+model NotificationCampaign {
+  id                   String                          @id @default(uuid())
+  ownerScope           String                          // "PLATFORM" | "TENANT"
+  ownerTenantId        String?
+  createdById          String
+  createdByRole        String
+  title                String
+  contentJson          Json
+  contentSchemaVersion Int                             @default(1)
+  sanitizedHtml        String
+  plainText            String
+  pushSummary          String?
+  audienceSpec         Json
+  channels             String[]                        @default(["IN_APP"])
+  dispatchStatus       String                          @default("DRAFT")
+  scheduledAt          DateTime?
+  timezone             String?
+  archivedAt           DateTime?
+  version              Int                             @default(1)
+  createdAt            DateTime                        @default(now())
+  updatedAt            DateTime                        @updatedAt
+  tenant               Tenant?                         @relation(fields: [ownerTenantId], references: [id], onDelete: Cascade)
+  recipients           NotificationCampaignRecipient[]
+  deliveries           NotificationDelivery[]
+  notifications        Notification[]
+
+  @@index([ownerScope, ownerTenantId, dispatchStatus])
+  @@index([dispatchStatus, scheduledAt])
+  @@index([createdAt])
+  @@map("notification_campaigns")
+}
+
+model NotificationCampaignRecipient {
+  id            String               @id @default(uuid())
+  campaignId    String
+  tenantId      String?
+  recipientId   String
+  recipientRole String
+  resolvedAt    DateTime             @default(now())
+  campaign      NotificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, recipientId, recipientRole])
+  @@index([campaignId])
+  @@index([tenantId, recipientId])
+  @@map("notification_campaign_recipients")
+}
+
+model NotificationDelivery {
+  id                String               @id @default(uuid())
+  campaignId        String
+  recipientId       String
+  recipientRole     String
+  tenantId          String?
+  channel           String               // "IN_APP" | "PUSH"
+  deviceToken       String?
+  status            String               // "PENDING" | "ACCEPTED" | "FAILED" | "SKIPPED"
+  attempts          Int                  @default(0)
+  nextAttemptAt     DateTime?
+  providerMessageId String?
+  errorCode         String?
+  acceptedAt        DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  campaign          NotificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, status])
+  @@index([campaignId, channel])
+  @@index([recipientId, channel])
+  @@map("notification_deliveries")
+}
+
+model NotificationOutbox {
+  id             String    @id @default(uuid())
+  campaignId     String
+  jobType        String    // "DISPATCH_CAMPAIGN" | "RETRY_DELIVERY"
+  payload        Json?
+  availableAt    DateTime  @default(now())
+  leaseOwner     String?
+  leaseExpiresAt DateTime?
+  attempts       Int       @default(0)
+  status         String    @default("PENDING") // "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, availableAt])
+  @@index([campaignId])
+  @@map("notification_outbox")
+}
+
+model NotificationDevice {
+  id         String   @id @default(uuid())
+  userId     String
+  role       String
+  tenantId   String?
+  token      String   @unique
+  platform   String?
+  active     Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, role, active])
+  @@index([tenantId, role])
+  @@map("notification_devices")
+}
+

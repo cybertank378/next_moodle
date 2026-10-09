@@ -1,4 +1,4 @@
-import { AppError } from "./AppError";
+import { AppError } from "@/core/errors/AppError";
 
 export class SecurityError extends AppError {
   public readonly code = "SECURITY_VIOLATION";

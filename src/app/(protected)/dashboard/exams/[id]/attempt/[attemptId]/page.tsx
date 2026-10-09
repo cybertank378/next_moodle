@@ -1,13 +1,19 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import ExamAttemptPageView from "@/sections/exam/pages/ExamAttemptPageView";
 
-export default async function ExamAttemptPage() {
+interface ExamAttemptPageProps {
+  params: Promise<{ id: string; attemptId: string }>;
+}
+
+export default async function ExamAttemptPage({
+  params,
+}: ExamAttemptPageProps) {
   await requireDashboardRoles(["STUDENT"]);
-
+  const { id, attemptId } = await params;
   return (
-    <DashboardRoutePlaceholder
-      title="Attempt Ujian"
-      description="Route attempt ujian peserta."
+    <ExamAttemptPageView
+      quizId={Number.parseInt(id, 10)}
+      attemptId={Number.parseInt(attemptId, 10)}
     />
   );
 }

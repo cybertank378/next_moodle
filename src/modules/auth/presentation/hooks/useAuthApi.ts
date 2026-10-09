@@ -6,11 +6,7 @@ export function useAuthApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const login = async (input: {
-    tenant: string;
-    username: string;
-    password: string;
-  }) => {
+  const login = async (input: { username: string; password: string }) => {
     setLoading(true);
     setError(null);
     try {

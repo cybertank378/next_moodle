@@ -3,11 +3,10 @@ import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlace
 
 export default async function GroupsPage() {
   await requireDashboardRoles(["TENANT"]);
-
   return (
     <DashboardRoutePlaceholder
       title="Groups"
-      description="Route daftar grup/rombel."
+      description="Kelola grup dan rombongan belajar tenant."
     />
   );
 }

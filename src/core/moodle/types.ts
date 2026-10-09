@@ -18,6 +18,8 @@ export interface MoodleRequestOptions {
   requestKind?: MoodleRequestKind;
   maxRetries?: number;
   retryDelayMs?: number;
+  /** TTL in ms for caching safe-read results. Only effective when requestKind is "safe-read" and a CacheAdapter is injected. */
+  cacheTtlMs?: number;
 }
 
 export interface MoodleRawException {

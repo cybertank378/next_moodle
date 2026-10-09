@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { type ApiEnvelope, type RequestState, request } from "@/libs/apiClient";
 import type {
   ConfigureTenantCredentialRequestDTO,
   CreateTenantRequestDTO,
@@ -11,36 +12,6 @@ import type {
   ListTenantsResponseDTO,
   TenantResponseDTO,
 } from "@/modules/tenant/domain/dto/TenantResponseDto";
-
-interface RequestState<T> {
-  data: T | null;
-  error: string | null;
-  loading: boolean;
-}
-
-interface ApiEnvelope<T> {
-  success: boolean;
-  data?: T;
-  error?: { message?: string };
-}
-
-async function request<T>(
-  url: string,
-  options?: RequestInit,
-): Promise<{ data: T | null; error: string | null }> {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
-  const body = (await response.json()) as ApiEnvelope<T>;
-  if (!response.ok || !body.success || body.data === undefined) {
-    return { data: null, error: body.error?.message ?? "Permintaan gagal." };
-  }
-  return { data: body.data, error: null };
-}
 
 export function useTenantApi() {
   const [listState, setListState] = useState<
@@ -80,7 +51,7 @@ export function useTenantApi() {
       if (params.search) query.set("search", params.search);
       if (params.status) query.set("status", params.status);
       const result = await request<ListTenantsResponseDTO>(
-        `/api/tenants?${query}`,
+        `/api/tenant?${query}`,
       );
       setListState({ ...result, loading: false });
       return result;
@@ -90,7 +61,7 @@ export function useTenantApi() {
 
   const getTenant = useCallback(async (tenantId: string) => {
     setDetailState({ data: null, error: null, loading: true });
-    const result = await request<TenantResponseDTO>(`/api/tenants/${tenantId}`);
+    const result = await request<TenantResponseDTO>(`/api/tenant/${tenantId}`);
     setDetailState({ ...result, loading: false });
     return result;
   }, []);
@@ -109,30 +80,30 @@ export function useTenantApi() {
   );
 
   const createTenant = useCallback(
-    (body: CreateTenantRequestDTO) => mutate("/api/tenants", "POST", body),
+    (body: CreateTenantRequestDTO) => mutate("/api/tenant", "POST", body),
     [mutate],
   );
 
   const updateTenant = useCallback(
     (tenantId: string, body: UpdateTenantRequestDTO) =>
-      mutate(`/api/tenants/${tenantId}`, "PATCH", body),
+      mutate(`/api/tenant/${tenantId}`, "PATCH", body),
     [mutate],
   );
 
   const updateTenantStatus = useCallback(
     (tenantId: string, body: UpdateTenantStatusRequestDTO) =>
-      mutate(`/api/tenants/${tenantId}/status`, "PATCH", body),
+      mutate(`/api/tenant/${tenantId}/status`, "PATCH", body),
     [mutate],
   );
 
   const configureCredential = useCallback(
     (tenantId: string, body: ConfigureTenantCredentialRequestDTO) =>
-      mutate(`/api/tenants/${tenantId}/credentials`, "PUT", body),
+      mutate(`/api/tenant/${tenantId}/credentials`, "PUT", body),
     [mutate],
   );
 
   const deleteTenant = useCallback(async (tenantId: string) => {
-    const response = await fetch(`/api/tenants/${tenantId}`, {
+    const response = await fetch(`/api/tenant/${tenantId}`, {
       method: "DELETE",
     });
     const body = (await response.json()) as ApiEnvelope<{ id: string }>;

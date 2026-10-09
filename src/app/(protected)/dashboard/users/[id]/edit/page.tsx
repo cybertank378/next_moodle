@@ -3,11 +3,10 @@ import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlace
 
 export default async function EditUserPage() {
   await requireDashboardRoles(["TENANT"]);
-
   return (
     <DashboardRoutePlaceholder
       title="Edit Pengguna"
-      description="Route perubahan pengguna."
+      description="Ubah data pengguna tenant."
     />
   );
 }

@@ -1,13 +1,14 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import ResultDetailPageView from "@/sections/results/pages/ResultDetailPageView";
 
-export default async function ResultDetailPage() {
-  await requireDashboardRoles(["TENANT", "STUDENT"]);
+interface ResultDetailPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  return (
-    <DashboardRoutePlaceholder
-      title="Detail Hasil"
-      description="Route detail hasil ujian."
-    />
-  );
+export default async function ResultDetailPage({
+  params,
+}: ResultDetailPageProps) {
+  await requireDashboardRoles(["ADMIN", "TENANT", "TEACHER", "STUDENT"]);
+  const { id } = await params;
+  return <ResultDetailPageView courseId={Number(id) || 0} />;
 }

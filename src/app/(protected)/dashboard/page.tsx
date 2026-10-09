@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/app/(protected)/dashboard/component/AdminDashboard";
 import StudentDashboard from "@/app/(protected)/dashboard/component/StudentDashboard";
+import TeacherDashboard from "@/app/(protected)/dashboard/component/TeacherDashboard";
 import TenantDashboard from "@/app/(protected)/dashboard/component/TenantDashboard";
+import { Role } from "@/libs/enums";
 import { ROUTES } from "@/libs/routes";
 import { resolveUserRole } from "@/libs/utils";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
@@ -11,20 +13,18 @@ export default async function DashboardPage() {
 
   if (!actor) {
     redirect(ROUTES.AUTH.LOGIN);
-    return null;
   }
 
-  const role = resolveUserRole(actor.role);
-
-  switch (role) {
-    case "ADMIN":
+  switch (resolveUserRole(actor.role)) {
+    case Role.ADMIN:
       return <AdminDashboard />;
-    case "TENANT":
+    case Role.TENANT:
       return <TenantDashboard />;
-    case "STUDENT":
+    case Role.STUDENT:
       return <StudentDashboard />;
+    case Role.TEACHER:
+      return <TeacherDashboard />;
     default:
       redirect(ROUTES.AUTH.LOGIN);
-      return null;
   }
 }

@@ -12,9 +12,21 @@ export default function Card({ children, className }: Props) {
   return (
     <div
       className={`
-        rounded-xl
-        shadow-sm
+        rounded-2xl
+        border
+        border-slate-200/60
+        
+        bg-white/80
+        
+        text-slate-800
+        
+        shadow-lg
+        shadow-slate-200/40
+        
+        backdrop-blur-xl
         p-6
+        transition-all
+        duration-300
         ${className ?? ""}
       `}
     >

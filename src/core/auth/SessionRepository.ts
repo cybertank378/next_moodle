@@ -1,4 +1,4 @@
-import type { Session } from "./Session";
+import type { Session } from "@/core/auth/Session";
 
 export interface SessionRepository {
   findByToken(token: string): Promise<Session | null>;

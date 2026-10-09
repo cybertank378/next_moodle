@@ -3,11 +3,10 @@ import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlace
 
 export default async function SettingsPage() {
   await requireDashboardRoles(["ADMIN"]);
-
   return (
     <DashboardRoutePlaceholder
       title="Pengaturan"
-      description="Route pengaturan platform."
+      description="Kelola pengaturan platform."
     />
   );
 }

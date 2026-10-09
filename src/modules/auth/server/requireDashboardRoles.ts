@@ -20,7 +20,7 @@ export async function requireDashboardRoles(
   const role = resolveUserRole(actor.role);
 
   if (!role || !allowedRoles.includes(role)) {
-    redirect(ROUTES.DASHBOARD.ROOT);
+    redirect(ROUTES.HOME);
     return null;
   }
 

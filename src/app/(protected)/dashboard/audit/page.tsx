@@ -3,11 +3,10 @@ import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlace
 
 export default async function AuditPage() {
   await requireDashboardRoles(["ADMIN", "TENANT"]);
-
   return (
     <DashboardRoutePlaceholder
       title="Log Audit"
-      description="Route log audit platform/tenant."
+      description="Lihat aktivitas penting platform atau tenant."
     />
   );
 }

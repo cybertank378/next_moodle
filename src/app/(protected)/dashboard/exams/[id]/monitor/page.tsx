@@ -1,13 +1,14 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import ExamMonitorPageView from "@/sections/exam-monitor/pages/ExamMonitorPageView";
 
-export default async function ExamMonitorPage() {
-  await requireDashboardRoles(["TENANT"]);
+interface ExamMonitorPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  return (
-    <DashboardRoutePlaceholder
-      title="Monitor Ujian"
-      description="Route monitor ujian untuk operator/pengawas."
-    />
-  );
+export default async function ExamMonitorPage({
+  params,
+}: ExamMonitorPageProps) {
+  await requireDashboardRoles(["TENANT", "TEACHER"]);
+  const { id } = await params;
+  return <ExamMonitorPageView quizId={Number(id) || 0} />;
 }

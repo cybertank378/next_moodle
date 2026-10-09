@@ -1,6 +1,6 @@
-import { AppError } from "../errors/AppError";
-import { ApiResponse } from "./ApiResponse";
-import { HttpStatus, type HttpStatusCode } from "./HttpStatus";
+import { AppError } from "@/core/errors/AppError";
+import { ApiResponse } from "@/core/http/ApiResponse";
+import { HttpStatus, type HttpStatusCode } from "@/core/http/HttpStatus";
 
 export function mapErrorToHttpResponse(
   error: unknown,
@@ -19,9 +19,13 @@ export function mapErrorToHttpResponse(
   }
 
   // Fallback for unknown / native errors — never leak raw stack or internal message
+  console.error(
+    "[mapErrorToHttpResponse] Trapped unexpected native error:",
+    error,
+  );
   return ApiResponse.error(
     "INTERNAL_ERROR",
-    "Internal server error",
+    "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.",
     HttpStatus.INTERNAL_SERVER_ERROR,
     undefined,
     meta,

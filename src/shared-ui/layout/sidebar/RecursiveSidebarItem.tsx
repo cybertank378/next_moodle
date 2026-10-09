@@ -5,8 +5,7 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type React from "react";
 import { useMemo } from "react";
 import type { UserRole } from "@/libs/enums";
@@ -50,9 +49,10 @@ export function RecursiveSidebarItem({
   setOpenKey,
 }: Props) {
   ////////////////////////////////////////////////////////////
-  // PATHNAME
+  // ROUTER & PATHNAME
   ////////////////////////////////////////////////////////////
 
+  const router = useRouter();
   const pathname = usePathname();
 
   ////////////////////////////////////////////////////////////
@@ -126,10 +126,10 @@ export function RecursiveSidebarItem({
   ////////////////////////////////////////////////////////////
 
   const itemClass = clsx(
-    "group flex h-11 w-full items-center justify-between rounded-2xl pr-3 transition-all duration-200",
+    "group flex h-10 w-full items-center justify-between rounded-xl pr-3 transition-all duration-200",
     isActive
-      ? "bg-indigo-600 text-white shadow-sm"
-      : "text-slate-300 hover:bg-sky-900 hover:text-white",
+      ? "bg-blue-600 text-white shadow-sm font-semibold"
+      : "text-slate-400 hover:bg-slate-800 hover:text-white font-medium",
   );
 
   ////////////////////////////////////////////////////////////
@@ -138,6 +138,17 @@ export function RecursiveSidebarItem({
 
   const handleToggle = () => {
     setOpenKey((prev) => (prev === itemKey ? null : itemKey));
+  };
+
+  ////////////////////////////////////////////////////////////
+  // ITEM CLICK
+  ////////////////////////////////////////////////////////////
+
+  const handleItemClick = () => {
+    onNavigate?.();
+    if (item.path) {
+      router.push(item.path);
+    }
   };
 
   ////////////////////////////////////////////////////////////
@@ -165,13 +176,15 @@ export function RecursiveSidebarItem({
               <Icon
                 size={18}
                 className={clsx(
-                  "shrink-0",
-                  isActive ? "text-white" : "text-slate-400",
+                  "shrink-0 transition-colors",
+                  isActive
+                    ? "text-white"
+                    : "text-slate-400 group-hover:text-white",
                 )}
               />
             )}
 
-            <span className="truncate text-sm font-medium">{item.label}</span>
+            <span className="truncate text-sm">{item.label}</span>
           </div>
 
           {/* RIGHT */}
@@ -182,17 +195,23 @@ export function RecursiveSidebarItem({
             transition={{
               duration: 0.2,
             }}
+            className={clsx(
+              "shrink-0",
+              isActive
+                ? "text-white"
+                : "text-slate-400 group-hover:text-white",
+            )}
           >
             <ChevronDown size={15} />
           </motion.div>
         </button>
       ) : (
         /* ================================================ */
-        /* LINK */
+        /* ITEM BUTTON */
         /* ================================================ */
-        <Link
-          href={item.path ?? "#"}
-          onClick={onNavigate}
+        <button
+          type="button"
+          onClick={handleItemClick}
           style={{
             paddingLeft,
           }}
@@ -203,15 +222,17 @@ export function RecursiveSidebarItem({
               <Icon
                 size={18}
                 className={clsx(
-                  "shrink-0",
-                  isActive ? "text-white" : "text-slate-400",
+                  "shrink-0 transition-colors",
+                  isActive
+                    ? "text-white"
+                    : "text-slate-400 group-hover:text-white",
                 )}
               />
             )}
 
-            <span className="truncate text-sm font-medium">{item.label}</span>
+            <span className="truncate text-sm">{item.label}</span>
           </div>
-        </Link>
+        </button>
       )}
 
       {/* ================================================== */}
@@ -238,7 +259,7 @@ export function RecursiveSidebarItem({
             }}
             className="overflow-hidden"
           >
-            <div className="space-y-1 pt-1">
+            <div className="space-y-1 pt-1 ml-4 border-l border-slate-700 pl-1">
               {item.children?.map((child, childIdx) => (
                 <RecursiveSidebarItem
                   key={child.path ?? `${child.label}-${childIdx}`}
