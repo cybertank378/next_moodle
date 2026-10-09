@@ -135,7 +135,7 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
       },
     ];
 
-    it("renders table with headers, search input, status filter, and tenant rows", () => {
+    it("renders table with headers, search input, status filter, and tenant rows with 3 action buttons", () => {
       const html = renderToStaticMarkup(
         <RecentTenantsTable tenants={sampleTenants} loading={false} />,
       );
@@ -146,6 +146,16 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
       expect(html).toContain("hangtuah2-jkt");
       expect(html).toContain("SMA Nusantara");
       expect(html).toContain("Detail");
+      expect(html).toContain("Edit");
+      expect(html).toContain("Buka");
+    });
+
+    it("renders shared EmptyState when no tenants match", () => {
+      const html = renderToStaticMarkup(
+        <RecentTenantsTable tenants={[]} loading={false} />,
+      );
+      expect(html).toContain("Tidak ada tenant ditemukan");
+      expect(html).toContain("Belum ada tenant terdaftar");
     });
   });
 
