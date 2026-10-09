@@ -37,11 +37,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationManagementPageView for ADMIN role", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-admin",
+      userId: "u-admin",
       role: "ADMIN",
       username: "admin",
       tenantId: null,
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);
@@ -52,11 +52,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationManagementPageView for TENANT role", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-tenant",
+      userId: "u-tenant",
       role: "TENANT",
       username: "tenant",
       tenantId: "t-1",
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);
@@ -67,11 +67,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationPageView for STUDENT role instead of redirecting", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-student",
+      userId: "u-student",
       role: "STUDENT",
       username: "student",
       tenantId: "t-1",
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);
@@ -83,11 +83,11 @@ describe("NotificationsPage Route Guard & Role Dispatching", () => {
 
   it("renders NotificationPageView for TEACHER role", async () => {
     vi.mocked(authServer.requireDashboardRoles).mockResolvedValue({
-      id: "u-teacher",
+      userId: "u-teacher",
       role: "TEACHER",
       username: "teacher",
       tenantId: "t-1",
-    } as any);
+    } as Awaited<ReturnType<typeof authServer.requireDashboardRoles>>);
 
     const Page = await NotificationsPage();
     const html = renderToStaticMarkup(Page as React.ReactElement);

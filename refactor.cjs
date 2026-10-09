@@ -1,6 +1,5 @@
-const fs = require("fs");
-const path = require("path");
-const { execSync } = require("child_process");
+const fs = require("node:fs");
+const path = require("node:path");
 
 function moveDirContents(srcDir, destDir) {
   if (!fs.existsSync(srcDir)) return;
@@ -18,7 +17,7 @@ function moveDirContents(srcDir, destDir) {
         moveDirContents(srcPath, destPath);
         try {
           fs.rmdirSync(srcPath);
-        } catch (e) {}
+        } catch { /* Ignore non-empty directory during migration. */ }
       } else {
         // file conflict, just overwrite or log
         fs.renameSync(srcPath, destPath);
@@ -29,7 +28,7 @@ function moveDirContents(srcDir, destDir) {
   }
   try {
     fs.rmdirSync(srcDir);
-  } catch (e) {}
+  } catch { /* Ignore non-empty directory during migration. */ }
 }
 
 // 1. Move quiz-attempts -> quiz

@@ -9,7 +9,7 @@ function walk(dir) {
   list.forEach((file) => {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
-    if (stat && stat.isDirectory()) {
+    if (stat.isDirectory()) {
       results = results.concat(walk(fullPath));
     } else {
       if (fullPath.endsWith('.ts') || fullPath.endsWith('.tsx')) {
@@ -29,7 +29,7 @@ files.forEach(file => {
   
   const regex = /(from|import|export|vi\.mock|jest\.mock)\s*\(?\s*['"](\.[^'"]+)['"]/g;
   
-  content = content.replace(regex, (match, keyword, relativePath) => {
+  content = content.replace(regex, (match, _keyword, relativePath) => {
     const fileDir = path.dirname(file);
     const resolvedPath = path.resolve(fileDir, relativePath);
     
