@@ -1,3 +1,4 @@
+import { recordSaasAudit } from "@/modules/audit/infrastructure/repo/SaasAuditWriter";
 import "server-only";
 
 import type { NextRequest } from "next/server";
@@ -97,15 +98,10 @@ export class TenantController {
         actor: actorToAuthorization(actor),
         data: parseCreateTenantBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(
-            ApiResponse.success(
-              result.getValue(),
-              undefined,
-              HttpStatus.CREATED,
-            ),
-          );
+      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      const saved = result.getValue();
+      await recordSaasAudit({actor,tenantId:saved.id,action:"tenant.create",resource:"tenant",resourceId:saved.id,details:{event:"tenant.created"}});
+      return respond(ApiResponse.success(saved,undefined,HttpStatus.CREATED));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -122,9 +118,9 @@ export class TenantController {
         tenantId,
         data: parseUpdateTenantBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(ApiResponse.success(result.getValue()));
+      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      await recordSaasAudit({actor,tenantId,action:"tenant.update",resource:"tenant",resourceId:tenantId,details:{event:"tenant.updated"}});
+      return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -141,9 +137,9 @@ export class TenantController {
         tenantId,
         status: parseStatusBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(ApiResponse.success(result.getValue()));
+      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      await recordSaasAudit({actor,tenantId,action:"tenant.status.update",resource:"tenant",resourceId:tenantId,details:{event:"tenant.status.updated"}});
+      return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -154,6 +150,8 @@ export class TenantController {
       actor: actorToAuthorization(actor),
       tenantId,
     });
+    // Deletion cascades SaasAuditLog under the current schema; audit history cannot survive a hard delete.
+    // This path requires a retention migration before durable deletion audit can be guaranteed.
     return result.isFailure
       ? respond(mapErrorToHttpResponse(result.getError()))
       : respond(ApiResponse.success(result.getValue()));
@@ -170,9 +168,9 @@ export class TenantController {
         tenantId,
         data: parseCredentialBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(ApiResponse.success(result.getValue()));
+      if (result.isFailure) return respond(mapErrorToHttpResponse(result.getError()));
+      await recordSaasAudit({actor,tenantId,action:"tenant.credentials.configure",resource:"tenant_credential",resourceId:tenantId,details:{event:"tenant.credentials.configured"}});
+      return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
