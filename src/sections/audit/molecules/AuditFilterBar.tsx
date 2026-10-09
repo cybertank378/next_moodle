@@ -45,10 +45,10 @@ export function AuditFilterBar({
 
   const hasAdvancedFilters = Boolean(
     draft.from ||
-      draft.to ||
-      draft.action ||
-      draft.resource ||
-      (isAdmin && draft.tenantId),
+    draft.to ||
+    draft.action ||
+    draft.resource ||
+    (isAdmin && draft.tenantId),
   );
 
   return (
@@ -106,7 +106,7 @@ export function AuditFilterBar({
         <Button
           type="submit"
           leftIcon={Filter}
-          className="h-11 min-w-28 rounded-lg px-4 shadow-sm md:w-full xl:w-auto"
+          className="h-11 min-w-28 rounded-lg px-4 shadow-sm md:w-full xl:w-auto mb-1.5"
         >
           Terapkan
         </Button>
@@ -117,7 +117,7 @@ export function AuditFilterBar({
           color="secondary"
           leftIcon={RotateCcw}
           onClick={onReset}
-          className="h-11 min-w-24 rounded-lg bg-white px-4 md:w-full xl:w-auto"
+          className="h-11 min-w-24 rounded-lg bg-white px-4 md:w-full xl:w-auto mb-1.5"
         >
           Reset
         </Button>
