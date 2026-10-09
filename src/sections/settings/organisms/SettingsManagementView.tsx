@@ -31,7 +31,7 @@ export function SettingsManagementView({initial}:{initial:PlatformSettingsDTO}){
     try{validatePlatformSettingsUpdate({...draft,expectedRevision:api.snapshot.revision});return null}
     catch(error){return error instanceof Error?error.message:"Periksa kembali input."}
   },[draft,api.snapshot.revision]);
-  const update=<K extends keyof PlatformSettingsFields>(key:K,value:PlatformSettingsFields[K])=>
+  const update = <K extends keyof PlatformSettingsFields,>(key: K, value: PlatformSettingsFields[K]) =>
     setDraft(previous=>({...previous,[key]:value}));
   const reload=async()=>{try{const result=await api.refresh();setDraft(draftFrom(result))}catch{showErrorToast("Gagal memuat pengaturan terbaru.")}};
   const submit=async()=>{
