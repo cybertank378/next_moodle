@@ -7,7 +7,7 @@ import type { TenantStatus } from "@/modules/tenant/domain/types/TenantMetadata"
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantStatusBadge from "@/sections/tenant/atoms/TenantStatusBadge";
 import TenantCredentialForm from "@/sections/tenant/molecules/TenantCredentialForm";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, ArrowLeft } from "lucide-react";
 import Button from "@/shared-ui/component/Button";
 import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
@@ -72,15 +72,30 @@ export default function TenantDetailView() {
     router.push(ROUTES.ADMIN.TENANTS);
   };
 
+  const handleNavigateBack = () => {
+    router.push(ROUTES.ADMIN.TENANTS);
+  };
+
   return (
     <section className="space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold">{tenant.name}</h1>
-            <TenantStatusBadge status={tenant.status} />
+        <div className="flex items-center gap-3">
+          <Button
+            size="sm"
+            variant="outline"
+            color="secondary"
+            iconOnly
+            leftIcon={ArrowLeft}
+            onClick={handleNavigateBack}
+            aria-label="Kembali ke daftar tenant"
+          />
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold">{tenant.name}</h1>
+              <TenantStatusBadge status={tenant.status} />
+            </div>
+            <p className="text-sm text-slate-500">{tenant.slug}</p>
           </div>
-          <p className="text-sm text-slate-500">{tenant.slug}</p>
         </div>
         <Button
           onClick={handleNavigateToEdit}

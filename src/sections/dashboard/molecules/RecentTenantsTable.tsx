@@ -4,13 +4,18 @@
 
 import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import { formatDisplayDate } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
+import Avatar from "@/shared-ui/component/Avatar";
+import Badge from "@/shared-ui/component/Badge";
 import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
-import Skeleton from "@/shared-ui/component/Skeleton";
+import EmptyState from "@/shared-ui/component/EmptyState";
 import Pagination from "@/shared-ui/component/Pagination";
+import SearchField from "@/shared-ui/component/SearchField";
+import SelectField from "@/shared-ui/component/SelectField";
+import Skeleton from "@/shared-ui/component/Skeleton";
 import {
   Table,
   TableBody,
@@ -19,6 +24,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
+import RecentTenantActionButtons from "@/sections/dashboard/atoms/RecentTenantActionButtons";
 import { ROUTES } from "@/libs/routes";
 
 const SKELETON_ROWS = 3;
@@ -48,26 +54,17 @@ export function filterRecentTenants(
   });
 }
 
-/** Generates deterministic 2-letter initials from name */
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/);
-  if (words.length >= 2) {
-    return (words[0][0] + words[1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-}
-
 /** Palette for tenant circle avatars */
-const AVATAR_COLORS = [
-  "bg-blue-100 text-blue-700 border-blue-200",
-  "bg-purple-100 text-purple-700 border-purple-200",
-  "bg-amber-100 text-amber-700 border-amber-200",
-  "bg-emerald-100 text-emerald-700 border-emerald-200",
-  "bg-rose-100 text-rose-700 border-rose-200",
+const AVATAR_BG_COLORS = [
+  "bg-blue-600",
+  "bg-purple-600",
+  "bg-amber-600",
+  "bg-emerald-600",
+  "bg-rose-600",
 ];
 
-function getAvatarColor(index: number): string {
-  return AVATAR_COLORS[index % AVATAR_COLORS.length];
+function getAvatarBgColor(index: number): string {
+  return AVATAR_BG_COLORS[index % AVATAR_BG_COLORS.length];
 }
 
 interface RecentTenantsTableProps {
@@ -88,11 +85,18 @@ export default function RecentTenantsTable({
     router.push(ROUTES.ADMIN.TENANTS);
   };
 
+  const handleNavigateToTenantDetail = (tenant: RecentTenantResponseDto) => {
+    router.push(ROUTES.ADMIN.TENANT_DETAIL(tenant.id));
+  };
+
+  const handleNavigateToTenantEdit = (tenant: RecentTenantResponseDto) => {
+    router.push(ROUTES.ADMIN.TENANT_EDIT(tenant.id));
+  };
+
   const handleNavigateToTenantSearch = (slug: string) => {
     router.push(`${ROUTES.ADMIN.TENANTS}?search=${encodeURIComponent(slug)}`);
   };
 
-  const searchInputId = useId();
   const statusSelectId = useId();
 
   const filteredTenants = useMemo(() => {
@@ -130,46 +134,37 @@ export default function RecentTenantsTable({
 
       {/* Filter Toolbar */}
       <div className="p-4 bg-slate-50/60 border-b border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="relative flex-1">
-          <label htmlFor={searchInputId} className="sr-only">
-            Cari nama atau slug tenant
-          </label>
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-            aria-hidden="true"
-          />
-          <input
-            id={searchInputId}
-            type="search"
+        <div className="flex-1">
+          <SearchField
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
+            onChange={(val) => {
+              setSearchQuery(val);
               setCurrentPage(1);
             }}
             placeholder="Cari nama atau slug tenant"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+            size="sm"
+            className="bg-white"
           />
         </div>
 
         <div className="w-full sm:w-48">
-          <label htmlFor={statusSelectId} className="sr-only">
-            Filter berdasarkan status tenant
-          </label>
-          <select
+          <SelectField
             id={statusSelectId}
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs sm:text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+            size="sm"
+            variant="outlined"
+            aria-label="Filter berdasarkan status tenant"
+            className="text-xs sm:text-sm"
           >
             <option value="all">Semua status</option>
             <option value="ACTIVE">Aktif</option>
             <option value="MAINTENANCE">Pemeliharaan</option>
             <option value="SUSPENDED">Ditangguhkan</option>
-          </select>
+          </SelectField>
         </div>
       </div>
 
@@ -200,17 +195,21 @@ export default function RecentTenantsTable({
               <TableRow>
                 <TableCell
                   colSpan={COLUMN_COUNT}
-                  className="py-10 text-center text-slate-500 text-sm"
+                  className="py-8 text-center"
                 >
-                  {searchQuery || statusFilter !== "all"
-                    ? "Tidak ada tenant yang cocok dengan filter pencarian."
-                    : "Belum ada tenant terdaftar."}
+                  <EmptyState
+                    title="Tidak ada tenant ditemukan"
+                    description={
+                      searchQuery || statusFilter !== "all"
+                        ? "Tidak ada tenant yang cocok dengan filter pencarian."
+                        : "Belum ada tenant terdaftar."
+                    }
+                  />
                 </TableCell>
               </TableRow>
             ) : (
               paginatedTenants.map((tenant, index) => {
-                const initials = getInitials(tenant.name);
-                const avatarColor = getAvatarColor(index);
+                const avatarBg = getAvatarBgColor(index);
                 const statusNormalized = tenant.status.toUpperCase();
 
                 return (
@@ -218,14 +217,14 @@ export default function RecentTenantsTable({
                     key={tenant.id}
                     className="border-b border-slate-50 hover:bg-slate-50/70 transition-colors"
                   >
-                    {/* Tenant with Initial Avatar */}
+                    {/* Tenant with Avatar */}
                     <TableCell className="py-3.5 px-4 font-semibold text-slate-900">
                       <div className="flex items-center gap-3">
-                        <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${avatarColor}`}
-                        >
-                          {initials}
-                        </div>
+                        <Avatar
+                          name={tenant.name}
+                          size="sm"
+                          className={`${avatarBg} text-white shadow-sm shrink-0`}
+                        />
                         <span className="truncate max-w-[240px]">
                           {tenant.name}
                         </span>
@@ -237,23 +236,23 @@ export default function RecentTenantsTable({
                       {tenant.slug}
                     </TableCell>
 
-                    {/* Status Badge with Dot */}
+                    {/* Status Badge */}
                     <TableCell className="py-3.5 px-4">
                       {statusNormalized === "ACTIVE" ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 border border-emerald-200">
+                        <Badge color="success" variant="soft" className="gap-1.5">
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           Aktif
-                        </span>
+                        </Badge>
                       ) : statusNormalized === "MAINTENANCE" ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 border border-amber-200">
+                        <Badge color="warning" variant="soft" className="gap-1.5">
                           <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                           Pemeliharaan
-                        </span>
+                        </Badge>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 border border-rose-200">
+                        <Badge color="error" variant="soft" className="gap-1.5">
                           <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
                           Ditangguhkan
-                        </span>
+                        </Badge>
                       )}
                     </TableCell>
 
@@ -262,18 +261,15 @@ export default function RecentTenantsTable({
                       {formatDisplayDate(tenant.createdAt)}
                     </TableCell>
 
-                    {/* Action Link */}
+                    {/* Action Buttons (Atom) */}
                     <TableCell className="py-3.5 px-4 text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        color="secondary"
-                        rightIcon={ArrowUpRight}
-                        onClick={() => handleNavigateToTenantSearch(tenant.slug)}
-                        className="h-7 px-2.5 text-xs font-semibold"
-                      >
-                        Detail
-                      </Button>
+                      <RecentTenantActionButtons
+                        slug={tenant.slug}
+                        tenantId={tenant.id}
+                        onDetail={() => handleNavigateToTenantDetail(tenant)}
+                        onEdit={() => handleNavigateToTenantEdit(tenant)}
+                        onVisit={() => handleNavigateToTenantSearch(tenant.slug)}
+                      />
                     </TableCell>
                   </TableRow>
                 );
@@ -303,3 +299,4 @@ export default function RecentTenantsTable({
     </Card>
   );
 }
+

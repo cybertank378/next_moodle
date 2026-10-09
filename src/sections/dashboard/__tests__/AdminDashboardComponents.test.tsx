@@ -12,6 +12,8 @@ import RecentTenantsTable, {
   filterRecentTenants,
 } from "@/sections/dashboard/molecules/RecentTenantsTable";
 import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
+import TenantGrowthChart from "@/sections/dashboard/molecules/TenantGrowthChart";
+import TenantStatusChart from "@/sections/dashboard/molecules/TenantStatusChart";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -133,7 +135,7 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
       },
     ];
 
-    it("renders table with headers, search input, status filter, and tenant rows", () => {
+    it("renders table with headers, search input, status filter, and tenant rows with 3 action buttons", () => {
       const html = renderToStaticMarkup(
         <RecentTenantsTable tenants={sampleTenants} loading={false} />,
       );
@@ -144,6 +146,16 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
       expect(html).toContain("hangtuah2-jkt");
       expect(html).toContain("SMA Nusantara");
       expect(html).toContain("Detail");
+      expect(html).toContain("Edit");
+      expect(html).toContain("Buka");
+    });
+
+    it("renders shared EmptyState when no tenants match", () => {
+      const html = renderToStaticMarkup(
+        <RecentTenantsTable tenants={[]} loading={false} />,
+      );
+      expect(html).toContain("Tidak ada tenant ditemukan");
+      expect(html).toContain("Belum ada tenant terdaftar");
     });
   });
 
@@ -181,4 +193,55 @@ describe("Admin Dashboard & Sidebar Components (Issue #136)", () => {
       expect(teacherMenu.length).toBeGreaterThan(0);
     });
   });
+
+  describe("TenantGrowthChart Component (@derpdaderp/chartkit)", () => {
+    it("renders growth chart header and period options", () => {
+      const html = renderToStaticMarkup(
+        <TenantGrowthChart
+          points={[
+            { period: "2026-05", newTenants: 3, cumulativeTenants: 10 },
+            { period: "2026-06", newTenants: 5, cumulativeTenants: 15 },
+          ]}
+          loading={false}
+          selectedMonths={6}
+        />,
+      );
+      expect(html).toContain("Pertumbuhan Tenant");
+      expect(html).toContain("6 bulan");
+      expect(html).toContain("12 bulan");
+    });
+
+    it("renders empty state when there are no growth points", () => {
+      const html = renderToStaticMarkup(
+        <TenantGrowthChart points={[]} loading={false} selectedMonths={6} />,
+      );
+      expect(html).toContain("Belum ada data pertumbuhan");
+    });
+  });
+
+  describe("TenantStatusChart Component (@derpdaderp/chartkit)", () => {
+    it("renders status distribution title and donut chart segments", () => {
+      const html = renderToStaticMarkup(
+        <TenantStatusChart
+          summary={{ total: 24, active: 20, maintenance: 3, suspended: 1 }}
+          loading={false}
+        />,
+      );
+      expect(html).toContain("Distribusi Status");
+      expect(html).toContain("Aktif");
+      expect(html).toContain("Pemeliharaan");
+      expect(html).toContain("Ditangguhkan");
+    });
+
+    it("renders empty state when total is 0", () => {
+      const html = renderToStaticMarkup(
+        <TenantStatusChart
+          summary={{ total: 0, active: 0, maintenance: 0, suspended: 0 }}
+          loading={false}
+        />,
+      );
+      expect(html).toContain("Belum ada data status tenant");
+    });
+  });
 });
+
