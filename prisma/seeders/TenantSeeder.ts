@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 
 export class TenantSeeder {
   constructor(private prisma: PrismaClient) {}
