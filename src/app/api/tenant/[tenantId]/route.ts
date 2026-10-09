@@ -1,3 +1,4 @@
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 import "server-only";
 
 import type { NextRequest, NextResponse } from "next/server";
@@ -18,7 +19,7 @@ export async function GET(
   return getTenantsController().getOne(actor, tenantId);
 }
 
-export async function PATCH(
+async function originalPATCH(
   req: NextRequest,
   context: TenantRouteContext,
 ): Promise<NextResponse> {
@@ -28,7 +29,7 @@ export async function PATCH(
   return getTenantsController().update(actor, tenantId, req);
 }
 
-export async function DELETE(
+async function originalDELETE(
   _req: NextRequest,
   context: TenantRouteContext,
 ): Promise<NextResponse> {
@@ -37,3 +38,6 @@ export async function DELETE(
   const { tenantId } = await context.params;
   return getTenantsController().remove(actor, tenantId);
 }
+
+export const PATCH = withAuditedMutation(originalPATCH, "tenant/:id");
+export const DELETE = withAuditedMutation(originalDELETE, "tenant/:id");

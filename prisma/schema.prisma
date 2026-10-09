@@ -63,7 +63,7 @@ model TenantBranding {
 
 model SaasAuditLog {
   id         String   @id @default(uuid())
-  tenantId   String
+  tenantId   String?
   actorId    String
   actorRole  String
   action     String
@@ -73,7 +73,7 @@ model SaasAuditLog {
   ipAddress  String?
   userAgent  String?
   createdAt  DateTime @default(now())
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
 
   @@index([tenantId])
   @@index([createdAt])

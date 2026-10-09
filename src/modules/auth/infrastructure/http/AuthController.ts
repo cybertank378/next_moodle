@@ -1,3 +1,4 @@
+import { recordSaasAudit } from "@/modules/audit/infrastructure/repo/SaasAuditWriter";
 import { NextResponse } from "next/server";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
@@ -121,6 +122,13 @@ export class AuthController {
         result.sessionCookie.value,
         result.sessionCookie.expiresAt,
       );
+      await recordSaasAudit({
+        actor: result.actor,
+        tenantId: result.actor.tenantId ?? null,
+        action: "auth.login",
+        resource: "session",
+        details: { event: "auth.login" },
+      });
       return response;
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));

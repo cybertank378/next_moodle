@@ -1,3 +1,4 @@
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 import "server-only";
 
 import type { NextRequest, NextResponse } from "next/server";
@@ -8,7 +9,7 @@ import {
 } from "@/core/http/routeUtils";
 import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
 
-export async function PUT(
+async function originalPUT(
   req: NextRequest,
   context: TenantRouteContext,
 ): Promise<NextResponse> {
@@ -18,3 +19,5 @@ export async function PUT(
   const { tenantId } = await context.params;
   return getTenantsController().configureCredentials(actor, tenantId, req);
 }
+
+export const PUT = withAuditedMutation(originalPUT, "tenant/:id/credentials");
