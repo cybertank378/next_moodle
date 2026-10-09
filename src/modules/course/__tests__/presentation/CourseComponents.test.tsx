@@ -68,7 +68,7 @@ describe("Course Components", () => {
       expect(html).toContain("General Biology 101");
       expect(html).toContain("Learn fundamental biology concepts.");
       expect(html).toContain("75%");
-      expect(html).toContain("Buka Kursus");
+      expect(html).toContain("Buka Mata Pelajaran");
     });
   });
 });

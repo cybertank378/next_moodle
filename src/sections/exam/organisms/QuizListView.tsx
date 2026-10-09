@@ -4,6 +4,7 @@ import { HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import QuizCard from "@/sections/exam/molecules/QuizCard";
 import QuizFilterBar from "@/sections/exam/molecules/QuizFilterBar";
 
@@ -18,6 +19,12 @@ export default function QuizListView({ courseId }: Props) {
   useEffect(() => {
     void listQuizzes({ courseId, search });
   }, [courseId, listQuizzes, search]);
+
+  useEffect(() => {
+    if (quizzesState.error) {
+      showErrorToast(quizzesState.error);
+    }
+  }, [quizzesState.error]);
 
   const quizzes = quizzesState.data?.quizzes ?? [];
   const loading = quizzesState.loading;
@@ -34,12 +41,6 @@ export default function QuizListView({ courseId }: Props) {
       </div>
 
       <QuizFilterBar search={search} onSearchChange={setSearch} />
-
-      {quizzesState.error && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
-          {quizzesState.error}
-        </div>
-      )}
 
       {loading && (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">

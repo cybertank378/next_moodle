@@ -1,6 +1,10 @@
+"use client";
+
 import { Award, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/libs/routes";
 import type { GradeSummaryDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
+import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
 
 interface Props {
@@ -8,18 +12,28 @@ interface Props {
 }
 
 export function StudentRecentGrades({ recentGrades }: Props) {
+  const router = useRouter();
+
+  const handleNavigateToAllGrades = () => {
+    router.push(ROUTES.STUDENT.RESULTS);
+  };
+
   return (
     <Card className="border-slate-100 shadow-sm p-6 flex flex-col">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-extrabold flex items-center gap-2">
           <Award className="w-5 h-5 text-slate-700" /> Nilai Terbaru
         </h3>
-        <Link
-          href="/dashboard/results"
-          className="text-blue-600 text-sm font-semibold flex items-center hover:text-blue-700"
+        <Button
+          size="sm"
+          variant="ghost"
+          color="primary"
+          rightIcon={ChevronRight}
+          onClick={handleNavigateToAllGrades}
+          className="text-blue-600 text-sm font-semibold hover:text-blue-700 h-auto p-0"
         >
-          Lihat Semua <ChevronRight className="w-4 h-4 ml-0.5" />
-        </Link>
+          Lihat Semua
+        </Button>
       </div>
       <div className="flex-1 flex flex-col">
         <table className="w-full text-sm text-left">
@@ -55,12 +69,16 @@ export function StudentRecentGrades({ recentGrades }: Props) {
           </div>
         )}
         <div className="mt-auto pt-4 px-2">
-          <Link
-            href="/dashboard/results"
-            className="text-blue-600 text-sm font-bold flex items-center hover:text-blue-700"
+          <Button
+            size="sm"
+            variant="ghost"
+            color="primary"
+            rightIcon={ChevronRight}
+            onClick={handleNavigateToAllGrades}
+            className="text-blue-600 text-sm font-bold hover:text-blue-700 h-auto p-0"
           >
-            Lihat Semua Nilai <ChevronRight className="w-4 h-4 ml-1" />
-          </Link>
+            Lihat Semua Nilai
+          </Button>
         </div>
       </div>
     </Card>

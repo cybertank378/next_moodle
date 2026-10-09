@@ -1,16 +1,29 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { ArrowRight } from "lucide-react";
+import { ROUTES } from "@/libs/routes";
 import Card from "@/shared-ui/component/Card";
-import LinkButton from "@/shared-ui/component/LinkButton";
+import Button from "@/shared-ui/component/Button";
 import Typography from "@/shared-ui/component/Typography";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
 import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
 import UpcomingExamsTable from "@/sections/dashboard/molecules/UpcomingExamsTable";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
 
 export default function TenantDashboardOverview() {
+  const router = useRouter();
   const { tenantState, fetchTenantOverview } = useDashboardApi();
+
+  const handleNavigateToExams = () => {
+    router.push(ROUTES.TENANT.EXAMS);
+  };
+
+  const handleNavigateToAudit = () => {
+    router.push(ROUTES.TENANT.AUDIT);
+  };
 
   useEffect(() => {
     fetchTenantOverview();
@@ -18,13 +31,11 @@ export default function TenantDashboardOverview() {
 
   const { data, loading, error } = tenantState;
 
-  if (error) {
-    return (
-      <div className="flex justify-center py-20 text-red-500">
-        Gagal memuat: {error}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -107,28 +118,34 @@ export default function TenantDashboardOverview() {
                 <Typography variant="body" className="text-xs text-slate-600  mt-1 leading-relaxed">
                   "World History: Module 4" dijadwalkan untuk 2 Nov memiliki 0 soal.
                 </Typography>
-                <LinkButton
-                  href="#"
+                <Button
+                  onClick={handleNavigateToExams}
                   variant="ghost"
-                  className="text-xs font-medium text-amber-700  hover:text-amber-900  mt-2 p-0 h-auto inline-flex"
+                  color="warning"
+                  size="sm"
+                  rightIcon={ArrowRight}
+                  className="text-xs font-medium text-amber-700 hover:text-amber-900 mt-2 p-0 h-auto"
                 >
-                  Tinjau Ujian &rarr;
-                </LinkButton>
+                  Tinjau Ujian
+                </Button>
               </div>
-              <div className="bg-white/80  p-4 rounded-lg border border-amber-200/60  shadow-sm">
-                <Typography variant="h3" className="font-semibold text-sm text-slate-900 ">
+              <div className="bg-white/80 p-4 rounded-lg border border-amber-200/60 shadow-sm">
+                <Typography variant="h3" className="font-semibold text-sm text-slate-900">
                   Insiden Mencurigakan
                 </Typography>
-                <Typography variant="body" className="text-xs text-slate-600  mt-1 leading-relaxed">
+                <Typography variant="body" className="text-xs text-slate-600 mt-1 leading-relaxed">
                   3 peserta ditandai keluar dari browser berulang kali dalam 24 jam terakhir.
                 </Typography>
-                <LinkButton
-                  href="#"
+                <Button
+                  onClick={handleNavigateToAudit}
                   variant="ghost"
-                  className="text-xs font-medium text-amber-700  hover:text-amber-900  mt-2 p-0 h-auto inline-flex"
+                  color="warning"
+                  size="sm"
+                  rightIcon={ArrowRight}
+                  className="text-xs font-medium text-amber-700 hover:text-amber-900 mt-2 p-0 h-auto"
                 >
-                  Lihat Log Audit &rarr;
-                </LinkButton>
+                  Lihat Log Audit
+                </Button>
               </div>
             </div>
           </Card>

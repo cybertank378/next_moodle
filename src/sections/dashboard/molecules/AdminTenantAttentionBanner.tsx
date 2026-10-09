@@ -1,9 +1,12 @@
 // Files: src/sections/dashboard/molecules/AdminTenantAttentionBanner.tsx
 
-import Link from "next/link";
+"use client";
+
 import { ArrowRight, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { TenantStatusSummary } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { ROUTES } from "@/libs/routes";
+import Button from "@/shared-ui/component/Button";
 
 export function calculateAttentionCount(summary: TenantStatusSummary): number {
   return (summary?.maintenance ?? 0) + (summary?.suspended ?? 0);
@@ -16,7 +19,12 @@ interface AdminTenantAttentionBannerProps {
 export default function AdminTenantAttentionBanner({
   summary,
 }: AdminTenantAttentionBannerProps) {
+  const router = useRouter();
   const attentionCount = calculateAttentionCount(summary);
+
+  const handleNavigateToTenants = () => {
+    router.push(ROUTES.ADMIN.TENANTS);
+  };
 
   if (attentionCount <= 0) {
     return null;
@@ -45,13 +53,16 @@ export default function AdminTenantAttentionBanner({
         </div>
       </div>
 
-      <Link
-        href={ROUTES.ADMIN.TENANTS}
-        className="inline-flex items-center gap-1 self-start sm:self-auto font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors shrink-0 text-sm"
+      <Button
+        size="sm"
+        variant="ghost"
+        color="primary"
+        rightIcon={ArrowRight}
+        onClick={handleNavigateToTenants}
+        className="self-start sm:self-auto font-semibold text-blue-600 hover:text-blue-700 shrink-0 text-sm"
       >
-        <span>Tinjau tenant</span>
-        <ArrowRight size={14} aria-hidden="true" />
-      </Link>
+        Tinjau tenant
+      </Button>
     </div>
   );
 }

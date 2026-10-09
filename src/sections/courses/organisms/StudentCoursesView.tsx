@@ -1,15 +1,23 @@
 "use client";
 
 import { BookOpen } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ROUTES } from "@/libs/routes";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
+import Button from "@/shared-ui/component/Button";
 import SearchField from "@/shared-ui/component/SearchField";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 export default function StudentCoursesView() {
+  const router = useRouter();
   const { studentState, fetchStudentOverview } = useDashboardApi();
   const [search, setSearch] = useState("");
+
+  const handleNavigateToCourseDetail = (courseId: string | number) => {
+    router.push(ROUTES.STUDENT.COURSE_DETAIL(courseId));
+  };
 
   useEffect(() => {
     // Initial fetch if empty
@@ -17,6 +25,12 @@ export default function StudentCoursesView() {
       void fetchStudentOverview();
     }
   }, [studentState.data, studentState.loading, fetchStudentOverview]);
+
+  useEffect(() => {
+    if (studentState.error) {
+      showErrorToast(studentState.error);
+    }
+  }, [studentState.error]);
 
   const allCourses = studentState.data?.courses || [];
 
@@ -52,12 +66,6 @@ export default function StudentCoursesView() {
           />
         </div>
       </div>
-
-      {studentState.error && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
-          {studentState.error}
-        </div>
-      )}
 
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -131,12 +139,15 @@ export default function StudentCoursesView() {
             const barColorClass = barColors[idx % barColors.length];
 
             return (
-              <Link
-                href={`/dashboard/courses/${course.id}`}
+              <Button
                 key={course.id}
-                className="block group"
+                type="button"
+                variant="ghost"
+                fullWidth
+                onClick={() => handleNavigateToCourseDetail(course.id)}
+                className="p-0 h-auto rounded-2xl block text-left w-full hover:bg-transparent font-normal whitespace-normal transition-none"
               >
-                <div className="border border-slate-100 rounded-2xl p-6 hover:shadow-lg hover:border-blue-100 transition-all bg-white h-full flex flex-col">
+                <div className="border border-slate-100 rounded-2xl p-6 hover:shadow-lg hover:border-blue-100 transition-all bg-white h-full flex flex-col w-full">
                   <div className="flex gap-4 mb-6">
                     <div
                       className={`p-4 rounded-2xl ${colorClass} group-hover:scale-110 transition-transform duration-300 shrink-0`}
@@ -169,7 +180,7 @@ export default function StudentCoursesView() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </Button>
             );
           })}
         </div>

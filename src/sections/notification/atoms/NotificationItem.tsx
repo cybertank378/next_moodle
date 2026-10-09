@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { NotificationResponseDto } from "@/modules/notification/domain/dto/NotificationResponseDto";
 import { NotificationType } from "@/modules/notification/domain/types/NotificationTypes";
+import Button from "@/shared-ui/component/Button";
 
 interface NotificationItemProps {
   notification: NotificationResponseDto;
@@ -57,20 +58,26 @@ export default function NotificationItem({
   notification,
   onClick,
 }: NotificationItemProps) {
+  const handleClick = () => {
+    onClick(notification);
+  };
+
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      fullWidth
       data-testid={`notification-item-${notification.id}`}
-      onClick={() => onClick(notification)}
+      onClick={handleClick}
       className={[
-        "w-full text-left px-4 py-3 flex gap-3 transition-colors hover:bg-slate-50 ",
+        "w-full text-left px-4 py-3 flex gap-3 transition-colors hover:bg-slate-50 rounded-none h-auto justify-start font-normal items-start",
         !notification.isRead
-          ? "bg-indigo-50/60  border-l-2 border-indigo-500"
+          ? "bg-indigo-50/60 border-l-2 border-indigo-500"
           : "border-l-2 border-transparent",
       ].join(" ")}
     >
       {/* Icon */}
-      <div className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-full bg-slate-100  flex items-center justify-center">
+      <div className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
         {getNotificationIcon(notification.type)}
       </div>
 
@@ -80,16 +87,16 @@ export default function NotificationItem({
           className={[
             "text-sm leading-snug",
             !notification.isRead
-              ? "font-semibold text-slate-900 "
-              : "font-normal text-slate-700 ",
+              ? "font-semibold text-slate-900"
+              : "font-normal text-slate-700",
           ].join(" ")}
         >
           {notification.title}
         </p>
-        <p className="mt-0.5 text-xs text-slate-500  line-clamp-2">
+        <p className="mt-0.5 text-xs text-slate-500 line-clamp-2">
           {notification.body}
         </p>
-        <p className="mt-1 text-[11px] text-slate-400 ">
+        <p className="mt-1 text-[11px] text-slate-400">
           {formatRelativeTime(notification.createdAt)}
         </p>
       </div>
@@ -98,6 +105,6 @@ export default function NotificationItem({
       {!notification.isRead && (
         <span className="flex-shrink-0 mt-2 w-2 h-2 rounded-full bg-indigo-500" />
       )}
-    </button>
+    </Button>
   );
 }

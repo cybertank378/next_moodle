@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ROUTES } from "@/libs/routes";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantForm, {
   type TenantFormValue,
@@ -28,7 +29,7 @@ export default function TenantEditView() {
       setError(result.error);
       return;
     }
-    router.push(`/dashboard/tenants/${params.id}`);
+    router.push(ROUTES.ADMIN.TENANT_DETAIL(params.id));
   }
 
   if (detailState.loading) {

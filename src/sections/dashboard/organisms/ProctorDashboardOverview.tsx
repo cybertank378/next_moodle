@@ -8,6 +8,8 @@ import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
 import ActiveMonitoringTable from "@/sections/dashboard/molecules/ActiveMonitoringTable";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
 
+import { showErrorToast } from "@/shared-ui/component/Toast";
+
 export default function ProctorDashboardOverview() {
   const { proctorState, fetchProctorOverview } = useDashboardApi();
 
@@ -17,13 +19,11 @@ export default function ProctorDashboardOverview() {
 
   const { data, loading, error } = proctorState;
 
-  if (error) {
-    return (
-      <div className="flex justify-center py-20 text-red-500">
-        Gagal memuat: {error}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">

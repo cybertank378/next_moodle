@@ -45,26 +45,29 @@ export default function NotificationManagementHeader({
         </div>
 
         <div className="flex items-center gap-3 self-start sm:self-auto">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            color="secondary"
+            size="md"
+            iconOnly
+            leftIcon={RefreshCw}
+            loading={loading}
             onClick={onRefresh}
             disabled={loading}
             aria-label="Segarkan data pengumuman"
             title="Segarkan data pengumuman"
-            className="w-10 h-10 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-xs transition-colors disabled:opacity-50"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${loading ? "animate-spin text-blue-600" : "text-slate-600"}`}
-            />
-          </button>
+            className="w-10 h-10 rounded-xl"
+          />
 
           <Button
-            variant="primary"
+            variant="filled"
+            color="primary"
             size="md"
+            leftIcon={Plus}
             onClick={onNewCampaign}
-            className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs"
+            className="h-10 px-4 rounded-xl text-xs sm:text-sm font-semibold shadow-xs"
           >
-            <Plus className="w-4 h-4" />
             Buat Pengumuman
           </Button>
         </div>

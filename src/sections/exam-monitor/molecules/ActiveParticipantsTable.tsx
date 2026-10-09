@@ -14,6 +14,7 @@ import {
 import Typography from "@/shared-ui/component/Typography";
 import Badge from "@/shared-ui/component/Badge";
 import Button from "@/shared-ui/component/Button";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import type { ExamMonitorParticipantDto } from "@/modules/exam-monitor/domain/dto/ExamMonitorDto";
 import { useExamMonitorApi } from "@/modules/exam-monitor/presentation/hooks/useExamMonitorApi";
 
@@ -61,7 +62,25 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
       await action();
       await fetchMonitor(quizId);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Terjadi kesalahan");
+      showErrorToast(error instanceof Error ? error.message : "Terjadi kesalahan");
+    }
+  };
+
+  const handleUnlock = (attemptId: number) => {
+    void handleAction(() => unlockAttempt({ attemptId }));
+  };
+
+  const handleLock = (attemptId: number) => {
+    void handleAction(() => lockAttempt({ attemptId }));
+  };
+
+  const handleExtendTime = (attemptId: number) => {
+    void handleAction(() => extendTimeAttempt({ attemptId, extraTimeMinutes: 10 }));
+  };
+
+  const handleForceFinish = (attemptId: number) => {
+    if (confirm("Anda yakin ingin memaksa selesai ujian ini?")) {
+      void handleAction(() => forceFinishAttempt({ attemptId }));
     }
   };
 
@@ -126,7 +145,7 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
                           size="sm" 
                           color="primary"
                           disabled={isMutating}
-                          onClick={() => handleAction(() => unlockAttempt({ attemptId: p.attemptId }))}
+                          onClick={() => handleUnlock(p.attemptId)}
                         >
                           Buka Kunci
                         </Button>
@@ -134,9 +153,9 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          color="error"
+                          color="danger"
                           disabled={isMutating || p.state === "finished"}
-                          onClick={() => handleAction(() => lockAttempt({ attemptId: p.attemptId }))}
+                          onClick={() => handleLock(p.attemptId)}
                         >
                           Kunci
                         </Button>
@@ -146,20 +165,16 @@ export default function ActiveParticipantsTable({ quizId, participants, loading 
                         size="sm" 
                         color="secondary"
                         disabled={isMutating || p.state === "finished"}
-                        onClick={() => handleAction(() => extendTimeAttempt({ attemptId: p.attemptId, extraTimeMinutes: 10 }))}
+                        onClick={() => handleExtendTime(p.attemptId)}
                       >
                         +10m
                       </Button>
                       <Button 
                         variant="filled" 
                         size="sm" 
-                        color="error"
+                        color="danger"
                         disabled={isMutating || p.state === "finished"}
-                        onClick={() => {
-                          if (confirm("Anda yakin ingin memaksa selesai ujian ini?")) {
-                            handleAction(() => forceFinishAttempt({ attemptId: p.attemptId }));
-                          }
-                        }}
+                        onClick={() => handleForceFinish(p.attemptId)}
                       >
                         Selesaikan
                       </Button>

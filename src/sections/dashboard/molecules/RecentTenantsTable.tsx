@@ -3,10 +3,11 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import Link from "next/link";
-import { ArrowUpRight, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
 import type { RecentTenantResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import { formatDisplayDate } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
+import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import Pagination from "@/shared-ui/component/Pagination";
@@ -78,9 +79,18 @@ export default function RecentTenantsTable({
   tenants,
   loading,
 }: RecentTenantsTableProps) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  const handleNavigateToAllTenants = () => {
+    router.push(ROUTES.ADMIN.TENANTS);
+  };
+
+  const handleNavigateToTenantSearch = (slug: string) => {
+    router.push(`${ROUTES.ADMIN.TENANTS}?search=${encodeURIComponent(slug)}`);
+  };
 
   const searchInputId = useId();
   const statusSelectId = useId();
@@ -106,13 +116,16 @@ export default function RecentTenantsTable({
             Sekolah dan organisasi yang baru bergabung.
           </p>
         </div>
-        <Link
-          href={ROUTES.ADMIN.TENANTS}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors shrink-0"
+        <Button
+          size="sm"
+          variant="ghost"
+          color="primary"
+          rightIcon={ArrowRight}
+          onClick={handleNavigateToAllTenants}
+          className="text-sm font-semibold shrink-0"
         >
-          <span>Lihat semua</span>
-          <span aria-hidden="true">→</span>
-        </Link>
+          Lihat semua
+        </Button>
       </div>
 
       {/* Filter Toolbar */}
@@ -251,13 +264,16 @@ export default function RecentTenantsTable({
 
                     {/* Action Link */}
                     <TableCell className="py-3.5 px-4 text-right">
-                      <Link
-                        href={`${ROUTES.ADMIN.TENANTS}?search=${encodeURIComponent(tenant.slug)}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        color="secondary"
+                        rightIcon={ArrowUpRight}
+                        onClick={() => handleNavigateToTenantSearch(tenant.slug)}
+                        className="h-7 px-2.5 text-xs font-semibold"
                       >
-                        <span>Detail</span>
-                        <ArrowUpRight size={13} aria-hidden="true" />
-                      </Link>
+                        Detail
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );

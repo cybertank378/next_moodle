@@ -96,6 +96,10 @@ export default function NotificationCampaignDetailView({
     );
   }
 
+  const handleEditDraft = () => {
+    onEdit(campaign.id);
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Bar */}
@@ -105,10 +109,11 @@ export default function NotificationCampaignDetailView({
             type="button"
             variant="ghost"
             size="sm"
+            color="secondary"
+            leftIcon={ArrowLeft}
             onClick={onBack}
-            className="flex items-center gap-1.5 text-xs text-slate-600"
+            className="text-xs text-slate-600"
           >
-            <ArrowLeft className="w-4 h-4" />
             Kembali ke Daftar
           </Button>
           <div>
@@ -136,20 +141,22 @@ export default function NotificationCampaignDetailView({
               <Button
                 type="button"
                 variant="outline"
+                color="secondary"
                 size="sm"
-                onClick={() => onEdit(campaign.id)}
+                onClick={handleEditDraft}
                 className="text-xs"
               >
                 Ubah Draft
               </Button>
               <Button
                 type="button"
-                variant="primary"
+                variant="filled"
+                color="primary"
                 size="sm"
+                leftIcon={Send}
                 onClick={handleSend}
-                className="text-xs flex items-center gap-1.5"
+                className="text-xs"
               >
-                <Send className="w-3.5 h-3.5" />
                 Kirim Sekarang
               </Button>
             </>
@@ -159,12 +166,13 @@ export default function NotificationCampaignDetailView({
             campaign.dispatchStatus === "QUEUED") && (
             <Button
               type="button"
-              variant="danger"
+              variant="outline"
+              color="danger"
               size="sm"
+              leftIcon={XCircle}
               onClick={handleCancel}
-              className="text-xs flex items-center gap-1.5"
+              className="text-xs"
             >
-              <XCircle className="w-3.5 h-3.5" />
               Batalkan Pengiriman
             </Button>
           )}
@@ -172,12 +180,14 @@ export default function NotificationCampaignDetailView({
           <Button
             type="button"
             variant="outline"
+            color="secondary"
             size="sm"
+            iconOnly
+            leftIcon={RefreshCw}
             onClick={loadData}
             title="Segarkan Data"
-          >
-            <RefreshCw className="w-3.5 h-3.5 text-slate-600" />
-          </Button>
+            aria-label="Segarkan Data"
+          />
         </div>
       </div>
 

@@ -3,7 +3,6 @@
 "use client";
 
 import { Slot } from "@radix-ui/react-slot";
-
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";

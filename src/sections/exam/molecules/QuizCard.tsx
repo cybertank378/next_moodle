@@ -2,7 +2,7 @@
 
 import { ArrowRight, Calendar, HelpCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AppRouteConstants } from "@/libs/routes";
+import { ROUTES } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import type { QuizSummaryResponseDTO } from "@/modules/quiz/domain/dto/QuizResponseDto";
 import Button from "@/shared-ui/component/Button";
@@ -16,6 +16,10 @@ interface Props {
 export default function QuizCard({ quiz }: Props) {
   const router = useRouter();
   const cleanIntro = stripHtml(quiz.intro);
+
+  const handleNavigateToQuizDetail = () => {
+    router.push(ROUTES.DASHBOARD.EXAM_DETAIL(quiz.id));
+  };
 
   return (
     <div className="flex flex-col justify-between rounded-xl border border-slate-200  bg-white  p-5 shadow-sm transition-all duration-200 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5">
@@ -81,7 +85,7 @@ export default function QuizCard({ quiz }: Props) {
           variant="filled"
           fullWidth
           rightIcon={ArrowRight}
-          onClick={() => router.push(AppRouteConstants.examDetail(quiz.id))}
+          onClick={handleNavigateToQuizDetail}
         >
           Detail & Akses Ujian
         </Button>

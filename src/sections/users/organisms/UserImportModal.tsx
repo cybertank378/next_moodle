@@ -8,14 +8,16 @@ import {
   Upload,
 } from "lucide-react";
 import type React from "react";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { BulkImportUsersRequestDto } from "@/modules/user/domain/dto/UserRequestDto";
 import type { BulkImportUsersResponseDto } from "@/modules/user/domain/dto/UserResponseDto";
 import {
   USER_IMPORT_TEMPLATE_CSV,
   UserImportParser,
 } from "@/modules/user/domain/mapper/UserImportParser";
+import Button from "@/shared-ui/component/Button";
 import { Modal } from "@/shared-ui/component/Modal";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface Props {
   open: boolean;
@@ -39,6 +41,12 @@ export default function UserImportModal({
   const [importResult, setImportResult] =
     useState<BulkImportUsersResponseDto | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (errorMsg) {
+      showErrorToast(errorMsg);
+    }
+  }, [errorMsg]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,12 +120,6 @@ export default function UserImportModal({
       size="lg"
     >
       <div className="space-y-4 py-2">
-        {errorMsg && (
-          <div className="rounded-lg bg-rose-50  border border-rose-200  p-3 text-sm text-rose-600 ">
-            {errorMsg}
-          </div>
-        )}
-
         {/* Template Download Banner */}
         {!importResult && (
           <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-indigo-100  bg-indigo-50/50  text-xs">
@@ -130,14 +132,16 @@ export default function UserImportModal({
                 sampel.
               </p>
             </div>
-            <button
+            <Button
               type="button"
+              variant="filled"
+              color="primary"
+              size="sm"
+              leftIcon={Download}
               onClick={handleDownloadTemplate}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium cursor-pointer transition-colors shadow-sm shrink-0"
             >
-              <Download size={14} />
-              <span>Unduh Template</span>
-            </button>
+              Unduh Template
+            </Button>
           </div>
         )}
 

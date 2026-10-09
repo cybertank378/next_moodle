@@ -12,12 +12,13 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AppRouteConstants } from "@/libs/routes";
+import { ROUTES } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
 import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
 
 interface Props {
@@ -30,6 +31,18 @@ export default function QuizDetailView({ quizId }: Props) {
     useQuizApi();
   const { startState, startAttempt } = useQuizAttemptApi();
 
+  const handleNavigateToExams = () => {
+    router.push(ROUTES.DASHBOARD.EXAMS);
+  };
+
+  const handleStartAttempt = async () => {
+    if (!quiz) return;
+    const res = await startAttempt({ quizId: quiz.id });
+    if (res.data) {
+      router.push(ROUTES.DASHBOARD.EXAM_ATTEMPT(quiz.id, res.data.id));
+    }
+  };
+
   useEffect(() => {
     if (quizId) {
       void getQuizDetail(quizId);
@@ -41,6 +54,12 @@ export default function QuizDetailView({ quizId }: Props) {
   const access = accessState.data;
   const loading = detailState.loading || accessState.loading;
 
+  useEffect(() => {
+    if (detailState.error) showErrorToast(detailState.error);
+    if (accessState.error) showErrorToast(accessState.error);
+    if (startState.error) showErrorToast(startState.error);
+  }, [detailState.error, accessState.error, startState.error]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -50,7 +69,7 @@ export default function QuizDetailView({ quizId }: Props) {
           color="secondary"
           iconOnly
           leftIcon={ArrowLeft}
-          onClick={() => router.push(AppRouteConstants.EXAMS)}
+          onClick={handleNavigateToExams}
           aria-label="Kembali ke daftar ujian"
         />
         <div>
@@ -201,20 +220,11 @@ export default function QuizDetailView({ quizId }: Props) {
                       leftIcon={Play}
                       disabled={!access.canAttempt || startState.loading}
                       loading={startState.loading}
-                      onClick={async () => {
-                        const res = await startAttempt({ quizId: quiz.id });
-                        if (res.data) {
-                          router.push(
-                            AppRouteConstants.examAttempt(quiz.id, res.data.id),
-                          );
-                        }
-                      }}
+                      onClick={handleStartAttempt}
                     >
-                      {startState.loading
-                        ? "Menyiapkan Ujian..."
-                        : access.canAttempt
-                          ? "Mulai Ujian Sekarang"
-                          : "Ujian Tidak Dapat Diakses"}
+                      {access.canAttempt
+                        ? "Mulai Ujian Sekarang"
+                        : "Ujian Tidak Dapat Diakses"}
                     </Button>
                   </div>
                 </div>

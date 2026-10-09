@@ -2,12 +2,13 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ROUTES } from "@/libs/routes";
 import type { TenantStatus } from "@/modules/tenant/domain/types/TenantMetadata";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantStatusBadge from "@/sections/tenant/atoms/TenantStatusBadge";
 import TenantCredentialForm from "@/sections/tenant/molecules/TenantCredentialForm";
+import { Edit, Trash2 } from "lucide-react";
 import Button from "@/shared-ui/component/Button";
-import LinkButton from "@/shared-ui/component/LinkButton";
 import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
 
@@ -51,6 +52,26 @@ export default function TenantDetailView() {
     );
   }
 
+  const handleNavigateToEdit = () => {
+    router.push(ROUTES.ADMIN.TENANT_EDIT(tenant.id));
+  };
+
+  const handleSaveStatus = async () => {
+    const result = await updateTenantStatus(tenant.id, { status });
+    setMessage(result.error ?? "Status tenant diperbarui.");
+    if (!result.error) await getTenant(tenant.id);
+  };
+
+  const handleDeleteTenant = async () => {
+    if (!window.confirm("Hapus tenant ini?")) return;
+    const result = await deleteTenant(tenant.id);
+    if (result.error) {
+      setMessage(result.error);
+      return;
+    }
+    router.push(ROUTES.ADMIN.TENANTS);
+  };
+
   return (
     <section className="space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -61,12 +82,15 @@ export default function TenantDetailView() {
           </div>
           <p className="text-sm text-slate-500">{tenant.slug}</p>
         </div>
-        <LinkButton
-          href={`/dashboard/tenants/${tenant.id}/edit`}
+        <Button
+          onClick={handleNavigateToEdit}
           variant="outline"
+          color="secondary"
+          size="sm"
+          leftIcon={Edit}
         >
           Edit metadata
-        </LinkButton>
+        </Button>
       </div>
 
       {message && (
@@ -118,12 +142,11 @@ export default function TenantDetailView() {
               <option value="SUSPENDED">SUSPENDED</option>
             </SelectField>
             <Button
+              variant="filled"
+              color="primary"
+              size="sm"
               loading={mutationState.loading}
-              onClick={async () => {
-                const result = await updateTenantStatus(tenant.id, { status });
-                setMessage(result.error ?? "Status tenant diperbarui.");
-                if (!result.error) await getTenant(tenant.id);
-              }}
+              onClick={handleSaveStatus}
             >
               Simpan status
             </Button>
@@ -154,17 +177,11 @@ export default function TenantDetailView() {
           cascade.
         </p>
         <Button
-          color="error"
+          color="danger"
           variant="outline"
-          onClick={async () => {
-            if (!window.confirm("Hapus tenant ini?")) return;
-            const result = await deleteTenant(tenant.id);
-            if (result.error) {
-              setMessage(result.error);
-              return;
-            }
-            router.push("/dashboard/tenants");
-          }}
+          size="sm"
+          leftIcon={Trash2}
+          onClick={handleDeleteTenant}
         >
           Hapus tenant
         </Button>

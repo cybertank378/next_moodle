@@ -93,6 +93,12 @@ describe("Architecture Guard: consolidated App Router structure", () => {
       "src/app/(protected)/dashboard/settings/page.tsx",
       "src/app/(protected)/dashboard/notifications/page.tsx",
       "src/app/(protected)/dashboard/proctor/page.tsx",
+      "src/app/(protected)/dashboard/assignments/page.tsx",
+      "src/app/(protected)/dashboard/calendar/page.tsx",
+      "src/app/(protected)/dashboard/schedule/page.tsx",
+      "src/app/(protected)/dashboard/announcements/page.tsx",
+      "src/app/(protected)/dashboard/activities/page.tsx",
+      "src/app/(protected)/dashboard/profile/page.tsx",
     ];
 
     for (const page of pages) {

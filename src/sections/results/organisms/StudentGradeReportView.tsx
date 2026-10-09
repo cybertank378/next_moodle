@@ -6,6 +6,7 @@ import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
 import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import {
   Table,
   TableBody,
@@ -37,6 +38,10 @@ export default function StudentGradeReportView({
   const { userReportState, getUserGradeReport } = useGradeApi();
   const [currentPage, setCurrentPage] = useState(1);
 
+  const handleRefreshReport = () => {
+    void getUserGradeReport(courseId, userId);
+  };
+
   useEffect(() => {
     if (courseId) {
       void getUserGradeReport(courseId, userId);
@@ -46,6 +51,12 @@ export default function StudentGradeReportView({
   const report = userReportState.data;
   const loading = userReportState.loading;
   const error = userReportState.error;
+
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   const paginatedItems = useMemo(() => {
     if (!report?.items) return [];
@@ -82,19 +93,12 @@ export default function StudentGradeReportView({
             color="secondary"
             leftIcon={RefreshCw}
             loading={loading}
-            onClick={() => void getUserGradeReport(courseId, userId)}
+            onClick={handleRefreshReport}
           >
             Muat Ulang
           </Button>
         </div>
       </div>
-
-      {error && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
-          <p className="font-semibold">Gagal memuat hasil penilaian:</p>
-          <p className="mt-1 text-xs">{error}</p>
-        </div>
-      )}
 
       {loading && !report ? (
         <div className="space-y-4">

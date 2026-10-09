@@ -258,11 +258,11 @@ export default function NotificationManagementView({
           </div>
           <Button
             variant="outline"
+            color="danger"
             size="sm"
+            leftIcon={RefreshCw}
             onClick={loadData}
-            className="flex items-center gap-1.5 text-xs text-rose-700 border-rose-300 hover:bg-rose-100/50"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
             Coba Lagi
           </Button>
         </div>
@@ -394,11 +394,11 @@ export default function NotificationManagementView({
 
           <Button
             variant="outline"
+            color="primary"
             size="sm"
+            leftIcon={Plus}
             onClick={onNewCampaign}
-            className="flex items-center gap-2 font-semibold border-blue-600 text-blue-600 hover:bg-blue-50 bg-white whitespace-nowrap px-4 py-2 rounded-xl text-xs"
           >
-            <Plus className="w-4 h-4" />
             Buat Pengumuman
           </Button>
         </div>

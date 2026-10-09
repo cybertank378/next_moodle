@@ -6,6 +6,7 @@ import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
 import Button from "@/shared-ui/component/Button";
 import SearchField from "@/shared-ui/component/SearchField";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
 import CourseGradesTable from "@/sections/results/molecules/CourseGradesTable";
 import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
@@ -27,6 +28,10 @@ export default function TeacherClassResultsView({
   const [exporting, setExporting] = useState(false);
   const [selectedStudent, setSelectedStudent] =
     useState<UserGradeReportResponseDto | null>(null);
+
+  const handleRefresh = () => {
+    void getCourseGrades(courseId);
+  };
 
   useEffect(() => {
     if (courseId) {
@@ -64,9 +69,8 @@ export default function TeacherClassResultsView({
       a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      // Surface error briefly – a toast integration can be added later
       console.error("[GradeExport]", err);
-      alert(
+      showErrorToast(
         err instanceof Error ? err.message : "Gagal mengekspor rekap nilai.",
       );
     } finally {
@@ -77,6 +81,12 @@ export default function TeacherClassResultsView({
   const reports = courseGradesState.data?.reports ?? [];
   const loading = courseGradesState.loading;
   const error = courseGradesState.error;
+
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   const filteredReports = useMemo(() => {
     if (!searchQuery.trim()) return reports;
@@ -153,7 +163,7 @@ export default function TeacherClassResultsView({
             color="secondary"
             leftIcon={RefreshCw}
             loading={loading}
-            onClick={() => void getCourseGrades(courseId)}
+            onClick={handleRefresh}
           >
             Muat Ulang
           </Button>
@@ -165,20 +175,13 @@ export default function TeacherClassResultsView({
             leftIcon={Download}
             loading={exporting}
             disabled={reports.length === 0 || loading}
-            onClick={() => void handleExportExcel()}
+            onClick={handleExportExcel}
             data-testid="export-excel-btn"
           >
             Export Excel
           </Button>
         </div>
       </div>
-
-      {error && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
-          <p className="font-semibold">Gagal memuat rekap nilai:</p>
-          <p className="mt-1 text-xs">{error}</p>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <GradeScoreCard

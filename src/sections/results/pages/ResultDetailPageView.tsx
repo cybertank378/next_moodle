@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AppRouteConstants } from "@/libs/routes";
+import { ROUTES } from "@/libs/routes";
 import Button from "@/shared-ui/component/Button";
 import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
 
@@ -19,6 +19,10 @@ export default function ResultDetailPageView({
 }: ResultDetailPageViewProps) {
   const router = useRouter();
 
+  const handleNavigateToResults = () => {
+    router.push(ROUTES.DASHBOARD.RESULTS);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -28,7 +32,7 @@ export default function ResultDetailPageView({
           color="secondary"
           iconOnly
           leftIcon={ArrowLeft}
-          onClick={() => router.push(`${AppRouteConstants.DASHBOARD}/results`)}
+          onClick={handleNavigateToResults}
           aria-label="Kembali ke halaman nilai"
         />
         <span className="text-sm text-gray-400">Kembali ke Daftar Nilai</span>

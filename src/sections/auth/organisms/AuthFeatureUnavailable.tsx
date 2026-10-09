@@ -17,6 +17,10 @@ export default function AuthFeatureUnavailable({
 }: AuthFeatureUnavailableProps) {
   const router = useRouter();
 
+  const handleNavigateToLogin = () => {
+    router.push(ROUTES.AUTH.LOGIN);
+  };
+
   return (
     <AuthFrame title={title} description={description}>
       <div className="space-y-5 text-center">
@@ -28,7 +32,9 @@ export default function AuthFeatureUnavailable({
         <Button
           fullWidth
           size="lg"
-          onClick={() => router.push(ROUTES.AUTH.LOGIN)}
+          variant="filled"
+          color="primary"
+          onClick={handleNavigateToLogin}
         >
           Kembali ke Login
         </Button>

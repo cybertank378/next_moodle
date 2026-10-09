@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import LinkButton from "@/shared-ui/component/LinkButton";
+import { ROUTES } from "@/libs/routes";
+import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import {
@@ -33,7 +35,12 @@ interface UpcomingExamsTableProps {
 }
 
 export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTableProps) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
+
+  const handleNavigateToAllExams = () => {
+    router.push(ROUTES.DASHBOARD.EXAMS);
+  };
 
   const totalItems = exams.length;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -45,9 +52,9 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
         <Typography variant="h2" className="text-slate-900 ">
           Ujian Mendatang
         </Typography>
-        <LinkButton href="/dashboard/exams" variant="secondary" className="text-xs px-3 py-1">
+        <Button onClick={handleNavigateToAllExams} variant="secondary" size="sm">
           Lihat Semua
-        </LinkButton>
+        </Button>
       </div>
 
       <Table wrapperClassName="rounded-none rounded-b-lg border-t-0">

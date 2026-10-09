@@ -9,6 +9,7 @@ import {
 } from "@/modules/questions/domain/types/QuestionTypes";
 import { useQuestionApi } from "@/modules/questions/presentation/hooks/useQuestionApi";
 import Button from "@/shared-ui/component/Button";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import RichTextEditorField from "@/shared-ui/component/RichTextEditor/RichTextEditorField";
 import SelectField from "@/shared-ui/component/SelectField";
 import TextField from "@/shared-ui/component/TextField";
@@ -49,6 +50,12 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
     setError(null);
   }, [categoryId, existingQuestion]);
 
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -82,9 +89,6 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
       <h2 className="text-lg font-semibold mb-4 text-slate-800">
         {isEditing ? "Edit Question" : "Create New Question"}
       </h2>
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded">{error}</div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -150,7 +154,7 @@ export const QuestionEditor: React.FC<QuestionEditorProps> = ({
         </div>
 
         <div className="pt-4 flex justify-end space-x-3">
-          <Button type="submit" loading={loading} variant="primary">
+          <Button type="submit" loading={loading} variant="filled" color="primary">
             {isEditing ? "Update Question" : "Save Question"}
           </Button>
         </div>

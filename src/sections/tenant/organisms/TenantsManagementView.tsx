@@ -1,14 +1,18 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ROUTES } from "@/libs/routes";
 import { useTenantApi } from "@/modules/tenant/presentation/hooks/useTenantApi";
 import TenantTable from "@/sections/tenant/molecules/TenantTable";
-import LinkButton from "@/shared-ui/component/LinkButton";
+import { Plus } from "lucide-react";
+import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import SelectField from "@/shared-ui/component/SelectField";
 import TextField from "@/shared-ui/component/TextField";
 
 export default function TenantsManagementView() {
+  const router = useRouter();
   const { listState, listTenants } = useTenantApi();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -17,6 +21,10 @@ export default function TenantsManagementView() {
   useEffect(() => {
     void listTenants({ page, pageSize: 10, search, status });
   }, [listTenants, page, search, status]);
+
+  const handleNavigateToCreateTenant = () => {
+    router.push(ROUTES.ADMIN.TENANTS_CREATE);
+  };
 
   const data = listState.data;
 
@@ -29,7 +37,14 @@ export default function TenantsManagementView() {
             Kelola metadata tenant dan konfigurasi credential terenkripsi.
           </p>
         </div>
-        <LinkButton href="/dashboard/tenants/create">Tambah tenant</LinkButton>
+        <Button
+          variant="filled"
+          color="primary"
+          leftIcon={Plus}
+          onClick={handleNavigateToCreateTenant}
+        >
+          Tambah tenant
+        </Button>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">

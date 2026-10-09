@@ -32,18 +32,18 @@ export default function UserFilterBar({
         <Button
           variant="outline"
           color="primary"
+          size="sm"
           onClick={onImportClick}
           leftIcon={Upload}
-          className="text-sm font-medium"
         >
           Import CSV
         </Button>
         <Button
           variant="filled"
           color="primary"
+          size="sm"
           onClick={onCreateClick}
           leftIcon={UserPlus}
-          className="text-sm font-medium"
         >
           Tambah Pengguna
         </Button>

@@ -6,6 +6,7 @@ import Typography from "@/shared-ui/component/Typography";
 import Card from "@/shared-ui/component/Card";
 import ActiveParticipantsTable from "../molecules/ActiveParticipantsTable";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface ExamMonitorOverviewProps {
   quizId: number;
@@ -26,13 +27,11 @@ export default function ExamMonitorOverview({ quizId }: ExamMonitorOverviewProps
 
   const { data, loading, error } = monitorState;
 
-  if (error) {
-    return (
-      <div className="flex justify-center py-20 text-red-500">
-        Gagal memuat: {error}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">

@@ -1,16 +1,36 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { ROUTES } from "@/libs/routes";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
 import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
 import Card from "@/shared-ui/component/Card";
-import LinkButton from "@/shared-ui/component/LinkButton";
+import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import Typography from "@/shared-ui/component/Typography";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 export default function TeacherDashboardOverview() {
+  const router = useRouter();
   const { teacherState, fetchTeacherOverview } = useDashboardApi();
+
+  const handleNavigateToQuestions = () => {
+    router.push(ROUTES.TEACHER.QUESTIONS);
+  };
+
+  const handleNavigateToResults = () => {
+    router.push(ROUTES.TEACHER.RESULTS);
+  };
+
+  const handleNavigateToCourses = () => {
+    router.push(ROUTES.TEACHER.COURSES);
+  };
+
+  const handleNavigateToExams = () => {
+    router.push(ROUTES.TEACHER.EXAMS);
+  };
 
   useEffect(() => {
     fetchTeacherOverview();
@@ -18,13 +38,11 @@ export default function TeacherDashboardOverview() {
 
   const { data, loading, error } = teacherState;
 
-  if (error) {
-    return (
-      <div className="flex justify-center py-20 text-red-500">
-        Gagal memuat: {error}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -83,26 +101,28 @@ export default function TeacherDashboardOverview() {
                       Ujian <strong>"Matematika Mid-Term"</strong> dijadwalkan
                       besok namun belum memiliki soal.
                     </Typography>
-                    <LinkButton
-                      href="/dashboard/questions"
-                      variant="secondary"
-                      className="text-xs text-rose-600 border-rose-200 hover:bg-rose-50"
+                    <Button
+                      onClick={handleNavigateToQuestions}
+                      variant="outline"
+                      color="danger"
+                      size="sm"
                     >
                       Tambahkan Soal
-                    </LinkButton>
+                    </Button>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-white  border border-amber-100 ">
                     <Typography variant="body" className="text-sm">
                       Terdapat <strong>3 insiden mencurigakan</strong> pada sesi
                       Proctoring ujian terakhir.
                     </Typography>
-                    <LinkButton
-                      href="/dashboard/results"
-                      variant="secondary"
-                      className="text-xs text-amber-600 border-amber-200 hover:bg-amber-50"
+                    <Button
+                      onClick={handleNavigateToResults}
+                      variant="outline"
+                      color="warning"
+                      size="sm"
                     >
                       Lihat Laporan
-                    </LinkButton>
+                    </Button>
                   </div>
                 </>
               )}
@@ -114,13 +134,13 @@ export default function TeacherDashboardOverview() {
             <Typography variant="h2" className="text-slate-900 ">
               Mata Pelajaran Saya
             </Typography>
-            <LinkButton
-              href="/dashboard/courses"
+            <Button
+              onClick={handleNavigateToCourses}
               variant="secondary"
-              className="text-xs px-3 py-1"
+              size="sm"
             >
               Lihat Semua
-            </LinkButton>
+            </Button>
           </div>
           <div className="p-6 space-y-4">
             {loading && (
@@ -166,13 +186,13 @@ export default function TeacherDashboardOverview() {
             <Typography variant="h2" className="text-slate-900 ">
               Aktivitas Ujian Kelas
             </Typography>
-            <LinkButton
-              href="/dashboard/exams"
+            <Button
+              onClick={handleNavigateToExams}
               variant="secondary"
-              className="text-xs px-3 py-1"
+              size="sm"
             >
               Lihat Semua
-            </LinkButton>
+            </Button>
           </div>
           <div className="p-6 space-y-4">
             {loading && (

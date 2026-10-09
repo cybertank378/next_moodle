@@ -44,6 +44,10 @@ export default function LoginForm() {
     }
   }
 
+  const handleNavigateToForgotPassword = () => {
+    router.push(ROUTES.AUTH.FORGOT_PASSWORD);
+  };
+
   return (
     <div className="w-full max-w-[420px] mx-auto flex flex-col justify-between py-6 px-4 sm:px-0">
       {/* Mobile top logo (visible on mobile only) */}
@@ -85,13 +89,16 @@ export default function LoginForm() {
 
         {/* Forgot password link */}
         <div className="flex justify-end pt-1">
-          <button
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 transition-colors cursor-pointer"
-            onClick={() => router.push(ROUTES.AUTH.FORGOT_PASSWORD)}
+          <Button
             type="button"
+            variant="text"
+            color="primary"
+            size="sm"
+            onClick={handleNavigateToForgotPassword}
+            className="text-xs font-semibold p-0 h-auto"
           >
             Lupa kata sandi?
-          </button>
+          </Button>
         </div>
 
         {/* Safe error banner */}
@@ -112,15 +119,17 @@ export default function LoginForm() {
 
         {/* Submit button */}
         <Button
-          className="mt-4 h-12 w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all"
-          disabled={auth.loading}
+          type="submit"
+          variant="filled"
+          color="primary"
+          size="lg"
           fullWidth
           loading={auth.loading}
-          size="lg"
-          type="submit"
+          disabled={auth.loading}
+          rightIcon={ArrowRight}
+          className="mt-4 h-12 rounded-xl text-sm font-semibold shadow-sm"
         >
-          <span>Masuk</span>
-          <ArrowRight aria-hidden="true" size={16} />
+          Masuk
         </Button>
       </form>
 

@@ -6,6 +6,7 @@ import { useCourseApi } from "@/modules/course/presentation/hooks/useCourseApi";
 import CourseCard from "@/sections/courses/molecules/CourseCard";
 import CourseFilterBar from "@/sections/courses/molecules/CourseFilterBar";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 export default function CoursesView() {
   const { coursesState, listCourses } = useCourseApi();
@@ -14,6 +15,12 @@ export default function CoursesView() {
   useEffect(() => {
     void listCourses({ search });
   }, [listCourses, search]);
+
+  useEffect(() => {
+    if (coursesState.error) {
+      showErrorToast(coursesState.error);
+    }
+  }, [coursesState.error]);
 
   const courses = coursesState.data?.courses ?? [];
   const loading = coursesState.loading;
@@ -31,12 +38,6 @@ export default function CoursesView() {
       </div>
 
       <CourseFilterBar search={search} onSearchChange={setSearch} />
-
-      {coursesState.error && (
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
-          {coursesState.error}
-        </div>
-      )}
 
       {loading && (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">

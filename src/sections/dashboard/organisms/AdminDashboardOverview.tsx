@@ -2,8 +2,8 @@
 
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   Ban,
   CheckCircle2,
@@ -17,6 +17,7 @@ import { ADMIN_DASHBOARD_DEFAULT_MONTHS } from "@/modules/dashboard/domain/types
 import { formatCount } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
 import Button from "@/shared-ui/component/Button";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import AdminTenantAttentionBanner from "@/sections/dashboard/molecules/AdminTenantAttentionBanner";
 import RecentTenantsTable from "@/sections/dashboard/molecules/RecentTenantsTable";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
@@ -27,10 +28,19 @@ import { ROUTES } from "@/libs/routes";
 const EMPTY_SUMMARY = { total: 0, active: 0, maintenance: 0, suspended: 0 };
 
 export default function AdminDashboardOverview() {
+  const router = useRouter();
   const { adminState, fetchAdminOverview } = useDashboardApi();
   const [selectedMonths, setSelectedMonths] = useState<number>(
     ADMIN_DASHBOARD_DEFAULT_MONTHS,
   );
+
+  const handleNavigateToRegisterTenant = () => {
+    router.push(`${ROUTES.ADMIN.TENANTS}?action=create`);
+  };
+
+  const handleRefresh = () => {
+    void fetchAdminOverview(selectedMonths);
+  };
 
   useEffect(() => {
     void fetchAdminOverview(selectedMonths);
@@ -39,6 +49,12 @@ export default function AdminDashboardOverview() {
   const { data, loading, error } = adminState;
   const summary = data?.summary ?? EMPTY_SUMMARY;
   const unavailable = !data && !!error;
+
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
@@ -69,26 +85,29 @@ export default function AdminDashboardOverview() {
 
         {/* Top Actions: Refresh & Daftarkan Tenant */}
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
-          <button
+          <Button
             type="button"
             aria-label="Muat ulang data platform"
-            onClick={() => void fetchAdminOverview(selectedMonths)}
+            variant="outline"
+            color="secondary"
+            size="md"
+            iconOnly
+            leftIcon={RotateCw}
+            onClick={handleRefresh}
             disabled={loading}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition-all disabled:opacity-60"
-          >
-            <RotateCw
-              size={17}
-              className={loading ? "animate-spin text-blue-600" : ""}
-            />
-          </button>
+            loading={loading}
+            className="h-10 w-10 rounded-xl"
+          />
 
-          <Link
-            href={`${ROUTES.ADMIN.TENANTS}?action=create`}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-all"
+          <Button
+            leftIcon={Plus}
+            color="primary"
+            variant="filled"
+            onClick={handleNavigateToRegisterTenant}
+            className="rounded-xl shadow-sm"
           >
-            <Plus size={16} />
-            <span>Daftarkan Tenant</span>
-          </Link>
+            Daftarkan Tenant
+          </Button>
         </div>
       </div>
 
@@ -103,7 +122,7 @@ export default function AdminDashboardOverview() {
             size="sm"
             variant="outline"
             color="error"
-            onClick={() => void fetchAdminOverview(selectedMonths)}
+            onClick={handleRefresh}
             className="border-rose-300 text-rose-700"
           >
             Coba lagi

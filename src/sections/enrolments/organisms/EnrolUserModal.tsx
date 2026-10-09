@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { EnrolUserRequestDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
 import SelectField from "@/shared-ui/component/SelectField";
 import TextField from "@/shared-ui/component/TextField";
 import { Modal } from "@/shared-ui/component/Modal";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface Props {
   open: boolean;
@@ -26,6 +27,12 @@ export default function EnrolUserModal({
   const [userId, setUserId] = useState("");
   const [roleId, setRoleId] = useState(5); // default 5 = student
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (errorMsg) {
+      showErrorToast(errorMsg);
+    }
+  }, [errorMsg]);
 
   const handleSubmit = async () => {
     if (!courseId) {
@@ -71,11 +78,6 @@ export default function EnrolUserModal({
       size="md"
     >
       <div className="space-y-4 py-2">
-        {errorMsg && (
-          <div className="rounded-lg bg-rose-50  border border-rose-200  p-3 text-sm text-rose-600 ">
-            {errorMsg}
-          </div>
-        )}
 
         <div>
           <TextField

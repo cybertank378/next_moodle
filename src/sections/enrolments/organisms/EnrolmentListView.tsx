@@ -14,6 +14,7 @@ import { useEnrolmentApi } from "@/modules/enrolment/presentation/hooks/useEnrol
 import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 import {
   Table,
   TableBody,
@@ -123,6 +124,22 @@ export default function EnrolmentListView() {
     }
   };
 
+  const handleDismissToast = () => {
+    setToastMessage(null);
+  };
+
+  useEffect(() => {
+    if (enrolmentsState.error) {
+      showErrorToast(enrolmentsState.error);
+    }
+  }, [enrolmentsState.error]);
+
+  useEffect(() => {
+    if (unenrolState.error) {
+      showErrorToast(unenrolState.error);
+    }
+  }, [unenrolState.error]);
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -132,13 +149,15 @@ export default function EnrolmentListView() {
             <CheckCircle2 size={18} />
             <span>{toastMessage}</span>
           </div>
-          <button
+          <Button
             type="button"
-            onClick={() => setToastMessage(null)}
+            variant="ghost"
+            size="sm"
+            onClick={handleDismissToast}
             className="text-xs font-semibold hover:underline"
           >
             Tutup
-          </button>
+          </Button>
         </div>
       )}
 
@@ -313,13 +332,12 @@ export default function EnrolmentListView() {
                 <TableCell className="text-right">
                   <Button
                     variant="ghost"
-                    color="error"
+                    color="danger"
                     size="sm"
                     onClick={() => handleUnenrol(enrol.userId, enrol.fullname)}
                     disabled={unenrolState.loading}
                     title="Batalkan pendaftaran"
                     leftIcon={Trash2}
-                    className="text-xs"
                   >
                     Batal Daftar
                   </Button>

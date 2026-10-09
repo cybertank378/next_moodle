@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AppRouteConstants } from "@/libs/routes";
+import { ROUTES } from "@/libs/routes";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
 import Skeleton from "@/shared-ui/component/Skeleton";
@@ -59,7 +59,7 @@ export default function ExamAttemptPageView({
       quizId,
     });
     if (res.data?.success) {
-      router.push(AppRouteConstants.EXAMS);
+      router.push(ROUTES.DASHBOARD.EXAMS);
     }
   };
 

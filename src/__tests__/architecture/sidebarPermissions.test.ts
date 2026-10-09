@@ -5,6 +5,15 @@ import type { UserRole } from "@/libs/enums";
 import { canAccess, PERMISSIONS } from "@/libs/permissions";
 import AppSidebar, { getSidebarMenu } from "@/shared-ui/layout/AppSidebar";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => "/dashboard",
+}));
+
 describe("Sidebar Navigation and Permission Guards", () => {
   it("renders the on-dark horizontal Aksaventra logo on desktop and mobile drawer", () => {
     const html = renderToStaticMarkup(
