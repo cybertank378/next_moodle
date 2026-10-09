@@ -4,9 +4,11 @@ import clsx from "clsx";
 
 export interface LoginHelpPanelProps {
   readonly className?: string;
+  readonly supportEmail?: string | null;
+  readonly supportUrl?: string | null;
 }
 
-export default function LoginHelpPanel({ className }: LoginHelpPanelProps) {
+export default function LoginHelpPanel({ className, supportEmail, supportUrl }: LoginHelpPanelProps) {
   return (
     <div
       className={clsx(
@@ -26,6 +28,10 @@ export default function LoginHelpPanel({ className }: LoginHelpPanelProps) {
         <span className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
           Hubungi administrator sekolah Anda.
         </span>
+        {(supportEmail || supportUrl) && <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold text-indigo-700">
+          {supportEmail && <a href={`mailto:${supportEmail}`}>Hubungi dukungan</a>}
+          {supportUrl && <a href={supportUrl} target="_blank" rel="noopener noreferrer">Bantuan</a>}
+        </div>
       </div>
     </div>
   );
