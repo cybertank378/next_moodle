@@ -56,8 +56,11 @@ export class PrismaNotificationOutboxRepository
 
     for (const job of candidateJobs) {
       try {
-        const updated = await prisma.notificationOutbox.update({
-          where: { id: job.id },
+        const lock = await prisma.notificationOutbox.updateMany({
+          where: { id: job.id, availableAt: { lte: now }, OR: [
+            { status: "PENDING" },
+            { status: "PROCESSING", leaseExpiresAt: { lte: now } },
+          ] },
           data: {
             status: "PROCESSING",
             leaseOwner,
@@ -65,12 +68,13 @@ export class PrismaNotificationOutboxRepository
             attempts: { increment: 1 },
           },
         });
+        if (lock.count !== 1) continue;
         claimed.push({
-          id: updated.id,
-          campaignId: updated.campaignId,
-          jobType: updated.jobType,
-          payload: updated.payload as Record<string, unknown> | null,
-          attempts: updated.attempts,
+          id: job.id,
+          campaignId: job.campaignId,
+          jobType: job.jobType,
+          payload: job.payload as Record<string, unknown> | null,
+          attempts: job.attempts + 1,
         });
       } catch {
         // Ignored if claimed concurrently by another worker

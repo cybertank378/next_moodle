@@ -16,6 +16,7 @@ export interface FindByRecipientResult {
 }
 
 export interface CreateNotificationOptions {
+  campaignId?: string;
   scope: NotificationScope;
   type: NotificationType;
   title: string;
