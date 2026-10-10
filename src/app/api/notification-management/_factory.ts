@@ -67,7 +67,6 @@ export function createNotificationManagementController(): NotificationManagement
     new SendNotificationCampaignUseCase(
       campaignRepo,
       outboxRepo,
-      dispatchService,
     ),
     new ScheduleNotificationCampaignUseCase(campaignRepo, outboxRepo),
     new CancelNotificationCampaignUseCase(campaignRepo),

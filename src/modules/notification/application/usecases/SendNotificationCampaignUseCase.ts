@@ -5,7 +5,6 @@ import {
   type CampaignActor,
   NotificationAuthorizationService,
 } from "@/modules/notification/application/services/NotificationAuthorizationService";
-import type { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
 import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
 import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import type { NotificationOutboxRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
@@ -14,7 +13,6 @@ export class SendNotificationCampaignUseCase {
   constructor(
     private readonly campaignRepo: NotificationCampaignRepositoryInterface,
     private readonly outboxRepo: NotificationOutboxRepositoryInterface,
-    private readonly dispatchService?: NotificationDispatchService,
   ) {}
 
   async execute(
@@ -31,12 +29,8 @@ export class SendNotificationCampaignUseCase {
     campaign.queue();
     const updated = await this.campaignRepo.update(campaign);
 
-    // Avoid duplicate dispatch through both inline execution and outbox.
-    if (this.dispatchService) {
-      await this.dispatchService.dispatchCampaign(updated);
-    } else {
-      await this.outboxRepo.enqueue(campaign.id, "DISPATCH_CAMPAIGN");
-    }
+    // Always queue: campaign delivery must not depend on the HTTP request lifetime.
+    await this.outboxRepo.enqueue(campaign.id, "DISPATCH_CAMPAIGN");
 
     return updated;
   }

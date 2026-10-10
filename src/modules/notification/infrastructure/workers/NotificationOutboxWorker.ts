@@ -48,7 +48,7 @@ export class NotificationOutboxWorker {
         succeeded += 1;
       } catch (err: unknown) {
         failed += 1;
-        const attempts = job.attempts + 1;
+        const attempts = job.attempts;
         const canRetry = attempts < 5;
         // Exponential backoff with jitter: 2^attempts * 1000ms + random(500)
         const baseBackoff = Math.min(60_000, 2 ** attempts * 1000);
@@ -56,8 +56,7 @@ export class NotificationOutboxWorker {
         const backoffMs = baseBackoff + jitter;
 
         console.error(
-          `[OutboxWorker] Job ${job.id} (${job.jobType}) failed:`,
-          err,
+          `[OutboxWorker] Job ${job.id} (${job.jobType}) failed.`,
         );
         await this.deps.outboxRepo.failJob(job.id, canRetry, backoffMs);
       }
