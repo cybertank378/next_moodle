@@ -95,14 +95,19 @@ export function NotificationProvider({
   const requestIdRef = useRef(0);
 
   // ── 3. Push permission & device state ──
-  const [pushPermission, setPushPermission] = useState<PushPermissionStatus>(
-    () => {
-      if (typeof window !== "undefined" && "Notification" in window) {
-        return Notification.permission as PushPermissionStatus;
-      }
-      return "unsupported";
-    },
-  );
+  // The initial state must match server HTML and the first client render.
+  // Browser permission is inspected only after hydration.
+  const [pushPermission, setPushPermission] =
+    useState<PushPermissionStatus>("unsupported");
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      setPushPermission("unsupported");
+      return;
+    }
+
+    setPushPermission(Notification.permission as PushPermissionStatus);
+  }, []);
   const [pushLoading, setPushLoading] = useState(false);
   const [pushError, setPushError] = useState<string | null>(null);
 
