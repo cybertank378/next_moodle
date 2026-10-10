@@ -3,13 +3,6 @@
 
 import { AlertCircle, Plus, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import type { NotificationCampaignResponseDto } from "@/modules/notification/domain/dto/NotificationCampaignResponseDto";
-import {
-  NotificationAudienceScope,
-  NotificationChannel,
-  NotificationDispatchStatus,
-  NotificationOwnerScope,
-} from "@/modules/notification/domain/types/NotificationTypes";
 import { useNotificationManagementApi } from "@/modules/notification/presentation/hooks/useNotificationManagementApi";
 import NotificationActionModal from "@/sections/notification-management/molecules/NotificationActionModal";
 import NotificationCampaignFilters from "@/sections/notification-management/molecules/NotificationCampaignFilters";
@@ -24,97 +17,6 @@ interface Props {
   onEditCampaign: (id: string) => void;
   onViewCampaign: (id: string) => void;
 }
-
-// Mockup 1 Reference Sample Data when system has no seeded campaigns
-const SAMPLE_MOCKUP_CAMPAIGNS: NotificationCampaignResponseDto[] = [
-  {
-    id: "sample-1",
-    ownerScope: NotificationOwnerScope.PLATFORM,
-    ownerTenantId: null,
-    createdById: "admin-1",
-    createdByRole: "ADMIN",
-    title: "Informasi pemeliharaan sistem",
-    contentJson: {},
-    sanitizedHtml: "<p>Informasi pemeliharaan sistem berkala.</p>",
-    plainText: "Informasi pemeliharaan sistem berkala.",
-    pushSummary: "Pemeliharaan sistem dijadwalkan.",
-    audienceSpec: { scope: NotificationAudienceScope.ALL },
-    channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
-    dispatchStatus: NotificationDispatchStatus.COMPLETED,
-    scheduledAt: null,
-    timezone: "Asia/Jakarta",
-    createdAt: "2026-10-06T08:00:00.000Z",
-    updatedAt: "2026-10-06T08:00:00.000Z",
-    version: 1,
-    archivedAt: null,
-  },
-  {
-    id: "sample-2",
-    ownerScope: NotificationOwnerScope.PLATFORM,
-    ownerTenantId: null,
-    createdById: "admin-1",
-    createdByRole: "ADMIN",
-    title: "Jadwal ujian semester",
-    contentJson: {},
-    sanitizedHtml: "<p>Jadwal ujian semester telah dirilis.</p>",
-    plainText: "Jadwal ujian semester telah dirilis.",
-    pushSummary: "Jadwal ujian semester telah dirilis.",
-    audienceSpec: { scope: NotificationAudienceScope.TENANT },
-    channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
-    dispatchStatus: NotificationDispatchStatus.SCHEDULED,
-    scheduledAt: "2026-10-08T07:00:00.000Z",
-    timezone: "Asia/Jakarta",
-    createdAt: "2026-10-05T10:00:00.000Z",
-    updatedAt: "2026-10-05T10:00:00.000Z",
-    version: 1,
-    archivedAt: null,
-  },
-  {
-    id: "sample-3",
-    ownerScope: NotificationOwnerScope.PLATFORM,
-    ownerTenantId: null,
-    createdById: "admin-1",
-    createdByRole: "ADMIN",
-    title: "Pembaruan materi pembelajaran",
-    contentJson: {},
-    sanitizedHtml: "<p>Pembaruan kurikulum dan materi pembelajaran.</p>",
-    plainText: "Pembaruan kurikulum dan materi pembelajaran.",
-    pushSummary: null,
-    audienceSpec: {
-      scope: NotificationAudienceScope.USERS,
-      userIds: ["tenant-1", "tenant-2", "tenant-3"],
-    },
-    channels: [NotificationChannel.IN_APP],
-    dispatchStatus: NotificationDispatchStatus.DRAFT,
-    scheduledAt: null,
-    timezone: "Asia/Jakarta",
-    createdAt: "2026-10-04T12:00:00.000Z",
-    updatedAt: "2026-10-04T12:00:00.000Z",
-    version: 1,
-    archivedAt: null,
-  },
-  {
-    id: "sample-4",
-    ownerScope: NotificationOwnerScope.PLATFORM,
-    ownerTenantId: null,
-    createdById: "admin-1",
-    createdByRole: "ADMIN",
-    title: "Panduan tahun ajaran baru",
-    contentJson: {},
-    sanitizedHtml: "<p>Panduan lengkap untuk tahun ajaran baru.</p>",
-    plainText: "Panduan lengkap untuk tahun ajaran baru.",
-    pushSummary: "Panduan tahun ajaran baru tersedia.",
-    audienceSpec: { scope: NotificationAudienceScope.ALL },
-    channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
-    dispatchStatus: NotificationDispatchStatus.COMPLETED,
-    scheduledAt: null,
-    timezone: "Asia/Jakarta",
-    createdAt: "2026-10-04T09:00:00.000Z",
-    updatedAt: "2026-10-04T09:00:00.000Z",
-    version: 1,
-    archivedAt: null,
-  },
-];
 
 export default function NotificationManagementView({
   role,
@@ -218,18 +120,6 @@ export default function NotificationManagementView({
     setPage(1);
   };
 
-  // When database has no campaigns created yet, show Mockup 1 reference sample data
-  const isUsingSampleData =
-    campaigns.length === 0 && !loading && !hasActiveFilters;
-
-  const effectiveCampaigns = isUsingSampleData
-    ? SAMPLE_MOCKUP_CAMPAIGNS
-    : campaigns;
-  const effectiveTotal = isUsingSampleData ? 24 : total;
-  const effectiveSummary = isUsingSampleData
-    ? { total: 24, sent: 18, scheduled: 4, draft: 2 }
-    : summary;
-
   return (
     <div className="space-y-6">
       {/* Header matching Mockup 1 */}
@@ -242,11 +132,11 @@ export default function NotificationManagementView({
 
       {/* 4 Summary Cards matching Mockup 1 */}
       <NotificationSummaryCards
-        total={effectiveSummary.total}
-        sent={effectiveSummary.sent}
-        scheduled={effectiveSummary.scheduled}
-        draft={effectiveSummary.draft}
-        loading={loading && campaigns.length === 0 && !isUsingSampleData}
+        total={summary.total}
+        sent={summary.sent}
+        scheduled={summary.scheduled}
+        draft={summary.draft}
+        loading={loading && campaigns.length === 0}
       />
 
       {/* Error Alert with Retry button */}
@@ -270,7 +160,6 @@ export default function NotificationManagementView({
 
       {/* Main Table Card with Data contoh label above */}
       <div className="space-y-2">
-        <div className="text-xs text-slate-400 font-medium">Data contoh</div>
 
         {/* Filters and Tabs */}
         <NotificationCampaignFilters
@@ -307,17 +196,17 @@ export default function NotificationManagementView({
           onResetFilters={handleResetFilters}
           hasActiveFilters={hasActiveFilters}
           counts={{
-            total: effectiveSummary.total,
-            sent: effectiveSummary.sent,
-            scheduled: effectiveSummary.scheduled,
-            draft: effectiveSummary.draft,
+            total: summary.total,
+            sent: summary.sent,
+            scheduled: summary.scheduled,
+            draft: summary.draft,
           }}
         />
 
         {/* Table */}
         <NotificationCampaignTable
-          campaigns={effectiveCampaigns}
-          total={effectiveTotal}
+          campaigns={campaigns}
+          total={total}
           currentPage={page}
           pageSize={pageSize}
           onPageChange={setPage}
@@ -327,7 +216,7 @@ export default function NotificationManagementView({
           onResetFilters={handleResetFilters}
           hasActiveFilters={hasActiveFilters}
           onSend={(id) => {
-            const c = effectiveCampaigns.find((x) => x.id === id);
+            const c = campaigns.find((x) => x.id === id);
             setActiveModal({
               type: "SEND",
               id,
@@ -335,7 +224,7 @@ export default function NotificationManagementView({
             });
           }}
           onDelete={(id) => {
-            const c = effectiveCampaigns.find((x) => x.id === id);
+            const c = campaigns.find((x) => x.id === id);
             setActiveModal({
               type: "DELETE",
               id,
@@ -343,15 +232,12 @@ export default function NotificationManagementView({
             });
           }}
           onArchive={handleArchive}
-          loading={loading && campaigns.length === 0 && !isUsingSampleData}
+          loading={loading && campaigns.length === 0}
         />
       </div>
 
-      {/* Tampilan saat belum ada pengumuman section matching Mockup 1 */}
+      {!loading && !error && campaigns.length === 0 && !hasActiveFilters && (
       <div className="pt-2 space-y-2">
-        <div className="text-xs text-slate-400 font-medium">
-          Tampilan saat belum ada pengumuman
-        </div>
         <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-5 text-center sm:text-left flex-col sm:flex-row">
             <div className="w-[120px] h-[60px] flex items-center justify-center shrink-0">
@@ -403,6 +289,8 @@ export default function NotificationManagementView({
           </Button>
         </div>
       </div>
+
+      )}
 
       {/* Action Confirmation Modal */}
       <NotificationActionModal
