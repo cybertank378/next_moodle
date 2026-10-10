@@ -68,6 +68,10 @@ export class NotificationRecipientProvider
       throw new ValidationError("Role audiens belum didukung oleh resolver Moodle.");
     }
     const requestedUsers = new Set(audienceSpec.userIds ?? []);
+    if (ownerScope === NotificationOwnerScope.PLATFORM && audienceSpec.scope === NotificationAudienceScope.USERS &&
+      [...requestedUsers].some(id => !/^moodle:[^:]+:\d+$/.test(id))) {
+      throw new ValidationError("ADMIN harus menggunakan ID Moodle berformat moodle:<tenantId>:<userId> untuk menghindari ambigu lintas tenant.");
+    }
     if (audienceSpec.scope === NotificationAudienceScope.USERS && requestedUsers.size === 0) {
       throw new ValidationError("Daftar pengguna tujuan tidak boleh kosong.");
     }

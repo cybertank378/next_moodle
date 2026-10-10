@@ -30,11 +30,18 @@ export class NotificationDispatchService {
     await this.campaignRepo.update(campaign);
 
     // 1. Resolve recipients
-    const recipients = await this.recipientProvider.resolveRecipients(
-      campaign.audienceSpec,
-      campaign.ownerScope,
-      campaign.ownerTenantId,
-    );
+    let recipients;
+    try {
+      recipients = await this.recipientProvider.resolveRecipients(
+        campaign.audienceSpec,
+        campaign.ownerScope,
+        campaign.ownerTenantId,
+      );
+    } catch {
+      campaign.markFailed();
+      await this.campaignRepo.update(campaign);
+      throw new Error("Pengambilan audiens Moodle gagal. Periksa koneksi dan izin Web Services.");
+    }
 
     const deliveries: NotificationDeliveryEntity[] = [];
     if (recipients.length === 0) {
@@ -142,7 +149,7 @@ export class NotificationDispatchService {
           });
           deliveries.push(successDelivery);
           hasSuccess = true;
-        } catch (err: unknown) {
+        } catch {
           hasFailure = true;
           const errorMsg = "PUSH_SEND_FAILED";
           const failDelivery = new NotificationDeliveryEntity({
