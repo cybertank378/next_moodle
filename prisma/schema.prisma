@@ -185,6 +185,7 @@ model NotificationDelivery {
   updatedAt         DateTime             @updatedAt
   campaign          NotificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
+  @@unique([campaignId, recipientId, recipientRole, channel])
   @@index([campaignId, status])
   @@index([campaignId, channel])
   @@index([recipientId, channel])
