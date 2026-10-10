@@ -46,7 +46,7 @@ export class NotificationOutboxWorker {
         await this.processJob(job);
         await this.deps.outboxRepo.completeJob(job.id);
         succeeded += 1;
-      } catch (err: unknown) {
+      } catch {
         failed += 1;
         const attempts = job.attempts;
         const canRetry = attempts < 5;

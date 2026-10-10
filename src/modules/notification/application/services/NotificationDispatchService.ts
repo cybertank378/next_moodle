@@ -5,7 +5,7 @@ import { NotificationDeliveryEntity } from "@/modules/notification/domain/entity
 import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import type { NotificationDeliveryRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeliveryRepositoryInterface";
 import type { NotificationDeviceRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeviceRepositoryInterface";
-import type { NotificationRecipientProviderInterface } from "@/modules/notification/domain/interfaces/NotificationRecipientProviderInterface";
+import type { NotificationRecipientProviderInterface, ResolvedRecipient } from "@/modules/notification/domain/interfaces/NotificationRecipientProviderInterface";
 import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
 import {
@@ -30,7 +30,7 @@ export class NotificationDispatchService {
     await this.campaignRepo.update(campaign);
 
     // 1. Resolve recipients
-    let recipients;
+    let recipients: ResolvedRecipient[];
     try {
       recipients = await this.recipientProvider.resolveRecipients(
         campaign.audienceSpec,
