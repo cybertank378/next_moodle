@@ -37,10 +37,15 @@ export class NotificationDispatchService {
         campaign.ownerScope,
         campaign.ownerTenantId,
       );
-    } catch {
+    } catch (error: unknown) {
+      console.error("[NotificationDispatchService] Moodle recipient resolution failed", {
+        campaignId: campaign.id,
+        ownerTenantId: campaign.ownerTenantId,
+        error,
+      });
       campaign.markFailed();
       await this.campaignRepo.update(campaign);
-      throw new Error("Pengambilan audiens Moodle gagal. Periksa koneksi dan izin Web Services.");
+      throw new Error("Pengambilan audiens Moodle gagal. Periksa koneksi dan izin Web Services.", { cause: error });
     }
 
     const deliveries: NotificationDeliveryEntity[] = [];
