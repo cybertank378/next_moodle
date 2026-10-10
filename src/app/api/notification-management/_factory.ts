@@ -5,7 +5,6 @@ import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentia
 import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { prisma } from "@/libs/prisma";
 import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
-import { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
 import { ArchiveNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ArchiveNotificationCampaignUseCase";
 import { CancelNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CancelNotificationCampaignUseCase";
 import { CreateNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CreateNotificationCampaignUseCase";
@@ -29,14 +28,12 @@ import { PrismaNotificationCampaignRepository } from "@/modules/notification/inf
 import { PrismaNotificationDeliveryRepository } from "@/modules/notification/infrastructure/repo/PrismaNotificationDeliveryRepository";
 import { PrismaNotificationDeviceRepository } from "@/modules/notification/infrastructure/repo/PrismaNotificationDeviceRepository";
 import { PrismaNotificationOutboxRepository } from "@/modules/notification/infrastructure/repo/PrismaNotificationOutboxRepository";
-import { PrismaNotificationRepository } from "@/modules/notification/infrastructure/repo/PrismaNotificationRepository";
 
 export function createNotificationManagementController(): NotificationManagementController {
   const campaignRepo = new PrismaNotificationCampaignRepository();
   const deliveryRepo = new PrismaNotificationDeliveryRepository();
   const deviceRepo = new PrismaNotificationDeviceRepository();
   const outboxRepo = new PrismaNotificationOutboxRepository();
-  const inboxRepo = new PrismaNotificationRepository();
   const credentialProvider = new EncryptedMoodleCredentialProvider(
     new PrismaMoodleCredentialStore(prisma),
     new AesHkdfEncryptionProvider(),
@@ -46,15 +43,6 @@ export function createNotificationManagementController(): NotificationManagement
   );
   const contentRenderer = new NotificationContentRenderer();
   const pushAdapter = new FirebaseCloudMessagingAdapter();
-
-  const dispatchService = new NotificationDispatchService(
-    campaignRepo,
-    deliveryRepo,
-    recipientProvider,
-    inboxRepo,
-    deviceRepo,
-    pushAdapter,
-  );
 
   return new NotificationManagementController(
     new GetNotificationCampaignListUseCase(campaignRepo),
