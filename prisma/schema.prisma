@@ -115,6 +115,7 @@ model Notification {
 
   @@index([tenantId, recipientId, recipientRole, isRead])
   @@index([tenantId, recipientId, createdAt])
+  @@unique([campaignId, recipientId, recipientRole])
   @@index([campaignId])
   @@map("notifications")
 }

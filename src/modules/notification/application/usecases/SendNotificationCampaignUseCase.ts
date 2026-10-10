@@ -31,13 +31,11 @@ export class SendNotificationCampaignUseCase {
     campaign.queue();
     const updated = await this.campaignRepo.update(campaign);
 
-    // Enqueue outbox job for async persistence
-    await this.outboxRepo.enqueue(campaign.id, "DISPATCH_CAMPAIGN");
-
-    // If dispatchService is provided (e.g. immediate execution in serverless/monolith), execute now
+    // Avoid duplicate dispatch through both inline execution and outbox.
     if (this.dispatchService) {
-      // Background or synchronous execution
       await this.dispatchService.dispatchCampaign(updated);
+    } else {
+      await this.outboxRepo.enqueue(campaign.id, "DISPATCH_CAMPAIGN");
     }
 
     return updated;

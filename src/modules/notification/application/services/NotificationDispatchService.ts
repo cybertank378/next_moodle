@@ -2,7 +2,6 @@
 
 import type { NotificationCampaignEntity } from "@/modules/notification/domain/entity/NotificationCampaignEntity";
 import { NotificationDeliveryEntity } from "@/modules/notification/domain/entity/NotificationDeliveryEntity";
-import { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
 import type { NotificationCampaignRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import type { NotificationDeliveryRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeliveryRepositoryInterface";
 import type { NotificationDeviceRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeviceRepositoryInterface";
@@ -38,6 +37,11 @@ export class NotificationDispatchService {
     );
 
     const deliveries: NotificationDeliveryEntity[] = [];
+    if (recipients.length === 0) {
+      campaign.markFailed();
+      await this.campaignRepo.update(campaign);
+      return;
+    }
     let hasFailure = false;
     let hasSuccess = false;
 
@@ -52,6 +56,7 @@ export class NotificationDispatchService {
 
         await this.inboxRepo.create({
           scope,
+          campaignId: campaign.id,
           type: NotificationType.ANNOUNCEMENT,
           title: campaign.title,
           body: campaign.plainText.slice(0, 1000),
@@ -86,12 +91,12 @@ export class NotificationDispatchService {
 
       const deviceMap = new Map<string, string>();
       for (const d of activeDevices) {
-        deviceMap.set(`${d.userId}_${d.role}`, d.token);
+        deviceMap.set(`${d.tenantId}_${d.userId}_${d.role}`, d.token);
       }
 
       for (const recipient of recipients) {
         const token = deviceMap.get(
-          `${recipient.recipientId}_${recipient.role}`,
+          `${recipient.tenantId}_${recipient.recipientId}_${recipient.role}`,
         );
 
         if (!token) {
@@ -110,8 +115,10 @@ export class NotificationDispatchService {
         }
 
         try {
-          if (this.pushAdapter.sendPushNotification) {
-            await this.pushAdapter.sendPushNotification({
+          if (!this.pushAdapter.sendPushNotification) {
+            throw new Error("PUSH_ADAPTER_UNAVAILABLE");
+          }
+          await this.pushAdapter.sendPushNotification({
               token,
               title: campaign.title,
               body: campaign.pushSummary || campaign.plainText.slice(0, 200),
@@ -120,7 +127,6 @@ export class NotificationDispatchService {
                 type: "CAMPAIGN_ANNOUNCEMENT",
               },
             });
-          }
 
           const successDelivery = new NotificationDeliveryEntity({
             id: crypto.randomUUID(),
@@ -138,8 +144,7 @@ export class NotificationDispatchService {
           hasSuccess = true;
         } catch (err: unknown) {
           hasFailure = true;
-          const errorMsg =
-            err instanceof Error ? err.message : "PUSH_SEND_FAILED";
+          const errorMsg = "PUSH_SEND_FAILED";
           const failDelivery = new NotificationDeliveryEntity({
             id: crypto.randomUUID(),
             campaignId: campaign.id,

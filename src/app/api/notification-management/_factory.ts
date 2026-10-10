@@ -1,5 +1,10 @@
 // Files: src/app/api/notification-management/_factory.ts
 
+import { DefaultMoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
+import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentialProvider";
+import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
+import { prisma } from "@/libs/prisma";
+import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
 import { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
 import { ArchiveNotificationCampaignUseCase } from "@/modules/notification/application/usecases/ArchiveNotificationCampaignUseCase";
 import { CancelNotificationCampaignUseCase } from "@/modules/notification/application/usecases/CancelNotificationCampaignUseCase";
@@ -32,7 +37,13 @@ export function createNotificationManagementController(): NotificationManagement
   const deviceRepo = new PrismaNotificationDeviceRepository();
   const outboxRepo = new PrismaNotificationOutboxRepository();
   const inboxRepo = new PrismaNotificationRepository();
-  const recipientProvider = new NotificationRecipientProvider();
+  const credentialProvider = new EncryptedMoodleCredentialProvider(
+    new PrismaMoodleCredentialStore(prisma),
+    new AesHkdfEncryptionProvider(),
+  );
+  const recipientProvider = new NotificationRecipientProvider(
+    new DefaultMoodleClientFactory(credentialProvider),
+  );
   const contentRenderer = new NotificationContentRenderer();
   const pushAdapter = new FirebaseCloudMessagingAdapter();
 
