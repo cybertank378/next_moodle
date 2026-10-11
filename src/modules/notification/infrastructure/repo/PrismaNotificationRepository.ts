@@ -137,8 +137,7 @@ export class PrismaNotificationRepository
   async create(
     options: CreateNotificationOptions,
   ): Promise<NotificationEntity> {
-    const row = await this.db.notification.create({
-      data: {
+    const data = {
         tenantId: options.scope.tenantId,
         recipientId: options.scope.recipientId,
         recipientRole: options.scope.recipientRole,
@@ -146,8 +145,21 @@ export class PrismaNotificationRepository
         title: options.title,
         body: options.body,
         linkPath: options.linkPath ?? null,
-      },
-    });
+        campaignId: options.campaignId ?? null,
+      };
+    const row = options.campaignId
+      ? await this.db.notification.upsert({
+          where: {
+            campaignId_recipientId_recipientRole: {
+              campaignId: options.campaignId,
+              recipientId: options.scope.recipientId,
+              recipientRole: options.scope.recipientRole,
+            },
+          },
+          create: data,
+          update: {},
+        })
+      : await this.db.notification.create({ data });
     return mapPrismaToEntity(row);
   }
 }

@@ -17,6 +17,7 @@ export class PrismaNotificationDeliveryRepository
     if (deliveries.length === 0) return;
 
     await prisma.notificationDelivery.createMany({
+      skipDuplicates: true,
       data: deliveries.map((d) => ({
         id: d.id,
         campaignId: d.campaignId,
