@@ -16,6 +16,7 @@ import { MoodleGradeRepository } from "@/modules/grades/infrastructure/repo/Mood
 import { MoodleQuizRepository } from "@/modules/quiz/infrastructure/repo/MoodleQuizRepository";
 import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
 import { TenantRepository } from "@/modules/tenant/infrastructure/repo/TenantRepository";
+import { MoodleUserRepository } from "@/modules/user/infrastructure/repo/MoodleUserRepository";
 
 let _controller: DashboardController | null = null;
 let _clientFactory: DefaultMoodleClientFactory | null = null;
@@ -56,6 +57,7 @@ export function getDashboardController(): DashboardController {
     const courseRepo = new MoodleCourseRepository(clientFactory);
     const quizRepo = new MoodleQuizRepository(clientFactory);
     const gradeRepo = new MoodleGradeRepository(clientFactory);
+    const userRepo = new MoodleUserRepository(clientFactory);
     const tenantRepo = new TenantRepository(prisma);
 
     _controller = new DashboardController(
@@ -68,7 +70,12 @@ export function getDashboardController(): DashboardController {
         tenantRepo,
       ),
       new GetTeacherDashboardUseCase(courseRepo, quizRepo, clientFactory),
-      new GetTenantDashboardUseCase(),
+      new GetTenantDashboardUseCase(
+        courseRepo,
+        quizRepo,
+        userRepo,
+        clientFactory,
+      ),
       new GetProctorDashboardUseCase(),
     );
   }

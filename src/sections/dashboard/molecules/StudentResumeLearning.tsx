@@ -50,7 +50,7 @@ export function StudentResumeLearning({ courses }: Props) {
                   {course.name}
                 </h4>
                 <p className="text-[11px] text-slate-500 mt-1 line-clamp-1 font-medium">
-                  {course.shortName} • {idx + 2}/5 materi
+                  {course.shortName} • Progress {course.progress ?? 0}%
                 </p>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3">
                   <div

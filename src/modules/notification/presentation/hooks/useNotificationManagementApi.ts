@@ -189,7 +189,7 @@ export function useNotificationManagementApi() {
     async (audienceSpec: NotificationAudienceSpec) => {
       try {
         const res = await fetch(
-          "/api/notification-management/campaigns/dummy/preview",
+          "/api/notification-management/campaigns/preview",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

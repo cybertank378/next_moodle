@@ -202,6 +202,7 @@ describe("PrismaNotificationRepository", () => {
         title: "Tenant baru",
         body: "SMA 1 terdaftar",
         linkPath: null,
+        campaignId: null,
       },
     });
     expect(entity.tenantId).toBeNull();

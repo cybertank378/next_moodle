@@ -1,8 +1,22 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import manifest from "@/app/manifest";
 import { APP_NAME, BRAND_ASSETS, getBrandAsset } from "@/libs/branding";
+import { DEFAULT_PLATFORM_SETTINGS } from "@/modules/settings/domain/entity/PlatformSettings";
 import BrandLogo from "@/shared-ui/component/BrandLogo";
+
+vi.mock(
+  "@/modules/settings/presentation/server/loadPublicPlatformSettings",
+  () => ({
+    loadPublicPlatformSettings: vi.fn().mockResolvedValue({
+      applicationName: "Aksaventra",
+      applicationShortName: "Aksaventra",
+      applicationDescription: "Ujian daring modern dan terintegrasi Moodle",
+      pwaThemeColor: "#0f172a",
+      pwaBackgroundColor: "#020617",
+    }),
+  }),
+);
 
 describe("Aksaventra branding", () => {
   it("keeps the platform name and asset paths in one configuration", () => {
@@ -13,8 +27,8 @@ describe("Aksaventra branding", () => {
     expect(BRAND_ASSETS.mark.dark).toContain("mark-on-dark.svg");
   });
 
-  it("uses the platform branding in install metadata", () => {
-    const metadata = manifest();
+  it("uses the platform branding in install metadata", async () => {
+    const metadata = await manifest();
 
     expect(metadata.name).toBe(APP_NAME);
     expect(metadata.short_name).toBe(APP_NAME);

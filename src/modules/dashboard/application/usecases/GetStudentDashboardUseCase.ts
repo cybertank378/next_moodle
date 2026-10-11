@@ -5,6 +5,7 @@ import type { CourseRepositoryInterface } from "@/modules/course/domain/interfac
 import type {
   GradeSummaryDto,
   StudentDashboardResponseDto,
+  StudentProfileDto,
 } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import type { GradeRepositoryInterface } from "@/modules/grades/domain/interfaces/GradeRepositoryInterface";
 import type { QuizEntity } from "@/modules/quiz/domain/entity/QuizEntity";
@@ -82,16 +83,12 @@ export class GetStudentDashboardUseCase {
         id: c.id.toString(),
         name: c.fullName,
         shortName: c.shortName,
-        instructor: "Guru Pengampu",
         progress: c.progress || 0,
       }));
 
-      const profile = {
+      const profile: StudentProfileDto = {
         name: request.actor.displayName || "Siswa",
-        educationLevel: "SMA" as const,
         schoolName: tenant.name,
-        className: "Kelas 10A",
-        academicYear: "2026/2027",
       };
 
       // Fetch recent grades for up to 3 active courses with bounded concurrency

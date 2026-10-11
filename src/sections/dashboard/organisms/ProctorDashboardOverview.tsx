@@ -36,7 +36,6 @@ export default function ProctorDashboardOverview() {
         <StatCard
           label="Ujian Langsung"
           value={data?.liveExams ?? 0}
-          hint="Sesi sedang berjalan"
           accent="indigo"
           loading={loading}
           unavailable={!data}
@@ -44,7 +43,6 @@ export default function ProctorDashboardOverview() {
         <StatCard
           label="Kandidat Aktif"
           value={data?.activeCandidates ?? 0}
-          hint="Terhubung dan dipantau"
           accent="emerald"
           loading={loading}
           unavailable={!data}
@@ -52,7 +50,6 @@ export default function ProctorDashboardOverview() {
         <StatCard
           label="Tanda Insiden"
           value={data?.incidentFlags ?? 0}
-          hint="Perlu ditinjau"
           accent="rose"
           loading={loading}
           unavailable={!data}

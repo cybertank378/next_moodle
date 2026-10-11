@@ -39,10 +39,10 @@ export interface CourseSummaryDto {
 
 export interface StudentProfileDto {
   name: string;
-  educationLevel: "SD" | "SMP" | "SMA" | "SMK";
+  educationLevel?: "SD" | "SMP" | "SMA" | "SMK";
   schoolName: string;
-  className: string;
-  academicYear: string;
+  className?: string;
+  academicYear?: string;
   gender?: "laki-laki" | "perempuan";
 }
 
@@ -70,9 +70,9 @@ export interface TeacherDashboardResponseDto {
 
 export interface TenantDashboardResponseDto {
   activeExams: number;
-  questionsInBank: number;
+  questionsInBank?: number;
   registeredUsers: number;
-  averageScore: number;
+  averageScore?: number;
   upcomingExams: ExamSummaryDto[];
 }
 

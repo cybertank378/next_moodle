@@ -70,9 +70,11 @@ export function StudentActiveCourses({ courses }: Props) {
                   <h4 className="font-bold text-sm text-slate-800 line-clamp-1">
                     {course.name}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">
-                    Guru: {course.instructor}
-                  </p>
+                  {course.instructor && (
+                    <p className="text-xs text-slate-500 mt-1 font-medium">
+                      Guru: {course.instructor}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="mt-auto">

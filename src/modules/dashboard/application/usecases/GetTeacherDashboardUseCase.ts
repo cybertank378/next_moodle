@@ -53,7 +53,6 @@ export class GetTeacherDashboardUseCase {
         id: c.id.toString(),
         name: c.fullName,
         shortName: c.shortName,
-        instructor: "Guru Pengampu",
         progress: c.progress || 0,
       }));
 
