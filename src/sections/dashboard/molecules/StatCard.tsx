@@ -12,7 +12,7 @@ import Card from "@/shared-ui/component/Card";
 interface StatCardProps {
   label: string;
   value: ReactNode;
-  hint: string;
+  hint?: string;
   accent: StatAccent;
   loading: boolean;
   unavailable: boolean;
@@ -73,7 +73,7 @@ export default function StatCard({
             </div>
           </div>
         )}
-        <p className="text-xs text-slate-400 font-medium">{hint}</p>
+        {hint && <p className="text-xs text-slate-400 font-medium">{hint}</p>}
       </div>
     </Card>
   );

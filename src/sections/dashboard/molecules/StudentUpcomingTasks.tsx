@@ -48,29 +48,21 @@ export function StudentUpcomingTasks({ upcomingExams }: Props) {
               bg: "bg-red-50",
               text: "text-red-500",
               icon: <FileText className="w-5 h-5" />,
-              badge: "bg-red-50 text-red-600",
-              badgeText: "2 hari lagi",
             },
             {
               bg: "bg-orange-50",
               text: "text-orange-500",
               icon: <Bell className="w-5 h-5" />,
-              badge: "bg-orange-50 text-orange-600",
-              badgeText: "4 hari lagi",
             },
             {
               bg: "bg-emerald-50",
               text: "text-emerald-500",
               icon: <CheckCircle className="w-5 h-5" />,
-              badge: "bg-emerald-50 text-emerald-600",
-              badgeText: "7 hari lagi",
             },
             {
               bg: "bg-blue-50",
               text: "text-blue-500",
               icon: <PlayCircle className="w-5 h-5" />,
-              badge: "bg-slate-100 text-slate-600",
-              badgeText: "10 hari lagi",
             },
           ];
           const st = icons[idx % icons.length];
@@ -87,14 +79,12 @@ export function StudentUpcomingTasks({ upcomingExams }: Props) {
                   {exam.name}
                 </h4>
                 <p className="text-xs text-slate-500 mt-1 line-clamp-1 font-medium">
-                  {exam.course} • Batas: {exam.scheduledDate.split(", ")[0]}
+                  {exam.course} • Jadwal: {exam.scheduledDate}
                 </p>
               </div>
               <div className="shrink-0">
-                <span
-                  className={`px-3 py-1 text-[11px] font-bold rounded-full ${st.badge}`}
-                >
-                  {st.badgeText}
+                <span className="px-3 py-1 text-[11px] font-bold rounded-full bg-blue-50 text-blue-700 capitalize">
+                  {exam.status}
                 </span>
               </div>
             </div>

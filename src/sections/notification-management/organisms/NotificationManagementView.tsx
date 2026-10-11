@@ -158,7 +158,7 @@ export default function NotificationManagementView({
         </div>
       )}
 
-      {/* Main Table Card with Data contoh label above */}
+      {/* Main Table Card */}
       <div className="space-y-2">
 
         {/* Filters and Tabs */}

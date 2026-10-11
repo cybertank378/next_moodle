@@ -10,30 +10,21 @@ export class GetProctorDashboardUseCase {
   async execute(
     request: GetProctorDashboardRequest,
   ): Promise<Result<ProctorDashboardResponseDto>> {
+    const tenantId = request.actor.tenantId;
+
+    if (!tenantId) {
+      return Result.failure(new Error("Tenant ID is required"));
+    }
+
+    // According to AGENTS.md Section 4.1:
+    // local_examapi_get_exam_monitor requires an explicit quizid, and upstream proctor_service
+    // currently uses in-memory mock/default data.
+    // Return honest zero/empty sessions rather than fabricated hardcoded sessions.
     return Result.ok<ProctorDashboardResponseDto>({
-      liveExams: 3,
-      activeCandidates: 124,
-      incidentFlags: 7,
-      sessions: [
-        {
-          id: "session-1",
-          examName: "Midterm: Organic Chemistry",
-          startTime: "09:00 AM",
-          duration: 45, // remaining roughly
-          activeCandidates: 42,
-          totalCandidates: 45,
-          flags: 3,
-        },
-        {
-          id: "session-2",
-          examName: "Final: Software Architecture",
-          startTime: "10:00 AM",
-          duration: 75,
-          activeCandidates: 82,
-          totalCandidates: 85,
-          flags: 0,
-        },
-      ],
+      liveExams: 0,
+      activeCandidates: 0,
+      incidentFlags: 0,
+      sessions: [],
     });
   }
 }

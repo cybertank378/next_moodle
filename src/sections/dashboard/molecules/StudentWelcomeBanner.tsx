@@ -33,7 +33,7 @@ export function StudentWelcomeBanner({ profile }: Props) {
             variant="h2"
             className="text-slate-800 font-bold mb-1 flex items-center gap-2"
           >
-            Halo, {profile?.name || "Andi Pratama"}! 👋
+            Halo, {profile?.name || "Siswa"}! 👋
           </Typography>
           <Typography
             variant="body"
@@ -41,12 +41,20 @@ export function StudentWelcomeBanner({ profile }: Props) {
           >
             Terus semangat belajar dan raih cita-citamu!
           </Typography>
-          <div className="flex items-center text-sm font-semibold text-slate-500 space-x-2">
-            <span>{profile?.schoolName || "SMP Negeri 1 Jakarta"}</span>
-            <span>•</span>
-            <span>{profile?.className || "Kelas 8A"}</span>
-            <span>•</span>
-            <span>Semester Genap {profile?.academicYear || "2024/2025"}</span>
+          <div className="flex flex-wrap items-center text-sm font-semibold text-slate-500 gap-2">
+            {profile?.schoolName && <span>{profile.schoolName}</span>}
+            {profile?.className && (
+              <>
+                <span>•</span>
+                <span>{profile.className}</span>
+              </>
+            )}
+            {profile?.academicYear && (
+              <>
+                <span>•</span>
+                <span>{profile.academicYear}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
