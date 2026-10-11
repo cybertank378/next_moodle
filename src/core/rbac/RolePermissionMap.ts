@@ -10,6 +10,8 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
     Permission.TENANT_STATUS_UPDATE,
     Permission.TENANT_CONNECTION_TEST,
     Permission.PLATFORM_AUDIT_READ,
+    Permission.PLATFORM_SETTINGS_READ,
+    Permission.PLATFORM_SETTINGS_UPDATE,
     Permission.NOTIFICATION_MANAGE,
     Permission.NOTIFICATION_CAMPAIGN_CREATE,
     Permission.NOTIFICATION_CAMPAIGN_READ,
