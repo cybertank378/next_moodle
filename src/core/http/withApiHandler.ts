@@ -101,6 +101,7 @@ export function withApiHandler<T = unknown>(
         headers: {
           "x-request-id": requestId,
           "content-type": "application/json",
+          "cache-control": "private, no-store",
         },
       });
     } catch (error) {
@@ -119,6 +120,7 @@ export function withApiHandler<T = unknown>(
         headers: {
           "x-request-id": requestId,
           "content-type": "application/json",
+          "cache-control": "private, no-store",
         },
       });
     }

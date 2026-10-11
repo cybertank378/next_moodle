@@ -16,13 +16,29 @@ export interface DashboardState<T> {
   error: string | null;
 }
 
-export function useDashboardApi() {
+export interface InitialDashboardState {
+  student?: StudentDashboardResponseDto | null;
+  admin?: AdminDashboardResponseDto | null;
+  teacher?: TeacherDashboardResponseDto | null;
+  tenant?: TenantDashboardResponseDto | null;
+  proctor?: ProctorDashboardResponseDto | null;
+}
+
+export function useDashboardApi(initial?: InitialDashboardState) {
   const [adminState, setAdminState] = useState<
     DashboardState<AdminDashboardResponseDto>
-  >({ data: null, loading: true, error: null });
+  >({
+    data: initial?.admin ?? null,
+    loading: initial?.admin ? false : true,
+    error: null,
+  });
   const [studentState, setStudentState] = useState<
     DashboardState<StudentDashboardResponseDto>
-  >({ data: null, loading: true, error: null });
+  >({
+    data: initial?.student ?? null,
+    loading: initial?.student ? false : true,
+    error: null,
+  });
   const [teacherState, setTeacherState] = useState<
     DashboardState<TeacherDashboardResponseDto>
   >({ data: null, loading: true, error: null });

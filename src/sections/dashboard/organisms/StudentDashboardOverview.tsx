@@ -19,14 +19,23 @@ const StudentCalendarWidget = dynamic(
   { ssr: false },
 );
 
+import type { StudentDashboardResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import { StudentRightRailWidgets } from "@/sections/dashboard/molecules/StudentRightRailWidgets";
 
-export default function StudentDashboardOverview() {
-  const { studentState, fetchStudentOverview } = useDashboardApi();
+export default function StudentDashboardOverview({
+  initialData,
+}: {
+  initialData?: StudentDashboardResponseDto | null;
+} = {}) {
+  const { studentState, fetchStudentOverview } = useDashboardApi({
+    student: initialData,
+  });
 
   useEffect(() => {
-    fetchStudentOverview();
-  }, [fetchStudentOverview]);
+    if (!initialData) {
+      fetchStudentOverview();
+    }
+  }, [fetchStudentOverview, initialData]);
 
   const { data, loading, error } = studentState;
 
