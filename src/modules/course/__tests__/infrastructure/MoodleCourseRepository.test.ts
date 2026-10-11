@@ -37,7 +37,7 @@ describe("MoodleCourseRepository", () => {
 
     const mockFactory: MoodleClientFactory = {
       createClient: vi.fn(),
-      createClientForTenant: vi.fn(),
+      createClientForTenant: vi.fn().mockResolvedValue(mockClient as any),
       createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
     };
 
@@ -83,7 +83,7 @@ describe("MoodleCourseRepository", () => {
 
     const mockFactory: MoodleClientFactory = {
       createClient: vi.fn(),
-      createClientForTenant: vi.fn(),
+      createClientForTenant: vi.fn().mockResolvedValue(mockClient as any),
       createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
     };
 
@@ -128,7 +128,7 @@ describe("MoodleCourseRepository", () => {
 
     const mockFactory: MoodleClientFactory = {
       createClient: vi.fn(),
-      createClientForTenant: vi.fn(),
+      createClientForTenant: vi.fn().mockResolvedValue(mockClient as any),
       createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
     };
 

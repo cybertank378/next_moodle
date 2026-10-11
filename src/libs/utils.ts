@@ -27,7 +27,7 @@ export function resolveUserRole(role?: string | null): UserRole | null {
 }
 
 export function redirectByRole(role?: string | null): string {
-  return resolveUserRole(role) ? ROUTES.HOME : ROUTES.AUTH.LOGIN;
+  return resolveUserRole(role) ? ROUTES.DASHBOARD.ROOT : ROUTES.AUTH.LOGIN;
 }
 
 export function stripHtml(html: string): string {

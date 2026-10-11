@@ -18,10 +18,24 @@ export interface CacheAdapter {
   set<T>(key: string, value: T, ttlMs: number): void;
   invalidate(key: string): void;
   clear(): void;
+  sweep?(): void;
 }
+
+export interface InMemoryCacheAdapterOptions {
+  maxEntries?: number;
+}
+
+const DEFAULT_MAX_ENTRIES = 500;
 
 export class InMemoryCacheAdapter implements CacheAdapter {
   private readonly store = new Map<string, CacheEntry<unknown>>();
+  private readonly maxEntries: number;
+
+  constructor(options: InMemoryCacheAdapterOptions = {}) {
+    this.maxEntries = options.maxEntries && options.maxEntries > 0
+      ? options.maxEntries
+      : DEFAULT_MAX_ENTRIES;
+  }
 
   get<T>(key: string): T | undefined {
     const entry = this.store.get(key);
@@ -30,10 +44,27 @@ export class InMemoryCacheAdapter implements CacheAdapter {
       this.store.delete(key);
       return undefined;
     }
+    // Re-insert to maintain LRU order (most recently accessed at the end)
+    this.store.delete(key);
+    this.store.set(key, entry);
     return entry.value as T;
   }
 
   set<T>(key: string, value: T, ttlMs: number): void {
+    if (this.store.has(key)) {
+      this.store.delete(key);
+    } else if (this.store.size >= this.maxEntries) {
+      // First try to sweep expired items to reclaim space
+      this.sweep();
+      // If still at capacity, evict the least recently used (first item in Map iterator)
+      if (this.store.size >= this.maxEntries) {
+        const oldestKey = this.store.keys().next().value;
+        if (oldestKey !== undefined) {
+          this.store.delete(oldestKey);
+        }
+      }
+    }
+
     this.store.set(key, {
       value,
       expiresAt: Date.now() + ttlMs,
@@ -48,6 +79,19 @@ export class InMemoryCacheAdapter implements CacheAdapter {
     this.store.clear();
   }
 
+  /**
+   * Sweeps and actively removes expired entries from the store
+   * to release memory even if keys are never read again.
+   */
+  sweep(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.store.entries()) {
+      if (now > entry.expiresAt) {
+        this.store.delete(key);
+      }
+    }
+  }
+
   /** Total number of live (non-expired) entries. */
   get size(): number {
     const now = Date.now();
@@ -59,19 +103,46 @@ export class InMemoryCacheAdapter implements CacheAdapter {
   }
 }
 
+const SENSITIVE_PARAM_KEYS = new Set([
+  "wstoken",
+  "token",
+  "password",
+  "secret",
+  "auth",
+]);
+
+function canonicalizeValue(val: unknown): string {
+  if (val === null || val === undefined) return "";
+  if (Array.isArray(val)) {
+    return `[${val.map(canonicalizeValue).join(",")}]`;
+  }
+  if (typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    const sortedKeys = Object.keys(obj).sort();
+    return `{${sortedKeys.map((k) => `${k}:${canonicalizeValue(obj[k])}`).join(",")}}`;
+  }
+  return String(val);
+}
+
 /**
- * Build a deterministic cache key from wsfunction + params.
- * Stable JSON.stringify is sufficient since Moodle params are plain objects.
+ * Build a deterministic, tenant-isolated cache key from wsfunction + params + source.
+ * Sensitive tokens are stripped and parameters are canonically serialized.
  */
 export function buildCacheKey(
   wsfunction: string,
-  params: Record<string, unknown>,
+  params: Record<string, unknown> = {},
+  source?: string,
 ): string {
-  const stable = Object.keys(params)
-    .sort()
-    .map((k) => `${k}=${String(params[k])}`)
+  const safeKeys = Object.keys(params)
+    .filter((k) => !SENSITIVE_PARAM_KEYS.has(k.toLowerCase()))
+    .sort();
+
+  const stable = safeKeys
+    .map((k) => `${k}=${canonicalizeValue(params[k])}`)
     .join("&");
-  return `moodle:${wsfunction}:${stable}`;
+
+  const prefix = source ? `moodle:${source}` : "moodle";
+  return `${prefix}:${wsfunction}:${stable}`;
 }
 
 /** Singleton shared across the Node.js process (per-deployment). */
@@ -88,3 +159,4 @@ export const CACHE_TTL = {
   /** Short-lived reads (question lists, etc.) — 30 seconds */
   SHORT: 30 * 1_000,
 } as const;
+

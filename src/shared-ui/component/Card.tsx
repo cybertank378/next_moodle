@@ -15,10 +15,13 @@ export default function Card({ children, className }: Props) {
         rounded-2xl
         border
         border-slate-200/60
+        dark:border-slate-800
         
         bg-white/80
+        dark:bg-[#151521]
         
         text-slate-800
+        dark:text-slate-100
         
         shadow-lg
         shadow-slate-200/40

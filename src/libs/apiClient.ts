@@ -16,6 +16,7 @@ export async function request<T>(
 ): Promise<{ data: T | null; error: string | null }> {
   try {
     const response = await fetch(url, {
+      cache: "no-store",
       ...options,
       credentials: "include",
       headers: {

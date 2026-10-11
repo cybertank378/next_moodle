@@ -26,16 +26,32 @@ const state = globalForPrisma.__next_moodle_prisma_state__;
  * Resolves PostgreSQL connection pool configuration.
  * Configured with strict timeouts and limits to prevent stacked database memory and socket leaks.
  */
+function parseBoundedInt(
+  val: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+): number {
+  if (!val) return fallback;
+  const parsed = Number.parseInt(val, 10);
+  if (!Number.isSafeInteger(parsed)) return fallback;
+  return Math.min(Math.max(parsed, min), max);
+}
+
 function createPoolConfig(): PoolConfig {
   const connectionString = process.env.DATABASE_URL;
-  const max = Number.parseInt(process.env.PG_POOL_MAX || "10", 10);
-  const idleTimeoutMillis = Number.parseInt(
-    process.env.PG_IDLE_TIMEOUT_MS || "30000",
-    10,
+  const max = parseBoundedInt(process.env.PG_POOL_MAX, 10, 1, 100);
+  const idleTimeoutMillis = parseBoundedInt(
+    process.env.PG_IDLE_TIMEOUT_MS,
+    30_000,
+    1_000,
+    300_000,
   );
-  const connectionTimeoutMillis = Number.parseInt(
-    process.env.PG_CONN_TIMEOUT_MS || "5000",
-    10,
+  const connectionTimeoutMillis = parseBoundedInt(
+    process.env.PG_CONN_TIMEOUT_MS,
+    5_000,
+    500,
+    60_000,
   );
 
   return {

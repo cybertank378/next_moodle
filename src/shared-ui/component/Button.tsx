@@ -123,13 +123,13 @@ const colorMap: Record<
 > = {
   primary: {
     filled:
-      "bg-indigo-600  text-white hover:bg-indigo-700  active:bg-indigo-800 focus:ring-indigo-400",
+      "bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 active:bg-indigo-800 focus:ring-indigo-400",
     label:
-      "bg-indigo-100  text-indigo-600  hover:bg-indigo-200  active:bg-indigo-300",
+      "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 active:bg-indigo-300",
     outline:
-      "border border-indigo-500 text-indigo-600  hover:bg-indigo-50  active:bg-indigo-100",
-    text: "text-indigo-600  hover:bg-indigo-50  active:bg-indigo-100",
-    ghost: "text-indigo-600  hover:bg-indigo-50  active:bg-indigo-100",
+      "border border-indigo-500 text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100",
+    text: "text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100",
+    ghost: "text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100",
   },
 
   secondary: {

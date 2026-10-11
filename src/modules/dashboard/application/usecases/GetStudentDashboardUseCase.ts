@@ -94,15 +94,14 @@ export class GetStudentDashboardUseCase {
         academicYear: "2026/2027",
       };
 
-      // Fetch recent grades for up to 3 active courses
+      // Fetch recent grades for up to 3 active courses with bounded concurrency
       const recentGrades: GradeSummaryDto[] = [];
       if (courseIds.length > 0) {
         try {
-          // Fetch grade report for the most recent courses
           const recentCourseIds = courseIds.slice(0, 3);
-          for (const cid of recentCourseIds) {
+          const gradePromises = recentCourseIds.map(async (cid) => {
             const courseEntity = rawCourses.find((c) => c.id === cid);
-            if (!courseEntity) continue;
+            if (!courseEntity) return null;
 
             const report = await this.gradeRepo.getUserGradeReport(
               tenantId,
@@ -110,15 +109,20 @@ export class GetStudentDashboardUseCase {
               moodleUserId,
               request.moodleToken,
             );
-            if (report) {
-              const courseTotal = report.courseTotal;
-              if (courseTotal && courseTotal.gradeRaw !== null) {
-                recentGrades.push({
-                  courseName: courseEntity.shortName,
-                  score: Math.round(courseTotal.gradeRaw),
-                  grade: getGradeLetter(courseTotal.gradeRaw),
-                });
-              }
+            if (report?.courseTotal && report.courseTotal.gradeRaw !== null) {
+              return {
+                courseName: courseEntity.shortName,
+                score: Math.round(report.courseTotal.gradeRaw),
+                grade: getGradeLetter(report.courseTotal.gradeRaw),
+              };
+            }
+            return null;
+          });
+
+          const settledResults = await Promise.allSettled(gradePromises);
+          for (const res of settledResults) {
+            if (res.status === "fulfilled" && res.value) {
+              recentGrades.push(res.value);
             }
           }
         } catch (e) {

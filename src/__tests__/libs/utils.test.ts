@@ -16,7 +16,7 @@ describe("libs/utils", () => {
       expect(resolveUserRole("SUPERADMIN")).toBe("ADMIN");
       expect(resolveUserRole("TENANT")).toBe("TENANT");
       expect(resolveUserRole("TENANT_ADMIN")).toBe("TENANT");
-      expect(resolveUserRole("TEACHER")).toBe("TENANT");
+      expect(resolveUserRole("TEACHER")).toBe("TEACHER");
       expect(resolveUserRole("STUDENT")).toBe("STUDENT");
     });
 

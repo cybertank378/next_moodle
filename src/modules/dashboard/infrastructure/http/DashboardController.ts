@@ -19,7 +19,12 @@ import type { GetTenantDashboardUseCase } from "@/modules/dashboard/application/
 import { parseAdminDashboardQuery } from "@/modules/dashboard/infrastructure/validators/dashboardValidator";
 
 function respond(response: ApiResponse): Response {
-  return Response.json(response.body, { status: response.status });
+  return Response.json(response.body, {
+    status: response.status,
+    headers: {
+      "Cache-Control": "private, no-store",
+    },
+  });
 }
 
 function toAuthorizationActor(actor: CurrentActor): AuthorizationActor | null {

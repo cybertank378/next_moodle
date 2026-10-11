@@ -14,12 +14,25 @@ export async function extractTokenFromRequest(
     if (token) return token;
   }
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session_token")?.value;
-  if (sessionToken) return sessionToken;
+  const cookieHeader = request.headers.get("cookie");
+  if (cookieHeader) {
+    const sessionMatch = cookieHeader.match(/(?:^|;\s*)session_token=([^;]+)/);
+    if (sessionMatch) return decodeURIComponent(sessionMatch[1].trim());
 
-  const authToken = cookieStore.get("auth_token")?.value;
-  if (authToken) return authToken;
+    const authMatch = cookieHeader.match(/(?:^|;\s*)auth_token=([^;]+)/);
+    if (authMatch) return decodeURIComponent(authMatch[1].trim());
+  }
+
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session_token")?.value;
+    if (sessionToken) return sessionToken;
+
+    const authToken = cookieStore.get("auth_token")?.value;
+    if (authToken) return authToken;
+  } catch {
+    // cookies() was called outside a request store (e.g. In unit tests)
+  }
 
   return null;
 }

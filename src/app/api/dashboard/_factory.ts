@@ -33,6 +33,22 @@ function getMoodleClientFactory() {
   return _clientFactory;
 }
 
+export function getStudentDashboardUseCase(): GetStudentDashboardUseCase {
+  const clientFactory = getMoodleClientFactory();
+  const courseRepo = new MoodleCourseRepository(clientFactory);
+  const quizRepo = new MoodleQuizRepository(clientFactory);
+  const gradeRepo = new MoodleGradeRepository(clientFactory);
+  const tenantRepo = new TenantRepository(prisma);
+
+  return new GetStudentDashboardUseCase(
+    courseRepo,
+    quizRepo,
+    gradeRepo,
+    clientFactory,
+    tenantRepo,
+  );
+}
+
 export function getDashboardController(): DashboardController {
   if (!_controller) {
     const repo = new PrismaDashboardRepository();
@@ -58,3 +74,4 @@ export function getDashboardController(): DashboardController {
   }
   return _controller;
 }
+
