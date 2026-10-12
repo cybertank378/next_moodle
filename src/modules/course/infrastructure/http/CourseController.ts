@@ -8,6 +8,7 @@ import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { GetCourseContentsUseCase } from "@/modules/course/application/usecases/GetCourseContentsUseCase";
+import type { GetCourseDetailUseCase } from "@/modules/course/application/usecases/GetCourseDetailUseCase";
 import type { GetUserCoursesUseCase } from "@/modules/course/application/usecases/GetUserCoursesUseCase";
 import {
   parseCourseId,
@@ -19,6 +20,7 @@ function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
     id: actor.userId,
     role: actor.role as AppRole,
     tenantId: actor.tenantId || null,
+    moodleUserId: actor.moodleUserId ?? undefined,
   };
 }
 
@@ -30,6 +32,7 @@ export class CourseController {
   constructor(
     private readonly getUserCourses: GetUserCoursesUseCase,
     private readonly getCourseContents: GetCourseContentsUseCase,
+    private readonly getCourseDetail?: GetCourseDetailUseCase,
   ) {}
 
   async list(actor: CurrentActor, req: NextRequest): Promise<NextResponse> {
@@ -67,6 +70,40 @@ export class CourseController {
           : parseCourseId(courseIdInput);
 
       const result = await this.getCourseContents.execute({
+        actor: actorToAuthorization(actor),
+        courseId,
+      });
+
+      if (result.isFailure) {
+        return respond(mapErrorToHttpResponse(result.getError()));
+      }
+
+      return respond(ApiResponse.success(result.getValue()));
+    } catch (error) {
+      return respond(mapErrorToHttpResponse(error));
+    }
+  }
+
+  async getDetail(
+    actor: CurrentActor,
+    courseIdInput: string | number,
+  ): Promise<NextResponse> {
+    try {
+      const courseId =
+        typeof courseIdInput === "number"
+          ? courseIdInput
+          : parseCourseId(courseIdInput);
+
+      if (!this.getCourseDetail) {
+        return respond(
+          ApiResponse.error(
+            "INTERNAL_SERVER_ERROR",
+            "GetCourseDetailUseCase belum terkonfigurasi.",
+          ),
+        );
+      }
+
+      const result = await this.getCourseDetail.execute({
         actor: actorToAuthorization(actor),
         courseId,
       });

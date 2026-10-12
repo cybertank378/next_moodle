@@ -20,4 +20,10 @@ export interface CourseRepositoryInterface {
     courseId: number;
     client?: MoodleClient;
   }): Promise<CourseSectionResponseDTO[]>;
+
+  getCourseById(input: {
+    tenantId: string;
+    courseId: number;
+    client?: MoodleClient;
+  }): Promise<CourseEntity | null>;
 }

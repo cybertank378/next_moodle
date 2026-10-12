@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cn, redirectByRole, resolveUserRole } from "@/libs/utils";
+import { cn, redirectByRole, resolveUserRole, sanitizeHtml } from "@/libs/utils";
 
 describe("libs/utils", () => {
   describe("cn", () => {
@@ -43,6 +43,17 @@ describe("libs/utils", () => {
       expect(redirectByRole(null)).toBe("/login");
       expect(redirectByRole(undefined)).toBe("/login");
       expect(redirectByRole("GUEST")).toBe("/login");
+    });
+  });
+
+  describe("sanitizeHtml", () => {
+    it("strips script tags and malicious attributes", () => {
+      const malicious = '<p>Hello <script>alert("xss")</script><a href="javascript:alert(1)" onclick="steal()">Click</a></p>';
+      const clean = sanitizeHtml(malicious);
+      expect(clean).not.toContain("<script>");
+      expect(clean).not.toContain("alert");
+      expect(clean).not.toContain("onclick");
+      expect(clean).toContain("<p>Hello ");
     });
   });
 });
