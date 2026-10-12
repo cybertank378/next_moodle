@@ -1,3 +1,5 @@
+import { ROUTES } from "@/libs/routes";
+
 export interface RequestState<T> {
   data: T | null;
   error: string | null;
@@ -29,7 +31,7 @@ export async function request<T>(
     if (response.status === 401 || body.error?.code === "UNAUTHORIZED") {
       if (typeof window !== "undefined") {
         console.error("apiClient.ts intercepted 401. URL:", url);
-        window.location.href = "/login";
+        window.location.href = ROUTES.AUTH.LOGIN;
       }
       return { data: null, error: body.error?.message ?? "Sesi tidak valid." };
     }

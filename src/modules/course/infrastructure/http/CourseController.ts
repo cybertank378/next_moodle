@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
-import type { AppRole } from "@/core/rbac/AppRole";
+import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { GetCourseContentsUseCase } from "@/modules/course/application/usecases/GetCourseContentsUseCase";
 import type { GetCourseDetailUseCase } from "@/modules/course/application/usecases/GetCourseDetailUseCase";
@@ -14,6 +14,9 @@ import {
   parseCourseId,
   parseListCourseQuery,
 } from "@/modules/course/infrastructure/validators/course.validator";
+
+import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
+import type { MoodleClient } from "@/core/moodle/types";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   return {
@@ -33,15 +36,45 @@ export class CourseController {
     private readonly getUserCourses: GetUserCoursesUseCase,
     private readonly getCourseContents: GetCourseContentsUseCase,
     private readonly getCourseDetail?: GetCourseDetailUseCase,
+    private readonly clientFactory?: MoodleClientFactory,
   ) {}
 
-  async list(actor: CurrentActor, req: NextRequest): Promise<NextResponse> {
+  private async resolveClient(
+    actor: CurrentActor,
+    moodleToken?: string,
+  ): Promise<MoodleClient | undefined> {
+    if (
+      actor.role === AppRole.STUDENT &&
+      actor.tenantId &&
+      moodleToken &&
+      this.clientFactory
+    ) {
+      return this.clientFactory.createClientForUser(
+        {
+          tenantId: actor.tenantId,
+          tenantSlug: actor.tenantId,
+          status: "ACTIVE",
+        },
+        moodleToken,
+      );
+    }
+    return undefined;
+  }
+
+  async list(
+    actor: CurrentActor,
+    req: NextRequest,
+    moodleToken?: string,
+  ): Promise<NextResponse> {
     try {
       const query = parseListCourseQuery(req.nextUrl.searchParams);
+      const client = await this.resolveClient(actor, moodleToken);
+
       const result = await this.getUserCourses.execute({
         actor: actorToAuthorization(actor),
         moodleUserId: actor.moodleUserId ?? undefined,
         search: query.search,
+        client,
       });
 
       if (result.isFailure) {
@@ -62,6 +95,7 @@ export class CourseController {
   async getContents(
     actor: CurrentActor,
     courseIdInput: string | number,
+    moodleToken?: string,
   ): Promise<NextResponse> {
     try {
       const courseId =
@@ -69,9 +103,12 @@ export class CourseController {
           ? courseIdInput
           : parseCourseId(courseIdInput);
 
+      const client = await this.resolveClient(actor, moodleToken);
+
       const result = await this.getCourseContents.execute({
         actor: actorToAuthorization(actor),
         courseId,
+        client,
       });
 
       if (result.isFailure) {
@@ -87,6 +124,7 @@ export class CourseController {
   async getDetail(
     actor: CurrentActor,
     courseIdInput: string | number,
+    moodleToken?: string,
   ): Promise<NextResponse> {
     try {
       const courseId =
@@ -103,9 +141,12 @@ export class CourseController {
         );
       }
 
+      const client = await this.resolveClient(actor, moodleToken);
+
       const result = await this.getCourseDetail.execute({
         actor: actorToAuthorization(actor),
         courseId,
+        client,
       });
 
       if (result.isFailure) {

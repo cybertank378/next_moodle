@@ -29,6 +29,7 @@ export function getCourseController(): CourseController {
     new GetUserCoursesUseCase(repository),
     new GetCourseContentsUseCase(repository),
     new GetCourseDetailUseCase(repository),
+    clientFactory,
   );
 
   return controller;

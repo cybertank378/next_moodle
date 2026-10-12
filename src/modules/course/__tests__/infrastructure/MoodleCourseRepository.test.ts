@@ -45,6 +45,7 @@ describe("MoodleCourseRepository", () => {
     const courses = await repo.getUserCourses({
       tenantId: "tenant-1",
       moodleUserId: 123,
+      client: mockClient,
     });
 
     expect(courses).toHaveLength(1);

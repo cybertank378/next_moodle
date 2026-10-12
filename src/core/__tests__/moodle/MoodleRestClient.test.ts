@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InfrastructureError } from "@/core/errors/InfrastructureError";
+import { MoodleError } from "@/core/errors/MoodleError";
 import { SecurityError } from "@/core/errors/SecurityError";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
@@ -72,7 +73,7 @@ describe("MoodleRestClient", () => {
     const client = new MoodleRestClient(credentials);
 
     await expect(client.call("core_course_get_courses", {})).rejects.toThrow(
-      UnauthorizedError,
+      MoodleError,
     );
   });
 

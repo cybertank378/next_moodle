@@ -8,10 +8,13 @@ import type { CourseDetailResponseDTO } from "@/modules/course/domain/dto/Course
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
 import { CourseMapper } from "@/modules/course/domain/mapper/CourseMapper";
 
+import type { MoodleClient } from "@/core/moodle/types";
+
 export interface GetCourseDetailInput {
   actor: AuthorizationActor | null | undefined;
   courseId: number;
   tenantId?: string;
+  client?: MoodleClient;
 }
 
 export class GetCourseDetailUseCase {
@@ -48,6 +51,14 @@ export class GetCourseDetailUseCase {
     try {
       // If STUDENT, check enrollment first
       if (actor.role === AppRole.STUDENT) {
+        if (!input.client) {
+          return Result.fail(
+            new ValidationError(
+              "Kredensial atau client Moodle siswa wajib disertakan.",
+            ),
+          );
+        }
+
         const moodleUserId = actor.moodleUserId;
         if (!moodleUserId) {
           return Result.fail(
@@ -58,6 +69,7 @@ export class GetCourseDetailUseCase {
         const enrolledCourses = await this.repository.getUserCourses({
           tenantId: effectiveTenantId,
           moodleUserId,
+          client: input.client,
         });
 
         const isEnrolled = enrolledCourses.some((c) => c.id === input.courseId);
@@ -79,6 +91,7 @@ export class GetCourseDetailUseCase {
           sections = await this.repository.getCourseContents({
             tenantId: effectiveTenantId,
             courseId: input.courseId,
+            client: input.client,
           });
         } catch {
           // In case core_course_get_contents is restricted/degraded, return empty sections
