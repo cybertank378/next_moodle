@@ -30,7 +30,12 @@ export class MoodleCourseRepository implements CourseRepositoryInterface {
     moodleUserId: number;
     client?: MoodleClient;
   }): Promise<CourseEntity[]> {
-    const client = await this.resolveClient(input.tenantId, input.client);
+    if (!input.client) {
+      throw new Error(
+        "Moodle client wajib disertakan untuk mengambil course siswa.",
+      );
+    }
+    const client = input.client;
 
     const rawCourses = await client.call<RawMoodleCourse[]>(
       "core_enrol_get_users_courses",

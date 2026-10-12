@@ -54,17 +54,19 @@ class MockCourseRepository implements CourseRepositoryInterface {
 
 describe("Course Use Cases", () => {
   describe("GetUserCoursesUseCase", () => {
-    it("fetches enrolled courses for STUDENT actor with moodleUserId", async () => {
+    it("fetches enrolled courses for STUDENT actor with moodleUserId and client", async () => {
       const repo = new MockCourseRepository();
       repo.getUserCourses.mockResolvedValue([
         createMockCourse(101, "MATH101"),
         createMockCourse(102, "PHYS101"),
       ]);
+      const mockClient = { call: vi.fn() } as any;
 
       const useCase = new GetUserCoursesUseCase(repo);
       const result = await useCase.execute({
         actor: studentActor,
         moodleUserId: 42,
+        client: mockClient,
       });
 
       expect(result.isSuccess).toBe(true);
@@ -74,7 +76,23 @@ describe("Course Use Cases", () => {
       expect(repo.getUserCourses).toHaveBeenCalledWith({
         tenantId: "tenant-1",
         moodleUserId: 42,
+        client: mockClient,
       });
+    });
+
+    it("fails closed when STUDENT actor does not have client or student token provided", async () => {
+      const repo = new MockCourseRepository();
+      const useCase = new GetUserCoursesUseCase(repo);
+
+      const result = await useCase.execute({
+        actor: studentActor,
+        moodleUserId: 42,
+        // no client or token
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().message).toMatch(/kredensial|token|client/i);
+      expect(repo.getUserCourses).not.toHaveBeenCalled();
     });
 
     it("fetches tenant courses for TENANT actor with optional search", async () => {
@@ -196,11 +214,13 @@ describe("Course Use Cases", () => {
           modules: [],
         },
       ]);
+      const mockClient = { call: vi.fn() } as any;
 
       const useCase = new GetCourseDetailUseCase(repo);
       const result = await useCase.execute({
         actor: studentActor,
         courseId: 101,
+        client: mockClient,
       });
 
       expect(result.isSuccess).toBe(true);
@@ -211,17 +231,39 @@ describe("Course Use Cases", () => {
       expect(repo.getUserCourses).toHaveBeenCalledWith({
         tenantId: "tenant-1",
         moodleUserId: 42,
+        client: mockClient,
       });
+      expect(repo.getCourseContents).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        courseId: 101,
+        client: mockClient,
+      });
+    });
+
+    it("fails closed when STUDENT actor accesses course detail without client", async () => {
+      const repo = new MockCourseRepository();
+      const useCase = new GetCourseDetailUseCase(repo);
+
+      const result = await useCase.execute({
+        actor: studentActor,
+        courseId: 101,
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().message).toMatch(/kredensial|token|client/i);
+      expect(repo.getUserCourses).not.toHaveBeenCalled();
     });
 
     it("returns NotFoundError if STUDENT actor is not enrolled in the course", async () => {
       const repo = new MockCourseRepository();
       repo.getUserCourses.mockResolvedValue([createMockCourse(999, "OTHER")]);
+      const mockClient = { call: vi.fn() } as any;
 
       const useCase = new GetCourseDetailUseCase(repo);
       const result = await useCase.execute({
         actor: studentActor,
         courseId: 101,
+        client: mockClient,
       });
 
       expect(result.isFailure).toBe(true);

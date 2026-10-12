@@ -61,4 +61,56 @@ describe("apiClient — reusable client request utility", () => {
     expect(result.data).toBeNull();
     expect(result.error).toBe("Network connection lost");
   });
+
+  it("handles 401 UNAUTHORIZED session expiration by redirecting to /login", async () => {
+    const originalWindow = globalThis.window;
+    const mockWindow = {
+      location: { href: "" },
+    } as any;
+    // @ts-ignore
+    globalThis.window = mockWindow;
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      status: 401,
+      ok: false,
+      json: async () => ({
+        success: false,
+        error: { code: "UNAUTHORIZED", message: "Sesi telah berakhir." },
+      }),
+    } as Response);
+
+    const result = await request("/api/courses");
+
+    expect(result.data).toBeNull();
+    expect(result.error).toBe("Sesi telah berakhir.");
+    expect(mockWindow.location.href).toBe("/login");
+
+    globalThis.window = originalWindow;
+  });
+
+  it("handles 502 MOODLE_ERROR without redirecting to /login", async () => {
+    const originalWindow = globalThis.window;
+    const mockWindow = {
+      location: { href: "" },
+    } as any;
+    // @ts-ignore
+    globalThis.window = mockWindow;
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      status: 502,
+      ok: false,
+      json: async () => ({
+        success: false,
+        error: { code: "MOODLE_ERROR", message: "Kredensial Moodle tidak valid atau ditolak oleh server Moodle." },
+      }),
+    } as Response);
+
+    const result = await request("/api/courses");
+
+    expect(result.data).toBeNull();
+    expect(result.error).toContain("Moodle");
+    expect(mockWindow.location.href).toBe(""); // NOT redirected
+
+    globalThis.window = originalWindow;
+  });
 });

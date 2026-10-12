@@ -5,10 +5,13 @@ import { authorizeCourseOperation } from "@/modules/course/application/services/
 import type { CourseSectionResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
 
+import type { MoodleClient } from "@/core/moodle/types";
+
 export interface GetCourseContentsInput {
   actor: AuthorizationActor | null | undefined;
   courseId: number;
   tenantId?: string;
+  client?: MoodleClient;
 }
 
 export class GetCourseContentsUseCase {
@@ -39,6 +42,7 @@ export class GetCourseContentsUseCase {
       const sections = await this.repository.getCourseContents({
         tenantId: effectiveTenantId,
         courseId: input.courseId,
+        client: input.client,
       });
 
       return Result.ok(sections);

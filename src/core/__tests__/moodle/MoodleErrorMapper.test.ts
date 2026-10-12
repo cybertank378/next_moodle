@@ -29,26 +29,32 @@ describe("MoodleErrorMapper", () => {
     expect(MoodleErrorMapper.isMoodleException("plain string")).toBe(false);
   });
 
-  it("should map invalidtoken errorcode to UnauthorizedError", () => {
+  it("should map invalidtoken errorcode to MoodleError with 502 status code", () => {
     const error = MoodleErrorMapper.fromMoodleException({
       exception: "moodle_exception",
       errorcode: "invalidtoken",
       message: "Invalid token - token not found",
     });
 
-    expect(error).toBeInstanceOf(UnauthorizedError);
-    expect(error.message).toBe("Moodle credentials were rejected.");
+    expect(error).toBeInstanceOf(MoodleError);
+    expect(error.statusCode).toBe(502);
+    expect(error.code).toBe("MOODLE_ERROR");
+    expect((error as MoodleError).moodleErrorCode).toBe("invalidtoken");
+    expect(error.message).toContain("Moodle");
   });
 
-  it("should map invalidlogin errorcode to UnauthorizedError", () => {
+  it("should map invalidlogin errorcode to MoodleError with 502 status code", () => {
     const error = MoodleErrorMapper.fromMoodleException({
       exception: "moodle_exception",
       errorcode: "invalidlogin",
       message: "Invalid login, please try again",
     });
 
-    expect(error).toBeInstanceOf(UnauthorizedError);
-    expect(error.message).toBe("Moodle credentials were rejected.");
+    expect(error).toBeInstanceOf(MoodleError);
+    expect(error.statusCode).toBe(502);
+    expect(error.code).toBe("MOODLE_ERROR");
+    expect((error as MoodleError).moodleErrorCode).toBe("invalidlogin");
+    expect(error.message).toContain("Moodle");
   });
 
   it("should map nopermissions or accessdenied to ForbiddenError", () => {
@@ -87,56 +93,59 @@ describe("MoodleErrorMapper", () => {
     expect(error.message).not.toContain("reverse proxy");
   });
 
-  describe("session-expired error codes", () => {
-    it("should map tokennotwhitelisted to UnauthorizedError with isSessionExpired", () => {
+  describe("upstream session/token invalid error codes", () => {
+    it("should map tokennotwhitelisted to MoodleError with 502 and isUpstreamAuthError", () => {
       const error = MoodleErrorMapper.fromMoodleException({
         exception: "webservice_access_exception",
         errorcode: "tokennotwhitelisted",
         message: "Token is not whitelisted",
       });
-      expect(error).toBeInstanceOf(UnauthorizedError);
-      expect(error.message).toContain("Sesi Moodle");
-      expect((error as UnauthorizedError).details).toHaveProperty(
-        "isSessionExpired",
+      expect(error).toBeInstanceOf(MoodleError);
+      expect(error.statusCode).toBe(502);
+      expect((error as MoodleError).details).toHaveProperty(
+        "isUpstreamAuthError",
         true,
       );
     });
 
-    it("should map servicerequireslogin to UnauthorizedError with isSessionExpired", () => {
+    it("should map servicerequireslogin to MoodleError with 502 and isUpstreamAuthError", () => {
       const error = MoodleErrorMapper.fromMoodleException({
         exception: "moodle_exception",
         errorcode: "servicerequireslogin",
         message: "Service requires login",
       });
-      expect(error).toBeInstanceOf(UnauthorizedError);
-      expect((error as UnauthorizedError).details).toHaveProperty(
-        "isSessionExpired",
+      expect(error).toBeInstanceOf(MoodleError);
+      expect(error.statusCode).toBe(502);
+      expect((error as MoodleError).details).toHaveProperty(
+        "isUpstreamAuthError",
         true,
       );
     });
 
-    it("should map invalidsession to UnauthorizedError with isSessionExpired", () => {
+    it("should map invalidsession to MoodleError with 502 and isUpstreamAuthError", () => {
       const error = MoodleErrorMapper.fromMoodleException({
         exception: "moodle_exception",
         errorcode: "invalidsession",
         message: "Invalid session",
       });
-      expect(error).toBeInstanceOf(UnauthorizedError);
-      expect((error as UnauthorizedError).details).toHaveProperty(
-        "isSessionExpired",
+      expect(error).toBeInstanceOf(MoodleError);
+      expect(error.statusCode).toBe(502);
+      expect((error as MoodleError).details).toHaveProperty(
+        "isUpstreamAuthError",
         true,
       );
     });
 
-    it("should map webservice_access_exception with unknown errorcode to session expired", () => {
+    it("should map webservice_access_exception with unknown errorcode to MoodleError with 502", () => {
       const error = MoodleErrorMapper.fromMoodleException({
         exception: "webservice_access_exception",
         errorcode: "someunknowncode",
         message: "Access exception",
       });
-      expect(error).toBeInstanceOf(UnauthorizedError);
-      expect((error as UnauthorizedError).details).toHaveProperty(
-        "isSessionExpired",
+      expect(error).toBeInstanceOf(MoodleError);
+      expect(error.statusCode).toBe(502);
+      expect((error as MoodleError).details).toHaveProperty(
+        "isUpstreamAuthError",
         true,
       );
     });
