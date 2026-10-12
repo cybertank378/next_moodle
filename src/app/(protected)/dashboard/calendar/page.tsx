@@ -1,12 +1,7 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import CalendarPageSection from "@/sections/calendar/pages/CalendarPageSection";
 
 export default async function CalendarPage() {
   await requireDashboardRoles(["STUDENT", "TEACHER", "TENANT"]);
-  return (
-    <DashboardRoutePlaceholder
-      title="Kalender Akademik"
-      description="Jadwal kegiatan akademik dan agenda belajar."
-    />
-  );
+  return <CalendarPageSection />;
 }
