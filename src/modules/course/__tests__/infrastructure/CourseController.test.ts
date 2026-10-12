@@ -136,4 +136,37 @@ describe("CourseController", () => {
     expect(body.success).toBe(false);
     expect(body.error.code).toBe("VALIDATION_ERROR");
   });
+
+  it("returns course detail on getDetail", async () => {
+    const mockGetUserCourses = {} as unknown as GetUserCoursesUseCase;
+    const mockGetCourseContents = {} as unknown as GetCourseContentsUseCase;
+    const mockGetCourseDetail = {
+      execute: vi.fn().mockResolvedValue(
+        Result.ok({
+          course: {
+            id: 101,
+            shortName: "MATH101",
+            fullName: "Mathematics 101",
+            displayName: "Math 101",
+            progress: null,
+          },
+          sections: [],
+        }),
+      ),
+    } as any;
+
+    const controller = new CourseController(
+      mockGetUserCourses,
+      mockGetCourseContents,
+      mockGetCourseDetail,
+    );
+
+    const response = await controller.getDetail(studentActor, "101");
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body.success).toBe(true);
+    expect(body.data.course.id).toBe(101);
+  });
 });
+

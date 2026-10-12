@@ -14,6 +14,7 @@ function makeDependencies() {
     getUserCourses: vi.fn().mockResolvedValue([]),
     getTenantCourses: vi.fn(),
     getCourseContents: vi.fn(),
+    getCourseById: vi.fn(),
   };
   const quizRepo: QuizRepositoryInterface = {
     getQuizzesByCourses: vi.fn(),

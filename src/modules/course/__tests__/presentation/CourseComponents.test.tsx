@@ -43,9 +43,16 @@ describe("Course Components", () => {
       expect(html).toContain("Selesai");
     });
 
-    it("renders Belum Dimulai when progress is 0 or null", () => {
+    it("renders Belum tersedia when progress is null or undefined", () => {
       const html = renderToStaticMarkup(
         <CourseProgressBadge progress={null} isCompleted={false} />,
+      );
+      expect(html).toContain("Belum tersedia");
+    });
+
+    it("renders Belum dimulai when progress is 0", () => {
+      const html = renderToStaticMarkup(
+        <CourseProgressBadge progress={0} isCompleted={false} />,
       );
       expect(html).toContain("Belum dimulai");
     });

@@ -16,6 +16,7 @@ describe("GetTenantDashboardUseCase", () => {
         { id: 101, fullName: "Matematika X", shortName: "MTK10" },
       ]),
       getCourseContents: vi.fn(),
+      getCourseById: vi.fn(),
     };
 
     const now = Math.floor(Date.now() / 1000);

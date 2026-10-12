@@ -5,6 +5,7 @@ import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentia
 import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { prisma } from "@/libs/prisma";
 import { GetCourseContentsUseCase } from "@/modules/course/application/usecases/GetCourseContentsUseCase";
+import { GetCourseDetailUseCase } from "@/modules/course/application/usecases/GetCourseDetailUseCase";
 import { GetUserCoursesUseCase } from "@/modules/course/application/usecases/GetUserCoursesUseCase";
 import { CourseController } from "@/modules/course/infrastructure/http/CourseController";
 import { MoodleCourseRepository } from "@/modules/course/infrastructure/repo/MoodleCourseRepository";
@@ -27,6 +28,7 @@ export function getCourseController(): CourseController {
   controller = new CourseController(
     new GetUserCoursesUseCase(repository),
     new GetCourseContentsUseCase(repository),
+    new GetCourseDetailUseCase(repository),
   );
 
   return controller;
