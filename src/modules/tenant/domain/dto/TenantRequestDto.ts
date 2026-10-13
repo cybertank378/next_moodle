@@ -11,6 +11,7 @@ export interface InitialTenantAdminDTO {
 export interface CreateTenantRequestDTO {
   slug: string;
   name: string;
+  status?: TenantStatus;
   customDomain?: string | null;
   adminUser?: InitialTenantAdminDTO | null;
 }
