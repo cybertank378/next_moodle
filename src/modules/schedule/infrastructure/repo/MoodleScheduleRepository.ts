@@ -108,6 +108,98 @@ export class MoodleScheduleRepository implements ScheduleRepositoryInterface {
     return sessions;
   }
 
+  async getTenantSchedule(
+    options: ScheduleQueryOptions,
+  ): Promise<ScheduleSessionEntity[]> {
+    const { tenantId, from, to, types, courseId, client } = options;
+
+    const sessions: ScheduleSessionEntity[] = [];
+    const shouldFetchExams = !types || types.includes("EXAM");
+
+    if (shouldFetchExams) {
+      // For Tenant, fetch courses of the tenant
+      const tenantCourses = await this.courseRepo.getTenantCourses({
+        tenantId,
+        client,
+      });
+
+      let targetCourseIds = tenantCourses.map((c) => c.id);
+      if (courseId !== undefined) {
+        if (!targetCourseIds.includes(courseId)) {
+          return [];
+        }
+        targetCourseIds = [courseId];
+      }
+
+      if (targetCourseIds.length > 0) {
+        const quizzes = await this.quizRepo.getQuizzesByCourses({
+          tenantId,
+          courseIds: targetCourseIds,
+          client,
+        });
+
+        const fromTimeMs = from.getTime();
+        const toTimeMs = to.getTime();
+        const nowMs = Date.now();
+
+        for (const quiz of quizzes) {
+          const startTimestampMs = quiz.timeOpen
+            ? quiz.timeOpen * 1000
+            : quiz.timeClose
+              ? quiz.timeClose * 1000
+              : null;
+
+          if (!startTimestampMs) continue;
+
+          const endTimestampMs = quiz.timeClose
+            ? quiz.timeClose * 1000
+            : quiz.timeLimitSeconds
+              ? startTimestampMs + quiz.timeLimitSeconds * 1000
+              : startTimestampMs + 60 * 60 * 1000;
+
+          if (startTimestampMs <= toTimeMs && endTimestampMs >= fromTimeMs) {
+            const course = tenantCourses.find((c) => c.id === quiz.courseId);
+            const courseName = course ? course.fullName : undefined;
+            const subjectCode = course ? course.shortName : undefined;
+
+            let status: ScheduleSessionStatus = "SCHEDULED";
+            if (nowMs >= startTimestampMs && nowMs <= endTimestampMs) {
+              status = "IN_PROGRESS";
+            } else if (nowMs > endTimestampMs) {
+              status = "COMPLETED";
+            }
+
+            sessions.push(
+              new ScheduleSessionEntity(`quiz-${quiz.id}`, tenantId, {
+                id: `quiz-${quiz.id}`,
+                sessionType: "EXAM",
+                title: quiz.name,
+                startsAt: new Date(startTimestampMs).toISOString(),
+                endsAt: new Date(endTimestampMs).toISOString(),
+                allDay: false,
+                courseId: quiz.courseId,
+                courseName,
+                subjectCode,
+                status,
+                detailRoute: ROUTES.DASHBOARD.EXAM_DETAIL(quiz.id),
+                description: quiz.intro || undefined,
+              }),
+            );
+          }
+        }
+      }
+    }
+
+    return sessions;
+  }
+
+  async getTeacherSchedule(
+    options: ScheduleQueryOptions,
+  ): Promise<ScheduleSessionEntity[]> {
+    // For teacher, assigned courses are fetched via getUserCourses
+    return this.getStudentSchedule(options);
+  }
+
   async getSessionById(options: {
     tenantId: string;
     moodleUserId: number;

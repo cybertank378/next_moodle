@@ -22,6 +22,7 @@ export class ScheduleMapper {
       timezone: entity.timezone,
       description: entity.description,
       sourceUpdatedAt: entity.sourceUpdatedAt,
+      isPublished: entity.isPublished,
     };
   }
 }

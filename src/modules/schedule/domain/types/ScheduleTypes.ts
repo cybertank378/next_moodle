@@ -1,11 +1,14 @@
 export type ScheduleSessionType = "LESSON" | "EXAM" | "CONSULTATION" | "OTHER";
 
 export type ScheduleSessionStatus =
+  | "DRAFT"
+  | "PUBLISHED"
   | "SCHEDULED"
   | "IN_PROGRESS"
   | "COMPLETED"
   | "CANCELLED"
-  | "RESCHEDULED";
+  | "RESCHEDULED"
+  | "ARCHIVED";
 
 export interface ScheduleSessionProps {
   id: string;
@@ -25,4 +28,5 @@ export interface ScheduleSessionProps {
   timezone?: string;
   description?: string;
   sourceUpdatedAt?: string;
+  isPublished?: boolean;
 }

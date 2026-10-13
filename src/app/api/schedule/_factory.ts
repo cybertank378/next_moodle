@@ -8,6 +8,14 @@ import { MoodleCourseRepository } from "@/modules/course/infrastructure/repo/Moo
 import { MoodleQuizRepository } from "@/modules/quiz/infrastructure/repo/MoodleQuizRepository";
 import { GetScheduleSessionDetailUseCase } from "@/modules/schedule/application/usecases/GetScheduleSessionDetailUseCase";
 import { GetStudentScheduleUseCase } from "@/modules/schedule/application/usecases/GetStudentScheduleUseCase";
+import { GetTeacherSchedulesUseCase } from "@/modules/schedule/application/usecases/GetTeacherSchedulesUseCase";
+import { GetTenantSchedulesUseCase } from "@/modules/schedule/application/usecases/GetTenantSchedulesUseCase";
+import {
+  CancelScheduleUseCase,
+  CreateScheduleUseCase,
+  PublishScheduleUseCase,
+  UpdateScheduleUseCase,
+} from "@/modules/schedule/application/usecases/MutateScheduleUseCases";
 import { ScheduleController } from "@/modules/schedule/infrastructure/http/ScheduleController";
 import { MoodleScheduleRepository } from "@/modules/schedule/infrastructure/repo/MoodleScheduleRepository";
 import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
@@ -33,14 +41,33 @@ export function getScheduleController(): ScheduleController {
     scheduleRepo,
     clientFactory,
   );
+  const getTenantSchedulesUseCase = new GetTenantSchedulesUseCase(
+    scheduleRepo,
+    clientFactory,
+  );
+  const getTeacherSchedulesUseCase = new GetTeacherSchedulesUseCase(
+    scheduleRepo,
+    clientFactory,
+  );
   const getScheduleSessionDetailUseCase = new GetScheduleSessionDetailUseCase(
     scheduleRepo,
     clientFactory,
   );
 
+  const createScheduleUseCase = new CreateScheduleUseCase();
+  const updateScheduleUseCase = new UpdateScheduleUseCase();
+  const publishScheduleUseCase = new PublishScheduleUseCase();
+  const cancelScheduleUseCase = new CancelScheduleUseCase();
+
   controller = new ScheduleController(
     getStudentScheduleUseCase,
+    getTenantSchedulesUseCase,
+    getTeacherSchedulesUseCase,
     getScheduleSessionDetailUseCase,
+    createScheduleUseCase,
+    updateScheduleUseCase,
+    publishScheduleUseCase,
+    cancelScheduleUseCase,
   );
   return controller;
 }
