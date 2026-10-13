@@ -19,6 +19,8 @@ describe("GetStudentScheduleUseCase", () => {
 
     repository = {
       getStudentSchedule: vi.fn(),
+      getTenantSchedule: vi.fn(),
+      getTeacherSchedule: vi.fn(),
       getSessionById: vi.fn(),
     };
 

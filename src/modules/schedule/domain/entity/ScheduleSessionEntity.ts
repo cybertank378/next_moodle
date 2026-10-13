@@ -75,6 +75,13 @@ export class ScheduleSessionEntity {
     return this.props.sourceUpdatedAt;
   }
 
+  get isPublished(): boolean {
+    return (
+      this.props.isPublished ??
+      (this.props.status !== "DRAFT" && this.props.status !== "ARCHIVED")
+    );
+  }
+
   toObject(): ScheduleSessionProps {
     return { ...this.props };
   }

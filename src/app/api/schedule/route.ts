@@ -17,3 +17,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     session.moodleToken,
   );
 }
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  const session = await getCurrentSession();
+  if (!session) {
+    return unauthorizedResponse();
+  }
+
+  return getScheduleController().createSchedule(
+    session.actor,
+    req,
+    session.moodleToken,
+  );
+}

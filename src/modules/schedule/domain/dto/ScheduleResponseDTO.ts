@@ -21,6 +21,7 @@ export interface ScheduleSessionItemDTO {
   timezone?: string;
   description?: string;
   sourceUpdatedAt?: string;
+  isPublished?: boolean;
 }
 
 export interface ScheduleResponseDTO {

@@ -17,6 +17,14 @@ export interface ScheduleRepositoryInterface {
     options: ScheduleQueryOptions,
   ): Promise<ScheduleSessionEntity[]>;
 
+  getTenantSchedule(
+    options: ScheduleQueryOptions,
+  ): Promise<ScheduleSessionEntity[]>;
+
+  getTeacherSchedule(
+    options: ScheduleQueryOptions,
+  ): Promise<ScheduleSessionEntity[]>;
+
   getSessionById(options: {
     tenantId: string;
     moodleUserId: number;

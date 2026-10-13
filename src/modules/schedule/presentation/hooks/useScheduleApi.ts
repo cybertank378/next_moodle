@@ -53,11 +53,76 @@ export function useScheduleApi() {
     throw new Error(res.error || "Gagal memuat detail sesi jadwal.");
   }, []);
 
+  const createSchedule = useCallback(
+    async (body: {
+      title: string;
+      sessionType: string;
+      courseId: number;
+      startsAt: string;
+      endsAt: string;
+      room?: string;
+      instructor?: string;
+      classGroup?: string;
+      description?: string;
+    }) => {
+      const res = await request<ScheduleSessionItemDTO>("/api/schedule", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+      if (res.data) return res.data;
+      throw new Error(res.error || "Gagal membuat jadwal pelajaran.");
+    },
+    [],
+  );
+
+  const updateSchedule = useCallback(
+    async (sessionId: string, body: Record<string, unknown>) => {
+      const res = await request<ScheduleSessionItemDTO>(
+        `/api/schedule/${encodeURIComponent(sessionId)}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(body),
+        },
+      );
+      if (res.data) return res.data;
+      throw new Error(res.error || "Gagal memperbarui jadwal.");
+    },
+    [],
+  );
+
+  const publishSchedule = useCallback(async (sessionId: string) => {
+    const res = await request<ScheduleSessionItemDTO>(
+      `/api/schedule/${encodeURIComponent(sessionId)}/publish`,
+      { method: "POST" },
+    );
+    if (res.data) return res.data;
+    throw new Error(res.error || "Gagal mempublikasikan jadwal.");
+  }, []);
+
+  const cancelSchedule = useCallback(
+    async (sessionId: string, reason?: string) => {
+      const res = await request<ScheduleSessionItemDTO>(
+        `/api/schedule/${encodeURIComponent(sessionId)}`,
+        {
+          method: "DELETE",
+          body: JSON.stringify({ reason }),
+        },
+      );
+      if (res.data) return res.data;
+      throw new Error(res.error || "Gagal membatalkan sesi jadwal.");
+    },
+    [],
+  );
+
   return {
     loading,
     error,
     data,
     fetchSchedule,
     fetchSessionDetail,
+    createSchedule,
+    updateSchedule,
+    publishSchedule,
+    cancelSchedule,
   };
 }

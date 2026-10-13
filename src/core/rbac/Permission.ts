@@ -46,11 +46,15 @@ export const Permission = {
   EXAM_MONITOR_ACTION: "exam.monitor.action",
   GRADE_READ: "grade.read",
   TENANT_AUDIT_READ: "tenant.audit.read",
+  SCHEDULE_READ: "schedule.read",
+  SCHEDULE_MANAGE: "schedule.manage",
+  SCHEDULE_PUBLISH: "schedule.publish",
 
   // STUDENT
   STUDENT_DASHBOARD_READ: "student.dashboard.read",
   STUDENT_COURSE_READ: "student.course.read",
   STUDENT_QUIZ_READ: "student.quiz.read",
+  STUDENT_SCHEDULE_READ: "student.schedule.read",
   ATTEMPT_START: "attempt.start",
   ATTEMPT_READ_OWN: "attempt.read.own",
   ATTEMPT_SAVE_OWN: "attempt.save.own",
@@ -63,6 +67,7 @@ export const Permission = {
   TEACHER_COURSE_READ: "teacher.course.read",
   TEACHER_QUIZ_READ: "teacher.quiz.read",
   TEACHER_GRADE_READ: "teacher.grade.read",
+  TEACHER_SCHEDULE_READ: "teacher.schedule.read",
 } as const;
 
 export type PermissionType = (typeof Permission)[keyof typeof Permission];

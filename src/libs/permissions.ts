@@ -12,6 +12,8 @@ export const PERMISSIONS = {
   EXAM_TAKE: "exam.take",
   RESULT_VIEW_ALL: "result.view.all",
   RESULT_VIEW_OWN: "result.view.own",
+  SCHEDULE_READ: "schedule.read",
+  SCHEDULE_MANAGE: "schedule.manage",
 } as const;
 
 export function canAccess(
@@ -30,7 +32,10 @@ export function canAccess(
     case PERMISSIONS.EXAM_MANAGE:
     case PERMISSIONS.EXAM_MONITOR:
     case PERMISSIONS.RESULT_VIEW_ALL:
+    case PERMISSIONS.SCHEDULE_MANAGE:
       return role === "TENANT";
+    case PERMISSIONS.SCHEDULE_READ:
+      return role === "TENANT" || role === "TEACHER" || role === "STUDENT";
     case PERMISSIONS.EXAM_TAKE:
     case PERMISSIONS.RESULT_VIEW_OWN:
       return role === "STUDENT";
