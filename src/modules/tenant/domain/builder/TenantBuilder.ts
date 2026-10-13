@@ -21,12 +21,20 @@ export const TenantBuilder = {
       TenantValidator.status(input.status);
     }
 
+    const status: TenantStatus =
+      input.status &&
+      (["ACTIVE", "MAINTENANCE", "SUSPENDED"] as const).includes(
+        input.status as TenantStatus,
+      )
+        ? (input.status as TenantStatus)
+        : "ACTIVE";
+
     const now = new Date();
     return new Tenant({
       id: randomUUID(),
       slug,
       name,
-      status: (input.status as any) || "ACTIVE",
+      status,
       customDomain,
       credential: null,
       branding: null,
