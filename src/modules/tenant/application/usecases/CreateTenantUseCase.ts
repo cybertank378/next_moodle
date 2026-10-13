@@ -5,6 +5,7 @@ import { Permission } from "@/core/rbac/Permission";
 import { authorizeTenantOperation } from "@/modules/tenant/application/services/TenantAuthorizationService";
 import { TenantBuilder } from "@/modules/tenant/domain/builder/TenantBuilder";
 import type { CreateTenantRequestDTO } from "@/modules/tenant/domain/dto/TenantRequestDto";
+import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantResponseDto";
 import type {
   TenantsRepository,
   TenantUserProvisioner,
@@ -95,3 +96,4 @@ export class CreateTenantUseCase {
     return Result.ok(response);
   }
 }
+
