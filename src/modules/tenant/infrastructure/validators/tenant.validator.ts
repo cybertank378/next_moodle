@@ -29,6 +29,42 @@ export function parseCreateTenantBody(input: unknown): CreateTenantRequestDTO {
   ) {
     throw new ValidationError("customDomain harus string atau null.");
   }
+
+  let adminUser: CreateTenantRequestDTO["adminUser"];
+  if (body.adminUser !== undefined && body.adminUser !== null) {
+    const adminObj = asObject(body.adminUser);
+    if (
+      typeof adminObj.username !== "string" ||
+      typeof adminObj.firstname !== "string" ||
+      typeof adminObj.lastname !== "string" ||
+      typeof adminObj.email !== "string"
+    ) {
+      throw new ValidationError(
+        "Field adminUser harus memiliki username, firstname, lastname, dan email bertipe string.",
+      );
+    }
+    if (
+      adminObj.password !== undefined &&
+      typeof adminObj.password !== "string"
+    ) {
+      throw new ValidationError("Password adminUser harus berupa string.");
+    }
+    TenantValidator.adminUser({
+      username: adminObj.username,
+      firstname: adminObj.firstname,
+      lastname: adminObj.lastname,
+      email: adminObj.email,
+      password: adminObj.password,
+    });
+    adminUser = {
+      username: adminObj.username.trim(),
+      firstname: adminObj.firstname.trim(),
+      lastname: adminObj.lastname.trim(),
+      email: adminObj.email.trim(),
+      password: adminObj.password,
+    };
+  }
+
   return {
     slug: body.slug,
     name: body.name,
@@ -36,6 +72,7 @@ export function parseCreateTenantBody(input: unknown): CreateTenantRequestDTO {
       body.customDomain === undefined
         ? undefined
         : (body.customDomain as string | null),
+    adminUser,
   };
 }
 

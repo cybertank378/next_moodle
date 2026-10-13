@@ -17,9 +17,48 @@ interface TenantValidatorContract {
     adminToken: string;
     timeoutBudgetMs: number;
   }): void;
+  adminUser(input: {
+    username: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    password?: string;
+  }): void;
 }
 
+const USERNAME_PATTERN = /^[a-z0-9_-]{3,50}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const TenantValidator: TenantValidatorContract = {
+  adminUser(input: {
+    username: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    password?: string;
+  }): void {
+    if (!USERNAME_PATTERN.test(input.username)) {
+      throw new ValidationError(
+        "Username tenant admin harus 3-50 karakter (huruf kecil, angka, underscore, atau hyphen).",
+      );
+    }
+    if (!input.firstname.trim() || input.firstname.length > 100) {
+      throw new ValidationError(
+        "Nama depan tenant admin wajib diisi (maks 100 karakter).",
+      );
+    }
+    if (!input.lastname.trim() || input.lastname.length > 100) {
+      throw new ValidationError(
+        "Nama belakang tenant admin wajib diisi (maks 100 karakter).",
+      );
+    }
+    if (!EMAIL_PATTERN.test(input.email)) {
+      throw new ValidationError("Format email tenant admin tidak valid.");
+    }
+    if (input.password !== undefined && input.password.length < 8) {
+      throw new ValidationError("Password tenant admin minimal 8 karakter.");
+    }
+  },
   slug(value: string): void {
     if (value.length < 3 || value.length > 63 || !SLUG_PATTERN.test(value)) {
       throw new ValidationError(
