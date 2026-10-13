@@ -65,9 +65,19 @@ export function parseCreateTenantBody(input: unknown): CreateTenantRequestDTO {
     };
   }
 
+  let status: TenantStatus | undefined;
+  if (body.status !== undefined && body.status !== null) {
+    if (typeof body.status !== "string") {
+      throw new ValidationError("status harus berupa string.");
+    }
+    TenantValidator.status(body.status);
+    status = body.status as TenantStatus;
+  }
+
   return {
     slug: body.slug,
     name: body.name,
+    status,
     customDomain:
       body.customDomain === undefined
         ? undefined
