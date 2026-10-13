@@ -15,7 +15,8 @@ import { Modal } from "@/shared-ui/component/Modal";
 import Skeleton from "@/shared-ui/component/Skeleton";
 
 export function TenantScheduleManagementView() {
-  const { data, loading, error, fetchSchedule } = useScheduleApi();
+  const { data, loading, error, fetchSchedule, createSchedule } =
+    useScheduleApi();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<"day" | "week" | "agenda">("week");
   const [search, setSearch] = useState<string>("");
@@ -28,6 +29,18 @@ export function TenantScheduleManagementView() {
     useState<ScheduleSessionItemDTO | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
+
+  // Form states
+  const [formTitle, setFormTitle] = useState("");
+  const [formType, setFormType] = useState<ScheduleSessionType>("LESSON");
+  const [formRoom, setFormRoom] = useState("");
+  const [formInstructor, setFormInstructor] = useState("");
+  const [formClassGroup, setFormClassGroup] = useState("");
+  const [formStartsAt, setFormStartsAt] = useState("");
+  const [formEndsAt, setFormEndsAt] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Compute boundaries based on viewMode
   const dateRange = useMemo(() => {
@@ -212,6 +225,66 @@ export function TenantScheduleManagementView() {
     setModalOpen(true);
   };
 
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+
+    if (!formTitle.trim()) {
+      setFormError("Judul sesi wajib diisi.");
+      return;
+    }
+
+    if (!formStartsAt || !formEndsAt) {
+      setFormError("Waktu mulai dan waktu selesai wajib ditentukan.");
+      return;
+    }
+
+    const startIso = new Date(formStartsAt).toISOString();
+    const endIso = new Date(formEndsAt).toISOString();
+
+    if (new Date(endIso).getTime() <= new Date(startIso).getTime()) {
+      setFormError("Waktu selesai harus lebih besar dari waktu mulai.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const created = await createSchedule({
+        title: formTitle.trim(),
+        sessionType: formType,
+        courseId: 0,
+        startsAt: startIso,
+        endsAt: endIso,
+        room: formRoom.trim() || undefined,
+        instructor: formInstructor.trim() || undefined,
+        classGroup: formClassGroup.trim() || undefined,
+        description: formDescription.trim() || undefined,
+      });
+
+      if (created) {
+        setCreateModalOpen(false);
+        // Reset form
+        setFormTitle("");
+        setFormRoom("");
+        setFormInstructor("");
+        setFormClassGroup("");
+        setFormStartsAt("");
+        setFormEndsAt("");
+        setFormDescription("");
+        // Refresh timetable
+        await fetchSchedule({
+          from: dateRange.from,
+          to: dateRange.to,
+          types: selectedTypes,
+        });
+      }
+    } catch (err: any) {
+      setFormError(err.message || "Gagal menyimpan jadwal.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
@@ -392,40 +465,189 @@ export function TenantScheduleManagementView() {
         onClose={() => setModalOpen(false)}
       />
 
-      {/* Create Modal - Backend Contract Blocked Notice */}
+      {/* Create Schedule Modal */}
       <Modal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         title="Buat Jadwal Pelajaran Baru"
-        subtitle="Pengaturan Sesi Pelajaran Institusi"
+        subtitle="Simpan sesi jadwal ke dalam kalender institusi"
         size="md"
       >
-        <div className="flex flex-col gap-4">
-          <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div className="flex flex-col gap-1">
-              <span className="font-semibold text-amber-900">
-                Fitur Terblokir Kontrak Backend (Backend-Contract-Blocked)
-              </span>
-              <p className="text-xs text-amber-700 leading-relaxed">
-                Plugin Moodle backend saat ini belum mendaftarkan Web Service
-                untuk penulisan/pembuatan jadwal pelajaran langsung (CRUD
-                timetable). Seluruh jadwal saat ini diintegrasikan secara
-                terverifikasi dari mata pelajaran terdaftar dan sesi ujian.
-              </p>
+        <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
+          {formError && (
+            <div className="p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+              <span>{formError}</span>
+            </div>
+          )}
+
+          <div>
+            <label
+              htmlFor="schedule-title"
+              className="block text-xs font-semibold text-slate-700 mb-1"
+            >
+              Judul Sesi / Mata Pelajaran *
+            </label>
+            <input
+              id="schedule-title"
+              type="text"
+              required
+              value={formTitle}
+              onChange={(e) => setFormTitle(e.target.value)}
+              placeholder="Contoh: Matematika Wajib - Aljabar"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="schedule-type"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
+                Tipe Sesi *
+              </label>
+              <select
+                id="schedule-type"
+                value={formType}
+                onChange={(e) =>
+                  setFormType(e.target.value as ScheduleSessionType)
+                }
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+              >
+                <option value="LESSON">Pelajaran (Lesson)</option>
+                <option value="EXAM">Ujian (Exam)</option>
+                <option value="CONSULTATION">Konsultasi / Bimbingan</option>
+                <option value="OTHER">Lainnya</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="schedule-room"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
+                Ruangan / Tempat
+              </label>
+              <input
+                id="schedule-room"
+                type="text"
+                value={formRoom}
+                onChange={(e) => setFormRoom(e.target.value)}
+                placeholder="Contoh: R. Kelas XII IPA 1"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+              />
             </div>
           </div>
 
-          <div className="flex justify-end pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="schedule-instructor"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
+                Pengajar / Guru
+              </label>
+              <input
+                id="schedule-instructor"
+                type="text"
+                value={formInstructor}
+                onChange={(e) => setFormInstructor(e.target.value)}
+                placeholder="Nama guru pengampu"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="schedule-classgroup"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
+                Rombel / Kelas
+              </label>
+              <input
+                id="schedule-classgroup"
+                type="text"
+                value={formClassGroup}
+                onChange={(e) => setFormClassGroup(e.target.value)}
+                placeholder="Contoh: XII IPA 1"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="schedule-starts-at"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
+                Waktu Mulai *
+              </label>
+              <input
+                id="schedule-starts-at"
+                type="datetime-local"
+                required
+                value={formStartsAt}
+                onChange={(e) => setFormStartsAt(e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="schedule-ends-at"
+                className="block text-xs font-semibold text-slate-700 mb-1"
+              >
+                Waktu Selesai *
+              </label>
+              <input
+                id="schedule-ends-at"
+                type="datetime-local"
+                required
+                value={formEndsAt}
+                onChange={(e) => setFormEndsAt(e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="schedule-description"
+              className="block text-xs font-semibold text-slate-700 mb-1"
+            >
+              Catatan / Deskripsi
+            </label>
+            <textarea
+              id="schedule-description"
+              rows={2}
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+              placeholder="Deskripsi atau instruksi tambahan..."
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+            />
+          </div>
+
+          <div className="flex justify-end items-center gap-2 pt-2 border-t border-slate-100">
             <Button
+              type="button"
               variant="outline"
               color="secondary"
               onClick={() => setCreateModalOpen(false)}
             >
-              Mengerti & Tutup
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              variant="filled"
+              color="primary"
+              loading={submitting}
+            >
+              Simpan Jadwal
             </Button>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );

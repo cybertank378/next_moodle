@@ -54,10 +54,10 @@ export function getScheduleController(): ScheduleController {
     clientFactory,
   );
 
-  const createScheduleUseCase = new CreateScheduleUseCase();
-  const updateScheduleUseCase = new UpdateScheduleUseCase();
-  const publishScheduleUseCase = new PublishScheduleUseCase();
-  const cancelScheduleUseCase = new CancelScheduleUseCase();
+  const createScheduleUseCase = new CreateScheduleUseCase(scheduleRepo);
+  const updateScheduleUseCase = new UpdateScheduleUseCase(scheduleRepo);
+  const publishScheduleUseCase = new PublishScheduleUseCase(scheduleRepo);
+  const cancelScheduleUseCase = new CancelScheduleUseCase(scheduleRepo);
 
   controller = new ScheduleController(
     getStudentScheduleUseCase,

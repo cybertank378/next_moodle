@@ -196,8 +196,22 @@ describe("Tenant & Teacher Schedule Use Cases and RBAC rules", () => {
       expect(result.getError().message).toContain("Siswa tidak memiliki izin");
     });
 
-    it("returns backend-contract-blocked message when TENANT attempts mutations", async () => {
-      const createUseCase = new CreateScheduleUseCase();
+    it("successfully delegates to scheduleRepo when TENANT creates a schedule", async () => {
+      const mockScheduleRepo: any = {
+        createSession: vi.fn().mockResolvedValue(
+          new ScheduleSessionEntity("session-1", "tenant-1", {
+            id: "session-1",
+            title: "Sesi Matematika",
+            sessionType: "LESSON",
+            courseId: 10,
+            startsAt: "2026-10-20T08:00:00Z",
+            endsAt: "2026-10-20T09:00:00Z",
+            status: "PUBLISHED",
+          }),
+        ),
+      };
+
+      const createUseCase = new CreateScheduleUseCase(mockScheduleRepo);
       const res = await createUseCase.execute({
         actor: {
           id: "tenant-1",
@@ -213,8 +227,12 @@ describe("Tenant & Teacher Schedule Use Cases and RBAC rules", () => {
         },
       });
 
-      expect(res.isFailure).toBe(true);
-      expect(res.getError().message).toContain("backend-contract-blocked");
+      if (res.isFailure) {
+        console.error("CreateUseCase failed with error:", res.getError());
+      }
+      expect(res.isSuccess).toBe(true);
+      expect(res.getValue().id).toBe("session-1");
+      expect(mockScheduleRepo.createSession).toHaveBeenCalled();
     });
   });
 });
