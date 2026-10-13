@@ -22,11 +22,9 @@ interface ScheduleSessionDetailModalProps {
   onClose: () => void;
 }
 
-export const ScheduleSessionDetailModal: FC<ScheduleSessionDetailModalProps> = ({
-  session,
-  open,
-  onClose,
-}) => {
+export const ScheduleSessionDetailModal: FC<
+  ScheduleSessionDetailModalProps
+> = ({ session, open, onClose }) => {
   if (!session) return null;
 
   const startDate = new Date(session.startsAt);
@@ -79,7 +77,9 @@ export const ScheduleSessionDetailModal: FC<ScheduleSessionDetailModalProps> = (
           {session.courseName && (
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-slate-400 shrink-0" />
-              <span className="font-medium text-slate-700">Mata Pelajaran:</span>
+              <span className="font-medium text-slate-700">
+                Mata Pelajaran:
+              </span>
               <span>{session.courseName}</span>
             </div>
           )}
@@ -107,11 +107,7 @@ export const ScheduleSessionDetailModal: FC<ScheduleSessionDetailModalProps> = (
           </Button>
           {session.detailRoute && (
             <Link href={session.detailRoute}>
-              <Button
-                variant="filled"
-                color="primary"
-                rightIcon={ExternalLink}
-              >
+              <Button variant="filled" color="primary" rightIcon={ExternalLink}>
                 Buka Halaman Ujian
               </Button>
             </Link>

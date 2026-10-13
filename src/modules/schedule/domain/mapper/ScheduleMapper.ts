@@ -1,6 +1,7 @@
 import type { ScheduleSessionItemDTO } from "@/modules/schedule/domain/dto/ScheduleResponseDTO";
 import type { ScheduleSessionEntity } from "@/modules/schedule/domain/entity/ScheduleSessionEntity";
 
+// biome-ignore lint/complexity/noStaticOnlyClass: DDD mapper convention
 export class ScheduleMapper {
   static toDTO(entity: ScheduleSessionEntity): ScheduleSessionItemDTO {
     return {

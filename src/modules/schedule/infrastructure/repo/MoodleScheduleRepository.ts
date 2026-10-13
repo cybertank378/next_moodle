@@ -19,7 +19,8 @@ export class MoodleScheduleRepository implements ScheduleRepositoryInterface {
   async getStudentSchedule(
     options: ScheduleQueryOptions,
   ): Promise<ScheduleSessionEntity[]> {
-    const { tenantId, moodleUserId, from, to, types, courseId, client } = options;
+    const { tenantId, moodleUserId, from, to, types, courseId, client } =
+      options;
 
     const sessions: ScheduleSessionEntity[] = [];
 

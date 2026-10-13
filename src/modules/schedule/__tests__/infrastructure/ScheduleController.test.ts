@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Result } from "@/core/base/Result";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { Result } from "@/core/base/Result";
 import type { GetScheduleSessionDetailUseCase } from "@/modules/schedule/application/usecases/GetScheduleSessionDetailUseCase";
 import type { GetStudentScheduleUseCase } from "@/modules/schedule/application/usecases/GetStudentScheduleUseCase";
 import { ScheduleController } from "@/modules/schedule/infrastructure/http/ScheduleController";

@@ -39,6 +39,7 @@ export const ScheduleSessionCard: FC<ScheduleSessionCardProps> = ({
     : `${startDate.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} - ${endDate.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`;
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: user constraint requires avoiding native button tags
     <div
       onClick={() => onSelect?.(session)}
       onKeyDown={(e) => {

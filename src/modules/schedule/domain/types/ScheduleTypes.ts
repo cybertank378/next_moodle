@@ -1,8 +1,4 @@
-export type ScheduleSessionType =
-  | "LESSON"
-  | "EXAM"
-  | "CONSULTATION"
-  | "OTHER";
+export type ScheduleSessionType = "LESSON" | "EXAM" | "CONSULTATION" | "OTHER";
 
 export type ScheduleSessionStatus =
   | "SCHEDULED"
