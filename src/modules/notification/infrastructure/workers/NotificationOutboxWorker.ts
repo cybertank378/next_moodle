@@ -46,19 +46,22 @@ export class NotificationOutboxWorker {
         await this.processJob(job);
         await this.deps.outboxRepo.completeJob(job.id);
         succeeded += 1;
-      } catch (err: unknown) {
+      } catch (error: unknown) {
         failed += 1;
-        const attempts = job.attempts + 1;
+        const attempts = job.attempts;
         const canRetry = attempts < 5;
         // Exponential backoff with jitter: 2^attempts * 1000ms + random(500)
         const baseBackoff = Math.min(60_000, 2 ** attempts * 1000);
         const jitter = Math.floor(Math.random() * 500);
         const backoffMs = baseBackoff + jitter;
 
-        console.error(
-          `[OutboxWorker] Job ${job.id} (${job.jobType}) failed:`,
-          err,
-        );
+        console.error("[OutboxWorker] Dispatch failed", {
+          jobId: job.id,
+          campaignId: job.campaignId,
+          jobType: job.jobType,
+          attempts: job.attempts,
+          error,
+        });
         await this.deps.outboxRepo.failJob(job.id, canRetry, backoffMs);
       }
     }

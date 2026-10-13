@@ -2,11 +2,11 @@
 
 import { useCallback, useState } from "react";
 import { type RequestState, request } from "@/libs/apiClient";
-import { showErrorToast, showSuccessToast } from "@/shared-ui/component/Toast";
 import type {
   CourseGradesResponseDto,
   UserGradeReportResponseDto,
 } from "@/modules/grades/domain/dto/GradeResponseDto";
+import { showErrorToast, showSuccessToast } from "@/shared-ui/component/Toast";
 
 export function useGradeApi() {
   const [userReportState, setUserReportState] = useState<

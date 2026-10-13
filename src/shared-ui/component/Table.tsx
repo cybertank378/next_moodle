@@ -73,12 +73,7 @@ export const TableBody = ({
 
   className?: string;
 }) => (
-  <tbody
-    className={clsx(
-      "divide-y divide-gray-200 ",
-      className,
-    )}
-  >
+  <tbody className={clsx("divide-y divide-gray-200 ", className)}>
     {children}
   </tbody>
 );

@@ -1,8 +1,8 @@
-import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
-import { Permission } from "@/core/rbac/Permission";
-import { hasPermission } from "@/core/rbac/hasPermission";
+import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import type { AppRole } from "@/core/rbac/AppRole";
+import { hasPermission } from "@/core/rbac/hasPermission";
+import { Permission } from "@/core/rbac/Permission";
 
 export function authorizeExamMonitorOperation(
   actor: CurrentActor,

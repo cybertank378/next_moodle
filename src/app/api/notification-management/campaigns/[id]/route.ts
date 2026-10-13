@@ -1,3 +1,4 @@
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 // Files: src/app/api/notification-management/campaigns/[id]/route.ts
 import "server-only";
 
@@ -11,7 +12,7 @@ export async function GET(
   return createNotificationManagementController().getCampaign(req, id);
 }
 
-export async function PATCH(
+async function originalPATCH(
   req: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
@@ -19,10 +20,19 @@ export async function PATCH(
   return createNotificationManagementController().updateCampaign(req, id);
 }
 
-export async function DELETE(
+async function originalDELETE(
   req: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await context.params;
   return createNotificationManagementController().deleteDraft(req, id);
 }
+
+export const PATCH = withAuditedMutation(
+  originalPATCH,
+  "notification-management/campaigns/:id",
+);
+export const DELETE = withAuditedMutation(
+  originalDELETE,
+  "notification-management/campaigns/:id",
+);

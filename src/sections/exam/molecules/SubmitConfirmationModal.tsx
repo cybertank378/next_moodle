@@ -92,18 +92,14 @@ export default function SubmitConfirmationModal({
 
         <div className="grid grid-cols-2 gap-3 pt-1">
           <div className="rounded-xl border border-slate-200  bg-slate-50  p-3 space-y-1">
-            <span className="text-[11px] text-slate-500 ">
-              Sudah Terjawab
-            </span>
+            <span className="text-[11px] text-slate-500 ">Sudah Terjawab</span>
             <p className="text-lg font-bold text-emerald-600  flex items-center gap-1.5">
               <CheckCircle2 size={16} />
               {answeredCount}
             </p>
           </div>
           <div className="rounded-xl border border-slate-200  bg-slate-50  p-3 space-y-1">
-            <span className="text-[11px] text-slate-500 ">
-              Belum Terjawab
-            </span>
+            <span className="text-[11px] text-slate-500 ">Belum Terjawab</span>
             <p
               className={`text-lg font-bold ${hasUnanswered ? "text-rose-600 " : "text-slate-400"}`}
             >
@@ -114,11 +110,8 @@ export default function SubmitConfirmationModal({
 
         <p className="text-xs text-slate-500  leading-relaxed">
           Setelah menekan tombol{" "}
-          <strong className="text-slate-900 ">
-            Kumpulkan Sekarang
-          </strong>
-          , sesi ujian Anda akan ditutup dan Anda tidak dapat lagi mengubah
-          jawaban.
+          <strong className="text-slate-900 ">Kumpulkan Sekarang</strong>, sesi
+          ujian Anda akan ditutup dan Anda tidak dapat lagi mengubah jawaban.
         </p>
 
         <div className="flex items-center justify-end gap-3 pt-2">

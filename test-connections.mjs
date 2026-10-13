@@ -40,7 +40,7 @@ async function main() {
       "/login/token.php",
       tenant.credential.moodleUrl,
     ).toString();
-    console.log("Fetching: " + url);
+    console.log(`Fetching: ${url}`);
     try {
       const resp = await fetch(url, { method: "POST" });
       console.log("✅ Moodle connection successful.");

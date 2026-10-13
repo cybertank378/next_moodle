@@ -14,7 +14,8 @@ describe("MoodleQuizAttemptRepository", () => {
 
     mockFactory = {
       createClient: vi.fn().mockReturnValue(mockClient as never),
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockClient as never),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockClient as never),
     };
   });
 

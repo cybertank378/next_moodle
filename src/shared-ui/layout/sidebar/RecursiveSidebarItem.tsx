@@ -197,9 +197,7 @@ export function RecursiveSidebarItem({
             }}
             className={clsx(
               "shrink-0",
-              isActive
-                ? "text-white"
-                : "text-slate-400 group-hover:text-white",
+              isActive ? "text-white" : "text-slate-400 group-hover:text-white",
             )}
           >
             <ChevronDown size={15} />

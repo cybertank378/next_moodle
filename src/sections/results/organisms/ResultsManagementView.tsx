@@ -4,11 +4,11 @@ import { BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Role, type UserRole } from "@/libs/enums";
 import { useCourseApi } from "@/modules/course/presentation/hooks/useCourseApi";
-import SelectField from "@/shared-ui/component/SelectField";
-import Skeleton from "@/shared-ui/component/Skeleton";
 import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
 import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
 import TeacherClassResultsView from "@/sections/results/organisms/TeacherClassResultsView";
+import SelectField from "@/shared-ui/component/SelectField";
+import Skeleton from "@/shared-ui/component/Skeleton";
 
 export interface ResultsManagementViewProps {
   userRole: UserRole;

@@ -39,12 +39,27 @@ export function getRateLimiter(
   return limiter;
 }
 
+export interface RateLimitAuthContext {
+  tenantId?: string | null;
+  actorId?: string | null;
+  scope?: string;
+}
+
 /**
  * Derive a rate-limit key from the request.
- * Uses `x-forwarded-for` when behind a reverse proxy, falling back to
- * `x-real-ip` or a constant key for local development.
+ * For authenticated requests, uses tenant + actor + scope to avoid blocking whole schools on shared IPs.
+ * For anonymous/external requests, falls back to reverse proxy IP headers.
  */
-export function resolveRateLimitKey(req: Request): string {
+export function resolveRateLimitKey(
+  req: Request,
+  authContext?: RateLimitAuthContext,
+): string {
+  if (authContext?.actorId) {
+    const tenant = authContext.tenantId || "global";
+    const scope = authContext.scope || "default";
+    return `actor:${tenant}:${authContext.actorId}:${scope}`;
+  }
+
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
 
@@ -53,3 +68,4 @@ export function resolveRateLimitKey(req: Request): string {
 
   return "anonymous";
 }
+

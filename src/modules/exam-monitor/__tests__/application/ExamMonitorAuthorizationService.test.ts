@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { authorizeExamMonitorOperation } from "@/modules/exam-monitor/application/services/ExamMonitorAuthorizationService";
-import { AppRole } from "@/core/rbac/AppRole";
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
+import { AppRole } from "@/core/rbac/AppRole";
+import { authorizeExamMonitorOperation } from "@/modules/exam-monitor/application/services/ExamMonitorAuthorizationService";
 
 describe("ExamMonitorAuthorizationService", () => {
   it("allows PROCTOR to perform action if tenantId matches", () => {
@@ -12,9 +12,11 @@ describe("ExamMonitorAuthorizationService", () => {
       permissions: ["exam.monitor.action", "exam.monitor.read"],
       tenantId: "tenant-a",
     };
-    
+
     // This will throw if forbidden
-    expect(() => authorizeExamMonitorOperation(actor, "tenant-a", "action")).not.toThrow();
+    expect(() =>
+      authorizeExamMonitorOperation(actor, "tenant-a", "action"),
+    ).not.toThrow();
   });
 
   it("throws ForbiddenError if PROCTOR attempts to monitor a different tenant", () => {
@@ -25,8 +27,10 @@ describe("ExamMonitorAuthorizationService", () => {
       permissions: ["exam.monitor.action", "exam.monitor.read"],
       tenantId: "tenant-a",
     };
-    
-    expect(() => authorizeExamMonitorOperation(actor, "tenant-b", "action")).toThrow(ForbiddenError);
+
+    expect(() =>
+      authorizeExamMonitorOperation(actor, "tenant-b", "action"),
+    ).toThrow(ForbiddenError);
   });
 
   it("throws ForbiddenError if actor lacks EXAM_MONITOR_ACTION permission for action", () => {
@@ -37,9 +41,11 @@ describe("ExamMonitorAuthorizationService", () => {
       permissions: ["exam.monitor.read"], // missing action
       tenantId: "tenant-a",
     };
-    
-    expect(() => authorizeExamMonitorOperation(actor, "tenant-a", "action")).toThrowError(
-      "Anda tidak memiliki izin untuk melakukan aksi pengawasan ujian ini."
+
+    expect(() =>
+      authorizeExamMonitorOperation(actor, "tenant-a", "action"),
+    ).toThrowError(
+      "Anda tidak memiliki izin untuk melakukan aksi pengawasan ujian ini.",
     );
   });
 
@@ -51,7 +57,9 @@ describe("ExamMonitorAuthorizationService", () => {
       permissions: ["exam.monitor.read"],
       tenantId: "tenant-a",
     };
-    
-    expect(() => authorizeExamMonitorOperation(actor, "tenant-a", "read")).not.toThrow();
+
+    expect(() =>
+      authorizeExamMonitorOperation(actor, "tenant-a", "read"),
+    ).not.toThrow();
   });
 });

@@ -1,0 +1,2 @@
+DELETE FROM "notifications" newer USING "notifications" older WHERE newer."campaignId" IS NOT NULL AND newer."campaignId" = older."campaignId" AND newer."recipientId" = older."recipientId" AND newer."recipientRole" = older."recipientRole" AND (newer."createdAt", newer."id") > (older."createdAt", older."id");
+CREATE UNIQUE INDEX "notifications_campaignId_recipientId_recipientRole_key" ON "notifications"("campaignId","recipientId","recipientRole");

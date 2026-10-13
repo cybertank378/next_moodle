@@ -3,6 +3,7 @@ import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { HttpStatus } from "@/core/http/HttpStatus";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
+import { recordSaasAudit } from "@/modules/audit/infrastructure/repo/SaasAuditWriter";
 import type { GetCurrentSessionUseCase } from "@/modules/auth/application/usecases/GetCurrentSessionUseCase";
 import type { LoginUseCase } from "@/modules/auth/application/usecases/LoginUseCase";
 import type { LogoutAllUseCase } from "@/modules/auth/application/usecases/LogoutAllUseCase";
@@ -103,7 +104,9 @@ export class AuthController {
         tenant: tenantIdentifierFromRequest(req),
       });
 
-      console.log(`[AUTH] User '${result.actor.username}' logged in successfully as role: ${result.actor.role}`);
+      console.log(
+        `[AUTH] User '${result.actor.username}' logged in successfully as role: ${result.actor.role}`,
+      );
 
       const response = respond(
         ApiResponse.success(
@@ -121,6 +124,22 @@ export class AuthController {
         result.sessionCookie.value,
         result.sessionCookie.expiresAt,
       );
+      // Authentication must not return HTTP 500 after the session was created.
+      // An audit outage must be visible to operations, never hidden.
+      try {
+        await recordSaasAudit({
+          actor: result.actor,
+          tenantId: result.actor.tenantId ?? null,
+          action: "auth.login",
+          resource: "session",
+          details: { event: "auth.login" },
+        });
+      } catch (auditError) {
+        console.error(
+          "[AuthController] Login succeeded but audit persistence failed",
+          auditError,
+        );
+      }
       return response;
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));

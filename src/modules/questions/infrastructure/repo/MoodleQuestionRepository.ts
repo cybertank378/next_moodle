@@ -6,8 +6,8 @@ import { QuestionEntity } from "@/modules/questions/domain/entity/QuestionEntity
 import type { QuestionRepositoryInterface } from "@/modules/questions/domain/interfaces/QuestionRepositoryInterface";
 import type {
   CreateQuestionRequestDto,
-  UpdateQuestionRequestDto,
   QuestionType,
+  UpdateQuestionRequestDto,
 } from "@/modules/questions/domain/types/QuestionTypes";
 
 interface MoodleQuestionRaw {
@@ -26,9 +26,12 @@ export class MoodleQuestionRepository implements QuestionRepositoryInterface {
     client: MoodleClient,
     categoryId: number,
   ): Promise<QuestionEntity[]> {
-    const res = await client.call<MoodleQuestionRaw[]>("local_examapi_get_questions", {
-      categoryid: categoryId,
-    });
+    const res = await client.call<MoodleQuestionRaw[]>(
+      "local_examapi_get_questions",
+      {
+        categoryid: categoryId,
+      },
+    );
     if (!res || !Array.isArray(res)) {
       throw new MoodleError(
         "Invalid response from local_examapi_get_questions",
@@ -53,14 +56,17 @@ export class MoodleQuestionRepository implements QuestionRepositoryInterface {
     client: MoodleClient,
     dto: CreateQuestionRequestDto,
   ): Promise<QuestionEntity> {
-    const res = await client.call<MoodleQuestionRaw>("local_examapi_create_question", {
-      categoryid: dto.categoryId,
-      qtype: dto.type,
-      name: dto.name,
-      questiontext: dto.questionText,
-      defaultmark: dto.defaultMark,
-      options: dto.options ? JSON.stringify(dto.options) : "[]",
-    });
+    const res = await client.call<MoodleQuestionRaw>(
+      "local_examapi_create_question",
+      {
+        categoryid: dto.categoryId,
+        qtype: dto.type,
+        name: dto.name,
+        questiontext: dto.questionText,
+        defaultmark: dto.defaultMark,
+        options: dto.options ? JSON.stringify(dto.options) : "[]",
+      },
+    );
 
     if (!res || !res.id) {
       throw new MoodleError("Failed to create question");
@@ -98,7 +104,10 @@ export class MoodleQuestionRepository implements QuestionRepositoryInterface {
     if (dto.defaultMark !== undefined) args.defaultmark = dto.defaultMark;
     if (dto.options !== undefined) args.options = JSON.stringify(dto.options);
 
-    const res = await client.call<MoodleQuestionRaw>("local_examapi_update_question", args);
+    const res = await client.call<MoodleQuestionRaw>(
+      "local_examapi_update_question",
+      args,
+    );
 
     if (!res || !res.id) {
       throw new MoodleError("Failed to update question");

@@ -27,9 +27,22 @@ export function resolveUserRole(role?: string | null): UserRole | null {
 }
 
 export function redirectByRole(role?: string | null): string {
-  return resolveUserRole(role) ? ROUTES.HOME : ROUTES.AUTH.LOGIN;
+  return resolveUserRole(role) ? ROUTES.DASHBOARD.ROOT : ROUTES.AUTH.LOGIN;
 }
 
 export function stripHtml(html: string): string {
   return html.replace(/<[^>]*>?/gm, "").trim();
+}
+
+/**
+ * Basic HTML sanitizer to strip dangerous script tags, handlers, and javascript: hrefs.
+ */
+export function sanitizeHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/on\w+\s*=\s*[^>\s]+/gi, "")
+    .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"')
+    .trim();
 }

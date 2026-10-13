@@ -1,6 +1,6 @@
+import type { MoodleClient } from "@/core/moodle/types";
 import type { CourseSectionResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
 import type { CourseEntity } from "@/modules/course/domain/entity/CourseEntity";
-import type { MoodleClient } from "@/core/moodle/types";
 
 export interface CourseRepositoryInterface {
   getUserCourses(input: {
@@ -20,4 +20,10 @@ export interface CourseRepositoryInterface {
     courseId: number;
     client?: MoodleClient;
   }): Promise<CourseSectionResponseDTO[]>;
+
+  getCourseById(input: {
+    tenantId: string;
+    courseId: number;
+    client?: MoodleClient;
+  }): Promise<CourseEntity | null>;
 }

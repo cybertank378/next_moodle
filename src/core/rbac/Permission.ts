@@ -7,6 +7,8 @@ export const Permission = {
   TENANT_STATUS_UPDATE: "tenant.status.update",
   TENANT_CONNECTION_TEST: "tenant.connection.test",
   PLATFORM_AUDIT_READ: "platform.audit.read",
+  PLATFORM_SETTINGS_READ: "platform.settings.read",
+  PLATFORM_SETTINGS_UPDATE: "platform.settings.update",
 
   // NOTIFICATION MANAGEMENT
   NOTIFICATION_MANAGE: "notification.manage",

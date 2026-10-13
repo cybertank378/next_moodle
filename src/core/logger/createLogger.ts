@@ -1,5 +1,10 @@
+import type {
+  LogContext,
+  LogEntry,
+  Logger,
+  LogLevel,
+} from "@/core/logger/Logger";
 import { redactSensitiveData } from "@/core/security/SensitiveData";
-import type { LogContext, LogEntry, Logger, LogLevel } from "@/core/logger/Logger";
 
 class StructuredLogger implements Logger {
   constructor(

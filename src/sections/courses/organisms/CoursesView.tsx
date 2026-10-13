@@ -28,9 +28,7 @@ export default function CoursesView() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-slate-900 ">
-          Mata Pelajaran
-        </h1>
+        <h1 className="text-2xl font-bold text-slate-900 ">Mata Pelajaran</h1>
         <p className="text-sm text-slate-500 ">
           Daftar mata pelajaran aktif yang terhubung dengan modul pembelajaran
           Moodle.

@@ -97,15 +97,10 @@ export class TenantController {
         actor: actorToAuthorization(actor),
         data: parseCreateTenantBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(
-            ApiResponse.success(
-              result.getValue(),
-              undefined,
-              HttpStatus.CREATED,
-            ),
-          );
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
+      const saved = result.getValue();
+      return respond(ApiResponse.success(saved, undefined, HttpStatus.CREATED));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -122,9 +117,9 @@ export class TenantController {
         tenantId,
         data: parseUpdateTenantBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(ApiResponse.success(result.getValue()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
+      return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -141,9 +136,9 @@ export class TenantController {
         tenantId,
         status: parseStatusBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(ApiResponse.success(result.getValue()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
+      return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }
@@ -154,6 +149,8 @@ export class TenantController {
       actor: actorToAuthorization(actor),
       tenantId,
     });
+    // Deletion cascades SaasAuditLog under the current schema; audit history cannot survive a hard delete.
+    // This path requires a retention migration before durable deletion audit can be guaranteed.
     return result.isFailure
       ? respond(mapErrorToHttpResponse(result.getError()))
       : respond(ApiResponse.success(result.getValue()));
@@ -170,9 +167,9 @@ export class TenantController {
         tenantId,
         data: parseCredentialBody(await parseJson(req)),
       });
-      return result.isFailure
-        ? respond(mapErrorToHttpResponse(result.getError()))
-        : respond(ApiResponse.success(result.getValue()));
+      if (result.isFailure)
+        return respond(mapErrorToHttpResponse(result.getError()));
+      return respond(ApiResponse.success(result.getValue()));
     } catch (error) {
       return respond(mapErrorToHttpResponse(error));
     }

@@ -32,10 +32,7 @@ export default function QuestionNavigator({
     >
       <div className="flex items-center justify-between border-b border-slate-200  pb-3">
         <div className="flex items-center gap-2 text-slate-900  font-semibold text-sm">
-          <LayoutGrid
-            size={16}
-            className="text-indigo-600 "
-          />
+          <LayoutGrid size={16} className="text-indigo-600 " />
           <span>Navigasi Soal</span>
         </div>
         <span className="text-xs text-slate-500  font-medium">
@@ -98,9 +95,7 @@ export default function QuestionNavigator({
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
             <span>Sudah Dijawab</span>
           </div>
-          <span className="font-semibold text-slate-700 ">
-            {answeredCount}
-          </span>
+          <span className="font-semibold text-slate-700 ">{answeredCount}</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

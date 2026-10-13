@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { GetCourseContentsUseCase } from "@/modules/course/application/usecases/GetCourseContentsUseCase";
+import { GetCourseDetailUseCase } from "@/modules/course/application/usecases/GetCourseDetailUseCase";
 import { GetUserCoursesUseCase } from "@/modules/course/application/usecases/GetUserCoursesUseCase";
 import type { CourseSectionResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
 import { CourseEntity } from "@/modules/course/domain/entity/CourseEntity";
@@ -11,6 +12,7 @@ const studentActor: AuthorizationActor = {
   id: "student-1",
   role: AppRole.STUDENT,
   tenantId: "tenant-1",
+  moodleUserId: 42,
 };
 
 const tenantActor: AuthorizationActor = {
@@ -47,21 +49,24 @@ class MockCourseRepository implements CourseRepositoryInterface {
   getUserCourses = vi.fn<CourseRepositoryInterface["getUserCourses"]>();
   getTenantCourses = vi.fn<CourseRepositoryInterface["getTenantCourses"]>();
   getCourseContents = vi.fn<CourseRepositoryInterface["getCourseContents"]>();
+  getCourseById = vi.fn<CourseRepositoryInterface["getCourseById"]>();
 }
 
 describe("Course Use Cases", () => {
   describe("GetUserCoursesUseCase", () => {
-    it("fetches enrolled courses for STUDENT actor with moodleUserId", async () => {
+    it("fetches enrolled courses for STUDENT actor with moodleUserId and client", async () => {
       const repo = new MockCourseRepository();
       repo.getUserCourses.mockResolvedValue([
         createMockCourse(101, "MATH101"),
         createMockCourse(102, "PHYS101"),
       ]);
+      const mockClient = { call: vi.fn() } as any;
 
       const useCase = new GetUserCoursesUseCase(repo);
       const result = await useCase.execute({
         actor: studentActor,
         moodleUserId: 42,
+        client: mockClient,
       });
 
       expect(result.isSuccess).toBe(true);
@@ -71,7 +76,23 @@ describe("Course Use Cases", () => {
       expect(repo.getUserCourses).toHaveBeenCalledWith({
         tenantId: "tenant-1",
         moodleUserId: 42,
+        client: mockClient,
       });
+    });
+
+    it("fails closed when STUDENT actor does not have client or student token provided", async () => {
+      const repo = new MockCourseRepository();
+      const useCase = new GetUserCoursesUseCase(repo);
+
+      const result = await useCase.execute({
+        actor: studentActor,
+        moodleUserId: 42,
+        // no client or token
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().message).toMatch(/kredensial|token|client/i);
+      expect(repo.getUserCourses).not.toHaveBeenCalled();
     });
 
     it("fetches tenant courses for TENANT actor with optional search", async () => {
@@ -175,6 +196,127 @@ describe("Course Use Cases", () => {
       });
 
       expect(result.isFailure).toBe(true);
+    });
+  });
+
+  describe("GetCourseDetailUseCase", () => {
+    it("fetches course detail and sections for enrolled STUDENT actor", async () => {
+      const repo = new MockCourseRepository();
+      const mockCourse = createMockCourse(101, "MATH101");
+      repo.getUserCourses.mockResolvedValue([mockCourse]);
+      repo.getCourseContents.mockResolvedValue([
+        {
+          id: 1,
+          name: "Chapter 1",
+          sectionNumber: 0,
+          summary: "Numbers",
+          isVisible: true,
+          modules: [],
+        },
+      ]);
+      const mockClient = { call: vi.fn() } as any;
+
+      const useCase = new GetCourseDetailUseCase(repo);
+      const result = await useCase.execute({
+        actor: studentActor,
+        courseId: 101,
+        client: mockClient,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      const data = result.getValue();
+      expect(data.course.id).toBe(101);
+      expect(data.course.shortName).toBe("MATH101");
+      expect(data.sections).toHaveLength(1);
+      expect(repo.getUserCourses).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        moodleUserId: 42,
+        client: mockClient,
+      });
+      expect(repo.getCourseContents).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        courseId: 101,
+        client: mockClient,
+      });
+    });
+
+    it("fails closed when STUDENT actor accesses course detail without client", async () => {
+      const repo = new MockCourseRepository();
+      const useCase = new GetCourseDetailUseCase(repo);
+
+      const result = await useCase.execute({
+        actor: studentActor,
+        courseId: 101,
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().message).toMatch(/kredensial|token|client/i);
+      expect(repo.getUserCourses).not.toHaveBeenCalled();
+    });
+
+    it("returns NotFoundError if STUDENT actor is not enrolled in the course", async () => {
+      const repo = new MockCourseRepository();
+      repo.getUserCourses.mockResolvedValue([createMockCourse(999, "OTHER")]);
+      const mockClient = { call: vi.fn() } as any;
+
+      const useCase = new GetCourseDetailUseCase(repo);
+      const result = await useCase.execute({
+        actor: studentActor,
+        courseId: 101,
+        client: mockClient,
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().name).toBe("NotFoundError");
+      expect(result.getError().message).toMatch(/tidak terdaftar/i);
+    });
+
+    it("fetches course detail for TENANT actor via getCourseById", async () => {
+      const repo = new MockCourseRepository();
+      const mockCourse = createMockCourse(101, "MATH101");
+      repo.getCourseById.mockResolvedValue(mockCourse);
+      repo.getCourseContents.mockResolvedValue([]);
+
+      const useCase = new GetCourseDetailUseCase(repo);
+      const result = await useCase.execute({
+        actor: tenantActor,
+        courseId: 101,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      const data = result.getValue();
+      expect(data.course.id).toBe(101);
+      expect(repo.getCourseById).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        courseId: 101,
+      });
+    });
+
+    it("returns NotFoundError for TENANT actor if course does not exist", async () => {
+      const repo = new MockCourseRepository();
+      repo.getCourseById.mockResolvedValue(null);
+
+      const useCase = new GetCourseDetailUseCase(repo);
+      const result = await useCase.execute({
+        actor: tenantActor,
+        courseId: 999,
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().name).toBe("NotFoundError");
+    });
+
+    it("fails with ValidationError on invalid courseId", async () => {
+      const repo = new MockCourseRepository();
+      const useCase = new GetCourseDetailUseCase(repo);
+
+      const result = await useCase.execute({
+        actor: studentActor,
+        courseId: 0,
+      });
+
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().name).toBe("ValidationError");
     });
   });
 });

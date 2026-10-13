@@ -3,10 +3,13 @@
 import { Award, BookOpen, CheckCircle, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
+import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
+import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
+import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
+import GradeReportSummaryCard from "@/sections/results/molecules/GradeReportSummaryCard";
 import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import { showErrorToast } from "@/shared-ui/component/Toast";
 import {
   Table,
   TableBody,
@@ -15,10 +18,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/shared-ui/component/Table";
-import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
-import GradeStatusBadge from "@/sections/results/atoms/GradeStatusBadge";
-import ResultsEmptyState from "@/sections/results/atoms/ResultsEmptyState";
-import GradeReportSummaryCard from "@/sections/results/molecules/GradeReportSummaryCard";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 export interface StudentGradeReportViewProps {
   courseId: number;

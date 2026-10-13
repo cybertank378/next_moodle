@@ -1,0 +1,4 @@
+# Debian/systemd deployment example for automatic cleanup.
+# Configure environment AUDIT_RETENTION_CRON_SECRET in the application AND protected scheduler.
+# 0 2 * * * curl --fail-with-body -sS -X POST -H "Authorization: Bearer ${AUDIT_RETENTION_CRON_SECRET}" https://YOUR_INTERNAL_HOST/api/cron/audit-retention
+# Use HTTPS and restrict network access.

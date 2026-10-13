@@ -2,8 +2,6 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import {
   Ban,
   CheckCircle2,
@@ -13,17 +11,19 @@ import {
   Settings,
   Users,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ROUTES } from "@/libs/routes";
 import { ADMIN_DASHBOARD_DEFAULT_MONTHS } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { formatCount } from "@/modules/dashboard/presentation/helpers/dashboardFormatters";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
-import Button from "@/shared-ui/component/Button";
-import { showErrorToast } from "@/shared-ui/component/Toast";
 import AdminTenantAttentionBanner from "@/sections/dashboard/molecules/AdminTenantAttentionBanner";
 import RecentTenantsTable from "@/sections/dashboard/molecules/RecentTenantsTable";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
 import TenantGrowthChart from "@/sections/dashboard/molecules/TenantGrowthChart";
 import TenantStatusChart from "@/sections/dashboard/molecules/TenantStatusChart";
-import { ROUTES } from "@/libs/routes";
+import Button from "@/shared-ui/component/Button";
+import { showErrorToast } from "@/shared-ui/component/Toast";
 
 const EMPTY_SUMMARY = { total: 0, active: 0, maintenance: 0, suspended: 0 };
 
@@ -33,6 +33,11 @@ export default function AdminDashboardOverview() {
   const [selectedMonths, setSelectedMonths] = useState<number>(
     ADMIN_DASHBOARD_DEFAULT_MONTHS,
   );
+
+  const handleSelectMonths = (months: number) => {
+    setSelectedMonths(months);
+    void fetchAdminOverview(months);
+  };
 
   const handleNavigateToRegisterTenant = () => {
     router.push(`${ROUTES.ADMIN.TENANTS}?action=create`);
@@ -180,10 +185,7 @@ export default function AdminDashboardOverview() {
             points={data?.growth ?? []}
             loading={loading && !data}
             selectedMonths={selectedMonths}
-            onSelectMonths={(m) => {
-              setSelectedMonths(m);
-              void fetchAdminOverview(m);
-            }}
+            onSelectMonths={handleSelectMonths}
           />
         </div>
         <div>

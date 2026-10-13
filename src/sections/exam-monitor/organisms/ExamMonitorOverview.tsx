@@ -2,22 +2,24 @@
 
 import { useEffect } from "react";
 import { useExamMonitorApi } from "@/modules/exam-monitor/presentation/hooks/useExamMonitorApi";
-import Typography from "@/shared-ui/component/Typography";
-import Card from "@/shared-ui/component/Card";
-import ActiveParticipantsTable from "../molecules/ActiveParticipantsTable";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
+import Card from "@/shared-ui/component/Card";
 import { showErrorToast } from "@/shared-ui/component/Toast";
+import Typography from "@/shared-ui/component/Typography";
+import ActiveParticipantsTable from "../molecules/ActiveParticipantsTable";
 
 interface ExamMonitorOverviewProps {
   quizId: number;
 }
 
-export default function ExamMonitorOverview({ quizId }: ExamMonitorOverviewProps) {
+export default function ExamMonitorOverview({
+  quizId,
+}: ExamMonitorOverviewProps) {
   const { monitorState, fetchMonitor } = useExamMonitorApi();
 
   useEffect(() => {
     fetchMonitor(quizId);
-    
+
     // Auto-refresh every 10 seconds
     const interval = setInterval(() => {
       fetchMonitor(quizId);
@@ -36,7 +38,10 @@ export default function ExamMonitorOverview({ quizId }: ExamMonitorOverviewProps
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto">
       <div>
-        <Typography variant="h2" className="bg-gradient-to-r from-indigo-700 to-rose-600   bg-clip-text text-transparent">
+        <Typography
+          variant="h2"
+          className="bg-gradient-to-r from-indigo-700 to-rose-600   bg-clip-text text-transparent"
+        >
           Pengawasan Ujian (Live)
         </Typography>
         <Typography variant="body" className="text-slate-500  mt-2">
@@ -65,7 +70,11 @@ export default function ExamMonitorOverview({ quizId }: ExamMonitorOverviewProps
 
       <div className="grid grid-cols-1 gap-6">
         <Card className="shadow-xl shadow-indigo-500/5  border border-slate-200/60  bg-white/70  backdrop-blur-md overflow-hidden transition-colors">
-          <ActiveParticipantsTable quizId={quizId} participants={data?.participants ?? []} loading={loading} />
+          <ActiveParticipantsTable
+            quizId={quizId}
+            participants={data?.participants ?? []}
+            loading={loading}
+          />
         </Card>
       </div>
     </div>

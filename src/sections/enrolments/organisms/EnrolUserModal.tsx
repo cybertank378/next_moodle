@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import type { EnrolUserRequestDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
+import { Modal } from "@/shared-ui/component/Modal";
 import SelectField from "@/shared-ui/component/SelectField";
 import TextField from "@/shared-ui/component/TextField";
-import { Modal } from "@/shared-ui/component/Modal";
 import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface Props {
@@ -78,7 +78,6 @@ export default function EnrolUserModal({
       size="md"
     >
       <div className="space-y-4 py-2">
-
         <div>
           <TextField
             id="enrol-user-id"

@@ -1,11 +1,11 @@
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { Permission } from "@/core/rbac/Permission";
+import { authorizeAttemptOperation } from "@/modules/quiz/application/services/QuizAttemptAuthorizationService";
 import type { AnswerInputPayload } from "@/modules/quiz/domain/dto/QuizAttemptRequestDto";
 import type { SaveQuizAnswerResponseDto } from "@/modules/quiz/domain/dto/QuizAttemptResponseDto";
 import type { QuizAttemptRepositoryInterface } from "@/modules/quiz/domain/interfaces/QuizAttemptRepositoryInterface";
 import { QuizAttemptMapper } from "@/modules/quiz/domain/mapper/QuizAttemptMapper";
-import { authorizeAttemptOperation } from "@/modules/quiz/application/services/QuizAttemptAuthorizationService";
 
 export interface SaveQuizAnswerInput {
   actor: AuthorizationActor;

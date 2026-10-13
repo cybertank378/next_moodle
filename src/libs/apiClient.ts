@@ -1,3 +1,5 @@
+import { ROUTES } from "@/libs/routes";
+
 export interface RequestState<T> {
   data: T | null;
   error: string | null;
@@ -16,6 +18,7 @@ export async function request<T>(
 ): Promise<{ data: T | null; error: string | null }> {
   try {
     const response = await fetch(url, {
+      cache: "no-store",
       ...options,
       credentials: "include",
       headers: {
@@ -28,7 +31,7 @@ export async function request<T>(
     if (response.status === 401 || body.error?.code === "UNAUTHORIZED") {
       if (typeof window !== "undefined") {
         console.error("apiClient.ts intercepted 401. URL:", url);
-        window.location.href = "/login";
+        window.location.href = ROUTES.AUTH.LOGIN;
       }
       return { data: null, error: body.error?.message ?? "Sesi tidak valid." };
     }
@@ -36,7 +39,8 @@ export async function request<T>(
     if (!response.ok || !body.success || body.data === undefined) {
       let errorMsg = body.error?.message ?? "Permintaan gagal.";
       if (errorMsg.toLowerCase().includes("internal server error")) {
-        errorMsg = "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.";
+        errorMsg =
+          "Terjadi kendala pada sistem. Silakan coba beberapa saat lagi.";
       }
       return { data: null, error: errorMsg };
     }

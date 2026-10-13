@@ -5,8 +5,10 @@ import { SecurityError } from "@/core/errors/SecurityError";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { createLogger } from "@/core/logger/createLogger";
 import type { Logger } from "@/core/logger/Logger";
-import { SsrfValidator } from "@/core/security/SsrfValidator";
-import { buildCacheKey, type CacheAdapter } from "@/core/moodle/MoodleCacheAdapter";
+import {
+  buildCacheKey,
+  type CacheAdapter,
+} from "@/core/moodle/MoodleCacheAdapter";
 import { encodeMoodleParams } from "@/core/moodle/MoodleEncoder";
 import { MoodleErrorMapper } from "@/core/moodle/MoodleErrorMapper";
 import type {
@@ -14,6 +16,7 @@ import type {
   MoodleCredentials,
   MoodleRequestOptions,
 } from "@/core/moodle/types";
+import { SsrfValidator } from "@/core/security/SsrfValidator";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_RETRY_DELAY_MS = 100;
@@ -50,6 +53,7 @@ interface MoodleSiteInfoResponse {
 
 export class MoodleRestClient implements MoodleClient {
   private readonly endpoint: string;
+  private readonly sourceIdentity: string;
   private readonly token: string;
   private readonly timeoutMs: number;
   private readonly logger: Logger;
@@ -86,6 +90,7 @@ export class MoodleRestClient implements MoodleClient {
     const normalizedPath = baseUrl.pathname.replace(/\/+$/, "");
     baseUrl.pathname = `${normalizedPath}/webservice/rest/server.php`;
     this.endpoint = baseUrl.toString();
+    this.sourceIdentity = baseUrl.origin;
     this.token = credentials.token.trim();
     this.timeoutMs = credentials.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.logger = createLogger("MoodleRestClient");
@@ -203,7 +208,7 @@ export class MoodleRestClient implements MoodleClient {
       this.cache &&
       options.cacheTtlMs !== undefined
     ) {
-      const cacheKey = buildCacheKey(wsfunction, params);
+      const cacheKey = buildCacheKey(wsfunction, params, this.sourceIdentity);
       const cached = this.cache.get<T>(cacheKey);
       if (cached !== undefined) {
         requestLogger.debug("Moodle cache hit", { wsfunction });
@@ -270,7 +275,11 @@ export class MoodleRestClient implements MoodleClient {
           this.cache &&
           options.cacheTtlMs !== undefined
         ) {
-          const cacheKey = buildCacheKey(wsfunction, params);
+          const cacheKey = buildCacheKey(
+            wsfunction,
+            params,
+            this.sourceIdentity,
+          );
           this.cache.set(cacheKey, responseData, options.cacheTtlMs);
           requestLogger.debug("Moodle response cached", {
             wsfunction,

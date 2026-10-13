@@ -42,4 +42,35 @@ describe("InMemoryRateLimiter", () => {
     expect(resB.success).toBe(true);
     expect(resB.remaining).toBe(1);
   });
+
+  it("should enforce maxBuckets capacity and evict oldest when exceeded", async () => {
+    const boundedLimiter = new InMemoryRateLimiter({
+      limit: 10,
+      windowMs: 60 * 1000,
+      maxBuckets: 2,
+    });
+
+    await boundedLimiter.limit("key1");
+    await boundedLimiter.limit("key2");
+    await boundedLimiter.limit("key3"); // Should evict oldest key to keep within capacity
+
+    // Capacity must not exceed maxBuckets
+    expect(boundedLimiter.size).toBeLessThanOrEqual(2);
+  });
+
+  it("should sweep expired buckets to reclaim memory", async () => {
+    const limiter = new InMemoryRateLimiter({
+      limit: 5,
+      windowMs: 50,
+    });
+
+    await limiter.limit("temp_key");
+    expect(limiter.size).toBe(1);
+
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    limiter.sweep();
+
+    expect(limiter.size).toBe(0);
+  });
 });
+

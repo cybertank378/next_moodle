@@ -3,8 +3,8 @@
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/libs/routes";
-import Button from "@/shared-ui/component/Button";
 import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
+import Button from "@/shared-ui/component/Button";
 
 export interface ResultDetailPageViewProps {
   courseId: number;

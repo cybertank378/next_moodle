@@ -1,7 +1,7 @@
 import "dotenv/config";
+import { randomUUID } from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { randomUUID } from "crypto";
 import pg from "pg";
 
 const { Pool } = pg;

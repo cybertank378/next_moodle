@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { type RequestState, request } from "@/libs/apiClient";
 import type {
+  CourseDetailResponseDTO,
   CourseListResponseDTO,
   CourseSectionResponseDTO,
 } from "@/modules/course/domain/dto/CourseResponseDto";
@@ -18,6 +19,14 @@ export function useCourseApi() {
 
   const [contentsState, setContentsState] = useState<
     RequestState<CourseSectionResponseDTO[]>
+  >({
+    data: null,
+    error: null,
+    loading: false,
+  });
+
+  const [detailState, setDetailState] = useState<
+    RequestState<CourseDetailResponseDTO>
   >({
     data: null,
     error: null,
@@ -49,10 +58,21 @@ export function useCourseApi() {
     return result;
   }, []);
 
+  const getCourseDetail = useCallback(async (courseId: number) => {
+    setDetailState({ data: null, error: null, loading: true });
+    const result = await request<CourseDetailResponseDTO>(
+      `/api/courses/${courseId}`,
+    );
+    setDetailState({ ...result, loading: false });
+    return result;
+  }, []);
+
   return {
     coursesState,
     contentsState,
+    detailState,
     listCourses,
     getCourseContents,
+    getCourseDetail,
   };
 }

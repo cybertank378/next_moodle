@@ -36,8 +36,8 @@ export class NotificationAudience {
         throw new ForbiddenError("Tenant ID wajib ada untuk pengelola tenant.");
       }
 
-      // Tenant can only target their own tenant
-      if (spec.scope === NotificationAudienceScope.TENANT) {
+      // Tenant can never target another tenant, regardless of audience scope.
+      if (spec.tenantIds?.length) {
         if (
           spec.tenantIds &&
           spec.tenantIds.some((id) => id !== actorTenantId)

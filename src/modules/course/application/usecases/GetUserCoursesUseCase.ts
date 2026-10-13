@@ -7,11 +7,14 @@ import type { CourseListResponseDTO } from "@/modules/course/domain/dto/CourseRe
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
 import { CourseMapper } from "@/modules/course/domain/mapper/CourseMapper";
 
+import type { MoodleClient } from "@/core/moodle/types";
+
 export interface GetUserCoursesInput {
   actor: AuthorizationActor | null | undefined;
   tenantId?: string;
   moodleUserId?: number;
   search?: string;
+  client?: MoodleClient;
 }
 
 export class GetUserCoursesUseCase {
@@ -41,6 +44,14 @@ export class GetUserCoursesUseCase {
 
     try {
       if (actor.role === AppRole.STUDENT) {
+        if (!input.client) {
+          return Result.fail(
+            new ValidationError(
+              "Kredensial atau client Moodle siswa wajib disertakan.",
+            ),
+          );
+        }
+
         const moodleUserId = input.moodleUserId ?? actor.moodleUserId;
         if (!moodleUserId) {
           return Result.fail(
@@ -53,6 +64,7 @@ export class GetUserCoursesUseCase {
         const courses = await this.repository.getUserCourses({
           tenantId: effectiveTenantId,
           moodleUserId,
+          client: input.client,
         });
 
         return Result.ok({

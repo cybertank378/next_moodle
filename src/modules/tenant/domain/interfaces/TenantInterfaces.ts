@@ -25,3 +25,14 @@ export interface TenantsRepository {
 export interface TenantCredentialCipher {
   encrypt(plainText: string, tenantId: string): Promise<string>;
 }
+
+export interface TenantUserProvisioner {
+  provisionInitialAdmin(input: {
+    tenantId: string;
+    username: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    password?: string;
+  }): Promise<{ id?: number; username: string; email: string }>;
+}

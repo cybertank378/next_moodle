@@ -8,7 +8,8 @@ export interface ExamMonitorActionRequestDto {
   attemptId: number;
 }
 
-export interface ExtendAttemptTimeRequestDto extends ExamMonitorActionRequestDto {
+export interface ExtendAttemptTimeRequestDto
+  extends ExamMonitorActionRequestDto {
   extraTimeMinutes: number;
 }
 

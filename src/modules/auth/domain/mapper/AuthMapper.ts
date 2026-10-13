@@ -32,12 +32,17 @@ export function mapMoodleUserToActor(
         capabilities.can_manage_incidents),
   );
 
+  const isTenantUsername =
+    usernameLower.startsWith("tenant") ||
+    usernameLower.startsWith("operator") ||
+    usernameLower.includes("tenant");
+
   let role = AppRole.STUDENT;
   if (serviceUsed === "nextjs_admin") {
-    if (usernameLower === "admin") {
-      role = AppRole.ADMIN;
-    } else if (isTeacherUsername || hasStaffCapabilities) {
+    if (isTeacherUsername) {
       role = AppRole.TEACHER;
+    } else if (isTenantUsername) {
+      role = AppRole.TENANT;
     } else {
       role = AppRole.ADMIN;
     }
@@ -45,6 +50,8 @@ export function mapMoodleUserToActor(
     serviceUsed === "nextjs_tenant" ||
     serviceUsed === "nextjs_proctor"
   ) {
+    role = AppRole.TENANT;
+  } else if (isTenantUsername) {
     role = AppRole.TENANT;
   } else if (isTeacherUsername || hasStaffCapabilities) {
     // Teacher using student service token — promote to TEACHER

@@ -1,93 +1,122 @@
-// Files: src/modules/notification/infrastructure/providers/NotificationRecipientProvider.ts
+import "server-only";
 
+import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
+import { ValidationError } from "@/core/errors/ValidationError";
 import { prisma } from "@/libs/prisma";
 import type {
   NotificationRecipientProviderInterface,
   ResolvedRecipient,
 } from "@/modules/notification/domain/interfaces/NotificationRecipientProviderInterface";
-import type {
-  NotificationAudienceSpec,
+import {
+  NotificationAudienceScope,
   NotificationOwnerScope,
+  type NotificationAudienceSpec,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
+interface MoodleCourse { id: number }
+interface MoodleEnrolledUser {
+  id: number;
+  fullname?: string;
+  username?: string;
+  roles?: Array<{ shortname?: string }>;
+  suspended?: boolean;
+}
+
+const STUDENT_ROLES = new Set(["student"]);
+const TEACHER_ROLES = new Set(["editingteacher", "teacher"]);
+const SUPPORTED_ROLES = new Set(["STUDENT", "TEACHER"]);
+
+/**
+ * Moodle is the authoritative source of academic recipients.
+ * Device registration is never used to discover IN_APP audiences.
+ */
 export class NotificationRecipientProvider
   implements NotificationRecipientProviderInterface
 {
+  constructor(private readonly moodle: MoodleClientFactory) {}
+
   async resolveRecipients(
     audienceSpec: NotificationAudienceSpec,
     ownerScope: NotificationOwnerScope,
     ownerTenantId: string | null,
   ): Promise<ResolvedRecipient[]> {
-    const targetTenantId = ownerScope === "TENANT" ? ownerTenantId : null;
-
-    // 1. If explicit userIds provided
-    if (
-      audienceSpec.scope === "USERS" &&
-      audienceSpec.userIds &&
-      audienceSpec.userIds.length > 0
-    ) {
-      return audienceSpec.userIds.map((uid) => ({
-        recipientId: uid,
-        role: "STUDENT",
-        tenantId: targetTenantId,
-        name: `User ${uid}`,
-      }));
+    const requestedTenants = new Set(audienceSpec.tenantIds ?? []);
+    if (ownerScope === NotificationOwnerScope.TENANT) {
+      if (!ownerTenantId || [...requestedTenants].some(id => id !== ownerTenantId)) {
+        throw new ValidationError("Akses tenant tujuan tidak diizinkan.");
+      }
     }
-
-    // 2. Query distinct recipients from NotificationDevice or past Notification interactions
-    const deviceRecipients = await prisma.notificationDevice.findMany({
-      where: {
-        active: true,
-        ...(targetTenantId ? { tenantId: targetTenantId } : {}),
-        ...(audienceSpec.roles && audienceSpec.roles.length > 0
-          ? { role: { in: audienceSpec.roles } }
-          : {}),
-      },
-      select: {
-        userId: true,
-        role: true,
-        tenantId: true,
-      },
-      distinct: ["userId", "role"],
+    const where = ownerScope === NotificationOwnerScope.TENANT
+      ? { id: ownerTenantId as string, status: "ACTIVE" as const }
+      : { status: "ACTIVE" as const, ...(requestedTenants.size > 0
+          ? { id: { in: [...requestedTenants] } }
+          : {}) };
+    const tenants = await prisma.tenant.findMany({
+      where,
+      select: { id: true, slug: true, status: true },
+      orderBy: { id: "asc" },
     });
+    if (ownerScope === NotificationOwnerScope.PLATFORM && requestedTenants.size > 0 &&
+        tenants.length !== requestedTenants.size) {
+      throw new ValidationError("Satu atau beberapa tenant tidak aktif atau tidak ditemukan.");
+    }
+    if (tenants.length === 0) return [];
 
-    if (deviceRecipients.length > 0) {
-      return deviceRecipients.map(
-        (d: { userId: string; role: string; tenantId: string | null }) => ({
-          recipientId: d.userId,
-          role: d.role,
-          tenantId: d.tenantId,
-          name: `Penerima ${d.userId}`,
-        }),
+    const roles = new Set(audienceSpec.roles?.length
+      ? audienceSpec.roles : ["STUDENT"]);
+    if ([...roles].some(role => !SUPPORTED_ROLES.has(role))) {
+      throw new ValidationError("Role audiens belum didukung oleh resolver Moodle.");
+    }
+    const requestedUsers = new Set(audienceSpec.userIds ?? []);
+    if (ownerScope === NotificationOwnerScope.PLATFORM && audienceSpec.scope === NotificationAudienceScope.USERS &&
+      [...requestedUsers].some(id => !/^moodle:[^:]+:\d+$/.test(id))) {
+      throw new ValidationError("ADMIN harus menggunakan ID Moodle berformat moodle:<tenantId>:<userId> untuk menghindari ambigu lintas tenant.");
+    }
+    if (audienceSpec.scope === NotificationAudienceScope.USERS && requestedUsers.size === 0) {
+      throw new ValidationError("Daftar pengguna tujuan tidak boleh kosong.");
+    }
+
+    const recipients = new Map<string, ResolvedRecipient>();
+    for (const tenant of tenants) {
+      const client = await this.moodle.createClientForTenant(
+        { tenantId: tenant.id, tenantSlug: tenant.slug, status: "ACTIVE" },
+        "admin",
       );
+      // Both functions are already used by the existing course/enrolment modules.
+      const courses = await client.call<MoodleCourse[]>("core_course_get_courses", {});
+      for (const course of courses ?? []) {
+        if (course.id === 1) continue;
+        const students = await client.call<MoodleEnrolledUser[]>(
+          "core_enrol_get_enrolled_users",
+          { courseid: course.id },
+        );
+        for (const student of students ?? []) {
+          if (!Number.isSafeInteger(student.id) || student.id <= 0 || student.suspended) continue;
+          const moodleRoles = new Set((student.roles ?? []).map(r => r.shortname?.toLowerCase()));
+          const role = [...moodleRoles].some(r => r && TEACHER_ROLES.has(r))
+            ? "TEACHER"
+            : [...moodleRoles].some(r => r && STUDENT_ROLES.has(r))
+              ? "STUDENT" : null;
+          if (!role || !roles.has(role)) continue;
+          const recipientId = `moodle:${tenant.id}:${student.id}`;
+          if (audienceSpec.scope === NotificationAudienceScope.USERS &&
+              !requestedUsers.has(recipientId) && !requestedUsers.has(String(student.id))) continue;
+          const key = `${tenant.id}:${recipientId}:${role}`;
+          recipients.set(key, {
+            recipientId, role, tenantId: tenant.id,
+            name: student.fullname || student.username || recipientId,
+          });
+        }
+      }
     }
-
-    // 3. Fallback: if no active devices registered yet, create representative recipient for tenant
-    if (targetTenantId) {
-      return [
-        {
-          recipientId: `all_students_${targetTenantId}`,
-          role: "STUDENT",
-          tenantId: targetTenantId,
-          name: "Seluruh Siswa",
-        },
-        {
-          recipientId: `all_teachers_${targetTenantId}`,
-          role: "TEACHER",
-          tenantId: targetTenantId,
-          name: "Seluruh Guru",
-        },
-      ];
+    // Explicit IDs must resolve to real enrolments; no fabricated recipients.
+    if (audienceSpec.scope === NotificationAudienceScope.USERS &&
+        [...requestedUsers].some(uid => ![...recipients.values()].some(
+          r => uid === r.recipientId || uid === r.recipientId.split(":").at(-1),
+        ))) {
+      throw new ValidationError("Satu atau beberapa pengguna bukan anggota audiens Moodle yang valid.");
     }
-
-    return [
-      {
-        recipientId: "all_platform_admins",
-        role: "ADMIN",
-        tenantId: null,
-        name: "Seluruh Administrator",
-      },
-    ];
+    return [...recipients.values()];
   }
 
   async getAudienceCount(
@@ -95,12 +124,7 @@ export class NotificationRecipientProvider
     ownerScope: NotificationOwnerScope,
     ownerTenantId: string | null,
   ): Promise<number> {
-    const recipients = await this.resolveRecipients(
-      audienceSpec,
-      ownerScope,
-      ownerTenantId,
-    );
-    return recipients.length;
+    return (await this.resolveRecipients(audienceSpec, ownerScope, ownerTenantId)).length;
   }
 
   async getRecipientOptions(
@@ -113,22 +137,13 @@ export class NotificationRecipientProvider
     const roles = [
       { role: "STUDENT", label: "Siswa / Peserta Ujian" },
       { role: "TEACHER", label: "Guru / Pengawas" },
-      { role: "TENANT", label: "Pengelola Sekolah / Tenant" },
     ];
-
-    if (ownerScope === "PLATFORM") {
-      const tenants = await prisma.tenant.findMany({
-        select: { id: true, name: true },
-        take: 100,
-        orderBy: { name: "asc" },
-      });
-
-      return {
-        roles: [...roles, { role: "ADMIN", label: "Administrator Platform" }],
-        tenants,
-      };
-    }
-
-    return { roles };
+    if (ownerScope !== NotificationOwnerScope.PLATFORM) return { roles };
+    const tenants = await prisma.tenant.findMany({
+      where: { status: "ACTIVE" },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    });
+    return { roles, tenants };
   }
 }

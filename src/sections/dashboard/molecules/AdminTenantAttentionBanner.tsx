@@ -4,8 +4,8 @@
 
 import { ArrowRight, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { TenantStatusSummary } from "@/modules/dashboard/domain/types/DashboardTypes";
 import { ROUTES } from "@/libs/routes";
+import type { TenantStatusSummary } from "@/modules/dashboard/domain/types/DashboardTypes";
 import Button from "@/shared-ui/component/Button";
 
 export function calculateAttentionCount(summary: TenantStatusSummary): number {

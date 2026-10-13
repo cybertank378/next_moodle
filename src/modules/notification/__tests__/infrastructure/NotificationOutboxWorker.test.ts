@@ -185,7 +185,7 @@ describe("NotificationOutboxWorker", () => {
       campaignId: "camp-unknown",
       jobType: "DISPATCH_CAMPAIGN",
       payload: null,
-      attempts: 4, // Next attempt is 5, which reaches limit
+      attempts: 5, // Reached max attempts (attempts >= 5)
     };
 
     mockOutboxRepo.claimDueJobs.mockResolvedValue([job]);

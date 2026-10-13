@@ -15,7 +15,9 @@ export function parseAdminDashboardQuery(
 
   const months = Number(raw);
   if (!Number.isInteger(months) || months <= 0) {
-    throw new ValidationError("Parameter 'months' harus bilangan bulat positif.");
+    throw new ValidationError(
+      "Parameter 'months' harus bilangan bulat positif.",
+    );
   }
   return { months };
 }

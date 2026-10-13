@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ROUTES } from "@/libs/routes";
+import Badge from "@/shared-ui/component/Badge";
 import Button from "@/shared-ui/component/Button";
 import Pagination from "@/shared-ui/component/Pagination";
 import Skeleton from "@/shared-ui/component/Skeleton";
@@ -15,7 +16,6 @@ import {
   TableRow,
 } from "@/shared-ui/component/Table";
 import Typography from "@/shared-ui/component/Typography";
-import Badge from "@/shared-ui/component/Badge";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -34,7 +34,10 @@ interface UpcomingExamsTableProps {
   loading: boolean;
 }
 
-export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTableProps) {
+export default function UpcomingExamsTable({
+  exams,
+  loading,
+}: UpcomingExamsTableProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -52,7 +55,11 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
         <Typography variant="h2" className="text-slate-900 ">
           Ujian Mendatang
         </Typography>
-        <Button onClick={handleNavigateToAllExams} variant="secondary" size="sm">
+        <Button
+          onClick={handleNavigateToAllExams}
+          variant="secondary"
+          size="sm"
+        >
           Lihat Semua
         </Button>
       </div>
@@ -77,7 +84,10 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
             ))
           ) : paginatedExams.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="py-8 text-center text-slate-500 ">
+              <TableCell
+                colSpan={4}
+                className="py-8 text-center text-slate-500 "
+              >
                 Tidak ada data ujian.
               </TableCell>
             </TableRow>
@@ -85,14 +95,14 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
             paginatedExams.map((exam) => (
               <TableRow key={exam.id}>
                 <TableCell>
-                  <div className="font-semibold text-slate-900 ">{exam.name}</div>
+                  <div className="font-semibold text-slate-900 ">
+                    {exam.name}
+                  </div>
                   <div className="text-xs text-slate-500  mt-1">
                     Siswa terdaftar: {exam.enrolledCount ?? 0}
                   </div>
                 </TableCell>
-                <TableCell className="text-slate-600 ">
-                  {exam.course}
-                </TableCell>
+                <TableCell className="text-slate-600 ">{exam.course}</TableCell>
                 <TableCell className="text-slate-600 ">
                   <div>{exam.scheduledDate.split(", ")[0]}</div>
                   <div className="text-xs text-slate-400  mt-0.5">
@@ -100,14 +110,19 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge 
+                  <Badge
                     color={
-                      exam.status === "upcoming" ? "success" : 
-                      exam.status === "published" ? "info" : 
-                      exam.status === "pending" ? "warning" : 
-                      exam.status === "open" ? "primary" : "secondary"
-                    } 
-                    variant="soft" 
+                      exam.status === "upcoming"
+                        ? "success"
+                        : exam.status === "published"
+                          ? "info"
+                          : exam.status === "pending"
+                            ? "warning"
+                            : exam.status === "open"
+                              ? "primary"
+                              : "secondary"
+                    }
+                    variant="soft"
                     className="capitalize"
                   >
                     {exam.status}
@@ -118,7 +133,7 @@ export default function UpcomingExamsTable({ exams, loading }: UpcomingExamsTabl
           )}
         </TableBody>
       </Table>
-      
+
       {!loading && totalItems > 0 && (
         <div className="px-6 py-4 bg-white/70  border border-t-0 border-slate-200/60  rounded-b-lg">
           <Pagination

@@ -1,18 +1,18 @@
 // Files: src/sections/dashboard/molecules/StatCard.tsx
 
 import type { ElementType, ReactNode } from "react";
-import StatValue from "@/sections/dashboard/atoms/StatValue";
 import {
   type StatAccent,
   StatAccentDot,
   StatAccentGlow,
 } from "@/sections/dashboard/atoms/StatAccent";
+import StatValue from "@/sections/dashboard/atoms/StatValue";
 import Card from "@/shared-ui/component/Card";
 
 interface StatCardProps {
   label: string;
   value: ReactNode;
-  hint: string;
+  hint?: string;
   accent: StatAccent;
   loading: boolean;
   unavailable: boolean;
@@ -73,7 +73,7 @@ export default function StatCard({
             </div>
           </div>
         )}
-        <p className="text-xs text-slate-400 font-medium">{hint}</p>
+        {hint && <p className="text-xs text-slate-400 font-medium">{hint}</p>}
       </div>
     </Card>
   );

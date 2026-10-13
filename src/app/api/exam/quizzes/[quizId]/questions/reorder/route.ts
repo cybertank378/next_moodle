@@ -1,6 +1,7 @@
 import { getExamAdministrationController } from "@/app/api/exam/_factory";
+import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 
-export async function PATCH(
+async function originalPATCH(
   req: Request,
   { params }: { params: Promise<{ quizId: string }> },
 ) {
@@ -8,3 +9,8 @@ export async function PATCH(
   const controller = getExamAdministrationController();
   return await controller.reorderQuizQuestions(req, Number(quizId));
 }
+
+export const PATCH = withAuditedMutation(
+  originalPATCH,
+  "exam/quizzes/:id/questions/reorder",
+);

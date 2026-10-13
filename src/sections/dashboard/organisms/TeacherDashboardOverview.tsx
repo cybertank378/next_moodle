@@ -6,23 +6,15 @@ import { ROUTES } from "@/libs/routes";
 import { useDashboardApi } from "@/modules/dashboard/presentation/hooks/useDashboardApi";
 import DashboardHeader from "@/sections/dashboard/molecules/DashboardHeader";
 import StatCard from "@/sections/dashboard/molecules/StatCard";
-import Card from "@/shared-ui/component/Card";
 import Button from "@/shared-ui/component/Button";
+import Card from "@/shared-ui/component/Card";
 import Skeleton from "@/shared-ui/component/Skeleton";
-import Typography from "@/shared-ui/component/Typography";
 import { showErrorToast } from "@/shared-ui/component/Toast";
+import Typography from "@/shared-ui/component/Typography";
 
 export default function TeacherDashboardOverview() {
   const router = useRouter();
   const { teacherState, fetchTeacherOverview } = useDashboardApi();
-
-  const handleNavigateToQuestions = () => {
-    router.push(ROUTES.TEACHER.QUESTIONS);
-  };
-
-  const handleNavigateToResults = () => {
-    router.push(ROUTES.TEACHER.RESULTS);
-  };
 
   const handleNavigateToCourses = () => {
     router.push(ROUTES.TEACHER.COURSES);
@@ -57,7 +49,6 @@ export default function TeacherDashboardOverview() {
         <StatCard
           label="Kelas Aktif"
           value={data?.activeClasses ?? 0}
-          hint="Total kelas aktif diajar"
           accent="emerald"
           loading={loading}
           unavailable={!data}
@@ -65,7 +56,6 @@ export default function TeacherDashboardOverview() {
         <StatCard
           label="Total Soal Dibuat"
           value={data?.totalQuestions ?? 0}
-          hint="Pertanyaan di bank soal"
           accent="teal"
           loading={loading}
           unavailable={!data}
@@ -73,7 +63,6 @@ export default function TeacherDashboardOverview() {
         <StatCard
           label="Total Siswa Terdaftar"
           value={data?.totalStudents ?? 0}
-          hint="Di seluruh mata pelajaran"
           accent="blue"
           loading={loading}
           unavailable={!data}
@@ -95,36 +84,11 @@ export default function TeacherDashboardOverview() {
               {loading ? (
                 <Skeleton className="h-10 w-full rounded" />
               ) : (
-                <>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white  border border-rose-100 ">
-                    <Typography variant="body" className="text-sm">
-                      Ujian <strong>"Matematika Mid-Term"</strong> dijadwalkan
-                      besok namun belum memiliki soal.
-                    </Typography>
-                    <Button
-                      onClick={handleNavigateToQuestions}
-                      variant="outline"
-                      color="danger"
-                      size="sm"
-                    >
-                      Tambahkan Soal
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white  border border-amber-100 ">
-                    <Typography variant="body" className="text-sm">
-                      Terdapat <strong>3 insiden mencurigakan</strong> pada sesi
-                      Proctoring ujian terakhir.
-                    </Typography>
-                    <Button
-                      onClick={handleNavigateToResults}
-                      variant="outline"
-                      color="warning"
-                      size="sm"
-                    >
-                      Lihat Laporan
-                    </Button>
-                  </div>
-                </>
+                <div className="p-3 rounded-lg bg-white border border-rose-100 text-center">
+                  <Typography variant="body" className="text-sm text-slate-600">
+                    Tidak ada peringatan atau tindakan mendesak saat ini.
+                  </Typography>
+                </div>
               )}
             </div>
           </Card>

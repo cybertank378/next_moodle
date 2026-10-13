@@ -28,7 +28,8 @@ export const ROUTES = {
     TENANTS: `${DASHBOARD_ROOT}/tenants`,
     TENANTS_CREATE: `${DASHBOARD_ROOT}/tenants/create`,
     TENANT_DETAIL: (id: string | number) => `${DASHBOARD_ROOT}/tenants/${id}`,
-    TENANT_EDIT: (id: string | number) => `${DASHBOARD_ROOT}/tenants/${id}/edit`,
+    TENANT_EDIT: (id: string | number) =>
+      `${DASHBOARD_ROOT}/tenants/${id}/edit`,
 
     // Users
     USERS: `${DASHBOARD_ROOT}/users`,
@@ -83,7 +84,8 @@ export const ROUTES = {
     TENANTS: `${DASHBOARD_ROOT}/tenants`,
     TENANTS_CREATE: `${DASHBOARD_ROOT}/tenants/create`,
     TENANT_DETAIL: (id: string | number) => `${DASHBOARD_ROOT}/tenants/${id}`,
-    TENANT_EDIT: (id: string | number) => `${DASHBOARD_ROOT}/tenants/${id}/edit`,
+    TENANT_EDIT: (id: string | number) =>
+      `${DASHBOARD_ROOT}/tenants/${id}/edit`,
     NOTIFICATIONS: `${DASHBOARD_ROOT}/notifications`,
     AUDIT: `${DASHBOARD_ROOT}/audit`,
     SETTINGS: `${DASHBOARD_ROOT}/settings`,

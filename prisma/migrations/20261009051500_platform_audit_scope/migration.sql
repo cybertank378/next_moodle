@@ -1,0 +1,1 @@
+ALTER TABLE "saas_audit_logs" ALTER COLUMN "tenantId" DROP NOT NULL;

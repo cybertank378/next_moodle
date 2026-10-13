@@ -1,23 +1,38 @@
-import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
-import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 import { cookies } from "next/headers";
+import { getAuthRepository } from "@/app/api/auth/_factory";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
 import type { SessionRepository } from "@/core/auth/SessionRepository";
-import { getAuthRepository } from "@/app/api/auth/_factory";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
+import { AuthRepository } from "@/modules/auth/infrastructure/repo/AuthRepository";
 
-export async function extractTokenFromRequest(request: Request): Promise<string | null> {
+export async function extractTokenFromRequest(
+  request: Request,
+): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.substring("Bearer ".length).trim();
     if (token) return token;
   }
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session_token")?.value;
-  if (sessionToken) return sessionToken;
+  const cookieHeader = request.headers.get("cookie");
+  if (cookieHeader) {
+    const sessionMatch = cookieHeader.match(/(?:^|;\s*)session_token=([^;]+)/);
+    if (sessionMatch) return decodeURIComponent(sessionMatch[1].trim());
 
-  const authToken = cookieStore.get("auth_token")?.value;
-  if (authToken) return authToken;
+    const authMatch = cookieHeader.match(/(?:^|;\s*)auth_token=([^;]+)/);
+    if (authMatch) return decodeURIComponent(authMatch[1].trim());
+  }
+
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session_token")?.value;
+    if (sessionToken) return sessionToken;
+
+    const authToken = cookieStore.get("auth_token")?.value;
+    if (authToken) return authToken;
+  } catch {
+    // cookies() was called outside a request store (e.g. In unit tests)
+  }
 
   return null;
 }

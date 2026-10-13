@@ -4,6 +4,7 @@
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import type { PublicPlatformSettingsDTO } from "@/modules/settings/domain/dto/PlatformSettingsDTO";
 import { ROUTES } from "@/libs/routes";
 import { useAuthApi } from "@/modules/auth/presentation/hooks/useAuthApi";
 import AuthBrand from "@/sections/auth/atoms/AuthBrand";
@@ -12,7 +13,7 @@ import LoginFormFields from "@/sections/auth/molecules/LoginFormFields";
 import LoginHelpPanel from "@/sections/auth/molecules/LoginHelpPanel";
 import Button from "@/shared-ui/component/Button";
 
-export default function LoginForm() {
+export default function LoginForm({platformSettings}:{platformSettings?:PublicPlatformSettingsDTO}) {
   const router = useRouter();
   const auth = useAuthApi();
   const [identifier, setIdentifier] = useState("");
@@ -135,7 +136,7 @@ export default function LoginForm() {
 
       {/* Help panel */}
       <div className="mt-6">
-        <LoginHelpPanel />
+        <LoginHelpPanel supportEmail={platformSettings?.supportEmail} supportUrl={platformSettings?.supportUrl} />
       </div>
 
       {/* Terms and Privacy policy statement */}
@@ -154,7 +155,7 @@ export default function LoginForm() {
 
       {/* Footer */}
       <div className="mt-6">
-        <LoginFooter />
+        <LoginFooter applicationName={platformSettings?.applicationName} />
       </div>
     </div>
   );

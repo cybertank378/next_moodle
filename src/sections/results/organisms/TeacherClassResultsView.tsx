@@ -3,13 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
 import { GradeExportFormatter } from "@/modules/grades/domain/mapper/GradeExportFormatter";
 import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
+import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
+import CourseGradesTable from "@/sections/results/molecules/CourseGradesTable";
+import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
 import Button from "@/shared-ui/component/Button";
 import SearchField from "@/shared-ui/component/SearchField";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import { showErrorToast } from "@/shared-ui/component/Toast";
-import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
-import CourseGradesTable from "@/sections/results/molecules/CourseGradesTable";
-import StudentGradeReportView from "@/sections/results/organisms/StudentGradeReportView";
 
 export interface TeacherClassResultsViewProps {
   courseId: number;

@@ -24,23 +24,24 @@ export function fromMoodleException(exception: MoodleRawException): AppError {
   const errorcode = exception.errorcode?.toLowerCase();
   const exceptionName = exception.exception?.toLowerCase();
 
-  // Token invalid / login rejected
-  if (errorcode === "invalidtoken" || errorcode === "invalidlogin") {
-    return new UnauthorizedError("Moodle credentials were rejected.", {
-      moodleErrorCode: exception.errorcode,
-    });
-  }
-
-  // Session expired — token whitelisting/scope failure
+  // Token invalid / login rejected — upstream Moodle auth failure (502 MOODLE_ERROR)
+  // Must NOT map to 401 UnauthorizedError because Next.js session is valid
+  // and 401 triggers an unintended global redirect to /login.
   if (
+    errorcode === "invalidtoken" ||
+    errorcode === "invalidlogin" ||
     errorcode === "tokennotwhitelisted" ||
     errorcode === "servicerequireslogin" ||
     errorcode === "invalidsession" ||
     exceptionName === "webservice_access_exception"
   ) {
-    return new UnauthorizedError(
-      "Sesi Moodle telah berakhir, silakan login kembali.",
-      { moodleErrorCode: exception.errorcode, isSessionExpired: true },
+    return new MoodleError(
+      exception.errorcode,
+      "Kredensial atau token Moodle tidak valid atau ditolak oleh server Moodle.",
+      {
+        moodleErrorCode: exception.errorcode,
+        isUpstreamAuthError: true,
+      },
     );
   }
 

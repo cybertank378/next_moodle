@@ -1,13 +1,13 @@
-import {
-  type TenantContext,
-  validateTenantContext,
-} from "@/core/tenant/TenantContext";
 import type {
   MoodleCredentialProvider,
   MoodleServiceCredential,
 } from "@/core/moodle/MoodleCredentialProvider";
 import { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 import type { MoodleCredentials } from "@/core/moodle/types";
+import {
+  type TenantContext,
+  validateTenantContext,
+} from "@/core/tenant/TenantContext";
 
 export interface MoodleClientFactory {
   createClient(credentials: MoodleCredentials): MoodleRestClient;

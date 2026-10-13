@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import type { QuizSummaryResponseDTO } from "@/modules/quiz/domain/dto/QuizResponseDto";
-import Button from "@/shared-ui/component/Button";
 import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
 import QuizTimeLimitBadge from "@/sections/exam/atoms/QuizTimeLimitBadge";
+import Button from "@/shared-ui/component/Button";
 
 interface Props {
   quiz: QuizSummaryResponseDTO;
@@ -43,9 +43,7 @@ export default function QuizCard({ quiz }: Props) {
                 Maksimal percobaan: {quiz.maxAttempts}x
               </p>
             ) : (
-              <p className="text-xs text-slate-500 ">
-                Percobaan tak terbatas
-              </p>
+              <p className="text-xs text-slate-500 ">Percobaan tak terbatas</p>
             )}
           </div>
         </div>

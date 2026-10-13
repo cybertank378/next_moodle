@@ -29,7 +29,8 @@ describe("MoodleUserRepository", () => {
     };
 
     const mockFactory: MoodleClientFactory = {
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
       createClient: vi.fn().mockReturnValue(mockMoodleClient),
     };
 
@@ -58,7 +59,8 @@ describe("MoodleUserRepository", () => {
     };
 
     const mockFactory: MoodleClientFactory = {
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
       createClient: vi.fn().mockReturnValue(mockMoodleClient),
     };
 
@@ -98,7 +100,8 @@ describe("MoodleUserRepository", () => {
     };
 
     const mockFactory: MoodleClientFactory = {
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
       createClient: vi.fn().mockReturnValue(mockMoodleClient),
     };
 
@@ -127,7 +130,8 @@ valid_user,Valid,User,valid@example.com
     };
 
     const mockFactory: MoodleClientFactory = {
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
       createClient: vi.fn().mockReturnValue(mockMoodleClient),
     };
 
@@ -175,7 +179,8 @@ valid_user,Valid,User,valid@example.com
     };
 
     const mockFactory: MoodleClientFactory = {
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockMoodleClient),
       createClient: vi.fn().mockReturnValue(mockMoodleClient),
     };
 

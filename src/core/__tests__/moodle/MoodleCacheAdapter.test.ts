@@ -125,3 +125,78 @@ describe("CACHE_TTL constants", () => {
     expect(CACHE_TTL.SHORT).toBe(30 * 1000);
   });
 });
+
+describe("InMemoryCacheAdapter - Memory bounds and eviction", () => {
+  it("should evict oldest entry when reaching max capacity", () => {
+    const boundedCache = new InMemoryCacheAdapter({ maxEntries: 3 });
+    boundedCache.set("key1", "val1", 60_000);
+    boundedCache.set("key2", "val2", 60_000);
+    boundedCache.set("key3", "val3", 60_000);
+
+    expect(boundedCache.get("key1")).toBe("val1");
+
+    // Adding 4th item should evict key2 (since key1 was accessed more recently) or oldest
+    boundedCache.set("key4", "val4", 60_000);
+    expect(boundedCache.size).toBeLessThanOrEqual(3);
+  });
+
+  it("should sweep and delete expired entries without reading them", () => {
+    vi.useFakeTimers();
+    const sweepCache = new InMemoryCacheAdapter();
+    sweepCache.set("exp1", "val1", 1000);
+    sweepCache.set("exp2", "val2", 1000);
+    sweepCache.set("live", "val3", 60_000);
+
+    vi.advanceTimersByTime(1500);
+
+    // Call active sweep
+    sweepCache.sweep();
+    expect(sweepCache.size).toBe(1);
+    expect(sweepCache.get("exp1")).toBeUndefined();
+    expect(sweepCache.get("live")).toBe("val3");
+    vi.useRealTimers();
+  });
+});
+
+describe("buildCacheKey - Tenant Isolation and Token Safety", () => {
+  it("should isolate cache keys by source/tenant", () => {
+    const keyTenantA = buildCacheKey(
+      "core_course_get_courses",
+      { id: 10 },
+      "tenant-alpha",
+    );
+    const keyTenantB = buildCacheKey(
+      "core_course_get_courses",
+      { id: 10 },
+      "tenant-beta",
+    );
+
+    expect(keyTenantA).not.toBe(keyTenantB);
+    expect(keyTenantA).toContain("tenant-alpha");
+    expect(keyTenantB).toContain("tenant-beta");
+  });
+
+  it("should strip sensitive tokens like wstoken from cache keys", () => {
+    const keyWithToken = buildCacheKey("core_course_get_courses", {
+      wstoken: "super-secret-moodle-token",
+      id: 10,
+    });
+
+    expect(keyWithToken).not.toContain("super-secret-moodle-token");
+    expect(keyWithToken).not.toContain("wstoken");
+  });
+
+  it("should canonically serialize nested objects and arrays", () => {
+    const key1 = buildCacheKey("mod_quiz_get_quizzes_by_courses", {
+      courseids: [1, 2],
+      criteria: { b: 2, a: 1 },
+    });
+    const key2 = buildCacheKey("mod_quiz_get_quizzes_by_courses", {
+      criteria: { a: 1, b: 2 },
+      courseids: [1, 2],
+    });
+
+    expect(key1).toBe(key2);
+  });
+});
+

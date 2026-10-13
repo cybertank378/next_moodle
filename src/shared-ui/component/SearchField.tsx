@@ -190,10 +190,7 @@ export default function SearchField({
         className,
       )}
     >
-      <Search
-        size={18}
-        className="shrink-0 text-gray-500 "
-      />
+      <Search size={18} className="shrink-0 text-gray-500 " />
 
       <input
         ref={inputRef}

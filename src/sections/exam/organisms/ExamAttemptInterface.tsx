@@ -3,12 +3,14 @@
 import { ArrowLeft, ArrowRight, Send, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAutosaveAttempt } from "@/modules/quiz/presentation/hooks/useAutosaveAttempt";
-import Button from "@/shared-ui/component/Button";
 import AttemptStatusBadge from "@/sections/exam/atoms/AttemptStatusBadge";
 import AttemptTimer from "@/sections/exam/atoms/AttemptTimer";
-import QuestionCard, { type QuestionCardData } from "@/sections/exam/molecules/QuestionCard";
+import QuestionCard, {
+  type QuestionCardData,
+} from "@/sections/exam/molecules/QuestionCard";
 import QuestionNavigator from "@/sections/exam/molecules/QuestionNavigator";
 import SubmitConfirmationModal from "@/sections/exam/molecules/SubmitConfirmationModal";
+import Button from "@/shared-ui/component/Button";
 
 export interface ExamAttemptInterfaceProps {
   attemptId: number;
@@ -128,9 +130,7 @@ export default function ExamAttemptInterface({
             <ShieldCheck size={20} />
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-900 ">
-              {quizName}
-            </h1>
+            <h1 className="text-base font-bold text-slate-900 ">{quizName}</h1>
             <p className="text-xs text-slate-500 ">
               ID Kuis: {quizId} • Attempt #{attemptId}
             </p>

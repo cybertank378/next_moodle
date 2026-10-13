@@ -37,13 +37,15 @@ describe("MoodleCourseRepository", () => {
 
     const mockFactory: MoodleClientFactory = {
       createClient: vi.fn(),
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
+      createClientForTenant: vi.fn().mockResolvedValue(mockClient as any),
+      createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
     };
 
     const repo = new MoodleCourseRepository(mockFactory);
     const courses = await repo.getUserCourses({
       tenantId: "tenant-1",
       moodleUserId: 123,
+      client: mockClient,
     });
 
     expect(courses).toHaveLength(1);
@@ -82,7 +84,8 @@ describe("MoodleCourseRepository", () => {
 
     const mockFactory: MoodleClientFactory = {
       createClient: vi.fn(),
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
+      createClientForTenant: vi.fn().mockResolvedValue(mockClient as any),
+      createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
     };
 
     const repo = new MoodleCourseRepository(mockFactory);
@@ -126,7 +129,8 @@ describe("MoodleCourseRepository", () => {
 
     const mockFactory: MoodleClientFactory = {
       createClient: vi.fn(),
-      createClientForTenant: vi.fn(), createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
+      createClientForTenant: vi.fn().mockResolvedValue(mockClient as any),
+      createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
     };
 
     const repo = new MoodleCourseRepository(mockFactory);

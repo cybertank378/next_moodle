@@ -1,6 +1,13 @@
 import clsx from "clsx";
 
-export type StatAccent = "indigo" | "emerald" | "amber" | "rose" | "blue" | "cyan" | "teal";
+export type StatAccent =
+  | "indigo"
+  | "emerald"
+  | "amber"
+  | "rose"
+  | "blue"
+  | "cyan"
+  | "teal";
 
 const accentStyles: Record<StatAccent, { glow: string; dot: string }> = {
   indigo: {
@@ -49,7 +56,10 @@ export function StatAccentDot({ accent }: { accent: StatAccent }) {
   return (
     <span
       aria-hidden="true"
-      className={clsx("inline-block h-2 w-2 rounded-full", accentStyles[accent].dot)}
+      className={clsx(
+        "inline-block h-2 w-2 rounded-full",
+        accentStyles[accent].dot,
+      )}
     />
   );
 }

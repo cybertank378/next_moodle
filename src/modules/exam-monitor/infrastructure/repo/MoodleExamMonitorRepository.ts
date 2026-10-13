@@ -1,20 +1,23 @@
 import { Result } from "@/core/base/Result";
-import { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
-import type { ExamMonitorRepositoryInterface } from "@/modules/exam-monitor/domain/interfaces/ExamMonitorRepositoryInterface";
+import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type {
-  ExamMonitorRequestDto,
   ExamMonitorActionRequestDto,
-  ExtendAttemptTimeRequestDto,
+  ExamMonitorRequestDto,
   ExamMonitorResponseDto,
+  ExtendAttemptTimeRequestDto,
 } from "@/modules/exam-monitor/domain/dto/ExamMonitorDto";
+import type { ExamMonitorRepositoryInterface } from "@/modules/exam-monitor/domain/interfaces/ExamMonitorRepositoryInterface";
 import { ExamMonitorMapper } from "@/modules/exam-monitor/domain/mapper/ExamMonitorMapper";
 
 export class MoodleExamMonitorRepository
-  implements ExamMonitorRepositoryInterface {
-  constructor(private readonly moodleClientFactory: MoodleClientFactory) { }
+  implements ExamMonitorRepositoryInterface
+{
+  constructor(private readonly moodleClientFactory: MoodleClientFactory) {}
 
   private handleError(error: unknown): Result<any> {
-    return Result.failure(error instanceof Error ? error : new Error(String(error)));
+    return Result.failure(
+      error instanceof Error ? error : new Error(String(error)),
+    );
   }
 
   async getExamMonitor(
