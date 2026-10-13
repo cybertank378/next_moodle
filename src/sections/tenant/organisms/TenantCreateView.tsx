@@ -260,7 +260,7 @@ export default function TenantCreateView() {
     provisioningStatus === "configuring_credentials";
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6 p-6">
+    <section className="w-full">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button
