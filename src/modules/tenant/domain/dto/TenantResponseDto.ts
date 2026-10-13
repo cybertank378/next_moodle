@@ -16,6 +16,12 @@ export interface TenantBrandingResponseDTO {
   faviconUrl: string | null;
 }
 
+export interface InitialTenantAdminSummaryDTO {
+  username: string;
+  email: string;
+  fullname: string;
+}
+
 export interface TenantResponseDTO {
   id: string;
   slug: string;
@@ -24,6 +30,7 @@ export interface TenantResponseDTO {
   customDomain: string | null;
   credential: TenantCredentialResponseDTO | null;
   branding: TenantBrandingResponseDTO | null;
+  initialAdminUser?: InitialTenantAdminSummaryDTO | null;
   createdAt: string;
   updatedAt: string;
 }

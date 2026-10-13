@@ -144,6 +144,69 @@ describe("tenants application use cases", () => {
     expect(result.getValue().slug).toBe("new-school");
   });
 
+  it("creates a tenant with initial adminUser provisioning for ADMIN", async () => {
+    const repository = new InMemoryTenantsRepository();
+    const mockProvisioner = {
+      provisionInitialAdmin: vi.fn().mockResolvedValue({
+        id: 99,
+        username: "operator_smk",
+        email: "admin@smk.sch.id",
+      }),
+    };
+    const useCase = new CreateTenantUseCase(repository, mockProvisioner);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      data: {
+        slug: "smk-bisa",
+        name: "SMK Bisa",
+        adminUser: {
+          username: "operator_smk",
+          firstname: "Operator",
+          lastname: "SMK",
+          email: "admin@smk.sch.id",
+          password: "SecretPassword123!",
+        },
+      },
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(mockProvisioner.provisionInitialAdmin).toHaveBeenCalledWith({
+      tenantId: expect.any(String),
+      username: "operator_smk",
+      firstname: "Operator",
+      lastname: "SMK",
+      email: "admin@smk.sch.id",
+      password: "SecretPassword123!",
+    });
+    expect(result.getValue().initialAdminUser).toEqual({
+      username: "operator_smk",
+      email: "admin@smk.sch.id",
+      fullname: "Operator SMK",
+    });
+  });
+
+  it("fails tenant creation if adminUser format is invalid", async () => {
+    const repository = new InMemoryTenantsRepository();
+    const useCase = new CreateTenantUseCase(repository);
+
+    const result = await useCase.execute({
+      actor: adminActor,
+      data: {
+        slug: "smk-error",
+        name: "SMK Error",
+        adminUser: {
+          username: "ab", // too short (< 3)
+          firstname: "",
+          lastname: "",
+          email: "invalid-email",
+        },
+      },
+    });
+
+    expect(result.isFailure).toBe(true);
+  });
+
   it("lists tenants for ADMIN with pagination metadata", async () => {
     const repository = new InMemoryTenantsRepository([makeTenant()]);
     const useCase = new GetAllTenantsUseCase(repository);

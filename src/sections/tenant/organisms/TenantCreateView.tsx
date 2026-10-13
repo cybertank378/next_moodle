@@ -20,10 +20,22 @@ export default function TenantCreateView() {
   };
 
   async function submit(value: TenantFormValue) {
+    const adminUser =
+      value.adminUsername && value.adminEmail
+        ? {
+            username: value.adminUsername,
+            firstname: value.adminFirstname || "Admin",
+            lastname: value.adminLastname || "Tenant",
+            email: value.adminEmail,
+            password: value.adminPassword,
+          }
+        : undefined;
+
     const result = await createTenant({
       slug: value.slug,
       name: value.name,
       customDomain: value.customDomain || null,
+      adminUser,
     });
     if (result.error || !result.data) {
       setError(result.error ?? "Gagal membuat tenant.");
