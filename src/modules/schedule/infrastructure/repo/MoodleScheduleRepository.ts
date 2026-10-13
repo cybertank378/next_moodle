@@ -190,14 +190,103 @@ export class MoodleScheduleRepository implements ScheduleRepositoryInterface {
       }
     }
 
+    // Also fetch local Prisma schedule sessions
+    try {
+      const { prisma } = await import("@/libs/prisma");
+      const localSessions = await prisma.tenantScheduleSession.findMany({
+        where: {
+          tenantId,
+          ...(courseId !== undefined ? { courseId } : {}),
+          startsAt: { lte: to },
+          endsAt: { gte: from },
+        },
+      });
+
+      for (const row of localSessions) {
+        if (types && !types.includes(row.sessionType as any)) continue;
+
+        sessions.push(
+          new ScheduleSessionEntity(row.id, tenantId, {
+            id: row.id,
+            sessionType: row.sessionType as any,
+            title: row.title,
+            startsAt: row.startsAt.toISOString(),
+            endsAt: row.endsAt.toISOString(),
+            allDay: row.allDay,
+            courseId: row.courseId,
+            courseName: row.courseName || undefined,
+            subjectCode: row.subjectCode || undefined,
+            room: row.room || undefined,
+            instructor: row.instructor || undefined,
+            classGroup: row.classGroup || undefined,
+            status: row.status as ScheduleSessionStatus,
+            description: row.description || undefined,
+            isPublished: row.isPublished,
+            detailRoute: `${ROUTES.DASHBOARD.SCHEDULE}/${row.id}`,
+          }),
+        );
+      }
+    } catch (err) {
+      console.warn(
+        "[ScheduleRepo] Error querying local schedule sessions:",
+        err,
+      );
+    }
+
     return sessions;
   }
 
   async getTeacherSchedule(
     options: ScheduleQueryOptions,
   ): Promise<ScheduleSessionEntity[]> {
-    // For teacher, assigned courses are fetched via getUserCourses
-    return this.getStudentSchedule(options);
+    const studentSessions = await this.getStudentSchedule(options);
+
+    // Also include local sessions for the tenant
+    try {
+      const { prisma } = await import("@/libs/prisma");
+      const { tenantId, from, to, types, courseId } = options;
+
+      const localSessions = await prisma.tenantScheduleSession.findMany({
+        where: {
+          tenantId,
+          ...(courseId !== undefined ? { courseId } : {}),
+          startsAt: { lte: to },
+          endsAt: { gte: from },
+        },
+      });
+
+      for (const row of localSessions) {
+        if (types && !types.includes(row.sessionType as any)) continue;
+
+        studentSessions.push(
+          new ScheduleSessionEntity(row.id, tenantId, {
+            id: row.id,
+            sessionType: row.sessionType as any,
+            title: row.title,
+            startsAt: row.startsAt.toISOString(),
+            endsAt: row.endsAt.toISOString(),
+            allDay: row.allDay,
+            courseId: row.courseId,
+            courseName: row.courseName || undefined,
+            subjectCode: row.subjectCode || undefined,
+            room: row.room || undefined,
+            instructor: row.instructor || undefined,
+            classGroup: row.classGroup || undefined,
+            status: row.status as ScheduleSessionStatus,
+            description: row.description || undefined,
+            isPublished: row.isPublished,
+            detailRoute: `${ROUTES.DASHBOARD.SCHEDULE}/${row.id}`,
+          }),
+        );
+      }
+    } catch (err) {
+      console.warn(
+        "[ScheduleRepo] Error querying teacher local sessions:",
+        err,
+      );
+    }
+
+    return studentSessions;
   }
 
   async getSessionById(options: {
@@ -270,6 +359,236 @@ export class MoodleScheduleRepository implements ScheduleRepositoryInterface {
       });
     }
 
-    return null;
+    // Try finding in local PostgreSQL database
+    try {
+      const { prisma } = await import("@/libs/prisma");
+      const row = await prisma.tenantScheduleSession.findFirst({
+        where: {
+          id: sessionId,
+          tenantId,
+        },
+      });
+
+      if (!row) return null;
+
+      return new ScheduleSessionEntity(row.id, tenantId, {
+        id: row.id,
+        sessionType: row.sessionType as any,
+        title: row.title,
+        startsAt: row.startsAt.toISOString(),
+        endsAt: row.endsAt.toISOString(),
+        allDay: row.allDay,
+        courseId: row.courseId,
+        courseName: row.courseName || undefined,
+        subjectCode: row.subjectCode || undefined,
+        room: row.room || undefined,
+        instructor: row.instructor || undefined,
+        classGroup: row.classGroup || undefined,
+        status: row.status as ScheduleSessionStatus,
+        description: row.description || undefined,
+        isPublished: row.isPublished,
+        detailRoute: `${ROUTES.DASHBOARD.SCHEDULE}/${row.id}`,
+      });
+    } catch (err) {
+      console.warn("[ScheduleRepo] Error fetching session by id:", err);
+      return null;
+    }
+  }
+
+  async createSession(options: {
+    tenantId: string;
+    createdById?: string;
+    data: {
+      title: string;
+      sessionType: any;
+      courseId: number;
+      courseName?: string;
+      subjectCode?: string;
+      startsAt: string;
+      endsAt: string;
+      room?: string;
+      instructor?: string;
+      classGroup?: string;
+      description?: string;
+    };
+  }): Promise<ScheduleSessionEntity> {
+    const { tenantId, createdById, data } = options;
+    const { prisma } = await import("@/libs/prisma");
+
+    const row = await prisma.tenantScheduleSession.create({
+      data: {
+        tenantId,
+        createdById,
+        title: data.title,
+        sessionType: data.sessionType,
+        courseId: data.courseId,
+        courseName: data.courseName,
+        subjectCode: data.subjectCode,
+        startsAt: new Date(data.startsAt),
+        endsAt: new Date(data.endsAt),
+        room: data.room,
+        instructor: data.instructor,
+        classGroup: data.classGroup,
+        description: data.description,
+        status: "PUBLISHED",
+        isPublished: true,
+      },
+    });
+
+    return new ScheduleSessionEntity(row.id, tenantId, {
+      id: row.id,
+      sessionType: row.sessionType as any,
+      title: row.title,
+      startsAt: row.startsAt.toISOString(),
+      endsAt: row.endsAt.toISOString(),
+      allDay: row.allDay,
+      courseId: row.courseId,
+      courseName: row.courseName || undefined,
+      subjectCode: row.subjectCode || undefined,
+      room: row.room || undefined,
+      instructor: row.instructor || undefined,
+      classGroup: row.classGroup || undefined,
+      status: row.status as ScheduleSessionStatus,
+      description: row.description || undefined,
+      isPublished: row.isPublished,
+      detailRoute: `${ROUTES.DASHBOARD.SCHEDULE}/${row.id}`,
+    });
+  }
+
+  async updateSession(options: {
+    tenantId: string;
+    sessionId: string;
+    data: Partial<{
+      title: string;
+      room: string;
+      instructor: string;
+      startsAt: string;
+      endsAt: string;
+      description: string;
+      status: ScheduleSessionStatus;
+    }>;
+  }): Promise<ScheduleSessionEntity | null> {
+    const { tenantId, sessionId, data } = options;
+    const { prisma } = await import("@/libs/prisma");
+
+    const existing = await prisma.tenantScheduleSession.findFirst({
+      where: { id: sessionId, tenantId },
+    });
+    if (!existing) return null;
+
+    const row = await prisma.tenantScheduleSession.update({
+      where: { id: sessionId },
+      data: {
+        ...(data.title ? { title: data.title } : {}),
+        ...(data.room !== undefined ? { room: data.room } : {}),
+        ...(data.instructor !== undefined
+          ? { instructor: data.instructor }
+          : {}),
+        ...(data.startsAt ? { startsAt: new Date(data.startsAt) } : {}),
+        ...(data.endsAt ? { endsAt: new Date(data.endsAt) } : {}),
+        ...(data.description !== undefined
+          ? { description: data.description }
+          : {}),
+        ...(data.status ? { status: data.status } : {}),
+      },
+    });
+
+    return new ScheduleSessionEntity(row.id, tenantId, {
+      id: row.id,
+      sessionType: row.sessionType as any,
+      title: row.title,
+      startsAt: row.startsAt.toISOString(),
+      endsAt: row.endsAt.toISOString(),
+      allDay: row.allDay,
+      courseId: row.courseId,
+      courseName: row.courseName || undefined,
+      subjectCode: row.subjectCode || undefined,
+      room: row.room || undefined,
+      instructor: row.instructor || undefined,
+      classGroup: row.classGroup || undefined,
+      status: row.status as ScheduleSessionStatus,
+      description: row.description || undefined,
+      isPublished: row.isPublished,
+      detailRoute: `${ROUTES.DASHBOARD.SCHEDULE}/${row.id}`,
+    });
+  }
+
+  async publishSession(options: {
+    tenantId: string;
+    sessionId: string;
+  }): Promise<ScheduleSessionEntity | null> {
+    const { tenantId, sessionId } = options;
+    const { prisma } = await import("@/libs/prisma");
+
+    const existing = await prisma.tenantScheduleSession.findFirst({
+      where: { id: sessionId, tenantId },
+    });
+    if (!existing) return null;
+
+    const row = await prisma.tenantScheduleSession.update({
+      where: { id: sessionId },
+      data: {
+        isPublished: true,
+        status: "PUBLISHED",
+      },
+    });
+
+    return new ScheduleSessionEntity(row.id, tenantId, {
+      id: row.id,
+      sessionType: row.sessionType as any,
+      title: row.title,
+      startsAt: row.startsAt.toISOString(),
+      endsAt: row.endsAt.toISOString(),
+      allDay: row.allDay,
+      courseId: row.courseId,
+      courseName: row.courseName || undefined,
+      subjectCode: row.subjectCode || undefined,
+      room: row.room || undefined,
+      instructor: row.instructor || undefined,
+      classGroup: row.classGroup || undefined,
+      status: row.status as ScheduleSessionStatus,
+      description: row.description || undefined,
+      isPublished: row.isPublished,
+      detailRoute: `${ROUTES.DASHBOARD.SCHEDULE}/${row.id}`,
+    });
+  }
+
+  async cancelSession(options: {
+    tenantId: string;
+    sessionId: string;
+  }): Promise<ScheduleSessionEntity | null> {
+    const { tenantId, sessionId } = options;
+    const { prisma } = await import("@/libs/prisma");
+
+    const existing = await prisma.tenantScheduleSession.findFirst({
+      where: { id: sessionId, tenantId },
+    });
+    if (!existing) return null;
+
+    const row = await prisma.tenantScheduleSession.update({
+      where: { id: sessionId },
+      data: {
+        status: "CANCELLED",
+      },
+    });
+
+    return new ScheduleSessionEntity(row.id, tenantId, {
+      id: row.id,
+      sessionType: row.sessionType as any,
+      title: row.title,
+      startsAt: row.startsAt.toISOString(),
+      endsAt: row.endsAt.toISOString(),
+      allDay: row.allDay,
+      courseId: row.courseId,
+      courseName: row.courseName || undefined,
+      subjectCode: row.subjectCode || undefined,
+      room: row.room || undefined,
+      instructor: row.instructor || undefined,
+      classGroup: row.classGroup || undefined,
+      status: row.status as ScheduleSessionStatus,
+      description: row.description || undefined,
+      isPublished: row.isPublished,
+      detailRoute: `${ROUTES.DASHBOARD.SCHEDULE}/${row.id}`,
+    });
   }
 }
