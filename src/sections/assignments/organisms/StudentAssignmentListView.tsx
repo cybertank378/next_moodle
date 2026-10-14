@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, FileText, Filter, RefreshCw, Search } from "lucide-react";
+import { AlertCircle, FileText, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { AssignmentItemDTO } from "@/modules/assignment/domain/dto/AssignmentResponseDTO";
 import { useAssignmentApi } from "@/modules/assignment/presentation/hooks/useAssignmentApi";
@@ -9,6 +9,8 @@ import { AssignmentDetailModal } from "@/sections/assignments/molecules/Assignme
 import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
 import EmptyState from "@/shared-ui/component/EmptyState";
+import SearchField from "@/shared-ui/component/SearchField";
+import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
 
 export function StudentAssignmentListView() {
@@ -92,30 +94,25 @@ export function StudentAssignmentListView() {
 
       {/* Toolbar / Search / Filter */}
       <div className="flex flex-col sm:flex-row items-center gap-3">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
+        <div className="flex-1 w-full">
+          <SearchField
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(val) => setSearch(val)}
             placeholder="Cari tugas atau mata pelajaran..."
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-slate-400 shrink-0 hidden sm:block" />
-          <select
+        <div className="w-full sm:w-auto min-w-[180px]">
+          <SelectField
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-700 w-full sm:w-auto"
           >
             <option value="ALL">Semua Status</option>
             <option value="NEW">Belum Dikerjakan</option>
             <option value="DRAFT">Draf</option>
             <option value="SUBMITTED">Terkirim</option>
             <option value="GRADED">Dinilai</option>
-          </select>
+          </SelectField>
         </div>
       </div>
 

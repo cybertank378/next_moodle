@@ -211,24 +211,18 @@ export default function NotificationCampaignFilters({
             </SelectField>
           </div>
 
-          {/* Date filter matching Mockup 1: Calendar icon and chevron */}
-          <div className="w-36 sm:w-44 relative">
-            <div className="relative flex items-center">
-              <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500 z-10">
-                <Calendar className="w-4 h-4 text-slate-400" />
-              </div>
-              <input
-                id="date-filter"
-                type="date"
-                value={date}
-                onChange={(e) => onDateChange?.(e.target.value)}
-                className="w-full h-11 pl-9 pr-8 text-xs bg-white border border-gray-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                aria-label="Pilih tanggal"
-              />
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500 z-10">
-                <ChevronDown className="w-4 h-4 text-slate-400" />
-              </div>
-            </div>
+          {/* Date filter */}
+          <div className="w-36 sm:w-44">
+            <TextField
+              id="date-filter"
+              type="date"
+              value={date}
+              onChange={(e) => onDateChange?.(e.target.value)}
+              leftIcon={Calendar}
+              rightIcon={ChevronDown}
+              className="text-xs cursor-pointer"
+              aria-label="Pilih tanggal"
+            />
           </div>
 
           {/* Reset Filters button */}

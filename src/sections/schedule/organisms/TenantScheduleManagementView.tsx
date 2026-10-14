@@ -12,7 +12,10 @@ import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
 import EmptyState from "@/shared-ui/component/EmptyState";
 import { Modal } from "@/shared-ui/component/Modal";
+import SelectField from "@/shared-ui/component/SelectField";
 import Skeleton from "@/shared-ui/component/Skeleton";
+import TextAreaField from "@/shared-ui/component/TextAreaField";
+import TextField from "@/shared-ui/component/TextField";
 
 export function TenantScheduleManagementView() {
   const { data, loading, error, fetchSchedule, createSchedule } =
@@ -481,153 +484,89 @@ export function TenantScheduleManagementView() {
             </div>
           )}
 
-          <div>
-            <label
-              htmlFor="schedule-title"
-              className="block text-xs font-semibold text-slate-700 mb-1"
+          <TextField
+            id="schedule-title"
+            label="Judul Sesi / Mata Pelajaran *"
+            type="text"
+            required
+            value={formTitle}
+            onChange={(e) => setFormTitle(e.target.value)}
+            placeholder="Contoh: Matematika Wajib - Aljabar"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <SelectField
+              id="schedule-type"
+              label="Tipe Sesi *"
+              value={formType}
+              onChange={(e) =>
+                setFormType(e.target.value as ScheduleSessionType)
+              }
             >
-              Judul Sesi / Mata Pelajaran *
-            </label>
-            <input
-              id="schedule-title"
+              <option value="LESSON">Pelajaran (Lesson)</option>
+              <option value="EXAM">Ujian (Exam)</option>
+              <option value="CONSULTATION">Konsultasi / Bimbingan</option>
+              <option value="OTHER">Lainnya</option>
+            </SelectField>
+
+            <TextField
+              id="schedule-room"
+              label="Ruangan / Tempat"
               type="text"
+              value={formRoom}
+              onChange={(e) => setFormRoom(e.target.value)}
+              placeholder="Contoh: R. Kelas XII IPA 1"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <TextField
+              id="schedule-instructor"
+              label="Pengajar / Guru"
+              type="text"
+              value={formInstructor}
+              onChange={(e) => setFormInstructor(e.target.value)}
+              placeholder="Nama guru pengampu"
+            />
+
+            <TextField
+              id="schedule-classgroup"
+              label="Rombel / Kelas"
+              type="text"
+              value={formClassGroup}
+              onChange={(e) => setFormClassGroup(e.target.value)}
+              placeholder="Contoh: XII IPA 1"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <TextField
+              id="schedule-starts-at"
+              label="Waktu Mulai *"
+              type="datetime-local"
               required
-              value={formTitle}
-              onChange={(e) => setFormTitle(e.target.value)}
-              placeholder="Contoh: Matematika Wajib - Aljabar"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
+              value={formStartsAt}
+              onChange={(e) => setFormStartsAt(e.target.value)}
+            />
+
+            <TextField
+              id="schedule-ends-at"
+              label="Waktu Selesai *"
+              type="datetime-local"
+              required
+              value={formEndsAt}
+              onChange={(e) => setFormEndsAt(e.target.value)}
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label
-                htmlFor="schedule-type"
-                className="block text-xs font-semibold text-slate-700 mb-1"
-              >
-                Tipe Sesi *
-              </label>
-              <select
-                id="schedule-type"
-                value={formType}
-                onChange={(e) =>
-                  setFormType(e.target.value as ScheduleSessionType)
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
-              >
-                <option value="LESSON">Pelajaran (Lesson)</option>
-                <option value="EXAM">Ujian (Exam)</option>
-                <option value="CONSULTATION">Konsultasi / Bimbingan</option>
-                <option value="OTHER">Lainnya</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="schedule-room"
-                className="block text-xs font-semibold text-slate-700 mb-1"
-              >
-                Ruangan / Tempat
-              </label>
-              <input
-                id="schedule-room"
-                type="text"
-                value={formRoom}
-                onChange={(e) => setFormRoom(e.target.value)}
-                placeholder="Contoh: R. Kelas XII IPA 1"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label
-                htmlFor="schedule-instructor"
-                className="block text-xs font-semibold text-slate-700 mb-1"
-              >
-                Pengajar / Guru
-              </label>
-              <input
-                id="schedule-instructor"
-                type="text"
-                value={formInstructor}
-                onChange={(e) => setFormInstructor(e.target.value)}
-                placeholder="Nama guru pengampu"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="schedule-classgroup"
-                className="block text-xs font-semibold text-slate-700 mb-1"
-              >
-                Rombel / Kelas
-              </label>
-              <input
-                id="schedule-classgroup"
-                type="text"
-                value={formClassGroup}
-                onChange={(e) => setFormClassGroup(e.target.value)}
-                placeholder="Contoh: XII IPA 1"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label
-                htmlFor="schedule-starts-at"
-                className="block text-xs font-semibold text-slate-700 mb-1"
-              >
-                Waktu Mulai *
-              </label>
-              <input
-                id="schedule-starts-at"
-                type="datetime-local"
-                required
-                value={formStartsAt}
-                onChange={(e) => setFormStartsAt(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="schedule-ends-at"
-                className="block text-xs font-semibold text-slate-700 mb-1"
-              >
-                Waktu Selesai *
-              </label>
-              <input
-                id="schedule-ends-at"
-                type="datetime-local"
-                required
-                value={formEndsAt}
-                onChange={(e) => setFormEndsAt(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="schedule-description"
-              className="block text-xs font-semibold text-slate-700 mb-1"
-            >
-              Catatan / Deskripsi
-            </label>
-            <textarea
-              id="schedule-description"
-              rows={2}
-              value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
-              placeholder="Deskripsi atau instruksi tambahan..."
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-900"
-            />
-          </div>
+          <TextAreaField
+            id="schedule-description"
+            label="Catatan / Deskripsi"
+            rows={2}
+            value={formDescription}
+            onChange={(e) => setFormDescription(e.target.value)}
+            placeholder="Deskripsi atau instruksi tambahan..."
+          />
 
           <div className="flex justify-end items-center gap-2 pt-2 border-t border-slate-100">
             <Button
