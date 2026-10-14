@@ -145,6 +145,39 @@ describe("Course Use Cases", () => {
       });
     });
 
+    it("returns zero courses empty list gracefully when no courses found for TENANT actor", async () => {
+      const repo = new MockCourseRepository();
+      repo.getTenantCourses.mockResolvedValue([]);
+
+      const useCase = new GetUserCoursesUseCase(repo);
+      const result = await useCase.execute({
+        actor: tenantActor,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      const data = result.getValue();
+      expect(data.total).toBe(0);
+      expect(data.courses).toEqual([]);
+    });
+
+    it("enforces tenant isolation by scoping getTenantCourses with session tenantId", async () => {
+      const repo = new MockCourseRepository();
+      repo.getTenantCourses.mockResolvedValue([]);
+
+      const useCase = new GetUserCoursesUseCase(repo);
+      // Even if input has another tenantId, actor tenantId takes precedence
+      await useCase.execute({
+        actor: tenantActor,
+        tenantId: "cross-tenant-override",
+      });
+
+      expect(repo.getTenantCourses).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tenantId: "tenant-1",
+        }),
+      );
+    });
+
     it("fails when STUDENT actor has no tenantId", async () => {
       const repo = new MockCourseRepository();
       const useCase = new GetUserCoursesUseCase(repo);

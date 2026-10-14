@@ -56,10 +56,21 @@ export class MoodleCourseRepository implements CourseRepositoryInterface {
   }): Promise<CourseEntity[]> {
     const client = await this.resolveClient(input.tenantId, input.client);
 
-    const rawCourses = await client.call<RawMoodleCourse[]>(
-      "core_course_get_courses",
-      {},
-    );
+    let rawCourses: RawMoodleCourse[] = [];
+    try {
+      rawCourses = await client.call<RawMoodleCourse[]>(
+        "local_examapi_get_courses",
+        {
+          tenantkey: input.tenantId,
+        },
+      );
+    } catch {
+      // Fallback to core_course_get_courses for standard Moodle installations
+      rawCourses = await client.call<RawMoodleCourse[]>(
+        "core_course_get_courses",
+        {},
+      );
+    }
 
     let courses = (rawCourses ?? [])
       // Filter out site course (id === 1 in Moodle is frontpage/site course)
