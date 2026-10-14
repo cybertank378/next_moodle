@@ -30,6 +30,9 @@ export default function SubmitConfirmationModal({
   return (
     <div
       data-testid="submit-confirmation-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="submit-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200"
     >
       <div className="relative w-full max-w-md rounded-2xl border border-slate-200  bg-white  p-6 shadow-2xl space-y-5">
@@ -39,7 +42,10 @@ export default function SubmitConfirmationModal({
               <Send size={18} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 ">
+              <h3
+                id="submit-modal-title"
+                className="text-base font-bold text-slate-900 "
+              >
                 Kumpulkan Ujian?
               </h3>
               <p className="text-xs text-slate-500 ">

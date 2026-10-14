@@ -61,4 +61,42 @@ describe("QuestionCard", () => {
     );
     expect(htmlFlagged).toContain("Ditandai Ragu");
   });
+
+  it("renders textarea input when question type is essay", () => {
+    const html = renderToStaticMarkup(
+      <QuestionCard
+        question={{
+          slot: 2,
+          type: "essay",
+          number: 2,
+          html: "<p>Jelaskan proses fotosintesis!</p>",
+        }}
+        currentAnswer="Jawaban esai saya"
+        onAnswerChange={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain("Jawaban Esai");
+    expect(html).toContain("data-testid=\"essay-2\"");
+    expect(html).toContain("Jawaban esai saya");
+  });
+
+  it("renders text input when question type is shortanswer", () => {
+    const html = renderToStaticMarkup(
+      <QuestionCard
+        question={{
+          slot: 4,
+          type: "shortanswer",
+          number: 4,
+          html: "<p>Ibukota Indonesia?</p>",
+        }}
+        currentAnswer="Nusantara"
+        onAnswerChange={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain("Jawaban Singkat");
+    expect(html).toContain("data-testid=\"shortanswer-4\"");
+    expect(html).toContain("Nusantara");
+  });
 });

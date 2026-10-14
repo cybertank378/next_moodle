@@ -3,11 +3,13 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { PermissionType } from "@/core/rbac/Permission";
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
 import type { GetAttemptDataUseCase } from "@/modules/quiz/application/usecases/GetAttemptDataUseCase";
 import type { GetAttemptSummaryUseCase } from "@/modules/quiz/application/usecases/GetAttemptSummaryUseCase";
 import type { GetUserAttemptsUseCase } from "@/modules/quiz/application/usecases/GetUserAttemptsUseCase";
@@ -47,12 +49,41 @@ export class QuizAttemptController {
     private readonly getAttemptSummaryUseCase: GetAttemptSummaryUseCase,
   ) {}
 
+  private async resolveSession(
+    actor?: CurrentActor,
+    token?: string,
+  ): Promise<{ actor: CurrentActor; moodleToken: string }> {
+    if (actor && token) {
+      return { actor, moodleToken: token };
+    }
+    const session = await getCurrentSession();
+    if (!session?.actor || !session?.moodleToken) {
+      throw new UnauthorizedError("Sesi tidak valid.");
+    }
+    return { actor: session.actor, moodleToken: session.moodleToken };
+  }
+
   async start(
-    actor: CurrentActor,
-    studentMoodleToken: string,
-    req: NextRequest,
+    actorOrReq: CurrentActor | NextRequest,
+    maybeToken?: string,
+    maybeReq?: NextRequest,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let studentMoodleToken: string;
+      let req: NextRequest;
+
+      if ("nextUrl" in actorOrReq) {
+        req = actorOrReq;
+        const resolved = await this.resolveSession();
+        actor = resolved.actor;
+        studentMoodleToken = resolved.moodleToken;
+      } else {
+        actor = actorOrReq;
+        studentMoodleToken = maybeToken!;
+        req = maybeReq!;
+      }
+
       const body = await req.json();
       const parsed = parseStartAttemptBody(body);
 
@@ -70,12 +101,33 @@ export class QuizAttemptController {
   }
 
   async save(
-    actor: CurrentActor,
-    studentMoodleToken: string,
-    attemptIdInput: string | number,
-    req: NextRequest,
+    actorOrAttemptId: CurrentActor | string | number,
+    tokenOrReq: string | NextRequest,
+    attemptIdOrUndefined?: string | number,
+    maybeReq?: NextRequest,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let studentMoodleToken: string;
+      let attemptIdInput: string | number;
+      let req: NextRequest;
+
+      if (
+        typeof actorOrAttemptId === "object" &&
+        "userId" in actorOrAttemptId
+      ) {
+        actor = actorOrAttemptId;
+        studentMoodleToken = tokenOrReq as string;
+        attemptIdInput = attemptIdOrUndefined!;
+        req = maybeReq!;
+      } else {
+        const resolved = await this.resolveSession();
+        actor = resolved.actor;
+        studentMoodleToken = resolved.moodleToken;
+        attemptIdInput = actorOrAttemptId;
+        req = tokenOrReq as NextRequest;
+      }
+
       const attemptId = parseAttemptId(attemptIdInput);
       const body = await req.json();
       const parsed = parseSaveAnswerBody(body);
@@ -95,12 +147,33 @@ export class QuizAttemptController {
   }
 
   async submit(
-    actor: CurrentActor,
-    studentMoodleToken: string,
-    attemptIdInput: string | number,
-    req: NextRequest,
+    actorOrAttemptId: CurrentActor | string | number,
+    tokenOrReq: string | NextRequest,
+    attemptIdOrUndefined?: string | number,
+    maybeReq?: NextRequest,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let studentMoodleToken: string;
+      let attemptIdInput: string | number;
+      let req: NextRequest;
+
+      if (
+        typeof actorOrAttemptId === "object" &&
+        "userId" in actorOrAttemptId
+      ) {
+        actor = actorOrAttemptId;
+        studentMoodleToken = tokenOrReq as string;
+        attemptIdInput = attemptIdOrUndefined!;
+        req = maybeReq!;
+      } else {
+        const resolved = await this.resolveSession();
+        actor = resolved.actor;
+        studentMoodleToken = resolved.moodleToken;
+        attemptIdInput = actorOrAttemptId;
+        req = tokenOrReq as NextRequest;
+      }
+
       const attemptId = parseAttemptId(attemptIdInput);
       let body: unknown = {};
       try {
@@ -126,11 +199,26 @@ export class QuizAttemptController {
   }
 
   async list(
-    actor: CurrentActor,
-    studentMoodleToken: string,
-    req: NextRequest,
+    actorOrReq: CurrentActor | NextRequest,
+    maybeToken?: string,
+    maybeReq?: NextRequest,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let studentMoodleToken: string;
+      let req: NextRequest;
+
+      if ("nextUrl" in actorOrReq) {
+        req = actorOrReq;
+        const resolved = await this.resolveSession();
+        actor = resolved.actor;
+        studentMoodleToken = resolved.moodleToken;
+      } else {
+        actor = actorOrReq;
+        studentMoodleToken = maybeToken!;
+        req = maybeReq!;
+      }
+
       const parsed = parseGetUserAttemptsQuery(req.nextUrl.searchParams);
 
       const attempts = await this.getUserAttemptsUseCase.execute({
@@ -147,12 +235,33 @@ export class QuizAttemptController {
   }
 
   async getData(
-    actor: CurrentActor,
-    studentMoodleToken: string,
-    attemptIdInput: string | number,
-    req: NextRequest,
+    actorOrAttemptId: CurrentActor | string | number,
+    tokenOrReq: string | NextRequest,
+    attemptIdOrUndefined?: string | number,
+    maybeReq?: NextRequest,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let studentMoodleToken: string;
+      let attemptIdInput: string | number;
+      let req: NextRequest;
+
+      if (
+        typeof actorOrAttemptId === "object" &&
+        "userId" in actorOrAttemptId
+      ) {
+        actor = actorOrAttemptId;
+        studentMoodleToken = tokenOrReq as string;
+        attemptIdInput = attemptIdOrUndefined!;
+        req = maybeReq!;
+      } else {
+        const resolved = await this.resolveSession();
+        actor = resolved.actor;
+        studentMoodleToken = resolved.moodleToken;
+        attemptIdInput = actorOrAttemptId;
+        req = tokenOrReq as NextRequest;
+      }
+
       const attemptId = parseAttemptId(attemptIdInput);
       const parsed = parseGetAttemptDataQuery(req.nextUrl.searchParams);
 
@@ -170,11 +279,29 @@ export class QuizAttemptController {
   }
 
   async getSummary(
-    actor: CurrentActor,
-    studentMoodleToken: string,
-    attemptIdInput: string | number,
+    actorOrAttemptId: CurrentActor | string | number,
+    maybeToken?: string,
+    maybeAttemptId?: string | number,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let studentMoodleToken: string;
+      let attemptIdInput: string | number;
+
+      if (
+        typeof actorOrAttemptId === "object" &&
+        "userId" in actorOrAttemptId
+      ) {
+        actor = actorOrAttemptId;
+        studentMoodleToken = maybeToken!;
+        attemptIdInput = maybeAttemptId!;
+      } else {
+        const resolved = await this.resolveSession();
+        actor = resolved.actor;
+        studentMoodleToken = resolved.moodleToken;
+        attemptIdInput = actorOrAttemptId;
+      }
+
       const attemptId = parseAttemptId(attemptIdInput);
 
       const data = await this.getAttemptSummaryUseCase.execute({

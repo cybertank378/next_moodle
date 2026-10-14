@@ -11,12 +11,13 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ROUTES } from "@/libs/routes";
 import { stripHtml } from "@/libs/utils";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
 import QuizStatusBadge from "@/sections/exam/atoms/QuizStatusBadge";
+import StartConfirmationModal from "@/sections/exam/molecules/StartConfirmationModal";
 import Button from "@/shared-ui/component/Button";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import { showErrorToast } from "@/shared-ui/component/Toast";
@@ -30,9 +31,18 @@ export default function QuizDetailView({ quizId }: Props) {
   const { detailState, accessState, getQuizDetail, checkQuizAccess } =
     useQuizApi();
   const { startState, startAttempt } = useQuizAttemptApi();
+  const [isStartModalOpen, setIsStartModalOpen] = useState(false);
 
   const handleNavigateToExams = () => {
     router.push(ROUTES.DASHBOARD.EXAMS);
+  };
+
+  const handleOpenStartModal = () => {
+    setIsStartModalOpen(true);
+  };
+
+  const handleCloseStartModal = () => {
+    setIsStartModalOpen(false);
   };
 
   const handleStartAttempt = async () => {
@@ -215,7 +225,7 @@ export default function QuizDetailView({ quizId }: Props) {
                       leftIcon={Play}
                       disabled={!access.canAttempt || startState.loading}
                       loading={startState.loading}
-                      onClick={handleStartAttempt}
+                      onClick={handleOpenStartModal}
                     >
                       {access.canAttempt
                         ? "Mulai Ujian Sekarang"
@@ -239,6 +249,25 @@ export default function QuizDetailView({ quizId }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {quiz && (
+        <StartConfirmationModal
+          isOpen={isStartModalOpen}
+          onClose={handleCloseStartModal}
+          onConfirmStart={async () => {
+            await handleStartAttempt();
+            handleCloseStartModal();
+          }}
+          quizName={quiz.name}
+          timeLimitMinutes={
+            quiz.timeLimitSeconds > 0
+              ? Math.round(quiz.timeLimitSeconds / 60)
+              : undefined
+          }
+          maxAttempts={quiz.maxAttempts > 0 ? quiz.maxAttempts : undefined}
+          isLoading={startState.loading}
+        />
       )}
     </div>
   );

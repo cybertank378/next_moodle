@@ -89,37 +89,68 @@ export default function QuestionCard({
 
       <div className="space-y-3 pt-2">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 ">
-          Pilihan Jawaban
+          {question.type === "essay"
+            ? "Jawaban Esai"
+            : question.type === "shortanswer"
+              ? "Jawaban Singkat"
+              : "Pilihan Jawaban"}
         </h4>
-        <div className="space-y-2">
-          {defaultOptions.map((opt) => {
-            const isSelected = currentAnswer === opt.value;
-            return (
-              <label
-                key={opt.value}
-                data-testid={`option-${opt.value}`}
-                className={`flex items-center gap-3.5 rounded-xl border p-3.5 cursor-pointer transition-all ${
-                  isSelected
-                    ? "border-indigo-500/50 bg-indigo-500/10 text-slate-900  shadow-sm ring-1 ring-indigo-500/30"
-                    : "border-slate-200  bg-slate-50/50  text-slate-700  hover:border-slate-300  hover:bg-slate-100/60 "
-                }`}
-              >
-                <input
-                  type="radio"
-                  name={`question_${question.slot}`}
-                  value={opt.value}
-                  checked={isSelected}
-                  onChange={(e) => onAnswerChange(e.target.value)}
-                  className="h-4 w-4 border-slate-300  text-indigo-600 focus:ring-indigo-500 bg-white "
-                />
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100  text-xs font-bold text-slate-700  border border-slate-200 ">
-                  {opt.label}
-                </span>
-                <span className="text-sm font-medium">Pilihan {opt.label}</span>
-              </label>
-            );
-          })}
-        </div>
+
+        {question.type === "essay" ? (
+          <div>
+            <textarea
+              data-testid={`essay-${question.slot}`}
+              rows={6}
+              value={currentAnswer}
+              onChange={(e) => onAnswerChange(e.target.value)}
+              placeholder="Tuliskan uraian jawaban Anda di sini..."
+              className="w-full rounded-xl border border-slate-200 p-3.5 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+            />
+          </div>
+        ) : question.type === "shortanswer" ? (
+          <div>
+            <input
+              type="text"
+              data-testid={`shortanswer-${question.slot}`}
+              value={currentAnswer}
+              onChange={(e) => onAnswerChange(e.target.value)}
+              placeholder="Ketik jawaban singkat Anda..."
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+            />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {defaultOptions.map((opt) => {
+              const isSelected = currentAnswer === opt.value;
+              return (
+                <label
+                  key={opt.value}
+                  data-testid={`option-${opt.value}`}
+                  className={`flex items-center gap-3.5 rounded-xl border p-3.5 cursor-pointer transition-all ${
+                    isSelected
+                      ? "border-indigo-500/50 bg-indigo-500/10 text-slate-900  shadow-sm ring-1 ring-indigo-500/30"
+                      : "border-slate-200  bg-slate-50/50  text-slate-700  hover:border-slate-300  hover:bg-slate-100/60 "
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`question_${question.slot}`}
+                    value={opt.value}
+                    checked={isSelected}
+                    onChange={(e) => onAnswerChange(e.target.value)}
+                    className="h-4 w-4 border-slate-300  text-indigo-600 focus:ring-indigo-500 bg-white "
+                  />
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100  text-xs font-bold text-slate-700  border border-slate-200 ">
+                    {opt.label}
+                  </span>
+                  <span className="text-sm font-medium">
+                    Pilihan {opt.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

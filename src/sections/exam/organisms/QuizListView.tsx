@@ -1,10 +1,13 @@
 "use client";
 
 import { HelpCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import QuizCard from "@/sections/exam/molecules/QuizCard";
-import QuizFilterBar from "@/sections/exam/molecules/QuizFilterBar";
+import QuizFilterBar, {
+  type QuizTabFilter,
+} from "@/sections/exam/molecules/QuizFilterBar";
+import EmptyState from "@/shared-ui/component/EmptyState";
 import Skeleton from "@/shared-ui/component/Skeleton";
 import { showErrorToast } from "@/shared-ui/component/Toast";
 
@@ -15,6 +18,7 @@ interface Props {
 export default function QuizListView({ courseId }: Props) {
   const { quizzesState, listQuizzes } = useQuizApi();
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<QuizTabFilter>("ALL");
 
   useEffect(() => {
     void listQuizzes({ courseId, search });
@@ -26,8 +30,13 @@ export default function QuizListView({ courseId }: Props) {
     }
   }, [quizzesState.error]);
 
-  const quizzes = quizzesState.data?.quizzes ?? [];
+  const rawQuizzes = quizzesState.data?.quizzes ?? [];
   const loading = quizzesState.loading;
+
+  const filteredQuizzes = useMemo(() => {
+    if (statusFilter === "ALL") return rawQuizzes;
+    return rawQuizzes.filter((q) => q.status === statusFilter);
+  }, [rawQuizzes, statusFilter]);
 
   return (
     <div className="space-y-6">
@@ -40,7 +49,12 @@ export default function QuizListView({ courseId }: Props) {
         </p>
       </div>
 
-      <QuizFilterBar search={search} onSearchChange={setSearch} />
+      <QuizFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+      />
 
       {loading && (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -61,25 +75,23 @@ export default function QuizListView({ courseId }: Props) {
         </div>
       )}
 
-      {!loading && quizzes.length === 0 && !quizzesState.error && (
-        <div className="rounded-xl border border-slate-200  bg-white  p-12 text-center shadow-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100  text-slate-500 ">
-            <HelpCircle size={24} />
-          </div>
-          <h3 className="mt-4 text-base font-semibold text-slate-900 ">
-            Belum ada ujian yang tersedia
-          </h3>
-          <p className="mt-1 text-xs text-slate-500  max-w-sm mx-auto">
-            {search
+      {!loading && filteredQuizzes.length === 0 && !quizzesState.error && (
+        <EmptyState
+          icon={<HelpCircle size={28} className="text-slate-400" />}
+          title="Belum ada ujian yang tersedia"
+          description={
+            search
               ? "Tidak ada ujian yang cocok dengan kata kunci pencarian Anda."
-              : "Belum ada kuis atau ujian aktif yang dijadwalkan saat ini."}
-          </p>
-        </div>
+              : statusFilter !== "ALL"
+                ? "Tidak ada ujian pada kategori status yang dipilih."
+                : "Belum ada kuis atau ujian aktif yang dijadwalkan saat ini."
+          }
+        />
       )}
 
-      {!loading && quizzes.length > 0 && (
+      {!loading && filteredQuizzes.length > 0 && (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {quizzes.map((quiz) => (
+          {filteredQuizzes.map((quiz) => (
             <QuizCard key={quiz.id} quiz={quiz} />
           ))}
         </div>
