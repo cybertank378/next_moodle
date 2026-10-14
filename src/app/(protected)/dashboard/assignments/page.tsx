@@ -1,12 +1,11 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
+import AssignmentsPageSection from "@/sections/assignments/pages/AssignmentsPageSection";
 
 export default async function AssignmentsPage() {
   await requireDashboardRoles(["STUDENT", "TEACHER", "TENANT"]);
-  return (
-    <DashboardRoutePlaceholder
-      title="Tugas & Penugasan"
-      description="Lihat dan kelola penugasan pembelajaran."
-    />
-  );
+  const session = await getCurrentSession();
+
+  return <AssignmentsPageSection role={session?.actor.role} />;
 }
+
