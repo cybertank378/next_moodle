@@ -1,13 +1,12 @@
 import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
+import type { MoodleClient } from "@/core/moodle/types";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { authorizeCourseOperation } from "@/modules/course/application/services/CourseAuthorizationService";
 import type { CourseListResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
 import { CourseMapper } from "@/modules/course/domain/mapper/CourseMapper";
-
-import type { MoodleClient } from "@/core/moodle/types";
 
 export interface GetUserCoursesInput {
   actor: AuthorizationActor | null | undefined;
@@ -73,10 +72,11 @@ export class GetUserCoursesUseCase {
         });
       }
 
-      // TENANT or ADMIN
+      // TENANT, ADMIN, or TEACHER
       const courses = await this.repository.getTenantCourses({
         tenantId: effectiveTenantId,
         search: input.search,
+        client: input.client,
       });
 
       return Result.ok({

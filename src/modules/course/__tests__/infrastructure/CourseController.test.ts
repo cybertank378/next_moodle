@@ -202,4 +202,67 @@ describe("CourseController", () => {
     expect(body.success).toBe(true);
     expect(body.data.course.id).toBe(101);
   });
+
+  it("resolves user Moodle client for TEACHER actor using their session moodleToken", async () => {
+    const teacherActor: CurrentActor = {
+      userId: "teacher-1",
+      email: "teacher@example.com",
+      role: AppRole.TEACHER,
+      tenantId: "tenant-1",
+      moodleUserId: 55,
+    } as any;
+
+    const mockGetUserCourses = {
+      execute: vi.fn().mockResolvedValue(
+        Result.ok({
+          courses: [],
+          total: 0,
+        }),
+      ),
+    } as unknown as GetUserCoursesUseCase;
+    const mockGetCourseContents = {} as unknown as GetCourseContentsUseCase;
+
+    const mockClient = { call: vi.fn() };
+    const mockClientFactory = {
+      createClient: vi.fn(),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
+    };
+
+    const controller = new CourseController(
+      mockGetUserCourses,
+      mockGetCourseContents,
+      undefined,
+      mockClientFactory as any,
+    );
+
+    const mockReq = {
+      nextUrl: {
+        searchParams: new URLSearchParams(),
+      },
+    } as unknown as NextRequest;
+
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: teacherActor,
+      moodleToken: "teacher-user-token",
+    });
+
+    const response = await controller.list(mockReq);
+    expect(response.status).toBe(200);
+
+    expect(mockClientFactory.createClientForUser).toHaveBeenCalledWith(
+      {
+        tenantId: "tenant-1",
+        tenantSlug: "tenant-1",
+        status: "ACTIVE",
+      },
+      "teacher-user-token",
+    );
+    expect(mockGetUserCourses.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor: expect.objectContaining({ role: AppRole.TEACHER }),
+        client: mockClient,
+      }),
+    );
+  });
 });

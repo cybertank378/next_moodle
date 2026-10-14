@@ -38,7 +38,9 @@ export function mapMoodleUserToActor(
     usernameLower.includes("tenant");
 
   let role = AppRole.STUDENT;
-  if (serviceUsed === "nextjs_admin") {
+  if (serviceUsed === "nextjs_teacher") {
+    role = AppRole.TEACHER;
+  } else if (serviceUsed === "nextjs_admin") {
     if (isTeacherUsername) {
       role = AppRole.TEACHER;
     } else if (isTenantUsername) {
@@ -50,7 +52,11 @@ export function mapMoodleUserToActor(
     serviceUsed === "nextjs_tenant" ||
     serviceUsed === "nextjs_proctor"
   ) {
-    role = AppRole.TENANT;
+    if (isTeacherUsername) {
+      role = AppRole.TEACHER;
+    } else {
+      role = AppRole.TENANT;
+    }
   } else if (isTenantUsername) {
     role = AppRole.TENANT;
   } else if (isTeacherUsername || hasStaffCapabilities) {

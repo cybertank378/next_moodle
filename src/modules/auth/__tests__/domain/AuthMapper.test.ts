@@ -59,6 +59,17 @@ describe("mapMoodleUserToActor", () => {
     });
   });
 
+  it("maps nextjs_teacher to TEACHER role", () => {
+    const actor = mapMoodleUserToActor(
+      mockTenant,
+      mockSiteInfo,
+      "nextjs_teacher",
+    );
+    expect(actor).toMatchObject({
+      role: AppRole.TEACHER,
+    });
+  });
+
   it("maps teacher username to TEACHER role even if service is nextjs_student", () => {
     const actor = mapMoodleUserToActor(
       mockTenant,

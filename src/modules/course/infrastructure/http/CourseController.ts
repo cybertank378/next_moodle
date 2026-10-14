@@ -45,7 +45,7 @@ export class CourseController {
     moodleToken?: string,
   ): Promise<MoodleClient | undefined> {
     if (
-      actor.role === AppRole.STUDENT &&
+      (actor.role === AppRole.STUDENT || actor.role === AppRole.TEACHER) &&
       actor.tenantId &&
       moodleToken &&
       this.clientFactory
