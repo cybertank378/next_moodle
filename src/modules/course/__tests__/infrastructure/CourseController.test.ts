@@ -8,6 +8,12 @@ import type { GetCourseContentsUseCase } from "@/modules/course/application/usec
 import type { GetUserCoursesUseCase } from "@/modules/course/application/usecases/GetUserCoursesUseCase";
 import { CourseController } from "@/modules/course/infrastructure/http/CourseController";
 
+vi.mock("@/modules/auth/server/getCurrentSession", () => ({
+  getCurrentSession: vi.fn(),
+}));
+
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
+
 describe("CourseController", () => {
   const studentActor: CurrentActor = {
     userId: "user-1",
@@ -55,7 +61,12 @@ describe("CourseController", () => {
       },
     } as unknown as NextRequest;
 
-    const response = await controller.list(studentActor, mockReq);
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.list(mockReq);
     expect(response.status).toBe(200);
 
     const body = await response.json();
@@ -83,7 +94,12 @@ describe("CourseController", () => {
       },
     } as unknown as NextRequest;
 
-    const response = await controller.list(studentActor, mockReq);
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.list(mockReq);
     expect(response.status).toBe(403);
 
     const body = await response.json();
@@ -113,7 +129,13 @@ describe("CourseController", () => {
       mockGetCourseContents,
     );
 
-    const response = await controller.getContents(studentActor, 101);
+    const mockReq = {} as NextRequest;
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getContents(mockReq, 101);
     expect(response.status).toBe(200);
 
     const body = await response.json();
@@ -129,7 +151,13 @@ describe("CourseController", () => {
       mockGetCourseContents,
     );
 
-    const response = await controller.getContents(studentActor, "invalid");
+    const mockReq = {} as NextRequest;
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getContents(mockReq, "invalid");
     expect(response.status).toBe(400);
 
     const body = await response.json();
@@ -161,7 +189,13 @@ describe("CourseController", () => {
       mockGetCourseDetail,
     );
 
-    const response = await controller.getDetail(studentActor, "101");
+    const mockReq = {} as NextRequest;
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getDetail(mockReq, "101");
     expect(response.status).toBe(200);
 
     const body = await response.json();
@@ -169,4 +203,3 @@ describe("CourseController", () => {
     expect(body.data.course.id).toBe(101);
   });
 });
-

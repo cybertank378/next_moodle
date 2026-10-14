@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { HttpStatus } from "@/core/http/HttpStatus";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
@@ -12,6 +13,7 @@ import type {
   SubmitAssignmentUseCase,
 } from "@/modules/assignment/application/usecases/AssignmentUseCases";
 import { parseAssignmentQuery } from "@/modules/assignment/infrastructure/validators/assignmentValidator";
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   return {
@@ -33,17 +35,17 @@ export class AssignmentController {
     private readonly submitAssignmentUseCase: SubmitAssignmentUseCase,
   ) {}
 
-  async getStudentAssignments(
-    actor: CurrentActor,
-    req: NextRequest,
-    moodleToken?: string,
-  ): Promise<NextResponse> {
+  async getStudentAssignments(req: NextRequest): Promise<NextResponse> {
     try {
+      const session = await getCurrentSession();
+      if (!session) {
+        throw new UnauthorizedError("Sesi tidak valid.");
+      }
       const query = parseAssignmentQuery(req.nextUrl.searchParams);
       const result = await this.getStudentAssignmentsUseCase.execute({
-        actor: actorToAuthorization(actor),
+        actor: actorToAuthorization(session.actor),
         query,
-        moodleToken,
+        moodleToken: session.moodleToken,
       });
 
       if (result.isFailure) {
@@ -57,15 +59,18 @@ export class AssignmentController {
   }
 
   async getAssignmentDetail(
-    actor: CurrentActor,
+    _req: NextRequest,
     assignmentId: string,
-    moodleToken?: string,
   ): Promise<NextResponse> {
     try {
+      const session = await getCurrentSession();
+      if (!session) {
+        throw new UnauthorizedError("Sesi tidak valid.");
+      }
       const result = await this.getAssignmentDetailUseCase.execute({
-        actor: actorToAuthorization(actor),
+        actor: actorToAuthorization(session.actor),
         assignmentId,
-        moodleToken,
+        moodleToken: session.moodleToken,
       });
 
       if (result.isFailure) {
@@ -90,18 +95,20 @@ export class AssignmentController {
   }
 
   async submitAssignment(
-    actor: CurrentActor,
-    assignmentId: string,
     req: NextRequest,
-    moodleToken?: string,
+    assignmentId: string,
   ): Promise<NextResponse> {
     try {
+      const session = await getCurrentSession();
+      if (!session) {
+        throw new UnauthorizedError("Sesi tidak valid.");
+      }
       const body = await req.json().catch(() => ({}));
       const result = await this.submitAssignmentUseCase.execute({
-        actor: actorToAuthorization(actor),
+        actor: actorToAuthorization(session.actor),
         assignmentId,
         data: body,
-        moodleToken,
+        moodleToken: session.moodleToken,
       });
 
       if (result.isFailure) {

@@ -3,10 +3,14 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
+import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
+import type { MoodleClient } from "@/core/moodle/types";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
 import type { GetCourseContentsUseCase } from "@/modules/course/application/usecases/GetCourseContentsUseCase";
 import type { GetCourseDetailUseCase } from "@/modules/course/application/usecases/GetCourseDetailUseCase";
 import type { GetUserCoursesUseCase } from "@/modules/course/application/usecases/GetUserCoursesUseCase";
@@ -14,9 +18,6 @@ import {
   parseCourseId,
   parseListCourseQuery,
 } from "@/modules/course/infrastructure/validators/course.validator";
-
-import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
-import type { MoodleClient } from "@/core/moodle/types";
 
 function actorToAuthorization(actor: CurrentActor): AuthorizationActor {
   return {
@@ -61,18 +62,21 @@ export class CourseController {
     return undefined;
   }
 
-  async list(
-    actor: CurrentActor,
-    req: NextRequest,
-    moodleToken?: string,
-  ): Promise<NextResponse> {
+  async list(req: NextRequest): Promise<NextResponse> {
     try {
+      const session = await getCurrentSession();
+      if (!session) {
+        throw new UnauthorizedError("Sesi tidak valid.");
+      }
       const query = parseListCourseQuery(req.nextUrl.searchParams);
-      const client = await this.resolveClient(actor, moodleToken);
+      const client = await this.resolveClient(
+        session.actor,
+        session.moodleToken,
+      );
 
       const result = await this.getUserCourses.execute({
-        actor: actorToAuthorization(actor),
-        moodleUserId: actor.moodleUserId ?? undefined,
+        actor: actorToAuthorization(session.actor),
+        moodleUserId: session.actor.moodleUserId ?? undefined,
         search: query.search,
         client,
       });
@@ -93,20 +97,26 @@ export class CourseController {
   }
 
   async getContents(
-    actor: CurrentActor,
+    _req: NextRequest,
     courseIdInput: string | number,
-    moodleToken?: string,
   ): Promise<NextResponse> {
     try {
+      const session = await getCurrentSession();
+      if (!session) {
+        throw new UnauthorizedError("Sesi tidak valid.");
+      }
       const courseId =
         typeof courseIdInput === "number"
           ? courseIdInput
           : parseCourseId(courseIdInput);
 
-      const client = await this.resolveClient(actor, moodleToken);
+      const client = await this.resolveClient(
+        session.actor,
+        session.moodleToken,
+      );
 
       const result = await this.getCourseContents.execute({
-        actor: actorToAuthorization(actor),
+        actor: actorToAuthorization(session.actor),
         courseId,
         client,
       });
@@ -122,11 +132,14 @@ export class CourseController {
   }
 
   async getDetail(
-    actor: CurrentActor,
+    _req: NextRequest,
     courseIdInput: string | number,
-    moodleToken?: string,
   ): Promise<NextResponse> {
     try {
+      const session = await getCurrentSession();
+      if (!session) {
+        throw new UnauthorizedError("Sesi tidak valid.");
+      }
       const courseId =
         typeof courseIdInput === "number"
           ? courseIdInput
@@ -141,10 +154,13 @@ export class CourseController {
         );
       }
 
-      const client = await this.resolveClient(actor, moodleToken);
+      const client = await this.resolveClient(
+        session.actor,
+        session.moodleToken,
+      );
 
       const result = await this.getCourseDetail.execute({
-        actor: actorToAuthorization(actor),
+        actor: actorToAuthorization(session.actor),
         courseId,
         client,
       });

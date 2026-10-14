@@ -3,10 +3,12 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
 import type { GetStudentCalendarEventsUseCase } from "@/modules/calendar/application/usecases/GetStudentCalendarEventsUseCase";
 import { parseCalendarEventsQuery } from "@/modules/calendar/infrastructure/validators/calendarValidator";
 
@@ -28,18 +30,18 @@ export class CalendarController {
     private readonly getStudentCalendarEvents: GetStudentCalendarEventsUseCase,
   ) {}
 
-  async getEvents(
-    actor: CurrentActor,
-    req: NextRequest,
-    moodleToken?: string,
-  ): Promise<NextResponse> {
+  async getEvents(req: NextRequest): Promise<NextResponse> {
     try {
+      const session = await getCurrentSession();
+      if (!session) {
+        throw new UnauthorizedError("Sesi tidak valid.");
+      }
       const query = parseCalendarEventsQuery(req.nextUrl.searchParams);
 
       const result = await this.getStudentCalendarEvents.execute({
-        actor: actorToAuthorization(actor),
+        actor: actorToAuthorization(session.actor),
         query,
-        moodleToken,
+        moodleToken: session.moodleToken,
       });
 
       if (result.isFailure) {
