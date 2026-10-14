@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import "server-only";
 
 import { getAuthRepository } from "@/app/api/auth/_factory";
@@ -18,8 +19,8 @@ import type { GetTeacherDashboardUseCase } from "@/modules/dashboard/application
 import type { GetTenantDashboardUseCase } from "@/modules/dashboard/application/usecases/GetTenantDashboardUseCase";
 import { parseAdminDashboardQuery } from "@/modules/dashboard/infrastructure/validators/dashboardValidator";
 
-function respond(response: ApiResponse): Response {
-  return Response.json(response.body, {
+function respond(response: ApiResponse): NextResponse {
+  return NextResponse.json(response.body, {
     status: response.status,
     headers: {
       "Cache-Control": "private, no-store",
@@ -47,7 +48,7 @@ export class DashboardController {
     private readonly getProctorDashboard: GetProctorDashboardUseCase,
   ) {}
 
-  async getAdminOverview(req: Request): Promise<Response> {
+  async getAdminOverview(req: Request): Promise<NextResponse> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
       return respond(
@@ -76,7 +77,7 @@ export class DashboardController {
     }
   }
 
-  async getStudentOverview(req: Request): Promise<Response> {
+  async getStudentOverview(req: Request): Promise<NextResponse> {
     try {
       const sessionToken = await extractTokenFromRequest(req);
       if (!sessionToken) throw new UnauthorizedError("Token hilang.");
@@ -101,7 +102,7 @@ export class DashboardController {
     }
   }
 
-  async getTeacherOverview(req: Request): Promise<Response> {
+  async getTeacherOverview(req: Request): Promise<NextResponse> {
     try {
       const sessionToken = await extractTokenFromRequest(req);
       if (!sessionToken) throw new UnauthorizedError("Token hilang.");
@@ -126,7 +127,7 @@ export class DashboardController {
     }
   }
 
-  async getTenantOverview(req: Request): Promise<Response> {
+  async getTenantOverview(req: Request): Promise<NextResponse> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor)
       return respond(
@@ -151,7 +152,7 @@ export class DashboardController {
     }
   }
 
-  async getProctorOverview(req: Request): Promise<Response> {
+  async getProctorOverview(req: Request): Promise<NextResponse> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor)
       return respond(

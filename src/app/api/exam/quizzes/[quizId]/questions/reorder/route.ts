@@ -1,8 +1,10 @@
+import type { NextRequest } from "next/server";
+
 import { getExamAdministrationController } from "@/app/api/exam/_factory";
 import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 
 async function originalPATCH(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ quizId: string }> },
 ) {
   const { quizId } = await params;

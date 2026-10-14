@@ -7,6 +7,12 @@ import { AppRole } from "@/core/rbac/AppRole";
 import type { GetStudentCalendarEventsUseCase } from "@/modules/calendar/application/usecases/GetStudentCalendarEventsUseCase";
 import { CalendarController } from "@/modules/calendar/infrastructure/http/CalendarController";
 
+vi.mock("@/modules/auth/server/getCurrentSession", () => ({
+  getCurrentSession: vi.fn(),
+}));
+
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
+
 describe("CalendarController", () => {
   const studentActor: CurrentActor = {
     userId: "student-1",
@@ -43,11 +49,12 @@ describe("CalendarController", () => {
       },
     } as unknown as NextRequest;
 
-    const response = await controller.getEvents(
-      studentActor,
-      mockReq,
-      "moodle-token",
-    );
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getEvents(mockReq);
     expect(response.status).toBe(200);
 
     const body = await response.json();
@@ -70,7 +77,12 @@ describe("CalendarController", () => {
       },
     } as unknown as NextRequest;
 
-    const response = await controller.getEvents(studentActor, mockReq);
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getEvents(mockReq);
     expect(response.status).toBe(403);
     const body = await response.json();
     expect(body.success).toBe(false);

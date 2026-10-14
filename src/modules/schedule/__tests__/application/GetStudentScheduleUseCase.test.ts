@@ -22,6 +22,10 @@ describe("GetStudentScheduleUseCase", () => {
       getTenantSchedule: vi.fn(),
       getTeacherSchedule: vi.fn(),
       getSessionById: vi.fn(),
+      createSession: vi.fn(),
+      updateSession: vi.fn(),
+      publishSession: vi.fn(),
+      cancelSession: vi.fn(),
     };
 
     clientFactory = {

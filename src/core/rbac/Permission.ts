@@ -55,12 +55,16 @@ export const Permission = {
   STUDENT_COURSE_READ: "student.course.read",
   STUDENT_QUIZ_READ: "student.quiz.read",
   STUDENT_SCHEDULE_READ: "student.schedule.read",
+  STUDENT_ASSIGNMENT_READ: "student.assignment.read",
+  STUDENT_ASSIGNMENT_SUBMIT: "student.assignment.submit",
   ATTEMPT_START: "attempt.start",
   ATTEMPT_READ_OWN: "attempt.read.own",
   ATTEMPT_SAVE_OWN: "attempt.save.own",
   ATTEMPT_SUBMIT_OWN: "attempt.submit.own",
   ATTEMPT_REVIEW_OWN: "attempt.review.own",
   GRADE_READ_OWN: "grade.read.own",
+  ASSIGNMENT_READ: "assignment.read",
+  ASSIGNMENT_MANAGE: "assignment.manage",
 
   // TEACHER
   TEACHER_DASHBOARD_READ: "teacher.dashboard.read",
