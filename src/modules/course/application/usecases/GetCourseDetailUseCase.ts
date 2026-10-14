@@ -1,14 +1,13 @@
 import { Result } from "@/core/base/Result";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { ValidationError } from "@/core/errors/ValidationError";
+import type { MoodleClient } from "@/core/moodle/types";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { authorizeCourseOperation } from "@/modules/course/application/services/CourseAuthorizationService";
 import type { CourseDetailResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
 import { CourseMapper } from "@/modules/course/domain/mapper/CourseMapper";
-
-import type { MoodleClient } from "@/core/moodle/types";
 
 export interface GetCourseDetailInput {
   actor: AuthorizationActor | null | undefined;
@@ -104,10 +103,11 @@ export class GetCourseDetailUseCase {
         });
       }
 
-      // For TENANT or ADMIN
+      // For TENANT, ADMIN, or TEACHER
       const course = await this.repository.getCourseById({
         tenantId: effectiveTenantId,
         courseId: input.courseId,
+        client: input.client,
       });
 
       if (!course) {
@@ -121,6 +121,7 @@ export class GetCourseDetailUseCase {
         sections = await this.repository.getCourseContents({
           tenantId: effectiveTenantId,
           courseId: input.courseId,
+          client: input.client,
         });
       } catch {
         sections = [];
