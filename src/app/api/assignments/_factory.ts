@@ -4,7 +4,6 @@ import { DefaultMoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentialProvider";
 import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { prisma } from "@/libs/prisma";
-import { MoodleCourseRepository } from "@/modules/course/infrastructure/repo/MoodleCourseRepository";
 import {
   GetAssignmentDetailUseCase,
   GetStudentAssignmentsUseCase,
@@ -12,6 +11,7 @@ import {
 } from "@/modules/assignment/application/usecases/AssignmentUseCases";
 import { AssignmentController } from "@/modules/assignment/infrastructure/http/AssignmentController";
 import { MoodleAssignmentRepository } from "@/modules/assignment/infrastructure/repo/MoodleAssignmentRepository";
+import { MoodleCourseRepository } from "@/modules/course/infrastructure/repo/MoodleCourseRepository";
 import { PrismaMoodleCredentialStore } from "@/modules/tenant/infrastructure/repo/PrismaMoodleCredentialStore";
 
 let controller: AssignmentController | null = null;

@@ -56,8 +56,12 @@ export class GetStudentAssignmentsUseCase {
     }
 
     try {
-      const client = this.clientFactory.createStudentClient(
-        actor.tenantId,
+      const client = await this.clientFactory.createClientForUser(
+        {
+          tenantId: actor.tenantId,
+          tenantSlug: actor.tenantId,
+          status: "ACTIVE",
+        },
         moodleToken,
       );
 
@@ -85,12 +89,12 @@ export class GetStudentAssignmentsUseCase {
           backendBlockedReason: result.backendBlockedReason,
         },
       });
-    } catch (err: any) {
-      return Result.fail(
-        new ValidationError(
-          err.message || "Gagal memuat daftar penugasan siswa.",
-        ),
-      );
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Gagal memuat daftar penugasan siswa.";
+      return Result.fail(new ValidationError(message));
     }
   }
 }
@@ -119,8 +123,12 @@ export class GetAssignmentDetailUseCase {
     }
 
     try {
-      const client = this.clientFactory.createStudentClient(
-        actor.tenantId,
+      const client = await this.clientFactory.createClientForUser(
+        {
+          tenantId: actor.tenantId,
+          tenantSlug: actor.tenantId,
+          status: "ACTIVE",
+        },
         moodleToken,
       );
 
@@ -134,10 +142,10 @@ export class GetAssignmentDetailUseCase {
       if (!entity) return Result.ok(null);
 
       return Result.ok(AssignmentMapper.toDTO(entity));
-    } catch (err: any) {
-      return Result.fail(
-        new ValidationError(err.message || "Gagal memuat detail tugas."),
-      );
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Gagal memuat detail tugas.";
+      return Result.fail(new ValidationError(message));
     }
   }
 }

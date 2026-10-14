@@ -11,19 +11,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return unauthorizedResponse();
   }
 
-  const { searchParams } = new URL(req.url);
-  const courseIdParam = searchParams.get("courseId");
-  const courseId = courseIdParam ? parseInt(courseIdParam, 10) : undefined;
-  const status = searchParams.get("status") || undefined;
-  const search = searchParams.get("search") || undefined;
-
-  return getAssignmentController().getStudentAssignments({
-    actor: session.actor,
-    query: {
-      courseId,
-      status: status as any,
-      search,
-    },
-    moodleToken: session.moodleToken,
-  }) as unknown as NextResponse;
+  return getAssignmentController().getStudentAssignments(
+    session.actor,
+    req,
+    session.moodleToken,
+  );
 }

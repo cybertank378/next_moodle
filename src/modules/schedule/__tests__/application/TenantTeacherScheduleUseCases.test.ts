@@ -28,6 +28,10 @@ describe("Tenant & Teacher Schedule Use Cases and RBAC rules", () => {
       getTenantSchedule: vi.fn(),
       getTeacherSchedule: vi.fn(),
       getSessionById: vi.fn(),
+      createSession: vi.fn(),
+      updateSession: vi.fn(),
+      publishSession: vi.fn(),
+      cancelSession: vi.fn(),
     };
 
     clientFactory = {
@@ -130,7 +134,7 @@ describe("Tenant & Teacher Schedule Use Cases and RBAC rules", () => {
 
   describe("MutateScheduleUseCases (Strict Student Forbidden & Backend-Block Contract)", () => {
     it("returns 403 Forbidden when STUDENT attempts CreateSchedule", async () => {
-      const useCase = new CreateScheduleUseCase();
+      const useCase = new CreateScheduleUseCase(repository);
       const result = await useCase.execute({
         actor: {
           id: "student-1",
@@ -151,7 +155,7 @@ describe("Tenant & Teacher Schedule Use Cases and RBAC rules", () => {
     });
 
     it("returns 403 Forbidden when STUDENT attempts UpdateSchedule", async () => {
-      const useCase = new UpdateScheduleUseCase();
+      const useCase = new UpdateScheduleUseCase(repository);
       const result = await useCase.execute({
         actor: {
           id: "student-1",
@@ -167,7 +171,7 @@ describe("Tenant & Teacher Schedule Use Cases and RBAC rules", () => {
     });
 
     it("returns 403 Forbidden when STUDENT attempts PublishSchedule", async () => {
-      const useCase = new PublishScheduleUseCase();
+      const useCase = new PublishScheduleUseCase(repository);
       const result = await useCase.execute({
         actor: {
           id: "student-1",
@@ -182,7 +186,7 @@ describe("Tenant & Teacher Schedule Use Cases and RBAC rules", () => {
     });
 
     it("returns 403 Forbidden when STUDENT attempts CancelSchedule", async () => {
-      const useCase = new CancelScheduleUseCase();
+      const useCase = new CancelScheduleUseCase(repository);
       const result = await useCase.execute({
         actor: {
           id: "student-1",

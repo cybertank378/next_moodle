@@ -16,11 +16,11 @@ export async function GET(
 
   const { id } = await context.params;
 
-  return getAssignmentController().getAssignmentDetail({
-    actor: session.actor,
-    assignmentId: id,
-    moodleToken: session.moodleToken,
-  }) as unknown as NextResponse;
+  return getAssignmentController().getAssignmentDetail(
+    session.actor,
+    id,
+    session.moodleToken,
+  );
 }
 
 export async function POST(
@@ -33,12 +33,11 @@ export async function POST(
   }
 
   const { id } = await context.params;
-  const body = await req.json().catch(() => ({}));
 
-  return getAssignmentController().submitAssignment({
-    actor: session.actor,
-    assignmentId: id,
-    data: body,
-    moodleToken: session.moodleToken,
-  }) as unknown as NextResponse;
+  return getAssignmentController().submitAssignment(
+    session.actor,
+    id,
+    req,
+    session.moodleToken,
+  );
 }

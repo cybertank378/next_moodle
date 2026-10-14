@@ -1,19 +1,27 @@
+import type { Mocked } from "vitest";
 import { describe, expect, it, vi } from "vitest";
+import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
+import type { MoodleRestClient } from "@/core/moodle/MoodleRestClient";
 import { AppRole } from "@/core/rbac/AppRole";
 import {
   GetStudentAssignmentsUseCase,
   SubmitAssignmentUseCase,
 } from "@/modules/assignment/application/usecases/AssignmentUseCases";
 import { AssignmentEntity } from "@/modules/assignment/domain/entity/AssignmentEntity";
+import type { AssignmentRepositoryInterface } from "@/modules/assignment/domain/interfaces/AssignmentRepositoryInterface";
 
 describe("Assignment Use Cases (Issue #172)", () => {
-  const mockAssignmentRepo: any = {
+  const mockAssignmentRepo: Mocked<AssignmentRepositoryInterface> = {
     getStudentAssignments: vi.fn(),
     getAssignmentById: vi.fn(),
   };
 
-  const mockClientFactory: any = {
-    createStudentClient: vi.fn().mockReturnValue({}),
+  const mockClientFactory: Mocked<MoodleClientFactory> = {
+    createClient: vi.fn(),
+    createClientForUser: vi
+      .fn()
+      .mockResolvedValue({} as unknown as MoodleRestClient),
+    createClientForTenant: vi.fn(),
   };
 
   describe("GetStudentAssignmentsUseCase", () => {
