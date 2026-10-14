@@ -5,6 +5,7 @@ import { EncryptedMoodleCredentialProvider } from "@/core/moodle/MoodleCredentia
 import { AesHkdfEncryptionProvider } from "@/core/security/AesHkdfEncryptionProvider";
 import { prisma } from "@/libs/prisma";
 import { NotificationDispatchService } from "@/modules/notification/application/services/NotificationDispatchService";
+import { NotificationOutboxCronController } from "@/modules/notification/infrastructure/http/NotificationOutboxCronController";
 import { FirebaseCloudMessagingAdapter } from "@/modules/notification/infrastructure/providers/FirebaseCloudMessagingAdapter";
 import { NotificationRecipientProvider } from "@/modules/notification/infrastructure/providers/NotificationRecipientProvider";
 import { PrismaNotificationCampaignRepository } from "@/modules/notification/infrastructure/repo/PrismaNotificationCampaignRepository";
@@ -30,7 +31,12 @@ export function createNotificationOutboxWorker(): NotificationOutboxWorker {
     new DefaultMoodleClientFactory(credentials),
   );
   const dispatchService = new NotificationDispatchService(
-    campaignRepo, deliveryRepo, recipientProvider, inboxRepo, deviceRepo, pushAdapter,
+    campaignRepo,
+    deliveryRepo,
+    recipientProvider,
+    inboxRepo,
+    deviceRepo,
+    pushAdapter,
   );
   return new NotificationOutboxWorker({
     outboxRepo,
@@ -39,4 +45,8 @@ export function createNotificationOutboxWorker(): NotificationOutboxWorker {
     dispatchService,
     pushAdapter,
   });
+}
+
+export function getNotificationOutboxCronController(): NotificationOutboxCronController {
+  return new NotificationOutboxCronController(createNotificationOutboxWorker());
 }
