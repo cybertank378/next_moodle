@@ -3,9 +3,13 @@ import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
+import { requireAuditCleanupAdmin } from "@/modules/audit/application/services/AuditRetentionService";
 import type { GetAuditDetailUseCase } from "@/modules/audit/application/usecases/GetAuditDetailUseCase";
 import type { GetAuditListUseCase } from "@/modules/audit/application/usecases/GetAuditListUseCase";
 import { parseAuditQuery } from "@/modules/audit/domain/builder/AuditQueryBuilder";
+import { purgeExpiredAuditLogs } from "@/modules/audit/infrastructure/repo/AuditCleanupRepository";
+import { getAuditRetentionOverview } from "@/modules/audit/infrastructure/repo/AuditRetentionOverview";
+import { recordSaasAudit } from "@/modules/audit/infrastructure/repo/SaasAuditWriter";
 
 const HEADERS = {
   "Cache-Control": "private, no-store",
@@ -46,6 +50,33 @@ export class AuditController {
           404,
         );
       return reply(ApiResponse.success(item).body);
+    } catch (e) {
+      return failed(e);
+    }
+  }
+  async retention(request: Request): Promise<Response> {
+    try {
+      const actor = await resolveCurrentActor(request);
+      requireAuditCleanupAdmin(actor);
+      return reply(ApiResponse.success(await getAuditRetentionOverview()).body);
+    } catch (e) {
+      return failed(e);
+    }
+  }
+
+  async cleanup(request: Request): Promise<Response> {
+    try {
+      const actor = await resolveCurrentActor(request);
+      requireAuditCleanupAdmin(actor);
+      const result = await purgeExpiredAuditLogs();
+      await recordSaasAudit({
+        actor,
+        tenantId: null,
+        action: "audit.cleanup.manual",
+        resource: "saas_audit_logs",
+        details: { event: "audit.cleanup", recordCount: result.deleted },
+      });
+      return reply(ApiResponse.success(result).body);
     } catch (e) {
       return failed(e);
     }
