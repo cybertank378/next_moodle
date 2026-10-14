@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
@@ -11,19 +12,19 @@ const HEADERS = {
   Vary: "Cookie, Authorization",
 };
 
-function failure(error: unknown): Response {
+function failure(error: unknown): NextResponse {
   if (
     error instanceof Error &&
     "statusCode" in error &&
     error.statusCode === 409
   ) {
-    return Response.json(
+    return NextResponse.json(
       ApiResponse.error("SETTINGS_CONFLICT", error.message, 409).body,
       { status: 409, headers: HEADERS },
     );
   }
   const mapped = mapErrorToHttpResponse(error);
-  return Response.json(mapped.body, {
+  return NextResponse.json(mapped.body, {
     status: mapped.status,
     headers: HEADERS,
   });
@@ -35,11 +36,11 @@ export class SettingsController {
     private readonly updatePlatformSettingsUseCase: UpdatePlatformSettingsUseCase,
   ) {}
 
-  async getSettings(request: Request): Promise<Response> {
+  async getSettings(request: Request): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(request);
       const data = await this.getPlatformSettingsUseCase.execute(actor);
-      return Response.json(ApiResponse.success(data).body, {
+      return NextResponse.json(ApiResponse.success(data).body, {
         headers: HEADERS,
       });
     } catch (error) {
@@ -47,7 +48,7 @@ export class SettingsController {
     }
   }
 
-  async updateSettings(request: Request): Promise<Response> {
+  async updateSettings(request: Request): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(request);
       const input: unknown = await request.json();
@@ -57,7 +58,7 @@ export class SettingsController {
       );
       revalidatePath("/", "layout");
       revalidatePath("/manifest.webmanifest");
-      return Response.json(ApiResponse.success(data).body, {
+      return NextResponse.json(ApiResponse.success(data).body, {
         headers: HEADERS,
       });
     } catch (error) {

@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import "server-only";
 import { resolveCurrentActor } from "@/core/auth/resolveCurrentActor";
 import { ValidationError } from "@/core/errors/ValidationError";
@@ -15,8 +16,8 @@ const HEADERS = {
   "Cache-Control": "private, no-store",
   Vary: "Cookie, Authorization",
 };
-const reply = (body: unknown, status = 200) =>
-  Response.json(body, { status, headers: HEADERS });
+const reply = (body: unknown, status = 200): NextResponse =>
+  NextResponse.json(body, { status, headers: HEADERS });
 const failed = (e: unknown) => {
   const r = mapErrorToHttpResponse(e);
   return reply(r.body, r.status);
@@ -26,7 +27,7 @@ export class AuditController {
     private readonly listUC: GetAuditListUseCase,
     private readonly detailUC: GetAuditDetailUseCase,
   ) {}
-  async list(request: Request): Promise<Response> {
+  async list(request: Request): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(request);
       const q = parseAuditQuery(new URL(request.url).searchParams);
@@ -37,7 +38,7 @@ export class AuditController {
       return failed(e);
     }
   }
-  async detail(request: Request, id: string): Promise<Response> {
+  async detail(request: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(request);
       if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id))
@@ -54,7 +55,7 @@ export class AuditController {
       return failed(e);
     }
   }
-  async retention(request: Request): Promise<Response> {
+  async retention(request: Request): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(request);
       requireAuditCleanupAdmin(actor);
@@ -64,7 +65,7 @@ export class AuditController {
     }
   }
 
-  async cleanup(request: Request): Promise<Response> {
+  async cleanup(request: Request): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(request);
       requireAuditCleanupAdmin(actor);
@@ -82,13 +83,13 @@ export class AuditController {
     }
   }
 
-  async cronAuditRetention(req: Request): Promise<Response> {
+  async cronAuditRetention(req: Request): Promise<NextResponse> {
     const secret = process.env.AUDIT_RETENTION_CRON_SECRET;
     const authorized = Boolean(
       secret && req.headers.get("authorization") === `Bearer ${secret}`,
     );
     if (!authorized) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: {
@@ -114,7 +115,7 @@ export class AuditController {
         resource: "saas_audit_logs",
         details: { event: "audit.cleanup", recordCount: result.deleted },
       });
-      return Response.json(
+      return NextResponse.json(
         { success: true, data: result },
         { headers: { "Cache-Control": "no-store" } },
       );

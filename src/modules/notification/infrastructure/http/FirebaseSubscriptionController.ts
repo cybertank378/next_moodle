@@ -16,7 +16,7 @@ if (!getApps().length) {
 }
 
 export class FirebaseSubscriptionController {
-  async subscribe(req: Request): Promise<Response> {
+  async subscribe(req: Request): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(req);
       if (!actor) {
@@ -43,7 +43,7 @@ export class FirebaseSubscriptionController {
     }
   }
 
-  async unsubscribe(req: Request): Promise<Response> {
+  async unsubscribe(req: Request): Promise<NextResponse> {
     try {
       const actor = await resolveCurrentActor(req);
       if (!actor) {

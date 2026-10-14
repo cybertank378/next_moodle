@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import "server-only";
 
 import type { CurrentActor } from "@/core/auth/CurrentActor";
@@ -10,8 +11,8 @@ import type { MarkNotificationReadUseCase } from "@/modules/notification/applica
 import { NotificationScope } from "@/modules/notification/domain/value-object/NotificationScope";
 import { parseNotificationQuery } from "@/modules/notification/infrastructure/validators/notificationValidator";
 
-function respond(body: unknown, status: number): Response {
-  return Response.json(
+function respond(body: unknown, status: number): NextResponse {
+  return NextResponse.json(
     {
       success: status < 400,
       ...(status >= 400 ? { error: body } : { data: body }),
@@ -28,10 +29,10 @@ export class NotificationController {
     private readonly markAllReadUseCase: MarkAllReadUseCase,
   ) {}
 
-  async getNotifications(req: Request): Promise<Response> {
+  async getNotifications(req: Request): Promise<NextResponse> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -57,17 +58,17 @@ export class NotificationController {
         limit: query.limit,
       });
 
-      return Response.json({ success: true, data: result }, { status: 200 });
+      return NextResponse.json({ success: true, data: result }, { status: 200 });
     } catch (error) {
       const r = mapErrorToHttpResponse(error);
-      return Response.json(r.body, { status: r.status });
+      return NextResponse.json(r.body, { status: r.status });
     }
   }
 
-  async getUnreadCount(req: Request): Promise<Response> {
+  async getUnreadCount(req: Request): Promise<NextResponse> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -87,20 +88,20 @@ export class NotificationController {
         scope,
       });
 
-      return Response.json(
+      return NextResponse.json(
         { success: true, data: { unreadCount } },
         { status: 200 },
       );
     } catch (error) {
       const r = mapErrorToHttpResponse(error);
-      return Response.json(r.body, { status: r.status });
+      return NextResponse.json(r.body, { status: r.status });
     }
   }
 
-  async markAsRead(notificationId: string, req: Request): Promise<Response> {
+  async markAsRead(notificationId: string, req: Request): Promise<NextResponse> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -110,7 +111,7 @@ export class NotificationController {
     }
 
     if (!notificationId || !notificationId.trim()) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: { code: "BAD_REQUEST", message: "ID Notifikasi tidak valid." },
@@ -131,7 +132,7 @@ export class NotificationController {
         scope,
       });
 
-      return Response.json(
+      return NextResponse.json(
         {
           success: true,
           data: { message: "Notifikasi telah ditandai sebagai dibaca." },
@@ -140,14 +141,14 @@ export class NotificationController {
       );
     } catch (error) {
       const r = mapErrorToHttpResponse(error);
-      return Response.json(r.body, { status: r.status });
+      return NextResponse.json(r.body, { status: r.status });
     }
   }
 
-  async markAllAsRead(req: Request): Promise<Response> {
+  async markAllAsRead(req: Request): Promise<NextResponse> {
     const actor = await resolveCurrentActor(req).catch(() => null);
     if (!actor) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -167,13 +168,13 @@ export class NotificationController {
         scope,
       });
 
-      return Response.json(
+      return NextResponse.json(
         { success: true, data: { markedCount } },
         { status: 200 },
       );
     } catch (error) {
       const r = mapErrorToHttpResponse(error);
-      return Response.json(r.body, { status: r.status });
+      return NextResponse.json(r.body, { status: r.status });
     }
   }
 }

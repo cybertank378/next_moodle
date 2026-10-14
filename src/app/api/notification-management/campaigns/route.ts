@@ -2,13 +2,16 @@ import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAud
 // Files: src/app/api/notification-management/campaigns/route.ts
 import "server-only";
 
+import type { NextRequest, NextResponse } from "next/server";
+
+
 import { createNotificationManagementController } from "@/app/api/notification-management/_factory";
 
-export async function GET(req: Request): Promise<Response> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
   return createNotificationManagementController().listCampaigns(req);
 }
 
-async function originalPOST(req: Request): Promise<Response> {
+async function originalPOST(req: NextRequest): Promise<NextResponse> {
   return createNotificationManagementController().createCampaign(req);
 }
 

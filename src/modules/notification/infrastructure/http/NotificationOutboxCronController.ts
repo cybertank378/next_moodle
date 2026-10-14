@@ -1,16 +1,17 @@
+import { NextResponse } from "next/server";
 import "server-only";
 import type { NotificationOutboxWorker } from "@/modules/notification/infrastructure/workers/NotificationOutboxWorker";
 
 export class NotificationOutboxCronController {
   constructor(private readonly worker: NotificationOutboxWorker) {}
 
-  async process(request: Request): Promise<Response> {
+  async process(request: Request): Promise<NextResponse> {
     const secret = process.env.NOTIFICATION_OUTBOX_CRON_SECRET;
     if (
       !secret ||
       request.headers.get("authorization") !== `Bearer ${secret}`
     ) {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: {
@@ -24,12 +25,12 @@ export class NotificationOutboxCronController {
 
     try {
       const result = await this.worker.processNextBatch(5);
-      return Response.json(
+      return NextResponse.json(
         { success: true, data: result },
         { headers: { "Cache-Control": "no-store" } },
       );
     } catch {
-      return Response.json(
+      return NextResponse.json(
         {
           success: false,
           error: {
