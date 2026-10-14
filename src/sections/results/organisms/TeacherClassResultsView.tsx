@@ -1,7 +1,6 @@
 import { Award, CheckCircle, Download, RefreshCw, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { UserGradeReportResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
-import { GradeExportFormatter } from "@/modules/grades/domain/mapper/GradeExportFormatter";
 import { useGradeApi } from "@/modules/grades/presentation/hooks/useGradeApi";
 import GradeScoreCard from "@/sections/results/atoms/GradeScoreCard";
 import CourseGradesTable from "@/sections/results/molecules/CourseGradesTable";
@@ -22,7 +21,7 @@ export default function TeacherClassResultsView({
   courseId,
   courseTitle,
 }: TeacherClassResultsViewProps) {
-  const { courseGradesState, getCourseGrades } = useGradeApi();
+  const { courseGradesState, getCourseGrades, exportGrades } = useGradeApi();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [exporting, setExporting] = useState(false);
@@ -43,16 +42,8 @@ export default function TeacherClassResultsView({
     if (exporting || reports.length === 0) return;
     setExporting(true);
     try {
-      const res = await fetch(`/api/grades/export?courseId=${courseId}`);
-      if (!res.ok) {
-        const errJson = (await res.json().catch(() => ({}))) as {
-          error?: { message?: string };
-        };
-        throw new Error(
-          errJson.error?.message ?? `Export gagal (${res.status})`,
-        );
-      }
-      const blob = await res.blob();
+      const blob = await exportGrades(courseId);
+      if (!blob) return;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       const timestamp = new Date()
