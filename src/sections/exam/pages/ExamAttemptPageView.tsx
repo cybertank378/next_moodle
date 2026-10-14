@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ROUTES } from "@/libs/routes";
 import { useQuizApi } from "@/modules/quiz/presentation/hooks/useQuizApi";
 import { useQuizAttemptApi } from "@/modules/quiz/presentation/hooks/useQuizAttemptApi";
+import ExamCompleteModal from "@/sections/exam/molecules/ExamCompleteModal";
 import ExamAttemptInterface from "@/sections/exam/organisms/ExamAttemptInterface";
 import Skeleton from "@/shared-ui/component/Skeleton";
 
@@ -46,6 +47,8 @@ export default function ExamAttemptPageView({
     ? detailState.data.timeLimitSeconds
     : 3600;
 
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+
   const handleSaveAnswer = async (
     answers: Record<string, string | number>,
   ): Promise<boolean> => {
@@ -59,7 +62,7 @@ export default function ExamAttemptPageView({
       quizId,
     });
     if (res.data?.success) {
-      router.push(ROUTES.DASHBOARD.EXAMS);
+      setIsCompleteModalOpen(true);
     }
   };
 
@@ -109,14 +112,24 @@ export default function ExamAttemptPageView({
         ];
 
   return (
-    <ExamAttemptInterface
-      attemptId={attemptId}
-      quizId={quizId}
-      quizName={detailState.data?.name ?? `Ujian #${quizId}`}
-      initialSeconds={initialSeconds}
-      questions={displayQuestions}
-      onSaveAnswer={handleSaveAnswer}
-      onFinalSubmit={handleFinalSubmit}
-    />
+    <>
+      <ExamAttemptInterface
+        attemptId={attemptId}
+        quizId={quizId}
+        quizName={detailState.data?.name ?? `Ujian #${quizId}`}
+        initialSeconds={initialSeconds}
+        questions={displayQuestions}
+        onSaveAnswer={handleSaveAnswer}
+        onFinalSubmit={handleFinalSubmit}
+      />
+
+      <ExamCompleteModal
+        isOpen={isCompleteModalOpen}
+        attemptId={attemptId}
+        quizName={detailState.data?.name}
+        onBackToExams={() => router.push(ROUTES.DASHBOARD.EXAMS)}
+        onViewResults={() => router.push(ROUTES.DASHBOARD.RESULTS)}
+      />
+    </>
   );
 }

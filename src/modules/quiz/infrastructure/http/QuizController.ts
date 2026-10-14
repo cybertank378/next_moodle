@@ -3,10 +3,12 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { ApiResponse } from "@/core/http/ApiResponse";
 import { mapErrorToHttpResponse } from "@/core/http/mapErrorToHttpResponse";
 import type { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
+import { getCurrentUser } from "@/modules/auth/server/getCurrentUser";
 import type { CheckQuizAccessUseCase } from "@/modules/quiz/application/usecases/CheckQuizAccessUseCase";
 import type { GetQuizDetailUseCase } from "@/modules/quiz/application/usecases/GetQuizDetailUseCase";
 import type { GetQuizzesByCourseUseCase } from "@/modules/quiz/application/usecases/GetQuizzesByCourseUseCase";
@@ -35,8 +37,24 @@ export class QuizController {
     private readonly checkQuizAccess: CheckQuizAccessUseCase,
   ) {}
 
-  async list(actor: CurrentActor, req: NextRequest): Promise<NextResponse> {
+  async list(
+    reqOrActor: CurrentActor | NextRequest,
+    maybeReq?: NextRequest,
+  ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let req: NextRequest;
+
+      if ("nextUrl" in reqOrActor) {
+        req = reqOrActor;
+        const current = await getCurrentUser();
+        if (!current) throw new UnauthorizedError("Sesi tidak valid.");
+        actor = current;
+      } else {
+        actor = reqOrActor;
+        req = maybeReq!;
+      }
+
       const query = parseListQuizzesQuery(req.nextUrl.searchParams);
       const result = await this.getQuizzesByCourse.execute({
         actor: actorToAuthorization(actor),
@@ -60,10 +78,27 @@ export class QuizController {
   }
 
   async getDetail(
-    actor: CurrentActor,
-    quizIdInput: string | number,
+    actorOrQuizId: CurrentActor | string | number,
+    maybeQuizId?: string | number,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let quizIdInput: string | number;
+
+      if (
+        typeof actorOrQuizId === "object" &&
+        actorOrQuizId !== null &&
+        "userId" in actorOrQuizId
+      ) {
+        actor = actorOrQuizId;
+        quizIdInput = maybeQuizId!;
+      } else {
+        const current = await getCurrentUser();
+        if (!current) throw new UnauthorizedError("Sesi tidak valid.");
+        actor = current;
+        quizIdInput = actorOrQuizId;
+      }
+
       const quizId =
         typeof quizIdInput === "number"
           ? quizIdInput
@@ -85,10 +120,27 @@ export class QuizController {
   }
 
   async checkAccess(
-    actor: CurrentActor,
-    quizIdInput: string | number,
+    actorOrQuizId: CurrentActor | string | number,
+    maybeQuizId?: string | number,
   ): Promise<NextResponse> {
     try {
+      let actor: CurrentActor;
+      let quizIdInput: string | number;
+
+      if (
+        typeof actorOrQuizId === "object" &&
+        actorOrQuizId !== null &&
+        "userId" in actorOrQuizId
+      ) {
+        actor = actorOrQuizId;
+        quizIdInput = maybeQuizId!;
+      } else {
+        const current = await getCurrentUser();
+        if (!current) throw new UnauthorizedError("Sesi tidak valid.");
+        actor = current;
+        quizIdInput = actorOrQuizId;
+      }
+
       const quizId =
         typeof quizIdInput === "number"
           ? quizIdInput
