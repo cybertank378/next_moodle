@@ -9,43 +9,35 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  type AuditRetentionOverviewData,
+  useAuditApi,
+} from "@/modules/audit/presentation/hooks/useAuditApi";
 import { AuditCleanupDialog } from "@/sections/audit/molecules/AuditCleanupDialog";
 import Button from "@/shared-ui/component/Button";
 
-interface Overview {
-  protectedCount: number;
-  eligibleCount: number;
-  cutoff: string;
-  asOf: string;
-}
+export type Overview = AuditRetentionOverviewData;
+
 export function AuditRetentionView({ initial }: { initial: Overview }) {
   const router = useRouter();
+  const { getRetentionOverview, cleanupRetention } = useAuditApi();
   const [data, setData] = useState(initial);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   async function reload() {
-    const res = await fetch("/api/audit/retention", { cache: "no-store" });
-    const body = await res.json();
-    if (!res.ok || !body.success)
-      throw new Error(body.error?.message ?? "Gagal memuat data.");
-    setData(body.data as Overview);
+    const freshData = await getRetentionOverview();
+    setData(freshData);
   }
   async function cleanup() {
     setBusy(true);
     setError("");
     try {
-      const res = await fetch("/api/audit/cleanup", {
-        method: "POST",
-        cache: "no-store",
-      });
-      const body = await res.json();
-      if (!res.ok || !body.success)
-        throw new Error(body.error?.message ?? "Pembersihan gagal.");
+      const result = await cleanupRetention();
       setOpen(false);
       setNotice(
-        `${Number(body.data.deleted).toLocaleString("id-ID")} log dibersihkan.`,
+        `${Number(result.deleted).toLocaleString("id-ID")} log dibersihkan.`,
       );
       await reload();
       router.refresh();
