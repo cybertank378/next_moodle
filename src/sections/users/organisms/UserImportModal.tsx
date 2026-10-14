@@ -17,6 +17,8 @@ import {
 } from "@/modules/user/domain/mapper/UserImportParser";
 import Button from "@/shared-ui/component/Button";
 import { Modal } from "@/shared-ui/component/Modal";
+import TextAreaField from "@/shared-ui/component/TextAreaField";
+import TextField from "@/shared-ui/component/TextField";
 import { showErrorToast } from "@/shared-ui/component/Toast";
 
 interface Props {
@@ -212,38 +214,23 @@ export default function UserImportModal({
               </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="import-default-password"
-                className="block text-xs font-semibold text-gray-700  mb-1"
-              >
-                Password Default (jika baris CSV tidak memiliki password)
-              </label>
-              <input
-                id="import-default-password"
-                type="text"
-                value={defaultPassword}
-                onChange={(e) => setDefaultPassword(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+            <TextField
+              id="import-default-password"
+              label="Password Default (jika baris CSV tidak memiliki password)"
+              type="text"
+              value={defaultPassword}
+              onChange={(e) => setDefaultPassword(e.target.value)}
+            />
 
-            <div>
-              <label
-                htmlFor="import-csv-textarea"
-                className="block text-xs font-semibold text-gray-700  mb-1"
-              >
-                Atau Tempel Teks CSV Langsung
-              </label>
-              <textarea
-                id="import-csv-textarea"
-                rows={5}
-                value={csvText}
-                onChange={(e) => setCsvText(e.target.value)}
-                placeholder="username,firstname,lastname,email,idnumber,role&#10;siswa01,Ahmad,Dahlan,ahmad@sekolah.sch.id,1001,student"
-                className="w-full font-mono text-xs px-3 py-2 rounded-lg border border-gray-200  bg-white  text-gray-900  focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+            <TextAreaField
+              id="import-csv-textarea"
+              label="Atau Tempel Teks CSV Langsung"
+              rows={5}
+              value={csvText}
+              onChange={(e) => setCsvText(e.target.value)}
+              placeholder="username,firstname,lastname,email,idnumber,role&#10;siswa01,Ahmad,Dahlan,ahmad@sekolah.sch.id,1001,student"
+              className="font-mono text-xs"
+            />
 
             {parsedPreview && (
               <div className="rounded-lg border border-slate-200  p-3 bg-slate-50  text-xs space-y-1">

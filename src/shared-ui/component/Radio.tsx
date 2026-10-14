@@ -3,16 +3,22 @@
 "use client";
 
 import clsx from "clsx";
-import { forwardRef, type InputHTMLAttributes } from "react";
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from "react";
 
 interface Props extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
-  label?: string;
+  label?: ReactNode;
+  wrapperClassName?: string;
 }
 
 const Radio = forwardRef<HTMLInputElement, Props>(
-  ({ label, disabled, ...props }, ref) => {
+  ({ label, disabled, wrapperClassName, ...props }, ref) => {
     return (
-      <label className="inline-flex items-center gap-3 cursor-pointer">
+      <label
+        className={clsx(
+          "inline-flex items-center gap-3 cursor-pointer",
+          wrapperClassName,
+        )}
+      >
         <span className="relative">
           <input
             ref={ref}

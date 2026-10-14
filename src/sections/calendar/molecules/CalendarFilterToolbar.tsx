@@ -4,6 +4,7 @@ import type { FC } from "react";
 import type { CalendarEventType } from "@/modules/calendar/domain/types/CalendarEventTypes";
 import Checkbox from "@/shared-ui/component/Checkbox";
 import SearchField from "@/shared-ui/component/SearchField";
+import ToggleGroup from "@/shared-ui/component/ToggleGroup";
 
 interface CalendarFilterToolbarProps {
   search: string;
@@ -42,30 +43,14 @@ export const CalendarFilterToolbar: FC<CalendarFilterToolbarProps> = ({
           />
         </div>
 
-        <div className="flex items-center rounded-lg bg-slate-100 p-1 border border-slate-200">
-          <button
-            type="button"
-            onClick={() => onViewModeChange("month")}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-              viewMode === "month"
-                ? "bg-white text-indigo-600 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Bulan
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewModeChange("agenda")}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-              viewMode === "agenda"
-                ? "bg-white text-indigo-600 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Agenda
-          </button>
-        </div>
+        <ToggleGroup
+          value={viewMode}
+          onChange={(val) => onViewModeChange(val as "month" | "agenda")}
+          options={[
+            { label: "Bulan", value: "month" },
+            { label: "Agenda", value: "agenda" },
+          ]}
+        />
       </div>
     </div>
   );

@@ -6,6 +6,14 @@ import { ROUTES } from "@/libs/routes";
 import type { GradeSummaryDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
 import Button from "@/shared-ui/component/Button";
 import Card from "@/shared-ui/component/Card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "@/shared-ui/component/Table";
 
 interface Props {
   recentGrades?: GradeSummaryDto[];
@@ -36,33 +44,42 @@ export function StudentRecentGrades({ recentGrades }: Props) {
         </Button>
       </div>
       <div className="flex-1 flex flex-col">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs text-slate-500 border-b-2 border-slate-100">
+        <Table
+          className="w-full text-sm text-left border-none shadow-none"
+          wrapperClassName="border-none shadow-none"
+        >
+          <TableHead className="text-xs text-slate-500 border-b-2 border-slate-100 bg-transparent h-auto">
             <tr>
-              <th className="px-4 py-3 font-semibold">Mata Pelajaran</th>
-              <th className="px-4 py-3 font-semibold text-center">Nilai</th>
-              <th className="px-4 py-3 font-semibold text-center">Predikat</th>
+              <TableHeaderCell className="px-4 py-3 font-semibold">
+                Mata Pelajaran
+              </TableHeaderCell>
+              <TableHeaderCell className="px-4 py-3 font-semibold text-center">
+                Nilai
+              </TableHeaderCell>
+              <TableHeaderCell className="px-4 py-3 font-semibold text-center">
+                Predikat
+              </TableHeaderCell>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
+          </TableHead>
+          <TableBody className="divide-y divide-slate-100">
             {recentGrades?.map((grade) => (
-              <tr
+              <TableRow
                 key={`${grade.courseName}-${grade.score}-${grade.grade}`}
                 className="hover:bg-slate-50 transition-colors"
               >
-                <td className="px-4 py-3.5 font-bold text-slate-800">
+                <TableCell className="px-4 py-3.5 font-bold text-slate-800">
                   {grade.courseName}
-                </td>
-                <td className="px-4 py-3.5 text-center font-extrabold text-slate-700">
+                </TableCell>
+                <TableCell className="px-4 py-3.5 text-center font-extrabold text-slate-700">
                   {grade.score}
-                </td>
-                <td className="px-4 py-3.5 text-center font-extrabold text-emerald-600">
+                </TableCell>
+                <TableCell className="px-4 py-3.5 text-center font-extrabold text-emerald-600">
                   {grade.grade}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
         {(!recentGrades || recentGrades.length === 0) && (
           <div className="py-10 text-center text-slate-500 text-sm font-medium border-2 border-dashed border-slate-100 rounded-2xl mx-4 mt-4 mb-4">
             Belum ada nilai yang dipublikasikan.
