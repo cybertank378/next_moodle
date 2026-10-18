@@ -27,6 +27,13 @@ const foreignStudentActor: AuthorizationActor = {
   tenantId: null,
 };
 
+const teacherActor: AuthorizationActor = {
+  id: "teacher-1",
+  role: AppRole.TEACHER,
+  tenantId: "tenant-1",
+  moodleUserId: 88,
+};
+
 function createMockCourse(id: number, shortName: string): CourseEntity {
   return new CourseEntity(id, "tenant-1", {
     id,
@@ -44,6 +51,17 @@ function createMockCourse(id: number, shortName: string): CourseEntity {
     imageUrl: null,
   });
 }
+
+const mockSections: CourseSectionResponseDTO[] = [
+  {
+    id: 1,
+    name: "Chapter 1",
+    sectionNumber: 0,
+    summary: "Numbers",
+    isVisible: true,
+    modules: [],
+  },
+];
 
 class MockCourseRepository implements CourseRepositoryInterface {
   getUserCourses = vi.fn<CourseRepositoryInterface["getUserCourses"]>();
@@ -407,6 +425,54 @@ describe("Course Use Cases", () => {
 
       expect(result.isFailure).toBe(true);
       expect(result.getError().name).toBe("ValidationError");
+    });
+
+    it("fetches course detail for TEACHER actor via getUserCourses when enrolled", async () => {
+      const repo = new MockCourseRepository();
+      repo.getUserCourses.mockResolvedValue([createMockCourse(101, "MATH101")]);
+      repo.getCourseContents.mockResolvedValue(mockSections);
+      const mockClient = { call: vi.fn() } as any;
+
+      const useCase = new GetCourseDetailUseCase(repo);
+      const result = await useCase.execute({
+        actor: teacherActor,
+        courseId: 101,
+        client: mockClient,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      const data = result.getValue();
+      expect(data.course.id).toBe(101);
+      expect(repo.getUserCourses).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        moodleUserId: 88,
+        client: mockClient,
+      });
+      expect(repo.getCourseById).not.toHaveBeenCalled();
+    });
+
+    it("falls back to getCourseById for TEACHER actor if not in enrolled courses", async () => {
+      const repo = new MockCourseRepository();
+      repo.getUserCourses.mockResolvedValue([]);
+      repo.getCourseById.mockResolvedValue(createMockCourse(202, "PHYS202"));
+      repo.getCourseContents.mockResolvedValue(mockSections);
+      const mockClient = { call: vi.fn() } as any;
+
+      const useCase = new GetCourseDetailUseCase(repo);
+      const result = await useCase.execute({
+        actor: teacherActor,
+        courseId: 202,
+        client: mockClient,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      const data = result.getValue();
+      expect(data.course.id).toBe(202);
+      expect(repo.getCourseById).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        courseId: 202,
+        client: mockClient,
+      });
     });
   });
 });

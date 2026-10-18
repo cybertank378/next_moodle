@@ -128,14 +128,39 @@ export class MoodleCourseRepository implements CourseRepositoryInterface {
   }): Promise<CourseSectionResponseDTO[]> {
     const client = await this.resolveClient(input.tenantId, input.client);
 
-    const rawSections = await client.call<RawMoodleSection[]>(
-      "core_course_get_contents",
-      {
-        courseid: input.courseId,
-      },
-    );
+    try {
+      const rawSections = await client.call<RawMoodleSection[]>(
+        "core_course_get_contents",
+        {
+          courseid: input.courseId,
+        },
+      );
 
-    return (rawSections ?? []).map(CourseMapper.toSectionDTO);
+      return (rawSections ?? []).map(CourseMapper.toSectionDTO);
+    } catch {
+      if (input.client) {
+        try {
+          const adminClient = await this.clientFactory.createClientForTenant(
+            {
+              tenantId: input.tenantId,
+              tenantSlug: input.tenantId,
+              status: "ACTIVE",
+            },
+            "admin",
+          );
+          const rawSections = await adminClient.call<RawMoodleSection[]>(
+            "core_course_get_contents",
+            {
+              courseid: input.courseId,
+            },
+          );
+          return (rawSections ?? []).map(CourseMapper.toSectionDTO);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    }
   }
 
   async getCourseById(input: {

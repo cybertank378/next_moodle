@@ -5,7 +5,11 @@ import type { MoodleClient } from "@/core/moodle/types";
 import { AppRole } from "@/core/rbac/AppRole";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { authorizeCourseOperation } from "@/modules/course/application/services/CourseAuthorizationService";
-import type { CourseDetailResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
+import type {
+  CourseDetailResponseDTO,
+  CourseSectionResponseDTO,
+} from "@/modules/course/domain/dto/CourseResponseDto";
+import type { CourseEntity } from "@/modules/course/domain/entity/CourseEntity";
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
 import { CourseMapper } from "@/modules/course/domain/mapper/CourseMapper";
 
@@ -47,76 +51,66 @@ export class GetCourseDetailUseCase {
       );
     }
 
+    if (
+      actor.role === AppRole.STUDENT &&
+      (!input.client || !actor.moodleUserId)
+    ) {
+      return Result.fail(
+        new ValidationError(
+          "Kredensial atau client token Moodle siswa wajib disertakan.",
+        ),
+      );
+    }
+
     try {
-      // If STUDENT, check enrollment first
-      if (actor.role === AppRole.STUDENT) {
-        if (!input.client) {
-          return Result.fail(
-            new ValidationError(
-              "Kredensial atau client Moodle siswa wajib disertakan.",
-            ),
-          );
-        }
+      let courseEntity: CourseEntity | null = null;
 
-        const moodleUserId = actor.moodleUserId;
-        if (!moodleUserId) {
-          return Result.fail(
-            new ValidationError("Moodle User ID tidak ditemukan untuk siswa."),
-          );
-        }
-
-        const enrolledCourses = await this.repository.getUserCourses({
-          tenantId: effectiveTenantId,
-          moodleUserId,
-          client: input.client,
-        });
-
-        const isEnrolled = enrolledCourses.some((c) => c.id === input.courseId);
-        if (!isEnrolled) {
-          return Result.fail(
-            new NotFoundError(
-              "Mata pelajaran tidak ditemukan atau Anda tidak terdaftar pada mata pelajaran ini.",
-            ),
-          );
-        }
-
-        const enrolledCourse = enrolledCourses.find(
-          (c) => c.id === input.courseId,
-        )!;
-
-        // Fetch sections
-        let sections: any[] = [];
+      // 1. For STUDENT or TEACHER with active user Moodle client, check enrolled courses first
+      if (
+        (actor.role === AppRole.STUDENT || actor.role === AppRole.TEACHER) &&
+        input.client &&
+        actor.moodleUserId
+      ) {
         try {
-          sections = await this.repository.getCourseContents({
+          const enrolledCourses = await this.repository.getUserCourses({
             tenantId: effectiveTenantId,
-            courseId: input.courseId,
+            moodleUserId: actor.moodleUserId,
             client: input.client,
           });
-        } catch {
-          // In case core_course_get_contents is restricted/degraded, return empty sections
-          sections = [];
-        }
 
-        return Result.ok({
-          course: CourseMapper.toSummaryDTO(enrolledCourse),
-          sections,
+          courseEntity =
+            enrolledCourses.find((c) => c.id === input.courseId) || null;
+        } catch {
+          // If getUserCourses fails, fall through
+        }
+      }
+
+      // 2. Student MUST be enrolled in the course
+      if (actor.role === AppRole.STUDENT && !courseEntity) {
+        return Result.fail(
+          new NotFoundError(
+            "Mata pelajaran tidak ditemukan atau Anda tidak terdaftar pada mata pelajaran ini.",
+          ),
+        );
+      }
+
+      // 3. For TEACHER (if not found in enrolled courses), TENANT, or ADMIN: fetch via getCourseById
+      if (!courseEntity) {
+        courseEntity = await this.repository.getCourseById({
+          tenantId: effectiveTenantId,
+          courseId: input.courseId,
+          client: input.client,
         });
       }
 
-      // For TENANT, ADMIN, or TEACHER
-      const course = await this.repository.getCourseById({
-        tenantId: effectiveTenantId,
-        courseId: input.courseId,
-        client: input.client,
-      });
-
-      if (!course) {
+      if (!courseEntity) {
         return Result.fail(
           new NotFoundError("Mata pelajaran tidak ditemukan."),
         );
       }
 
-      let sections: any[] = [];
+      // 4. Fetch sections / modules content
+      let sections: CourseSectionResponseDTO[] = [];
       try {
         sections = await this.repository.getCourseContents({
           tenantId: effectiveTenantId,
@@ -128,7 +122,7 @@ export class GetCourseDetailUseCase {
       }
 
       return Result.ok({
-        course: CourseMapper.toSummaryDTO(course),
+        course: CourseMapper.toSummaryDTO(courseEntity),
         sections,
       });
     } catch (error) {

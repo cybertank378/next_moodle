@@ -2,7 +2,7 @@ import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRol
 import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
 
 export default async function CreateExamPage() {
-  await requireDashboardRoles(["TENANT"]);
+  await requireDashboardRoles(["TENANT", "TEACHER"]);
   return (
     <DashboardRoutePlaceholder
       title="Buat Ujian"

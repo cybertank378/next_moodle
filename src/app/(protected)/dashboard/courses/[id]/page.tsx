@@ -8,7 +8,8 @@ interface CourseDetailPageProps {
 export default async function CourseDetailPage({
   params,
 }: CourseDetailPageProps) {
-  await requireDashboardRoles(["TENANT", "TEACHER", "STUDENT"]);
+  const actor = await requireDashboardRoles(["TENANT", "TEACHER", "STUDENT"]);
+  if (!actor) return null;
   const { id } = await params;
-  return <CourseDetailView courseId={Number(id) || 0} />;
+  return <CourseDetailView courseId={Number(id) || 0} userRole={actor.role} />;
 }
