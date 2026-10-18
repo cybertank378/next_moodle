@@ -5,12 +5,30 @@ export enum QuestionType {
   TRUEFALSE = "truefalse",
   ESSAY = "essay",
   SHORTANSWER = "shortanswer",
+  MATCH = "match",
+  NUMERICAL = "numerical",
 }
 
 export interface QuestionOption {
   text: string;
   fraction: number; // 0 to 100
   feedback?: string;
+}
+
+export interface QuestionCategory {
+  id: number;
+  name: string;
+  contextId: number;
+  parent: number;
+  info?: string;
+  questionCount: number;
+}
+
+export interface CreateQuestionCategoryRequestDto {
+  name: string;
+  contextId: number;
+  parent?: number;
+  info?: string;
 }
 
 export interface CreateQuestionRequestDto {
@@ -27,4 +45,29 @@ export interface UpdateQuestionRequestDto {
   questionText?: string;
   defaultMark?: number;
   options?: QuestionOption[];
+}
+
+export interface GetQuestionsQueryDto {
+  categoryId?: number;
+  qtype?: string;
+  status?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface GetQuestionsResultDto {
+  total: number;
+  page: number;
+  limit: number;
+  questions: Array<{
+    id: number;
+    categoryId: number;
+    type: QuestionType | string;
+    name: string;
+    questionText: string;
+    defaultMark: number;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }>;
 }

@@ -18,7 +18,11 @@ describe("QuestionEditor", () => {
     vi.mocked(questionHook.useQuestionApi).mockReturnValue({
       createQuestion: vi.fn(),
       updateQuestion: vi.fn(),
+      getQuestions: vi.fn(),
+      getCategories: vi.fn(),
+      createCategory: vi.fn(),
       loading: false,
+      error: null,
     });
   });
 
