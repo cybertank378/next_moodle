@@ -14,18 +14,18 @@ export default function CourseOverviewInfoCard({
   isTeacher,
 }: CourseOverviewInfoCardProps) {
   return (
-    <Card className="p-6 space-y-4 border border-slate-200/80 shadow-xs">
-      <Typography variant="h3" className="font-bold text-slate-900">
+    <Card className="p-5 space-y-3.5 border border-slate-200/80 shadow-xs">
+      <Typography variant="h3" className="font-bold text-slate-900 text-base">
         Informasi Pembelajaran
       </Typography>
-      <div className="space-y-3 text-xs text-slate-600">
-        <div className="flex justify-between py-2 border-b border-slate-100">
+      <div className="space-y-2.5 text-xs text-slate-600">
+        <div className="flex justify-between py-1.5 border-b border-slate-100">
           <span className="text-slate-400">Kode Mata Pelajaran</span>
           <span className="font-semibold text-slate-800">
             {course.shortName}
           </span>
         </div>
-        <div className="flex justify-between py-2 border-b border-slate-100">
+        <div className="flex justify-between py-1.5 border-b border-slate-100">
           <span className="text-slate-400">
             {isTeacher ? "Hak Akses" : "Status Belajar"}
           </span>
@@ -37,14 +37,14 @@ export default function CourseOverviewInfoCard({
                 : "Sedang Berlangsung"}
           </span>
         </div>
-        <div className="flex justify-between py-2 border-b border-slate-100">
+        <div className="flex justify-between py-1.5 border-b border-slate-100">
           <span className="text-slate-400">Format Pembelajaran</span>
           <span className="font-semibold text-slate-800 capitalize">
             {course.format}
           </span>
         </div>
         {course.startDate && (
-          <div className="flex justify-between py-2 border-b border-slate-100">
+          <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-400">Tanggal Mulai</span>
             <span className="font-semibold text-slate-800">
               {new Date(course.startDate * 1000).toLocaleDateString("id-ID", {

@@ -65,7 +65,7 @@ export default function CourseDetailView({
   );
 
   return (
-    <div className="space-y-6 mx-auto pb-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-5 max-w-6xl mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {detailState.error && (
         <EmptyState
           title="Gagal Memuat Mata Pelajaran"

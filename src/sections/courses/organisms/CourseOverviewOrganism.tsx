@@ -25,43 +25,44 @@ export default function CourseOverviewOrganism({
   onOpenMateri,
 }: CourseOverviewOrganismProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-6">
-        <Card className="p-6 space-y-4 border border-slate-200/80 shadow-xs">
-          <Typography
-            variant="h3"
-            className="font-bold text-slate-900 flex items-center gap-2"
-          >
-            <Info size={18} className="text-blue-600" />
-            Tentang Mata Pelajaran
-          </Typography>
-          {course.summary ? (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="lg:col-span-2 space-y-5">
+        {course.summary ? (
+          <Card className="p-5 space-y-3 border border-slate-200/80 shadow-xs">
+            <Typography
+              variant="h3"
+              className="font-bold text-slate-900 flex items-center gap-2 text-base"
+            >
+              <Info size={16} className="text-blue-600" />
+              Tentang Mata Pelajaran
+            </Typography>
             <CourseHtmlContent
               content={course.summary}
               className="text-sm"
             />
-          ) : (
-            <p className="text-sm text-slate-500">
-              Tidak ada informasi deskripsi tambahan yang disediakan.
-            </p>
-          )}
-        </Card>
+          </Card>
+        ) : null}
 
+        <Card className="p-5 space-y-3.5 border border-slate-200/80 shadow-xs">
+          <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+            <Typography
+              variant="h3"
+              className="font-bold text-slate-900 flex items-center gap-2 text-base"
+            >
+              <Layers size={16} className="text-blue-600" />
+              Struktur Topik Pembelajaran
+            </Typography>
+            <span className="text-xs text-slate-400 font-medium">
+              {sections.length} Topik
+            </span>
+          </div>
 
-        <Card className="p-6 space-y-4 border border-slate-200/80 shadow-xs">
-          <Typography
-            variant="h3"
-            className="font-bold text-slate-900 flex items-center gap-2"
-          >
-            <Layers size={18} className="text-blue-600" />
-            Struktur Topik Pembelajaran
-          </Typography>
           {sections.length === 0 ? (
-            <p className="text-sm text-slate-500 italic">
+            <p className="text-sm text-slate-500 italic py-2">
               Belum ada topik atau bab pada mata pelajaran ini.
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {sections.map((section, sIdx) => (
                 <CourseTopicItem
                   key={section.id}
@@ -76,7 +77,7 @@ export default function CourseOverviewOrganism({
       </div>
 
       {/* Sidebar Info */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         <CourseOverviewInfoCard course={course} isTeacher={isTeacher} />
       </div>
     </div>
