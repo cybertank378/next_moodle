@@ -65,7 +65,7 @@ export default function CourseDetailView({
   );
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto pb-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 mx-auto pb-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {detailState.error && (
         <EmptyState
           title="Gagal Memuat Mata Pelajaran"
@@ -163,13 +163,6 @@ export default function CourseDetailView({
             <CourseFeaturePlaceholder
               featureName="Tugas (Assignment)"
               moduleName="mod_assign"
-            />
-          )}
-
-          {activeTab === "forum" && (
-            <CourseFeaturePlaceholder
-              featureName="Forum Diskusi"
-              moduleName="mod_forum"
             />
           )}
         </>

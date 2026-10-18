@@ -14,7 +14,6 @@ export type CourseTab =
   | "materi"
   | "tugas"
   | "ujian"
-  | "forum"
   | "nilai";
 
 interface CourseTabNavProps {
@@ -28,7 +27,6 @@ const TABS = [
   { id: "ujian", label: "Ujian", icon: FileQuestion },
   { id: "nilai", label: "Nilai", icon: Award },
   { id: "tugas", label: "Tugas", icon: FileText, blocked: true },
-  { id: "forum", label: "Forum", icon: MessageSquare, blocked: true },
 ] as const;
 
 export default function CourseTabNav({
@@ -47,11 +45,10 @@ export default function CourseTabNav({
             key={tab.id}
             type="button"
             onClick={() => onSelectTab(tab.id as CourseTab)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
-              isActive
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${isActive
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-            }`}
+              }`}
           >
             <Icon size={16} />
             <span>{tab.label}</span>
