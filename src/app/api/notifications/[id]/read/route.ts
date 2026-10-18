@@ -1,12 +1,15 @@
 import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 import "server-only";
 
+import type { NextRequest, NextResponse } from "next/server";
+
+
 import { getNotificationController } from "@/app/api/notifications/_factory";
 
 async function originalPATCH(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
-): Promise<Response> {
+): Promise<NextResponse> {
   const { id } = await params;
   return getNotificationController().markAsRead(id, req);
 }

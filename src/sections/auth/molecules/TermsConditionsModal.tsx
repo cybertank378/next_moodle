@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { TERMS_CONTENT } from "@/sections/auth/atoms/terms";
 import Button from "@/shared-ui/component/Button";
+import Checkbox from "@/shared-ui/component/Checkbox";
 import { Modal } from "@/shared-ui/component/Modal";
 
 interface Props {
@@ -51,17 +52,16 @@ export default function TermsConditionsModal({
       </div>
       <div className="mt-6 space-y-4 border-t pt-4">
         {onAgree ? (
-          <label className="flex items-start gap-2 text-sm text-gray-700">
-            <input
-              checked={checked}
-              disabled={!hasReadAll}
-              onChange={(event) => setChecked(event.target.checked)}
-              type="checkbox"
-            />
-            {hasReadAll
-              ? "Saya telah membaca dan menyetujui Syarat & Ketentuan"
-              : "Scroll ke bawah untuk mengaktifkan persetujuan"}
-          </label>
+          <Checkbox
+            checked={checked}
+            disabled={!hasReadAll}
+            onChange={(event) => setChecked(event.target.checked)}
+            label={
+              hasReadAll
+                ? "Saya telah membaca dan menyetujui Syarat & Ketentuan"
+                : "Scroll ke bawah untuk mengaktifkan persetujuan"
+            }
+          />
         ) : null}
         <div className="flex justify-end gap-3">
           <Button onClick={onClose} variant="ghost">

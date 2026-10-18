@@ -3,6 +3,7 @@
 
 import { Bell, Mail, Send } from "lucide-react";
 import { NotificationChannel } from "@/modules/notification/domain/types/NotificationTypes";
+import Checkbox from "@/shared-ui/component/Checkbox";
 
 interface Props {
   channels: NotificationChannel[];
@@ -47,56 +48,60 @@ export default function NotificationChannelPanel({
       {/* Options */}
       <div className="flex flex-col gap-2.5">
         {/* Inbox Aplikasi */}
-        <label
-          className={`flex items-start gap-3 p-3.5 border rounded-xl cursor-pointer transition-colors ${
+        <div
+          className={`p-3.5 border rounded-xl transition-colors ${
             channels.includes(NotificationChannel.IN_APP)
               ? "border-blue-200 bg-blue-50/30"
               : "border-slate-200 hover:bg-slate-50/60"
           }`}
         >
-          <input
-            type="checkbox"
-            className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          <Checkbox
             checked={channels.includes(NotificationChannel.IN_APP)}
             onChange={() => toggleChannel(NotificationChannel.IN_APP)}
             disabled={disabled}
+            label={
+              <div className="flex items-start gap-2.5 ml-1">
+                <Mail className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-xs font-semibold text-slate-900">
+                    Inbox Aplikasi
+                  </div>
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    Pesan tersimpan di aplikasi.
+                  </div>
+                </div>
+              </div>
+            }
           />
-          <Mail className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <div className="text-xs font-semibold text-slate-900">
-              Inbox Aplikasi
-            </div>
-            <div className="text-xs text-slate-500 mt-0.5">
-              Pesan tersimpan di aplikasi.
-            </div>
-          </div>
-        </label>
+        </div>
 
         {/* Push Notifikasi */}
-        <label
-          className={`flex items-start gap-3 p-3.5 border rounded-xl cursor-pointer transition-colors ${
+        <div
+          className={`p-3.5 border rounded-xl transition-colors ${
             channels.includes(NotificationChannel.PUSH)
               ? "border-blue-200 bg-blue-50/30"
               : "border-slate-200 hover:bg-slate-50/60"
           }`}
         >
-          <input
-            type="checkbox"
-            className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          <Checkbox
             checked={channels.includes(NotificationChannel.PUSH)}
             onChange={() => toggleChannel(NotificationChannel.PUSH)}
             disabled={disabled}
+            label={
+              <div className="flex items-start gap-2.5 ml-1">
+                <Bell className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-xs font-semibold text-slate-900">
+                    Push Notifikasi
+                  </div>
+                  <div className="text-xs text-slate-500 mt-0.5">
+                    Untuk perangkat yang mengaktifkan izin.
+                  </div>
+                </div>
+              </div>
+            }
           />
-          <Bell className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <div className="text-xs font-semibold text-slate-900">
-              Push Notifikasi
-            </div>
-            <div className="text-xs text-slate-500 mt-0.5">
-              Untuk perangkat yang mengaktifkan izin.
-            </div>
-          </div>
-        </label>
+        </div>
       </div>
 
       {error && <p className="text-xs text-rose-600 font-medium">{error}</p>}

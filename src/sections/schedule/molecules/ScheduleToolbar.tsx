@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import type { FC } from "react";
 import type { ScheduleSessionType } from "@/modules/schedule/domain/types/ScheduleTypes";
 import Button from "@/shared-ui/component/Button";
@@ -60,11 +55,7 @@ export const ScheduleToolbar: FC<ScheduleToolbarProps> = ({
             />
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onToday}
-          >
+          <Button variant="outline" size="sm" onClick={onToday}>
             Hari Ini
           </Button>
 
@@ -138,8 +129,12 @@ export const ScheduleToolbar: FC<ScheduleToolbarProps> = ({
           </Button>
 
           <Button
-            variant={selectedTypes.includes("CONSULTATION") ? "filled" : "outline"}
-            color={selectedTypes.includes("CONSULTATION") ? "info" : "secondary"}
+            variant={
+              selectedTypes.includes("CONSULTATION") ? "filled" : "outline"
+            }
+            color={
+              selectedTypes.includes("CONSULTATION") ? "info" : "secondary"
+            }
             size="sm"
             onClick={() => onToggleType("CONSULTATION")}
           >

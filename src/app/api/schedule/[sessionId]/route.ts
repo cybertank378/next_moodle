@@ -22,3 +22,41 @@ export async function GET(
     session.moodleToken,
   );
 }
+
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ sessionId: string }> },
+): Promise<NextResponse> {
+  const session = await getCurrentSession();
+  if (!session) {
+    return unauthorizedResponse();
+  }
+
+  const { sessionId } = await context.params;
+
+  return getScheduleController().updateSchedule(
+    session.actor,
+    sessionId,
+    req,
+    session.moodleToken,
+  );
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ sessionId: string }> },
+): Promise<NextResponse> {
+  const session = await getCurrentSession();
+  if (!session) {
+    return unauthorizedResponse();
+  }
+
+  const { sessionId } = await context.params;
+
+  return getScheduleController().cancelSchedule(
+    session.actor,
+    sessionId,
+    req,
+    session.moodleToken,
+  );
+}

@@ -6,6 +6,7 @@ export interface ExamMonitorRequestDto {
 export interface ExamMonitorActionRequestDto {
   tenantId: string;
   attemptId: number;
+  reason?: string;
 }
 
 export interface ExtendAttemptTimeRequestDto

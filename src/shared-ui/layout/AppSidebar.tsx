@@ -197,6 +197,11 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
                   path: ROUTES.TENANT.QUESTIONS,
                   permission: PERMISSIONS.EXAM_MANAGE,
                 },
+                {
+                  label: "Jadwal Pelajaran",
+                  path: ROUTES.TENANT.SCHEDULE,
+                  permission: PERMISSIONS.SCHEDULE_MANAGE,
+                },
               ],
             },
             {
@@ -332,6 +337,11 @@ export function getSidebarMenu(role: UserRole): SidebarGroup[] {
               label: "Mata Pelajaran",
               path: ROUTES.TEACHER.COURSES,
               icon: BookOpen,
+            },
+            {
+              label: "Jadwal Mengajar",
+              path: ROUTES.TEACHER.SCHEDULE,
+              icon: CalendarDays,
             },
             {
               label: "Bank Soal",

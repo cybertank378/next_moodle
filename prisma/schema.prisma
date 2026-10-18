@@ -25,6 +25,7 @@ model Tenant {
   auditLogs     SaasAuditLog[]
   notifications Notification[]
   campaigns     NotificationCampaign[]
+  scheduleSessions TenantScheduleSession[]
 
   @@index([status])
   @@index([name])
@@ -243,4 +244,32 @@ model PlatformSettings {
   createdAt              DateTime @default(now())
 
   @@map("platform_settings")
+}
+
+model TenantScheduleSession {
+  id              String   @id @default(uuid())
+  tenantId        String
+  title           String
+  sessionType     String   // "LESSON" | "EXAM" | "CONSULTATION" | "OTHER"
+  courseId        Int
+  courseName      String?
+  subjectCode     String?
+  startsAt        DateTime
+  endsAt          DateTime
+  allDay          Boolean  @default(false)
+  room            String?
+  instructor      String?
+  classGroup      String?
+  status          String   @default("PUBLISHED") // "DRAFT" | "PUBLISHED" | "ARCHIVED" | "CANCELLED"
+  description     String?
+  isPublished     Boolean  @default(true)
+  createdById     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, startsAt])
+  @@index([tenantId, courseId])
+  @@map("tenant_schedule_sessions")
 }

@@ -116,6 +116,68 @@ describe("Course Use Cases", () => {
       });
     });
 
+    it("fetches courses for TEACHER actor passing client and moodleUserId", async () => {
+      const teacherActor: AuthorizationActor = {
+        id: "teacher-1",
+        role: AppRole.TEACHER,
+        tenantId: "tenant-1",
+        moodleUserId: 55,
+      };
+
+      const repo = new MockCourseRepository();
+      repo.getTenantCourses.mockResolvedValue([
+        createMockCourse(101, "MATH101"),
+      ]);
+      const mockClient = { call: vi.fn() } as any;
+
+      const useCase = new GetUserCoursesUseCase(repo);
+      const result = await useCase.execute({
+        actor: teacherActor,
+        search: "math",
+        client: mockClient,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      expect(repo.getTenantCourses).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        search: "math",
+        client: mockClient,
+      });
+    });
+
+    it("returns zero courses empty list gracefully when no courses found for TENANT actor", async () => {
+      const repo = new MockCourseRepository();
+      repo.getTenantCourses.mockResolvedValue([]);
+
+      const useCase = new GetUserCoursesUseCase(repo);
+      const result = await useCase.execute({
+        actor: tenantActor,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      const data = result.getValue();
+      expect(data.total).toBe(0);
+      expect(data.courses).toEqual([]);
+    });
+
+    it("enforces tenant isolation by scoping getTenantCourses with session tenantId", async () => {
+      const repo = new MockCourseRepository();
+      repo.getTenantCourses.mockResolvedValue([]);
+
+      const useCase = new GetUserCoursesUseCase(repo);
+      // Even if input has another tenantId, actor tenantId takes precedence
+      await useCase.execute({
+        actor: tenantActor,
+        tenantId: "cross-tenant-override",
+      });
+
+      expect(repo.getTenantCourses).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tenantId: "tenant-1",
+        }),
+      );
+    });
+
     it("fails when STUDENT actor has no tenantId", async () => {
       const repo = new MockCourseRepository();
       const useCase = new GetUserCoursesUseCase(repo);

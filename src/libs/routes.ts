@@ -127,6 +127,7 @@ export const ROUTES = {
     BRANDING: `${DASHBOARD_ROOT}/branding`,
     AUDIT: `${DASHBOARD_ROOT}/audit`,
     PROCTOR: `${DASHBOARD_ROOT}/proctor`,
+    SCHEDULE: `${DASHBOARD_ROOT}/schedule`,
     SETTINGS: `${DASHBOARD_ROOT}/settings`,
   },
   STUDENT: {
@@ -164,6 +165,7 @@ export const ROUTES = {
       `${DASHBOARD_ROOT}/exams/${id}/monitor`,
     RESULTS: `${DASHBOARD_ROOT}/results`,
     RESULT_DETAIL: (id: string | number) => `${DASHBOARD_ROOT}/results/${id}`,
+    SCHEDULE: `${DASHBOARD_ROOT}/schedule`,
     NOTIFICATIONS: `${DASHBOARD_ROOT}/notifications`,
     PROFILE: `${DASHBOARD_ROOT}/profile`,
     SETTINGS: `${DASHBOARD_ROOT}/settings`,

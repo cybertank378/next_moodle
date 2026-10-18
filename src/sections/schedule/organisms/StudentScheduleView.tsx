@@ -225,7 +225,8 @@ export function StudentScheduleView() {
             Jadwal Pelajaran
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Lihat jadwal kelas terdaftar, sesi ujian mendatang, dan agenda pembelajaran.
+            Lihat jadwal kelas terdaftar, sesi ujian mendatang, dan agenda
+            pembelajaran.
           </p>
         </div>
 
@@ -310,8 +311,7 @@ export function StudentScheduleView() {
         <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
           {weekDays.map((day) => {
             const dateKey = day.toISOString().split("T")[0];
-            const isToday =
-              new Date().toISOString().split("T")[0] === dateKey;
+            const isToday = new Date().toISOString().split("T")[0] === dateKey;
             const daySessions = sessionsByDate.get(dateKey) || [];
 
             return (

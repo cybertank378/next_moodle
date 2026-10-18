@@ -22,11 +22,32 @@ async function get<T>(url: string, signal: AbortSignal): Promise<T> {
     throw new Error(body.error?.message ?? "Gagal mengambil data audit.");
   return body.data;
 }
+
+export interface AuditRetentionOverviewData {
+  protectedCount: number;
+  eligibleCount: number;
+  cutoff: string;
+  asOf: string;
+}
+
+const EMPTY_AUDIT_LIST: AuditListResponseDTO = {
+  items: [],
+  total: 0,
+  page: 1,
+  pageSize: 25,
+  totalPages: 0,
+  statistics: { total: 0, admin: 0, tenant: 0, today: 0 },
+  scope: { role: "TENANT", tenantId: null },
+  fetchedAt: "",
+};
+
 export function useAuditApi(
-  initialData: AuditListResponseDTO,
-  initialQuery: AuditQuery,
+  initialData?: AuditListResponseDTO,
+  initialQuery?: AuditQuery,
 ) {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState<AuditListResponseDTO>(
+    initialData ?? EMPTY_AUDIT_LIST,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<AuditDetailDTO | null>(null);
@@ -37,6 +58,7 @@ export function useAuditApi(
   const last = useRef(Date.now());
   const seq = useRef(0);
   const refresh = useCallback(async () => {
+    if (!initialQuery) return;
     listAbort.current?.abort();
     const controller = new AbortController();
     listAbort.current = controller;
@@ -48,7 +70,7 @@ export function useAuditApi(
       if (v !== undefined && v !== "") p.set(k, String(v));
     try {
       const next = await get<AuditListResponseDTO>(
-        "/api/audit?" + p,
+        `/api/audit?${p}`,
         controller.signal,
       );
       if (!controller.signal.aborted && seq.current === id) {
@@ -71,7 +93,7 @@ export function useAuditApi(
     setDetailLoading(true);
     try {
       const item = await get<AuditDetailDTO>(
-        "/api/audit/" + encodeURIComponent(id),
+        `/api/audit/${encodeURIComponent(id)}`,
         controller.signal,
       );
       if (!controller.signal.aborted) setDetail(item);
@@ -90,7 +112,39 @@ export function useAuditApi(
     setDetailError(null);
     setDetailLoading(false);
   }, []);
+
+  const getRetentionOverview =
+    useCallback(async (): Promise<AuditRetentionOverviewData> => {
+      const res = await fetch("/api/audit/retention", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      const body = (await res.json()) as Envelope<AuditRetentionOverviewData>;
+      if (!res.ok || !body.success || !body.data) {
+        throw new Error(
+          body.error?.message ?? "Gagal memuat data retensi audit.",
+        );
+      }
+      return body.data;
+    }, []);
+
+  const cleanupRetention = useCallback(async (): Promise<{
+    deleted: number;
+  }> => {
+    const res = await fetch("/api/audit/cleanup", {
+      method: "POST",
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    const body = (await res.json()) as Envelope<{ deleted: number }>;
+    if (!res.ok || !body.success || !body.data) {
+      throw new Error(body.error?.message ?? "Pembersihan log audit gagal.");
+    }
+    return body.data;
+  }, []);
+
   useEffect(() => {
+    if (!initialQuery) return;
     const onFocus = () => {
       if (
         document.visibilityState !== "visible" ||
@@ -108,7 +162,8 @@ export function useAuditApi(
       listAbort.current?.abort();
       detailAbort.current?.abort();
     };
-  }, [refresh]);
+  }, [refresh, initialQuery]);
+
   return {
     data,
     loading,
@@ -119,5 +174,7 @@ export function useAuditApi(
     refresh,
     loadDetail,
     closeDetail,
+    getRetentionOverview,
+    cleanupRetention,
   };
 }

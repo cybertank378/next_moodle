@@ -29,7 +29,6 @@ export const ScheduleTypeBadge: FC<ScheduleTypeBadgeProps> = ({
       label = "Konsultasi";
       color = "info";
       break;
-    case "OTHER":
     default:
       label = "Lainnya";
       color = "secondary";

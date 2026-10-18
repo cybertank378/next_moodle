@@ -17,6 +17,14 @@ export const ScheduleStatusBadge: FC<ScheduleStatusBadgeProps> = ({
   let color: BadgeColor = "primary";
 
   switch (status) {
+    case "DRAFT":
+      label = "Draf";
+      color = "secondary";
+      break;
+    case "PUBLISHED":
+      label = "Terpublikasi";
+      color = "success";
+      break;
     case "SCHEDULED":
       label = "Terjadwal";
       color = "primary";
@@ -31,11 +39,15 @@ export const ScheduleStatusBadge: FC<ScheduleStatusBadgeProps> = ({
       break;
     case "CANCELLED":
       label = "Dibatalkan";
-      color = "secondary";
+      color = "error";
       break;
     case "RESCHEDULED":
       label = "Dijadwal Ulang";
       color = "warning";
+      break;
+    case "ARCHIVED":
+      label = "Diarsipkan";
+      color = "secondary";
       break;
   }
 

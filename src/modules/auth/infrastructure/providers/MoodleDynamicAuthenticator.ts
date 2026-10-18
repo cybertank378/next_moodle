@@ -79,18 +79,17 @@ export class MoodleDynamicAuthenticator implements IMoodleClient {
         {},
       );
 
-      const isTeacherOrManager =
+      const isManager = Boolean(caps?.can_manage);
+      const isTeacher =
         isTeacherUsername ||
         Boolean(
           caps &&
-            (caps.can_manage ||
-              caps.can_manage_questions ||
+            (caps.can_manage_questions ||
               caps.can_manage_quizzes ||
               caps.can_view_reports),
         );
 
-      if (isTeacherOrManager) {
-        // Try authenticating with nextjs_admin if Moodle allows it for this staff account
+      if (isManager) {
         try {
           const adminToken = await MoodleRestClient.authenticate(
             input.tenant.moodleUrl,
@@ -105,13 +104,51 @@ export class MoodleDynamicAuthenticator implements IMoodleClient {
             capabilities: caps,
           };
         } catch {
-          // If nextjs_admin service is restricted in Moodle for teachers,
-          // preserve teacher/tenant role with probeToken
           return {
             ...probeToken,
             serviceUsed: "nextjs_tenant",
             capabilities: caps,
           };
+        }
+      }
+
+      if (isTeacher) {
+        // Try authenticating with nextjs_teacher first
+        try {
+          const teacherToken = await MoodleRestClient.authenticate(
+            input.tenant.moodleUrl,
+            input.username,
+            input.password,
+            10000,
+            "nextjs_teacher",
+          );
+          return {
+            ...teacherToken,
+            serviceUsed: "nextjs_teacher",
+            capabilities: caps,
+          };
+        } catch {
+          // If nextjs_teacher not available, try nextjs_admin fallback
+          try {
+            const adminToken = await MoodleRestClient.authenticate(
+              input.tenant.moodleUrl,
+              input.username,
+              input.password,
+              10000,
+              "nextjs_admin",
+            );
+            return {
+              ...adminToken,
+              serviceUsed: "nextjs_admin",
+              capabilities: caps,
+            };
+          } catch {
+            return {
+              ...probeToken,
+              serviceUsed: "nextjs_tenant",
+              capabilities: caps,
+            };
+          }
         }
       }
 

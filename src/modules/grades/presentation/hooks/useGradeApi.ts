@@ -109,10 +109,27 @@ export function useGradeApi() {
     [],
   );
 
+  const exportGrades = useCallback(
+    async (courseId: number): Promise<Blob | null> => {
+      const res = await fetch(`/api/grades/export?courseId=${courseId}`);
+      if (!res.ok) {
+        const errJson = (await res.json().catch(() => ({}))) as {
+          error?: { message?: string };
+        };
+        throw new Error(
+          errJson.error?.message ?? `Export gagal (${res.status})`,
+        );
+      }
+      return await res.blob();
+    },
+    [],
+  );
+
   return {
     userReportState,
     courseGradesState,
     getUserGradeReport,
     getCourseGrades,
+    exportGrades,
   };
 }

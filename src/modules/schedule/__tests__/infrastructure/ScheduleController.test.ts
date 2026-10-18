@@ -1,9 +1,17 @@
 import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Result } from "@/core/base/Result";
 import type { CurrentActor } from "@/core/auth/CurrentActor";
+import { Result } from "@/core/base/Result";
 import type { GetScheduleSessionDetailUseCase } from "@/modules/schedule/application/usecases/GetScheduleSessionDetailUseCase";
 import type { GetStudentScheduleUseCase } from "@/modules/schedule/application/usecases/GetStudentScheduleUseCase";
+import type { GetTeacherSchedulesUseCase } from "@/modules/schedule/application/usecases/GetTeacherSchedulesUseCase";
+import type { GetTenantSchedulesUseCase } from "@/modules/schedule/application/usecases/GetTenantSchedulesUseCase";
+import type {
+  CancelScheduleUseCase,
+  CreateScheduleUseCase,
+  PublishScheduleUseCase,
+  UpdateScheduleUseCase,
+} from "@/modules/schedule/application/usecases/MutateScheduleUseCases";
 import { ScheduleController } from "@/modules/schedule/infrastructure/http/ScheduleController";
 
 describe("ScheduleController", () => {
@@ -30,7 +38,13 @@ describe("ScheduleController", () => {
 
     controller = new ScheduleController(
       getStudentSchedule,
+      { execute: vi.fn() } as unknown as GetTenantSchedulesUseCase,
+      { execute: vi.fn() } as unknown as GetTeacherSchedulesUseCase,
       getScheduleSessionDetail,
+      { execute: vi.fn() } as unknown as CreateScheduleUseCase,
+      { execute: vi.fn() } as unknown as UpdateScheduleUseCase,
+      { execute: vi.fn() } as unknown as PublishScheduleUseCase,
+      { execute: vi.fn() } as unknown as CancelScheduleUseCase,
     );
   });
 

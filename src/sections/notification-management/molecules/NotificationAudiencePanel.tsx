@@ -183,9 +183,10 @@ export default function NotificationAudiencePanel({
 
           {/* Add role button if some roles remain */}
           {availableRolesToAdd.length > 0 && !disabled && (
-            <div className="relative inline-block">
-              <select
-                className="text-xs text-blue-600 bg-white border border-dashed border-blue-300 rounded-xl px-2.5 py-1.5 hover:bg-blue-50 focus:outline-none cursor-pointer"
+            <div className="w-36">
+              <SelectField
+                size="sm"
+                className="text-xs text-blue-600 border-dashed border-blue-300 hover:bg-blue-50 cursor-pointer"
                 onChange={(e) => {
                   if (e.target.value) {
                     addRole(e.target.value);
@@ -202,7 +203,7 @@ export default function NotificationAudiencePanel({
                     {r.label}
                   </option>
                 ))}
-              </select>
+              </SelectField>
             </div>
           )}
         </div>

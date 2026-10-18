@@ -50,9 +50,7 @@ export class GetScheduleSessionDetailUseCase {
     }
 
     if (!input.sessionId) {
-      return Result.fail(
-        new ValidationError("Session ID wajib ditentukan."),
-      );
+      return Result.fail(new ValidationError("Session ID wajib ditentukan."));
     }
 
     if (!input.moodleToken) {
@@ -82,7 +80,9 @@ export class GetScheduleSessionDetailUseCase {
 
       if (!session) {
         return Result.fail(
-          new NotFoundError("Sesi jadwal tidak ditemukan atau tidak dapat diakses."),
+          new NotFoundError(
+            "Sesi jadwal tidak ditemukan atau tidak dapat diakses.",
+          ),
         );
       }
 

@@ -3,11 +3,7 @@ import "server-only";
 
 import type { NextRequest, NextResponse } from "next/server";
 import { getQuizAttemptController } from "@/app/api/quizzes/attempts/_factory";
-import {
-  type RouteContext,
-  unauthorizedResponse,
-} from "@/core/http/routeUtils";
-import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
+import type { RouteContext } from "@/core/http/routeUtils";
 
 type AttemptRouteContext = RouteContext<{ attemptId: string }>;
 
@@ -15,18 +11,8 @@ async function originalPOST(
   req: NextRequest,
   context: AttemptRouteContext,
 ): Promise<NextResponse> {
-  const session = await getCurrentSession();
-  if (!session?.actor) {
-    return unauthorizedResponse();
-  }
-
   const { attemptId } = await context.params;
-  return getQuizAttemptController().submit(
-    session.actor,
-    session.moodleToken,
-    attemptId,
-    req,
-  );
+  return getQuizAttemptController().submit(attemptId, req);
 }
 
 export const POST = withAuditedMutation(

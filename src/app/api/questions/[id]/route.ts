@@ -1,8 +1,10 @@
+import type { NextRequest } from "next/server";
+
 import { getQuestionController } from "@/app/api/questions/_factory";
 import { withAuditedMutation } from "@/modules/audit/infrastructure/http/withAuditedMutation";
 
 async function originalPATCH(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;

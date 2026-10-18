@@ -19,7 +19,13 @@ describe("GetStudentScheduleUseCase", () => {
 
     repository = {
       getStudentSchedule: vi.fn(),
+      getTenantSchedule: vi.fn(),
+      getTeacherSchedule: vi.fn(),
       getSessionById: vi.fn(),
+      createSession: vi.fn(),
+      updateSession: vi.fn(),
+      publishSession: vi.fn(),
+      cancelSession: vi.fn(),
     };
 
     clientFactory = {
@@ -41,7 +47,9 @@ describe("GetStudentScheduleUseCase", () => {
     });
 
     expect(result.isFailure).toBe(true);
-    expect(result.getError().message).toContain("hanya dapat diakses oleh siswa");
+    expect(result.getError().message).toContain(
+      "hanya dapat diakses oleh siswa",
+    );
   });
 
   it("fails if moodleToken is missing", async () => {
@@ -56,7 +64,9 @@ describe("GetStudentScheduleUseCase", () => {
     });
 
     expect(result.isFailure).toBe(true);
-    expect(result.getError().message).toContain("Kredensial atau token Moodle siswa wajib");
+    expect(result.getError().message).toContain(
+      "Kredensial atau token Moodle siswa wajib",
+    );
   });
 
   it("successfully returns sorted and deduplicated schedule sessions", async () => {

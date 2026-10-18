@@ -2,6 +2,7 @@
 "use client";
 
 import { Clock } from "lucide-react";
+import Radio from "@/shared-ui/component/Radio";
 import TextField from "@/shared-ui/component/TextField";
 
 interface Props {
@@ -47,55 +48,55 @@ export default function NotificationSchedulePanel({
 
       {/* Radio options */}
       <div className="flex flex-col gap-2.5">
-        <label
-          className={`flex items-start gap-3 p-3.5 border rounded-xl cursor-pointer transition-colors ${
+        <div
+          className={`p-3.5 border rounded-xl transition-colors ${
             !isScheduled
               ? "border-blue-200 bg-blue-50/30"
               : "border-slate-200 hover:bg-slate-50/60"
           }`}
         >
-          <input
-            type="radio"
+          <Radio
             name="delivery-time-mode"
-            className="mt-0.5 text-blue-600 focus:ring-blue-500"
             checked={!isScheduled}
             onChange={() => handleModeChange("NOW")}
             disabled={disabled}
+            label={
+              <div>
+                <div className="text-xs font-semibold text-slate-900">
+                  Kirim sekarang
+                </div>
+                <div className="text-xs text-slate-500 mt-0.5">
+                  Pengiriman dimulai setelah Anda mengonfirmasi.
+                </div>
+              </div>
+            }
           />
-          <div>
-            <div className="text-xs font-semibold text-slate-900">
-              Kirim sekarang
-            </div>
-            <div className="text-xs text-slate-500 mt-0.5">
-              Pengiriman dimulai setelah Anda mengonfirmasi.
-            </div>
-          </div>
-        </label>
+        </div>
 
-        <label
-          className={`flex items-start gap-3 p-3.5 border rounded-xl cursor-pointer transition-colors ${
+        <div
+          className={`p-3.5 border rounded-xl transition-colors ${
             isScheduled
               ? "border-blue-200 bg-blue-50/30"
               : "border-slate-200 hover:bg-slate-50/60"
           }`}
         >
-          <input
-            type="radio"
+          <Radio
             name="delivery-time-mode"
-            className="mt-0.5 text-blue-600 focus:ring-blue-500"
             checked={isScheduled}
             onChange={() => handleModeChange("SCHEDULE")}
             disabled={disabled}
+            label={
+              <div>
+                <div className="text-xs font-semibold text-slate-900">
+                  Jadwalkan
+                </div>
+                <div className="text-xs text-slate-500 mt-0.5">
+                  Pilih tanggal dan waktu untuk mengirim pengumuman.
+                </div>
+              </div>
+            }
           />
-          <div className="flex-1">
-            <div className="text-xs font-semibold text-slate-900">
-              Jadwalkan
-            </div>
-            <div className="text-xs text-slate-500 mt-0.5">
-              Pilih tanggal dan waktu untuk mengirim pengumuman.
-            </div>
-          </div>
-        </label>
+        </div>
       </div>
 
       {/* Date & Time Input if Scheduled */}

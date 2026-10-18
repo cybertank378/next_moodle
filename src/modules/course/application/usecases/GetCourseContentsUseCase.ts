@@ -1,11 +1,10 @@
 import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
+import type { MoodleClient } from "@/core/moodle/types";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { authorizeCourseOperation } from "@/modules/course/application/services/CourseAuthorizationService";
 import type { CourseSectionResponseDTO } from "@/modules/course/domain/dto/CourseResponseDto";
 import type { CourseRepositoryInterface } from "@/modules/course/domain/interfaces/CourseRepositoryInterface";
-
-import type { MoodleClient } from "@/core/moodle/types";
 
 export interface GetCourseContentsInput {
   actor: AuthorizationActor | null | undefined;

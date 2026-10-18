@@ -46,7 +46,9 @@ describe("Schedule UI Components", () => {
       detailRoute: "/dashboard/exams/1",
     };
 
-    const html = renderToStaticMarkup(<ScheduleSessionCard session={session} />);
+    const html = renderToStaticMarkup(
+      <ScheduleSessionCard session={session} />,
+    );
 
     expect(html).toContain("Ujian Akhir Semester Fisika");
     expect(html).toContain("Fisika Dasar");

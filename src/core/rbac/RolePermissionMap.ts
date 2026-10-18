@@ -48,6 +48,11 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
     Permission.EXAM_MONITOR_ACTION,
     Permission.GRADE_READ,
     Permission.TENANT_AUDIT_READ,
+    Permission.SCHEDULE_READ,
+    Permission.SCHEDULE_MANAGE,
+    Permission.SCHEDULE_PUBLISH,
+    Permission.ASSIGNMENT_READ,
+    Permission.ASSIGNMENT_MANAGE,
     Permission.NOTIFICATION_MANAGE,
     Permission.NOTIFICATION_CAMPAIGN_CREATE,
     Permission.NOTIFICATION_CAMPAIGN_READ,
@@ -62,6 +67,9 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
     Permission.STUDENT_DASHBOARD_READ,
     Permission.STUDENT_COURSE_READ,
     Permission.STUDENT_QUIZ_READ,
+    Permission.STUDENT_SCHEDULE_READ,
+    Permission.STUDENT_ASSIGNMENT_READ,
+    Permission.STUDENT_ASSIGNMENT_SUBMIT,
     Permission.ATTEMPT_START,
     Permission.ATTEMPT_READ_OWN,
     Permission.ATTEMPT_SAVE_OWN,
@@ -76,6 +84,7 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
     Permission.TEACHER_COURSE_READ,
     Permission.TEACHER_QUIZ_READ,
     Permission.TEACHER_GRADE_READ,
+    Permission.TEACHER_SCHEDULE_READ,
 
     // Same as TENANT — except USER_READ/CREATE/UPDATE/DEACTIVATE/IMPORT
     Permission.TENANT_DASHBOARD_READ,
@@ -98,5 +107,7 @@ export const RolePermissionMap: Record<AppRole, readonly PermissionType[]> = {
     Permission.EXAM_MONITOR_ACTION,
     Permission.GRADE_READ,
     Permission.TENANT_AUDIT_READ,
+    Permission.SCHEDULE_READ,
+    Permission.ASSIGNMENT_READ,
   ],
 };

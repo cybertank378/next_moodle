@@ -8,6 +8,12 @@ import type { GetCourseContentsUseCase } from "@/modules/course/application/usec
 import type { GetUserCoursesUseCase } from "@/modules/course/application/usecases/GetUserCoursesUseCase";
 import { CourseController } from "@/modules/course/infrastructure/http/CourseController";
 
+vi.mock("@/modules/auth/server/getCurrentSession", () => ({
+  getCurrentSession: vi.fn(),
+}));
+
+import { getCurrentSession } from "@/modules/auth/server/getCurrentSession";
+
 describe("CourseController", () => {
   const studentActor: CurrentActor = {
     userId: "user-1",
@@ -55,7 +61,12 @@ describe("CourseController", () => {
       },
     } as unknown as NextRequest;
 
-    const response = await controller.list(studentActor, mockReq);
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.list(mockReq);
     expect(response.status).toBe(200);
 
     const body = await response.json();
@@ -83,7 +94,12 @@ describe("CourseController", () => {
       },
     } as unknown as NextRequest;
 
-    const response = await controller.list(studentActor, mockReq);
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.list(mockReq);
     expect(response.status).toBe(403);
 
     const body = await response.json();
@@ -113,7 +129,13 @@ describe("CourseController", () => {
       mockGetCourseContents,
     );
 
-    const response = await controller.getContents(studentActor, 101);
+    const mockReq = {} as NextRequest;
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getContents(mockReq, 101);
     expect(response.status).toBe(200);
 
     const body = await response.json();
@@ -129,7 +151,13 @@ describe("CourseController", () => {
       mockGetCourseContents,
     );
 
-    const response = await controller.getContents(studentActor, "invalid");
+    const mockReq = {} as NextRequest;
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getContents(mockReq, "invalid");
     expect(response.status).toBe(400);
 
     const body = await response.json();
@@ -161,12 +189,197 @@ describe("CourseController", () => {
       mockGetCourseDetail,
     );
 
-    const response = await controller.getDetail(studentActor, "101");
+    const mockReq = {} as NextRequest;
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: studentActor,
+      moodleToken: "moodle-token",
+    });
+
+    const response = await controller.getDetail(mockReq, "101");
     expect(response.status).toBe(200);
 
     const body = await response.json();
     expect(body.success).toBe(true);
     expect(body.data.course.id).toBe(101);
   });
-});
 
+  it("resolves user Moodle client for TEACHER actor using their session moodleToken", async () => {
+    const teacherActor: CurrentActor = {
+      userId: "teacher-1",
+      email: "teacher@example.com",
+      role: AppRole.TEACHER,
+      tenantId: "tenant-1",
+      moodleUserId: 55,
+    } as any;
+
+    const mockGetUserCourses = {
+      execute: vi.fn().mockResolvedValue(
+        Result.ok({
+          courses: [],
+          total: 0,
+        }),
+      ),
+    } as unknown as GetUserCoursesUseCase;
+    const mockGetCourseContents = {} as unknown as GetCourseContentsUseCase;
+
+    const mockClient = { call: vi.fn() };
+    const mockClientFactory = {
+      createClient: vi.fn(),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
+    };
+
+    const controller = new CourseController(
+      mockGetUserCourses,
+      mockGetCourseContents,
+      undefined,
+      mockClientFactory as any,
+    );
+
+    const mockReq = {
+      nextUrl: {
+        searchParams: new URLSearchParams(),
+      },
+    } as unknown as NextRequest;
+
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: teacherActor,
+      moodleToken: "teacher-user-token",
+    });
+
+    const response = await controller.list(mockReq);
+    expect(response.status).toBe(200);
+
+    expect(mockClientFactory.createClientForUser).toHaveBeenCalledWith(
+      {
+        tenantId: "tenant-1",
+        tenantSlug: "tenant-1",
+        status: "ACTIVE",
+      },
+      "teacher-user-token",
+    );
+    expect(mockGetUserCourses.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor: expect.objectContaining({ role: AppRole.TEACHER }),
+        client: mockClient,
+      }),
+    );
+  });
+
+  it("resolves user Moodle client for TENANT actor using their session moodleToken", async () => {
+    const tenantActor: CurrentActor = {
+      userId: "tenant-1",
+      email: "tenant@example.com",
+      role: AppRole.TENANT,
+      tenantId: "tenant-1",
+      moodleUserId: 2,
+    } as any;
+
+    const mockGetUserCourses = {
+      execute: vi.fn().mockResolvedValue(
+        Result.ok({
+          courses: [],
+          total: 0,
+        }),
+      ),
+    } as unknown as GetUserCoursesUseCase;
+    const mockGetCourseContents = {} as unknown as GetCourseContentsUseCase;
+
+    const mockClient = { call: vi.fn() };
+    const mockClientFactory = {
+      createClient: vi.fn(),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn().mockResolvedValue(mockClient as any),
+    };
+
+    const controller = new CourseController(
+      mockGetUserCourses,
+      mockGetCourseContents,
+      undefined,
+      mockClientFactory as any,
+    );
+
+    const mockReq = {
+      nextUrl: {
+        searchParams: new URLSearchParams(),
+      },
+    } as unknown as NextRequest;
+
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: tenantActor,
+      moodleToken: "tenant-user-token",
+    });
+
+    const response = await controller.list(mockReq);
+    expect(response.status).toBe(200);
+
+    expect(mockClientFactory.createClientForUser).toHaveBeenCalledWith(
+      {
+        tenantId: "tenant-1",
+        tenantSlug: "tenant-1",
+        status: "ACTIVE",
+      },
+      "tenant-user-token",
+    );
+    expect(mockGetUserCourses.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor: expect.objectContaining({ role: AppRole.TENANT }),
+        client: mockClient,
+      }),
+    );
+  });
+
+  it("leaves client undefined when TENANT actor has no session moodleToken to fallback to tenant admin credential", async () => {
+    const tenantActor: CurrentActor = {
+      userId: "tenant-1",
+      email: "tenant@example.com",
+      role: AppRole.TENANT,
+      tenantId: "tenant-1",
+    } as any;
+
+    const mockGetUserCourses = {
+      execute: vi.fn().mockResolvedValue(
+        Result.ok({
+          courses: [],
+          total: 0,
+        }),
+      ),
+    } as unknown as GetUserCoursesUseCase;
+    const mockGetCourseContents = {} as unknown as GetCourseContentsUseCase;
+
+    const mockClientFactory = {
+      createClient: vi.fn(),
+      createClientForTenant: vi.fn(),
+      createClientForUser: vi.fn(),
+    };
+
+    const controller = new CourseController(
+      mockGetUserCourses,
+      mockGetCourseContents,
+      undefined,
+      mockClientFactory as any,
+    );
+
+    const mockReq = {
+      nextUrl: {
+        searchParams: new URLSearchParams(),
+      },
+    } as unknown as NextRequest;
+
+    vi.mocked(getCurrentSession).mockResolvedValue({
+      actor: tenantActor,
+      moodleToken: "",
+    });
+
+    const response = await controller.list(mockReq);
+    expect(response.status).toBe(200);
+
+    expect(mockClientFactory.createClientForUser).not.toHaveBeenCalled();
+    expect(mockGetUserCourses.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor: expect.objectContaining({ role: AppRole.TENANT }),
+        client: undefined,
+      }),
+    );
+  });
+});

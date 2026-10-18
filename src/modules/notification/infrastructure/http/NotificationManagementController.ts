@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 // Files: src/modules/notification/infrastructure/http/NotificationManagementController.ts
 
 import "server-only";
@@ -26,12 +27,12 @@ import {
   NotificationDispatchStatus,
 } from "@/modules/notification/domain/types/NotificationTypes";
 
-function respond(response: ApiResponse<unknown>): Response {
-  return Response.json(response.body, { status: response.status });
+function respond(response: ApiResponse<unknown>): NextResponse {
+  return NextResponse.json(response.body, { status: response.status });
 }
 
-function jsonSuccess(data: unknown, status = 200): Response {
-  return Response.json({ success: true, data }, { status });
+function jsonSuccess(data: unknown, status = 200): NextResponse {
+  return NextResponse.json({ success: true, data }, { status });
 }
 
 export class NotificationManagementController {
@@ -65,7 +66,7 @@ export class NotificationManagementController {
     };
   }
 
-  async listCampaigns(req: Request): Promise<Response> {
+  async listCampaigns(req: Request): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const { searchParams } = new URL(req.url);
@@ -120,7 +121,7 @@ export class NotificationManagementController {
       });
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -132,7 +133,7 @@ export class NotificationManagementController {
     }
   }
 
-  async getCampaign(req: Request, id: string): Promise<Response> {
+  async getCampaign(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const { campaign, summary } = await this.getByIdUseCase.execute(
@@ -144,7 +145,7 @@ export class NotificationManagementController {
       );
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -156,7 +157,7 @@ export class NotificationManagementController {
     }
   }
 
-  async createCampaign(req: Request): Promise<Response> {
+  async createCampaign(req: Request): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const body = await req.json();
@@ -167,7 +168,7 @@ export class NotificationManagementController {
       );
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -179,7 +180,7 @@ export class NotificationManagementController {
     }
   }
 
-  async updateCampaign(req: Request, id: string): Promise<Response> {
+  async updateCampaign(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const body = await req.json();
@@ -187,7 +188,7 @@ export class NotificationManagementController {
       return jsonSuccess(NotificationCampaignMapper.toResponseDto(updated));
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -199,14 +200,14 @@ export class NotificationManagementController {
     }
   }
 
-  async deleteDraft(req: Request, id: string): Promise<Response> {
+  async deleteDraft(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       await this.deleteDraftUseCase.execute(id, actor);
       return jsonSuccess({ message: "Draft berhasil dihapus." });
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -218,7 +219,7 @@ export class NotificationManagementController {
     }
   }
 
-  async previewAudience(req: Request): Promise<Response> {
+  async previewAudience(req: Request): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const body = await req.json();
@@ -226,7 +227,7 @@ export class NotificationManagementController {
       return jsonSuccess(result);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -238,14 +239,14 @@ export class NotificationManagementController {
     }
   }
 
-  async getRecipientOptions(req: Request): Promise<Response> {
+  async getRecipientOptions(req: Request): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const result = await this.getRecipientOptionsUseCase.execute(actor);
       return jsonSuccess(result);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -257,14 +258,14 @@ export class NotificationManagementController {
     }
   }
 
-  async sendCampaign(req: Request, id: string): Promise<Response> {
+  async sendCampaign(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const sent = await this.sendUseCase.execute(id, actor);
       return jsonSuccess(NotificationCampaignMapper.toResponseDto(sent), 202);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -276,7 +277,7 @@ export class NotificationManagementController {
     }
   }
 
-  async scheduleCampaign(req: Request, id: string): Promise<Response> {
+  async scheduleCampaign(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const body = await req.json();
@@ -284,7 +285,7 @@ export class NotificationManagementController {
       return jsonSuccess(NotificationCampaignMapper.toResponseDto(scheduled));
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -296,14 +297,14 @@ export class NotificationManagementController {
     }
   }
 
-  async cancelCampaign(req: Request, id: string): Promise<Response> {
+  async cancelCampaign(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const cancelled = await this.cancelUseCase.execute(id, actor);
       return jsonSuccess(NotificationCampaignMapper.toResponseDto(cancelled));
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -315,14 +316,14 @@ export class NotificationManagementController {
     }
   }
 
-  async archiveCampaign(req: Request, id: string): Promise<Response> {
+  async archiveCampaign(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const archived = await this.archiveUseCase.execute(id, actor);
       return jsonSuccess(NotificationCampaignMapper.toResponseDto(archived));
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -334,14 +335,14 @@ export class NotificationManagementController {
     }
   }
 
-  async retryDelivery(req: Request, id: string): Promise<Response> {
+  async retryDelivery(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const result = await this.retryUseCase.execute(id, actor);
       return jsonSuccess(result);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -353,7 +354,7 @@ export class NotificationManagementController {
     }
   }
 
-  async getDeliveryReport(req: Request, id: string): Promise<Response> {
+  async getDeliveryReport(req: Request, id: string): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const { searchParams } = new URL(req.url);
@@ -372,7 +373,7 @@ export class NotificationManagementController {
       });
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -384,7 +385,7 @@ export class NotificationManagementController {
     }
   }
 
-  async registerDevice(req: Request): Promise<Response> {
+  async registerDevice(req: Request): Promise<NextResponse> {
     try {
       const actor = await this.getActor(req);
       const body = await req.json();
@@ -392,7 +393,7 @@ export class NotificationManagementController {
       return jsonSuccess({ message: "Perangkat berhasil didaftarkan." });
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHORIZED") {
-        return Response.json(
+        return NextResponse.json(
           {
             success: false,
             error: { code: "UNAUTHORIZED", message: "Sesi tidak valid." },
@@ -404,7 +405,7 @@ export class NotificationManagementController {
     }
   }
 
-  async unregisterDevice(req: Request): Promise<Response> {
+  async unregisterDevice(req: Request): Promise<NextResponse> {
     try {
       const body = await req.json();
       await this.unregisterDeviceUseCase.execute(body.token);
