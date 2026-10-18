@@ -42,37 +42,53 @@ export class GetUserCoursesUseCase {
     }
 
     try {
-      if (actor.role === AppRole.STUDENT) {
+      if (actor.role === AppRole.STUDENT || actor.role === AppRole.TEACHER) {
         if (!input.client) {
           return Result.fail(
             new ValidationError(
-              "Kredensial atau client Moodle siswa wajib disertakan.",
+              "Kredensial atau client Moodle wajib disertakan.",
             ),
           );
         }
 
         const moodleUserId = input.moodleUserId ?? actor.moodleUserId;
-        if (!moodleUserId) {
+        if (moodleUserId) {
+          try {
+            let courses = await this.repository.getUserCourses({
+              tenantId: effectiveTenantId,
+              moodleUserId,
+              client: input.client,
+            });
+
+            if (input.search?.trim()) {
+              const q = input.search.toLowerCase().trim();
+              courses = courses.filter(
+                (c) =>
+                  c.fullName.toLowerCase().includes(q) ||
+                  c.shortName.toLowerCase().includes(q),
+              );
+            }
+
+            return Result.ok({
+              courses: courses.map(CourseMapper.toSummaryDTO),
+              total: courses.length,
+            });
+          } catch (err) {
+            // For teacher, if getUserCourses fails or is not supported, attempt getTenantCourses fallback
+            if (actor.role === AppRole.STUDENT) {
+              throw err;
+            }
+          }
+        } else if (actor.role === AppRole.STUDENT) {
           return Result.fail(
             new ValidationError(
               "Moodle User ID tidak ditemukan untuk sesi siswa.",
             ),
           );
         }
-
-        const courses = await this.repository.getUserCourses({
-          tenantId: effectiveTenantId,
-          moodleUserId,
-          client: input.client,
-        });
-
-        return Result.ok({
-          courses: courses.map(CourseMapper.toSummaryDTO),
-          total: courses.length,
-        });
       }
 
-      // TENANT, ADMIN, or TEACHER
+      // TENANT, ADMIN, or TEACHER fallback
       const courses = await this.repository.getTenantCourses({
         tenantId: effectiveTenantId,
         search: input.search,

@@ -146,6 +146,48 @@ describe("MoodleCourseRepository", () => {
     expect(mockClient.call).toHaveBeenCalledWith("core_course_get_courses", {});
   });
 
+  it("falls back to tenant admin client when client override fails with upstream error", async () => {
+    const failingUserClient: MoodleClient = {
+      call: vi
+        .fn()
+        .mockRejectedValue(new Error("require_capability_exception")),
+    };
+
+    const adminClient: MoodleClient = {
+      call: vi.fn().mockImplementation(async (fn: string) => {
+        if (fn === "local_examapi_get_courses") {
+          return [
+            {
+              id: 40,
+              shortname: "BIO101",
+              fullname: "Biology 101",
+            },
+          ];
+        }
+        return [];
+      }),
+    };
+
+    const mockFactory: MoodleClientFactory = {
+      createClient: vi.fn(),
+      createClientForTenant: vi.fn().mockResolvedValue(adminClient as any),
+      createClientForUser: vi.fn(),
+    };
+
+    const repo = new MoodleCourseRepository(mockFactory);
+    const courses = await repo.getTenantCourses({
+      tenantId: "tenant-1",
+      client: failingUserClient,
+    });
+
+    expect(courses).toHaveLength(1);
+    expect(courses[0].shortName).toBe("BIO101");
+    expect(mockFactory.createClientForTenant).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: "tenant-1" }),
+      "admin",
+    );
+  });
+
   it("fetches course contents via core_course_get_contents", async () => {
     const mockClient: MoodleClient = {
       call: vi.fn().mockResolvedValue([

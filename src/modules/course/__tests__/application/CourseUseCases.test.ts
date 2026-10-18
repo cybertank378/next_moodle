@@ -116,7 +116,7 @@ describe("Course Use Cases", () => {
       });
     });
 
-    it("fetches courses for TEACHER actor passing client and moodleUserId", async () => {
+    it("fetches courses for TEACHER actor using getUserCourses when moodleUserId is provided", async () => {
       const teacherActor: AuthorizationActor = {
         id: "teacher-1",
         role: AppRole.TEACHER,
@@ -125,6 +125,34 @@ describe("Course Use Cases", () => {
       };
 
       const repo = new MockCourseRepository();
+      repo.getUserCourses.mockResolvedValue([createMockCourse(101, "MATH101")]);
+      const mockClient = { call: vi.fn() } as any;
+
+      const useCase = new GetUserCoursesUseCase(repo);
+      const result = await useCase.execute({
+        actor: teacherActor,
+        search: "math",
+        client: mockClient,
+      });
+
+      expect(result.isSuccess).toBe(true);
+      expect(repo.getUserCourses).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        moodleUserId: 55,
+        client: mockClient,
+      });
+    });
+
+    it("falls back to getTenantCourses for TEACHER when getUserCourses fails", async () => {
+      const teacherActor: AuthorizationActor = {
+        id: "teacher-1",
+        role: AppRole.TEACHER,
+        tenantId: "tenant-1",
+        moodleUserId: 55,
+      };
+
+      const repo = new MockCourseRepository();
+      repo.getUserCourses.mockRejectedValue(new Error("Moodle error"));
       repo.getTenantCourses.mockResolvedValue([
         createMockCourse(101, "MATH101"),
       ]);

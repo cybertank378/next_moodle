@@ -65,11 +65,43 @@ export class MoodleCourseRepository implements CourseRepositoryInterface {
         },
       );
     } catch {
-      // Fallback to core_course_get_courses for standard Moodle installations
-      rawCourses = await client.call<RawMoodleCourse[]>(
-        "core_course_get_courses",
-        {},
-      );
+      try {
+        // Fallback to core_course_get_courses for standard Moodle installations
+        rawCourses = await client.call<RawMoodleCourse[]>(
+          "core_course_get_courses",
+          {},
+        );
+      } catch {
+        // If caller was using a user token that lacks system-wide course permissions,
+        // fallback to tenant admin client to retrieve tenant courses catalog
+        if (input.client) {
+          try {
+            const tenantClient = await this.clientFactory.createClientForTenant(
+              {
+                tenantId: input.tenantId,
+                tenantSlug: input.tenantId,
+                status: "ACTIVE",
+              },
+              "admin",
+            );
+            try {
+              rawCourses = await tenantClient.call<RawMoodleCourse[]>(
+                "local_examapi_get_courses",
+                { tenantkey: input.tenantId },
+              );
+            } catch {
+              rawCourses = await tenantClient.call<RawMoodleCourse[]>(
+                "core_course_get_courses",
+                {},
+              );
+            }
+          } catch {
+            rawCourses = [];
+          }
+        } else {
+          rawCourses = [];
+        }
+      }
     }
 
     let courses = (rawCourses ?? [])
@@ -128,6 +160,30 @@ export class MoodleCourseRepository implements CourseRepositoryInterface {
 
       return CourseMapper.toEntity(found, input.tenantId);
     } catch {
+      if (input.client) {
+        try {
+          const adminClient = await this.clientFactory.createClientForTenant(
+            {
+              tenantId: input.tenantId,
+              tenantSlug: input.tenantId,
+              status: "ACTIVE",
+            },
+            "admin",
+          );
+          const rawCourses = await adminClient.call<RawMoodleCourse[]>(
+            "core_course_get_courses",
+            {
+              options: {
+                ids: [input.courseId],
+              },
+            },
+          );
+          const found = (rawCourses ?? []).find((c) => c.id === input.courseId);
+          if (found) return CourseMapper.toEntity(found, input.tenantId);
+        } catch {
+          return null;
+        }
+      }
       return null;
     }
   }
