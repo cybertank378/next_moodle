@@ -10,18 +10,25 @@ export class MoodleExamAdministrationRepository
     quizId: number,
     questions: Array<{ questionId: number; slot: number }>,
   ): Promise<void> {
-    const res = await client.call<any>("local_examapi_reorder_quiz_questions", {
+    const sortedSlotIds = questions
+      .slice()
+      .sort((a, b) => a.slot - b.slot)
+      .map((q) => q.slot);
+
+    const res = await client.call<{
+      success?: boolean;
+      quizid?: number;
+      error?: string;
+    }>("local_examapi_reorder_quiz_questions", {
       quizid: quizId,
-      questions: JSON.stringify(
-        questions.map((q) => ({
-          questionid: q.questionId,
-          slot: q.slot,
-        })),
-      ),
+      slotids_json: JSON.stringify(sortedSlotIds),
     });
 
-    if (res && res.error) {
-      throw new MoodleError(`Failed to reorder quiz questions: ${res.error}`);
+    if (res?.error) {
+      throw new MoodleError(
+        "REORDER_FAILED",
+        `Failed to reorder quiz questions: ${res.error}`,
+      );
     }
   }
 }
