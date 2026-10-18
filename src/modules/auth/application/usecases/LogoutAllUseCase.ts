@@ -1,9 +1,13 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import type { IAuthRepository } from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
-export class LogoutAllUseCase {
-  constructor(private readonly sessionManager: IAuthRepository) {}
+export class LogoutAllUseCase extends BaseUseCase<string, void> {
+  constructor(private readonly sessionManager: IAuthRepository) {
+    super();
+  }
 
-  async execute(actorId: string): Promise<void> {
+  async handle(actorId: string): Promise<void> {
     await this.sessionManager.revokeAllForActor(actorId);
   }
 }
+

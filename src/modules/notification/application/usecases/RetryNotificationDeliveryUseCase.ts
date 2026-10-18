@@ -1,5 +1,6 @@
 // Files: src/modules/notification/application/usecases/RetryNotificationDeliveryUseCase.ts
 
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import {
   type CampaignActor,
@@ -10,25 +11,39 @@ import type { NotificationDeliveryRepositoryInterface } from "@/modules/notifica
 import type { PushNotificationAdapterInterface } from "@/modules/notification/domain/interfaces/PushNotificationAdapterInterface";
 import { NotificationChannel } from "@/modules/notification/domain/types/NotificationTypes";
 
-export class RetryNotificationDeliveryUseCase {
+export interface RetryNotificationDeliveryInput {
+  campaignId: string;
+  actor: CampaignActor;
+}
+
+export class RetryNotificationDeliveryUseCase extends BaseUseCase<
+  RetryNotificationDeliveryInput,
+  { retriedCount: number }
+> {
   constructor(
     private readonly campaignRepo: NotificationCampaignRepositoryInterface,
     private readonly deliveryRepo: NotificationDeliveryRepositoryInterface,
     private readonly pushAdapter: PushNotificationAdapterInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
-    campaignId: string,
-    actor: CampaignActor,
+  async handle(
+    input: RetryNotificationDeliveryInput,
   ): Promise<{ retriedCount: number }> {
-    const campaign = await this.campaignRepo.findById(campaignId);
+    const campaign = await this.campaignRepo.findById(input.campaignId);
     if (!campaign) {
       throw new NotFoundError("Pengumuman/notifikasi tidak ditemukan.");
     }
 
-    NotificationAuthorizationService.assertCanAccessCampaign(campaign, actor);
+    NotificationAuthorizationService.assertCanAccessCampaign(
+      campaign,
+      input.actor,
+    );
 
-    const eligible = await this.deliveryRepo.findEligibleForRetry(campaignId);
+    const eligible = await this.deliveryRepo.findEligibleForRetry(
+      input.campaignId,
+    );
     let retriedCount = 0;
 
     for (const delivery of eligible) {
@@ -62,5 +77,22 @@ export class RetryNotificationDeliveryUseCase {
     }
 
     return { retriedCount };
+  }
+
+  override execute(
+    campaignId: string,
+    actor: CampaignActor,
+  ): Promise<{ retriedCount: number }>;
+  override execute(
+    input: RetryNotificationDeliveryInput,
+  ): Promise<{ retriedCount: number }>;
+  override async execute(
+    campaignIdOrInput: string | RetryNotificationDeliveryInput,
+    actor?: CampaignActor,
+  ): Promise<{ retriedCount: number }> {
+    if (typeof campaignIdOrInput === "string") {
+      return this.handle({ campaignId: campaignIdOrInput, actor: actor! });
+    }
+    return this.handle(campaignIdOrInput);
   }
 }

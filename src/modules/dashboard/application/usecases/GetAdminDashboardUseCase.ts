@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { Permission } from "@/core/rbac/Permission";
 import { authorizeDashboardOperation } from "@/modules/dashboard/application/services/DashboardAuthorizationService";
@@ -11,13 +12,18 @@ import {
   ADMIN_DASHBOARD_RECENT_TENANT_LIMIT,
 } from "@/modules/dashboard/domain/types/DashboardTypes";
 
-export class GetAdminDashboardUseCase {
+export class GetAdminDashboardUseCase extends BaseUseCase<
+  GetAdminDashboardRequestDto,
+  Result<AdminDashboardResponseDto, Error>
+> {
   constructor(
     private readonly repository: DashboardRepositoryInterface,
     private readonly clock: () => Date = () => new Date(),
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: GetAdminDashboardRequestDto,
   ): Promise<Result<AdminDashboardResponseDto, Error>> {
     const authError = authorizeDashboardOperation(

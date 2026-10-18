@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ConflictError } from "@/core/errors/ConflictError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
@@ -12,14 +13,23 @@ import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
 import { TenantNormalizer } from "@/modules/tenant/domain/normalizers/TenantNormalizer";
 import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
 
-export class UpdateTenantUseCase {
-  constructor(private readonly repository: TenantsRepository) {}
+export interface UpdateTenantInput {
+  actor: AuthorizationActor | null | undefined;
+  tenantId: string;
+  data: UpdateTenantRequestDTO;
+}
 
-  async execute(input: {
-    actor: AuthorizationActor | null | undefined;
-    tenantId: string;
-    data: UpdateTenantRequestDTO;
-  }): Promise<Result<TenantResponseDTO, Error>> {
+export class UpdateTenantUseCase extends BaseUseCase<
+  UpdateTenantInput,
+  Result<TenantResponseDTO, Error>
+> {
+  constructor(private readonly repository: TenantsRepository) {
+    super();
+  }
+
+  async handle(
+    input: UpdateTenantInput,
+  ): Promise<Result<TenantResponseDTO, Error>> {
     const authError = authorizeTenantOperation(
       input.actor,
       Permission.TENANT_UPDATE,

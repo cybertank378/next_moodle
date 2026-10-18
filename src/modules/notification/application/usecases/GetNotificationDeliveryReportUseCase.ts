@@ -1,5 +1,6 @@
 // Files: src/modules/notification/application/usecases/GetNotificationDeliveryReportUseCase.ts
 
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import {
   type CampaignActor,
@@ -10,34 +11,74 @@ import type { NotificationCampaignRepositoryInterface } from "@/modules/notifica
 import type { NotificationDeliveryRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationDeliveryRepositoryInterface";
 import type { NotificationDeliverySummary } from "@/modules/notification/domain/types/NotificationTypes";
 
-export class GetNotificationDeliveryReportUseCase {
+export interface GetNotificationDeliveryReportInput {
+  campaignId: string;
+  actor: CampaignActor;
+  pagination?: { page: number; limit: number };
+}
+
+export interface GetNotificationDeliveryReportOutput {
+  deliveries: NotificationDeliveryEntity[];
+  total: number;
+  summary: NotificationDeliverySummary;
+}
+
+export class GetNotificationDeliveryReportUseCase extends BaseUseCase<
+  GetNotificationDeliveryReportInput,
+  GetNotificationDeliveryReportOutput
+> {
   constructor(
     private readonly campaignRepo: NotificationCampaignRepositoryInterface,
     private readonly deliveryRepo: NotificationDeliveryRepositoryInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
-    campaignId: string,
-    actor: CampaignActor,
-    pagination?: { page: number; limit: number },
-  ): Promise<{
-    deliveries: NotificationDeliveryEntity[];
-    total: number;
-    summary: NotificationDeliverySummary;
-  }> {
-    const campaign = await this.campaignRepo.findById(campaignId);
+  async handle(
+    input: GetNotificationDeliveryReportInput,
+  ): Promise<GetNotificationDeliveryReportOutput> {
+    const campaign = await this.campaignRepo.findById(input.campaignId);
     if (!campaign) {
       throw new NotFoundError("Pengumuman/notifikasi tidak ditemukan.");
     }
 
-    NotificationAuthorizationService.assertCanAccessCampaign(campaign, actor);
+    NotificationAuthorizationService.assertCanAccessCampaign(
+      campaign,
+      input.actor,
+    );
 
     const { deliveries, total } = await this.deliveryRepo.findByCampaignId(
-      campaignId,
-      pagination,
+      input.campaignId,
+      input.pagination,
     );
-    const summary = await this.deliveryRepo.getDeliverySummary(campaignId);
+    const summary = await this.deliveryRepo.getDeliverySummary(
+      input.campaignId,
+    );
 
     return { deliveries, total, summary };
   }
+
+  override execute(
+    campaignId: string,
+    actor: CampaignActor,
+    pagination?: { page: number; limit: number },
+  ): Promise<GetNotificationDeliveryReportOutput>;
+  override execute(
+    input: GetNotificationDeliveryReportInput,
+  ): Promise<GetNotificationDeliveryReportOutput>;
+  override async execute(
+    campaignIdOrInput: string | GetNotificationDeliveryReportInput,
+    actor?: CampaignActor,
+    pagination?: { page: number; limit: number },
+  ): Promise<GetNotificationDeliveryReportOutput> {
+    if (typeof campaignIdOrInput === "string") {
+      return this.handle({
+        campaignId: campaignIdOrInput,
+        actor: actor!,
+        pagination,
+      });
+    }
+    return this.handle(campaignIdOrInput);
+  }
 }
+

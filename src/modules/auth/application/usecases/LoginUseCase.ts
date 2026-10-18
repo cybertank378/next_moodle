@@ -1,3 +1,5 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
+import type { CurrentActor } from "@/core/auth/CurrentActor";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
 import { createLogger } from "@/core/logger/createLogger";
 import type {
@@ -9,16 +11,27 @@ import type {
 import { mapMoodleUserToActor } from "@/modules/auth/domain/mapper/AuthMapper";
 import { validateLoginRequest } from "@/modules/auth/domain/validators/AuthValidator";
 
-export class LoginUseCase {
+export interface LoginResult {
+  actor: CurrentActor;
+  sessionCookie: {
+    name: string;
+    value: string;
+    expiresAt: Date;
+  };
+}
+
+export class LoginUseCase extends BaseUseCase<LoginCredentials, LoginResult> {
   private readonly logger = createLogger("LoginUseCase");
 
   constructor(
     private readonly tenantResolver: TenantAuthResolver,
     private readonly moodleClient: IMoodleClient,
     private readonly authRepository: IAuthRepository,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(input: LoginCredentials) {
+  async handle(input: LoginCredentials): Promise<LoginResult> {
     this.logger.info("Starting login process", {
       username: input.username,
       tenant: input.tenant,

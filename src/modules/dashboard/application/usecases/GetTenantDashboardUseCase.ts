@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
@@ -10,15 +11,20 @@ export interface GetTenantDashboardRequest {
   actor: AuthorizationActor;
 }
 
-export class GetTenantDashboardUseCase {
+export class GetTenantDashboardUseCase extends BaseUseCase<
+  GetTenantDashboardRequest,
+  Result<TenantDashboardResponseDto>
+> {
   constructor(
     private readonly courseRepo: CourseRepositoryInterface,
     private readonly quizRepo: QuizRepositoryInterface,
     private readonly userRepo: UserRepositoryInterface,
     private readonly clientFactory: MoodleClientFactory,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     request: GetTenantDashboardRequest,
   ): Promise<Result<TenantDashboardResponseDto>> {
     const tenantId = request.actor.tenantId;

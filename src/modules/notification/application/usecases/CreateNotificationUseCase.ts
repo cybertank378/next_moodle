@@ -1,4 +1,5 @@
 // Files: src/modules/notification/application/usecases/CreateNotificationUseCase.ts
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { ValidationError } from "@/core/errors/ValidationError";
 import type { CreateNotificationRequestDto } from "@/modules/notification/domain/dto/NotificationRequestDto";
 import type { NotificationEntity } from "@/modules/notification/domain/entity/NotificationEntity";
@@ -18,14 +19,19 @@ function isInternalPath(path: string): boolean {
  * Entry point for server-side producers (domain events such as import
  * completion or exam result availability). Not exposed to the browser.
  */
-export class CreateNotificationUseCase {
+export class CreateNotificationUseCase extends BaseUseCase<
+  CreateNotificationRequestDto,
+  NotificationEntity
+> {
   constructor(
     private readonly repo: NotificationRepositoryInterface,
     private readonly wsAdapter?: PushNotificationAdapterInterface,
     private readonly outboxRepo?: NotificationOutboxRepositoryInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     dto: CreateNotificationRequestDto,
   ): Promise<NotificationEntity> {
     const title = dto.title.trim();

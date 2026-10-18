@@ -1,13 +1,19 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import type { EnrolUserRequestDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
 import type { EnrolmentRepositoryInterface } from "@/modules/enrolment/domain/interfaces/EnrolmentRepositoryInterface";
 
-export class EnrolUsersUseCase {
-  constructor(private readonly repository: EnrolmentRepositoryInterface) {}
+export interface EnrolUsersInput {
+  tenantId: string;
+  enrolments: EnrolUserRequestDto[];
+}
 
-  async execute(input: {
-    tenantId: string;
-    enrolments: EnrolUserRequestDto[];
-  }): Promise<boolean> {
+export class EnrolUsersUseCase extends BaseUseCase<EnrolUsersInput, boolean> {
+  constructor(private readonly repository: EnrolmentRepositoryInterface) {
+    super();
+  }
+
+  async handle(input: EnrolUsersInput): Promise<boolean> {
     return this.repository.enrolUsers(input);
   }
 }
+

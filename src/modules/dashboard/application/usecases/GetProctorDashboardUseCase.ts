@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import type { ProctorDashboardResponseDto } from "@/modules/dashboard/domain/dto/DashboardResponseDto";
@@ -6,8 +7,11 @@ export interface GetProctorDashboardRequest {
   actor: AuthorizationActor;
 }
 
-export class GetProctorDashboardUseCase {
-  async execute(
+export class GetProctorDashboardUseCase extends BaseUseCase<
+  GetProctorDashboardRequest,
+  Result<ProctorDashboardResponseDto>
+> {
+  async handle(
     request: GetProctorDashboardRequest,
   ): Promise<Result<ProctorDashboardResponseDto>> {
     const tenantId = request.actor.tenantId;

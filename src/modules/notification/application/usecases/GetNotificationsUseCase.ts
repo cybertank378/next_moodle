@@ -1,12 +1,18 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import type { GetNotificationsRequestDto } from "@/modules/notification/domain/dto/NotificationRequestDto";
 import type { PaginatedNotificationsResponseDto } from "@/modules/notification/domain/dto/NotificationResponseDto";
 import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 import { NotificationMapper } from "@/modules/notification/domain/mapper/NotificationMapper";
 
-export class GetNotificationsUseCase {
-  constructor(private readonly repo: NotificationRepositoryInterface) {}
+export class GetNotificationsUseCase extends BaseUseCase<
+  GetNotificationsRequestDto,
+  PaginatedNotificationsResponseDto
+> {
+  constructor(private readonly repo: NotificationRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     dto: GetNotificationsRequestDto,
   ): Promise<PaginatedNotificationsResponseDto> {
     const { scope, tab, page, limit } = dto;

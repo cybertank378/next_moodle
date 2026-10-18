@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import type { MoodleClientFactory } from "@/core/moodle/MoodleClientFactory";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
@@ -17,16 +18,21 @@ export interface GetStudentDashboardRequest {
   moodleToken: string;
 }
 
-export class GetStudentDashboardUseCase {
+export class GetStudentDashboardUseCase extends BaseUseCase<
+  GetStudentDashboardRequest,
+  Result<StudentDashboardResponseDto>
+> {
   constructor(
     private readonly courseRepo: CourseRepositoryInterface,
     private readonly quizRepo: QuizRepositoryInterface,
     private readonly gradeRepo: GradeRepositoryInterface,
     private readonly clientFactory: MoodleClientFactory,
     private readonly tenantRepo: Pick<TenantsRepository, "findById">,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     request: GetStudentDashboardRequest,
   ): Promise<Result<StudentDashboardResponseDto>> {
     const tenantId = request.actor.tenantId;

@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { ValidationError } from "@/core/errors/ValidationError";
@@ -8,13 +9,20 @@ import type { CalendarEventsResponseDTO } from "@/modules/calendar/domain/dto/Ca
 import type { CalendarRepositoryInterface } from "@/modules/calendar/domain/interfaces/CalendarRepositoryInterface";
 import { CalendarEventMapper } from "@/modules/calendar/domain/mapper/CalendarEventMapper";
 
-export class GetStudentCalendarEventsUseCase {
+export type { GetStudentCalendarEventsInput };
+
+export class GetStudentCalendarEventsUseCase extends BaseUseCase<
+  GetStudentCalendarEventsInput,
+  Result<CalendarEventsResponseDTO, Error>
+> {
   constructor(
     private readonly repository: CalendarRepositoryInterface,
     private readonly clientFactory: MoodleClientFactory,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: GetStudentCalendarEventsInput,
   ): Promise<Result<CalendarEventsResponseDTO, Error>> {
     const actor = input.actor;

@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
 import type { MoodleClient } from "@/core/moodle/types";
@@ -22,12 +23,17 @@ export interface AddQuestionToQuizResult {
   page: number;
 }
 
-export class AddQuestionToQuizUseCase {
+export class AddQuestionToQuizUseCase extends BaseUseCase<
+  AddQuestionToQuizInput,
+  Result<AddQuestionToQuizResult, Error>
+> {
   constructor(
     private readonly repository: ExamAdministrationRepositoryInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: AddQuestionToQuizInput,
   ): Promise<Result<AddQuestionToQuizResult, Error>> {
     const authError = authorizeExamOperation(

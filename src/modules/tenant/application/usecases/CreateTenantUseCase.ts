@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ConflictError } from "@/core/errors/ConflictError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
@@ -14,16 +15,25 @@ import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
 import { TenantNormalizer } from "@/modules/tenant/domain/normalizers/TenantNormalizer";
 import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
 
-export class CreateTenantUseCase {
+export interface CreateTenantInput {
+  actor: AuthorizationActor | null | undefined;
+  data: CreateTenantRequestDTO;
+}
+
+export class CreateTenantUseCase extends BaseUseCase<
+  CreateTenantInput,
+  Result<TenantResponseDTO, Error>
+> {
   constructor(
     private readonly repository: TenantsRepository,
     private readonly userProvisioner?: TenantUserProvisioner,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(input: {
-    actor: AuthorizationActor | null | undefined;
-    data: CreateTenantRequestDTO;
-  }): Promise<Result<TenantResponseDTO, Error>> {
+  async handle(
+    input: CreateTenantInput,
+  ): Promise<Result<TenantResponseDTO, Error>> {
     const authError = authorizeTenantOperation(
       input.actor,
       Permission.TENANT_CREATE,

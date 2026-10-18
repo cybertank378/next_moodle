@@ -1,5 +1,6 @@
 // Files: src/modules/notification/application/usecases/PreviewNotificationAudienceUseCase.ts
 
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import {
   type CampaignActor,
   NotificationAuthorizationService,
@@ -9,15 +10,25 @@ import type { NotificationAudiencePreviewResponseDto } from "@/modules/notificat
 import type { NotificationRecipientProviderInterface } from "@/modules/notification/domain/interfaces/NotificationRecipientProviderInterface";
 import { NotificationAudience } from "@/modules/notification/domain/value-object/NotificationAudience";
 
-export class PreviewNotificationAudienceUseCase {
+export interface PreviewNotificationAudienceInput {
+  dto: AudiencePreviewRequestDto;
+  actor: CampaignActor;
+}
+
+export class PreviewNotificationAudienceUseCase extends BaseUseCase<
+  PreviewNotificationAudienceInput,
+  NotificationAudiencePreviewResponseDto
+> {
   constructor(
     private readonly recipientProvider: NotificationRecipientProviderInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
-    dto: AudiencePreviewRequestDto,
-    actor: CampaignActor,
+  async handle(
+    input: PreviewNotificationAudienceInput,
   ): Promise<NotificationAudiencePreviewResponseDto> {
+    const { dto, actor } = input;
     const { ownerScope, ownerTenantId } =
       NotificationAuthorizationService.resolveOwnerScope(actor);
 
@@ -49,4 +60,25 @@ export class PreviewNotificationAudienceUseCase {
       })),
     };
   }
+
+  override execute(
+    dto: AudiencePreviewRequestDto,
+    actor: CampaignActor,
+  ): Promise<NotificationAudiencePreviewResponseDto>;
+  override execute(
+    input: PreviewNotificationAudienceInput,
+  ): Promise<NotificationAudiencePreviewResponseDto>;
+  override async execute(
+    dtoOrInput: AudiencePreviewRequestDto | PreviewNotificationAudienceInput,
+    actor?: CampaignActor,
+  ): Promise<NotificationAudiencePreviewResponseDto> {
+    if ("dto" in dtoOrInput && "actor" in dtoOrInput) {
+      return this.handle(dtoOrInput as PreviewNotificationAudienceInput);
+    }
+    return this.handle({
+      dto: dtoOrInput as AudiencePreviewRequestDto,
+      actor: actor!,
+    });
+  }
 }
+

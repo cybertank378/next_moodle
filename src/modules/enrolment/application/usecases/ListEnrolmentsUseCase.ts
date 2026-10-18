@@ -1,14 +1,23 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import type { ListEnrolmentsQueryDto } from "@/modules/enrolment/domain/dto/EnrolmentRequestDto";
 import type { EnrolmentListResponseDto } from "@/modules/enrolment/domain/dto/EnrolmentResponseDto";
 import type { EnrolmentRepositoryInterface } from "@/modules/enrolment/domain/interfaces/EnrolmentRepositoryInterface";
 
-export class ListEnrolmentsUseCase {
-  constructor(private readonly repository: EnrolmentRepositoryInterface) {}
+export interface ListEnrolmentsInput {
+  tenantId: string;
+  query: ListEnrolmentsQueryDto;
+}
 
-  async execute(input: {
-    tenantId: string;
-    query: ListEnrolmentsQueryDto;
-  }): Promise<EnrolmentListResponseDto> {
+export class ListEnrolmentsUseCase extends BaseUseCase<
+  ListEnrolmentsInput,
+  EnrolmentListResponseDto
+> {
+  constructor(private readonly repository: EnrolmentRepositoryInterface) {
+    super();
+  }
+
+  async handle(input: ListEnrolmentsInput): Promise<EnrolmentListResponseDto> {
     return this.repository.getCourseEnrolments(input);
   }
 }
+

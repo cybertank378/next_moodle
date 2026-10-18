@@ -1,9 +1,19 @@
-import type { IAuthRepository } from "@/modules/auth/domain/interfaces/AuthInterfaces";
+import { BaseUseCase } from "@/core/base/BaseUseCase";
+import type {
+  AppSessionPayload,
+  IAuthRepository,
+} from "@/modules/auth/domain/interfaces/AuthInterfaces";
 
-export class GetCurrentSessionUseCase {
-  constructor(private readonly sessionManager: IAuthRepository) {}
+export class GetCurrentSessionUseCase extends BaseUseCase<
+  string,
+  AppSessionPayload
+> {
+  constructor(private readonly sessionManager: IAuthRepository) {
+    super();
+  }
 
-  async execute(cookieValue: string) {
+  async handle(cookieValue: string): Promise<AppSessionPayload> {
     return this.sessionManager.resolveSession(cookieValue);
   }
 }
+

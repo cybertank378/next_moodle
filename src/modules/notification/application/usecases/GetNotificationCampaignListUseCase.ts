@@ -1,5 +1,6 @@
 // Files: src/modules/notification/application/usecases/GetNotificationCampaignListUseCase.ts
 
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { AppRole } from "@/core/rbac/AppRole";
 import {
   type CampaignActor,
@@ -13,19 +14,31 @@ import type {
 } from "@/modules/notification/domain/interfaces/NotificationCampaignRepositoryInterface";
 import { NotificationOwnerScope } from "@/modules/notification/domain/types/NotificationTypes";
 
-export class GetNotificationCampaignListUseCase {
+export interface GetNotificationCampaignListInput {
+  filter: CampaignFilterParams;
+  actor: CampaignActor;
+}
+
+export interface GetNotificationCampaignListOutput {
+  campaigns: NotificationCampaignEntity[];
+  total: number;
+  summary?: CampaignSummaryStats;
+}
+
+export class GetNotificationCampaignListUseCase extends BaseUseCase<
+  GetNotificationCampaignListInput,
+  GetNotificationCampaignListOutput
+> {
   constructor(
     private readonly campaignRepo: NotificationCampaignRepositoryInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
-    filter: CampaignFilterParams,
-    actor: CampaignActor,
-  ): Promise<{
-    campaigns: NotificationCampaignEntity[];
-    total: number;
-    summary?: CampaignSummaryStats;
-  }> {
+  async handle(
+    input: GetNotificationCampaignListInput,
+  ): Promise<GetNotificationCampaignListOutput> {
+    const { filter, actor } = input;
     NotificationAuthorizationService.assertCanManageCampaign(actor);
 
     const scopedFilter: CampaignFilterParams = { ...filter };
@@ -37,4 +50,25 @@ export class GetNotificationCampaignListUseCase {
 
     return this.campaignRepo.findMany(scopedFilter);
   }
+
+  override execute(
+    filter: CampaignFilterParams,
+    actor: CampaignActor,
+  ): Promise<GetNotificationCampaignListOutput>;
+  override execute(
+    input: GetNotificationCampaignListInput,
+  ): Promise<GetNotificationCampaignListOutput>;
+  override async execute(
+    filterOrInput: CampaignFilterParams | GetNotificationCampaignListInput,
+    actor?: CampaignActor,
+  ): Promise<GetNotificationCampaignListOutput> {
+    if ("filter" in filterOrInput && "actor" in filterOrInput) {
+      return this.handle(filterOrInput as GetNotificationCampaignListInput);
+    }
+    return this.handle({
+      filter: filterOrInput as CampaignFilterParams,
+      actor: actor!,
+    });
+  }
 }
+
