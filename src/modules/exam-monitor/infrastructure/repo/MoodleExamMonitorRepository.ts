@@ -29,24 +29,12 @@ export class MoodleExamMonitorRepository
         "proctor",
       );
 
-      const response = await client.call<{
-        quizid: number;
-        participants: Array<{
-          attemptid: number;
-          userid: number;
-          fullname: string;
-          state: string;
-          timecreated: number;
-          timemodified: number;
-          timelimit: number;
-          timeremaining?: number;
-          islocked: boolean;
-        }>;
-        totalactive: number;
-        totalfinished: number;
-      }>("local_examapi_get_exam_monitor", {
-        quizid: req.quizId,
-      });
+      const response = await client.call<any>(
+        "local_examapi_get_exam_monitor",
+        {
+          quizid: req.quizId,
+        },
+      );
 
       return Result.success(ExamMonitorMapper.toResponseDto(response));
     } catch (error) {
@@ -63,6 +51,7 @@ export class MoodleExamMonitorRepository
 
       await client.call("local_examapi_lock_attempt", {
         attemptid: req.attemptId,
+        reason: req.reason || "Attempt locked by proctor",
       });
 
       return Result.success(undefined);
@@ -80,6 +69,7 @@ export class MoodleExamMonitorRepository
 
       await client.call("local_examapi_unlock_attempt", {
         attemptid: req.attemptId,
+        reason: req.reason || "Attempt unlocked by proctor",
       });
 
       return Result.success(undefined);
@@ -99,6 +89,7 @@ export class MoodleExamMonitorRepository
 
       await client.call("local_examapi_force_finish_attempt", {
         attemptid: req.attemptId,
+        reason: req.reason || "Attempt force-finished by proctor",
       });
 
       return Result.success(undefined);
@@ -118,7 +109,8 @@ export class MoodleExamMonitorRepository
 
       await client.call("local_examapi_extend_attempt_time", {
         attemptid: req.attemptId,
-        extratimeminutes: req.extraTimeMinutes,
+        extraminutes: req.extraTimeMinutes,
+        reason: req.reason || "Attempt time extended by proctor",
       });
 
       return Result.success(undefined);
