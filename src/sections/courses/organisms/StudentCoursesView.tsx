@@ -57,10 +57,16 @@ export default function StudentCoursesView() {
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <Typography variant="h1" className="text-2xl font-bold text-slate-900">
+              <Typography
+                variant="h1"
+                className="text-2xl font-bold text-slate-900"
+              >
                 Mata Pelajaran Saya
               </Typography>
-              <Typography variant="body" className="text-sm text-slate-500 mt-0.5">
+              <Typography
+                variant="body"
+                className="text-sm text-slate-500 mt-0.5"
+              >
                 Daftar semua mata pelajaran yang Anda ikuti saat ini.
               </Typography>
             </div>
@@ -85,7 +91,12 @@ export default function StudentCoursesView() {
               className="p-6 space-y-4 shadow-sm border border-slate-100"
             >
               <div className="flex gap-4">
-                <Skeleton height={52} width={52} rounded className="rounded-2xl" />
+                <Skeleton
+                  height={52}
+                  width={52}
+                  rounded
+                  className="rounded-2xl"
+                />
                 <div className="flex-1 space-y-3 py-1">
                   <Skeleton height={14} width="80%" />
                   <Skeleton height={12} width="60%" />
@@ -96,7 +107,12 @@ export default function StudentCoursesView() {
                   <Skeleton height={10} width={40} />
                   <Skeleton height={10} width={20} />
                 </div>
-                <Skeleton height={8} width="100%" rounded className="rounded-full" />
+                <Skeleton
+                  height={8}
+                  width="100%"
+                  rounded
+                  className="rounded-full"
+                />
               </div>
             </Card>
           ))}
@@ -123,17 +139,20 @@ export default function StudentCoursesView() {
         />
       )}
 
-      {!loading && !coursesState.error && allCourses.length > 0 && filteredCourses.length === 0 && (
-        <EmptyState
-          title="Mata Pelajaran Tidak Ditemukan"
-          description={`Tidak ada mata pelajaran yang cocok dengan kata kunci "${search}".`}
-          action={
-            <Button size="sm" variant="outline" onClick={() => setSearch("")}>
-              Reset Pencarian
-            </Button>
-          }
-        />
-      )}
+      {!loading &&
+        !coursesState.error &&
+        allCourses.length > 0 &&
+        filteredCourses.length === 0 && (
+          <EmptyState
+            title="Mata Pelajaran Tidak Ditemukan"
+            description={`Tidak ada mata pelajaran yang cocok dengan kata kunci "${search}".`}
+            action={
+              <Button size="sm" variant="outline" onClick={() => setSearch("")}>
+                Reset Pencarian
+              </Button>
+            }
+          />
+        )}
 
       {!loading && !coursesState.error && filteredCourses.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

@@ -98,6 +98,8 @@ vi.mock("@/modules/grades/presentation/hooks/useGradeApi", () => ({
   }),
 }));
 
+import CourseDetailPageView from "@/sections/courses/pages/CourseDetailPageView";
+
 describe("CourseDetailView Role Adaptations", () => {
   it("renders teacher controls and role badge when userRole is TEACHER", () => {
     const html = renderToStaticMarkup(
@@ -119,4 +121,14 @@ describe("CourseDetailView Role Adaptations", () => {
     expect(html).toContain("40%");
     expect(html).not.toContain("Guru Pengampu");
   });
+
+  it("CourseDetailPageView composes CourseDetailView properly", () => {
+    const html = renderToStaticMarkup(
+      <CourseDetailPageView courseId={101} userRole="TEACHER" />,
+    );
+
+    expect(html).toContain("Matematika Dasar 101");
+    expect(html).toContain("Akses Pengajar");
+  });
 });
+
