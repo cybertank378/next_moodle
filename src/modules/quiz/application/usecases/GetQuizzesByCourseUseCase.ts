@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
@@ -14,10 +15,15 @@ export interface GetQuizzesByCourseInput {
   tenantId?: string;
 }
 
-export class GetQuizzesByCourseUseCase {
-  constructor(private readonly repository: QuizRepositoryInterface) {}
+export class GetQuizzesByCourseUseCase extends BaseUseCase<
+  GetQuizzesByCourseInput,
+  Result<QuizListResponseDTO, Error>
+> {
+  constructor(private readonly repository: QuizRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: GetQuizzesByCourseInput,
   ): Promise<Result<QuizListResponseDTO, Error>> {
     const authError = authorizeQuizOperation(input.actor);

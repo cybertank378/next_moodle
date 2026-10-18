@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
@@ -5,13 +6,22 @@ import { Permission } from "@/core/rbac/Permission";
 import { authorizeTenantOperation } from "@/modules/tenant/application/services/TenantAuthorizationService";
 import type { TenantsRepository } from "@/modules/tenant/domain/interfaces/TenantInterfaces";
 
-export class DeleteTenantUseCase {
-  constructor(private readonly repository: TenantsRepository) {}
+export interface DeleteTenantInput {
+  actor: AuthorizationActor | null | undefined;
+  tenantId: string;
+}
 
-  async execute(input: {
-    actor: AuthorizationActor | null | undefined;
-    tenantId: string;
-  }): Promise<Result<{ id: string }, Error>> {
+export class DeleteTenantUseCase extends BaseUseCase<
+  DeleteTenantInput,
+  Result<{ id: string }, Error>
+> {
+  constructor(private readonly repository: TenantsRepository) {
+    super();
+  }
+
+  async handle(
+    input: DeleteTenantInput,
+  ): Promise<Result<{ id: string }, Error>> {
     const authError = authorizeTenantOperation(
       input.actor,
       Permission.TENANT_UPDATE,

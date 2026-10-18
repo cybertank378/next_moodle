@@ -1,13 +1,19 @@
 // Files: src/modules/notification/application/usecases/MarkNotificationReadUseCase.ts
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { MarkNotificationReadRequestDto } from "@/modules/notification/domain/dto/NotificationRequestDto";
 import type { NotificationRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationRepositoryInterface";
 
-export class MarkNotificationReadUseCase {
-  constructor(private readonly repo: NotificationRepositoryInterface) {}
+export class MarkNotificationReadUseCase extends BaseUseCase<
+  MarkNotificationReadRequestDto,
+  void
+> {
+  constructor(private readonly repo: NotificationRepositoryInterface) {
+    super();
+  }
 
-  async execute(dto: MarkNotificationReadRequestDto): Promise<void> {
+  async handle(dto: MarkNotificationReadRequestDto): Promise<void> {
     const { notificationId, scope } = dto;
 
     const notification = await this.repo.findById(notificationId);

@@ -1,5 +1,6 @@
 // Files: src/modules/notification/application/usecases/CreateNotificationCampaignUseCase.ts
 
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import {
   type CampaignActor,
   NotificationAuthorizationService,
@@ -12,16 +13,26 @@ import { NotificationDispatchStatus } from "@/modules/notification/domain/types/
 import { NotificationAudience } from "@/modules/notification/domain/value-object/NotificationAudience";
 import { NotificationContent } from "@/modules/notification/domain/value-object/NotificationContent";
 
-export class CreateNotificationCampaignUseCase {
+export interface CreateNotificationCampaignInput {
+  dto: CreateNotificationCampaignRequestDto;
+  actor: CampaignActor;
+}
+
+export class CreateNotificationCampaignUseCase extends BaseUseCase<
+  CreateNotificationCampaignInput,
+  NotificationCampaignEntity
+> {
   constructor(
     private readonly campaignRepo: NotificationCampaignRepositoryInterface,
     private readonly contentRenderer: NotificationContentRendererInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
-    dto: CreateNotificationCampaignRequestDto,
-    actor: CampaignActor,
+  async handle(
+    input: CreateNotificationCampaignInput,
   ): Promise<NotificationCampaignEntity> {
+    const { dto, actor } = input;
     const { ownerScope, ownerTenantId } =
       NotificationAuthorizationService.resolveOwnerScope(actor);
 
@@ -67,4 +78,27 @@ export class CreateNotificationCampaignUseCase {
 
     return this.campaignRepo.create(campaign);
   }
+
+  override execute(
+    dto: CreateNotificationCampaignRequestDto,
+    actor: CampaignActor,
+  ): Promise<NotificationCampaignEntity>;
+  override execute(
+    input: CreateNotificationCampaignInput,
+  ): Promise<NotificationCampaignEntity>;
+  override async execute(
+    dtoOrInput:
+      | CreateNotificationCampaignRequestDto
+      | CreateNotificationCampaignInput,
+    actor?: CampaignActor,
+  ): Promise<NotificationCampaignEntity> {
+    if ("dto" in dtoOrInput && "actor" in dtoOrInput) {
+      return this.handle(dtoOrInput as CreateNotificationCampaignInput);
+    }
+    return this.handle({
+      dto: dtoOrInput as CreateNotificationCampaignRequestDto,
+      actor: actor!,
+    });
+  }
 }
+

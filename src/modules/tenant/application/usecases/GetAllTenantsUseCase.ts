@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { Permission } from "@/core/rbac/Permission";
@@ -7,13 +8,22 @@ import type { TenantsRepository } from "@/modules/tenant/domain/interfaces/Tenan
 import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
 import type { TenantListFilter } from "@/modules/tenant/domain/types/TenantMetadata";
 
-export class GetAllTenantsUseCase {
-  constructor(private readonly repository: TenantsRepository) {}
+export interface GetAllTenantsInput {
+  actor: AuthorizationActor | null | undefined;
+  filter: Partial<TenantListFilter>;
+}
 
-  async execute(input: {
-    actor: AuthorizationActor | null | undefined;
-    filter: Partial<TenantListFilter>;
-  }): Promise<Result<ListTenantsResponseDTO, Error>> {
+export class GetAllTenantsUseCase extends BaseUseCase<
+  GetAllTenantsInput,
+  Result<ListTenantsResponseDTO, Error>
+> {
+  constructor(private readonly repository: TenantsRepository) {
+    super();
+  }
+
+  async handle(
+    input: GetAllTenantsInput,
+  ): Promise<Result<ListTenantsResponseDTO, Error>> {
     const authError = authorizeTenantOperation(
       input.actor,
       Permission.TENANT_READ,

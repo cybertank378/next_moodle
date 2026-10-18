@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
@@ -9,14 +10,23 @@ import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
 import type { TenantStatus } from "@/modules/tenant/domain/types/TenantMetadata";
 import { TenantValidator } from "@/modules/tenant/domain/validators/TenantValidator";
 
-export class UpdateTenantStatusUseCase {
-  constructor(private readonly repository: TenantsRepository) {}
+export interface UpdateTenantStatusInput {
+  actor: AuthorizationActor | null | undefined;
+  tenantId: string;
+  status: TenantStatus;
+}
 
-  async execute(input: {
-    actor: AuthorizationActor | null | undefined;
-    tenantId: string;
-    status: TenantStatus;
-  }): Promise<Result<TenantResponseDTO, Error>> {
+export class UpdateTenantStatusUseCase extends BaseUseCase<
+  UpdateTenantStatusInput,
+  Result<TenantResponseDTO, Error>
+> {
+  constructor(private readonly repository: TenantsRepository) {
+    super();
+  }
+
+  async handle(
+    input: UpdateTenantStatusInput,
+  ): Promise<Result<TenantResponseDTO, Error>> {
     const authError = authorizeTenantOperation(
       input.actor,
       Permission.TENANT_STATUS_UPDATE,

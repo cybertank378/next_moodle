@@ -1,5 +1,6 @@
 // Files: src/modules/notification/application/usecases/ScheduleNotificationCampaignUseCase.ts
 
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import {
   type CampaignActor,
@@ -11,17 +12,27 @@ import type { NotificationCampaignRepositoryInterface } from "@/modules/notifica
 import type { NotificationOutboxRepositoryInterface } from "@/modules/notification/domain/interfaces/NotificationOutboxRepositoryInterface";
 import { NotificationSchedule } from "@/modules/notification/domain/value-object/NotificationSchedule";
 
-export class ScheduleNotificationCampaignUseCase {
+export interface ScheduleNotificationCampaignInput {
+  campaignId: string;
+  dto: ScheduleNotificationCampaignRequestDto;
+  actor: CampaignActor;
+}
+
+export class ScheduleNotificationCampaignUseCase extends BaseUseCase<
+  ScheduleNotificationCampaignInput,
+  NotificationCampaignEntity
+> {
   constructor(
     private readonly campaignRepo: NotificationCampaignRepositoryInterface,
     private readonly outboxRepo: NotificationOutboxRepositoryInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
-    campaignId: string,
-    dto: ScheduleNotificationCampaignRequestDto,
-    actor: CampaignActor,
+  async handle(
+    input: ScheduleNotificationCampaignInput,
   ): Promise<NotificationCampaignEntity> {
+    const { campaignId, dto, actor } = input;
     const campaign = await this.campaignRepo.findById(campaignId);
     if (!campaign) {
       throw new NotFoundError("Pengumuman/notifikasi tidak ditemukan.");
@@ -48,4 +59,28 @@ export class ScheduleNotificationCampaignUseCase {
 
     return updated;
   }
+
+  override execute(
+    campaignId: string,
+    dto: ScheduleNotificationCampaignRequestDto,
+    actor: CampaignActor,
+  ): Promise<NotificationCampaignEntity>;
+  override execute(
+    input: ScheduleNotificationCampaignInput,
+  ): Promise<NotificationCampaignEntity>;
+  override async execute(
+    campaignIdOrInput: string | ScheduleNotificationCampaignInput,
+    dto?: ScheduleNotificationCampaignRequestDto,
+    actor?: CampaignActor,
+  ): Promise<NotificationCampaignEntity> {
+    if (typeof campaignIdOrInput === "string") {
+      return this.handle({
+        campaignId: campaignIdOrInput,
+        dto: dto!,
+        actor: actor!,
+      });
+    }
+    return this.handle(campaignIdOrInput);
+  }
 }
+

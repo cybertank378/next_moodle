@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { ValidationError } from "@/core/errors/ValidationError";
@@ -15,10 +16,15 @@ export interface CheckQuizAccessInput {
   currentTime?: number;
 }
 
-export class CheckQuizAccessUseCase {
-  constructor(private readonly repository: QuizRepositoryInterface) {}
+export class CheckQuizAccessUseCase extends BaseUseCase<
+  CheckQuizAccessInput,
+  Result<QuizAccessResponseDTO, Error>
+> {
+  constructor(private readonly repository: QuizRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: CheckQuizAccessInput,
   ): Promise<Result<QuizAccessResponseDTO, Error>> {
     const authError = authorizeQuizOperation(input.actor);

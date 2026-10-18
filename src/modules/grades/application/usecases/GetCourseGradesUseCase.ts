@@ -1,13 +1,19 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { GradeAuthorizationService } from "@/modules/grades/application/services/GradeAuthorizationService";
 import type { GetCourseGradesRequestDto } from "@/modules/grades/domain/dto/GradeRequestDto";
 import type { CourseGradesResponseDto } from "@/modules/grades/domain/dto/GradeResponseDto";
 import type { GradeRepositoryInterface } from "@/modules/grades/domain/interfaces/GradeRepositoryInterface";
 import { GradeMapper } from "@/modules/grades/domain/mapper/GradeMapper";
 
-export class GetCourseGradesUseCase {
-  constructor(private readonly gradeRepository: GradeRepositoryInterface) {}
+export class GetCourseGradesUseCase extends BaseUseCase<
+  GetCourseGradesRequestDto,
+  CourseGradesResponseDto
+> {
+  constructor(private readonly gradeRepository: GradeRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     dto: GetCourseGradesRequestDto,
   ): Promise<CourseGradesResponseDto> {
     const { tenantId } = GradeAuthorizationService.authorizeCourseGradesAccess(

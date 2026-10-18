@@ -1,5 +1,6 @@
 // Files: src/modules/notification/application/usecases/UpdateNotificationCampaignUseCase.ts
 
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import {
   type CampaignActor,
@@ -12,17 +13,27 @@ import type { NotificationContentRendererInterface } from "@/modules/notificatio
 import { NotificationAudience } from "@/modules/notification/domain/value-object/NotificationAudience";
 import { NotificationContent } from "@/modules/notification/domain/value-object/NotificationContent";
 
-export class UpdateNotificationCampaignUseCase {
+export interface UpdateNotificationCampaignInput {
+  campaignId: string;
+  dto: UpdateNotificationCampaignRequestDto;
+  actor: CampaignActor;
+}
+
+export class UpdateNotificationCampaignUseCase extends BaseUseCase<
+  UpdateNotificationCampaignInput,
+  NotificationCampaignEntity
+> {
   constructor(
     private readonly campaignRepo: NotificationCampaignRepositoryInterface,
     private readonly contentRenderer: NotificationContentRendererInterface,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
-    campaignId: string,
-    dto: UpdateNotificationCampaignRequestDto,
-    actor: CampaignActor,
+  async handle(
+    input: UpdateNotificationCampaignInput,
   ): Promise<NotificationCampaignEntity> {
+    const { campaignId, dto, actor } = input;
     const campaign = await this.campaignRepo.findById(campaignId);
     if (!campaign) {
       throw new NotFoundError("Pengumuman/notifikasi tidak ditemukan.");
@@ -72,4 +83,28 @@ export class UpdateNotificationCampaignUseCase {
 
     return this.campaignRepo.update(campaign);
   }
+
+  override execute(
+    campaignId: string,
+    dto: UpdateNotificationCampaignRequestDto,
+    actor: CampaignActor,
+  ): Promise<NotificationCampaignEntity>;
+  override execute(
+    input: UpdateNotificationCampaignInput,
+  ): Promise<NotificationCampaignEntity>;
+  override async execute(
+    campaignIdOrInput: string | UpdateNotificationCampaignInput,
+    dto?: UpdateNotificationCampaignRequestDto,
+    actor?: CampaignActor,
+  ): Promise<NotificationCampaignEntity> {
+    if (typeof campaignIdOrInput === "string") {
+      return this.handle({
+        campaignId: campaignIdOrInput,
+        dto: dto!,
+        actor: actor!,
+      });
+    }
+    return this.handle(campaignIdOrInput);
+  }
 }
+

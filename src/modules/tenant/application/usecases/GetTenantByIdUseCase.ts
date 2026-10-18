@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
@@ -7,13 +8,22 @@ import type { TenantResponseDTO } from "@/modules/tenant/domain/dto/TenantRespon
 import type { TenantsRepository } from "@/modules/tenant/domain/interfaces/TenantInterfaces";
 import { TenantMapper } from "@/modules/tenant/domain/mapper/TenantMapper";
 
-export class GetTenantByIdUseCase {
-  constructor(private readonly repository: TenantsRepository) {}
+export interface GetTenantByIdInput {
+  actor: AuthorizationActor | null | undefined;
+  tenantId: string;
+}
 
-  async execute(input: {
-    actor: AuthorizationActor | null | undefined;
-    tenantId: string;
-  }): Promise<Result<TenantResponseDTO, Error>> {
+export class GetTenantByIdUseCase extends BaseUseCase<
+  GetTenantByIdInput,
+  Result<TenantResponseDTO, Error>
+> {
+  constructor(private readonly repository: TenantsRepository) {
+    super();
+  }
+
+  async handle(
+    input: GetTenantByIdInput,
+  ): Promise<Result<TenantResponseDTO, Error>> {
     const authError = authorizeTenantOperation(
       input.actor,
       Permission.TENANT_READ,

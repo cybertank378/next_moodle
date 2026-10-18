@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { Permission } from "@/core/rbac/Permission";
@@ -15,10 +16,15 @@ export interface SaveQuizAnswerInput {
   answers: AnswerInputPayload;
 }
 
-export class SaveQuizAnswerUseCase {
-  constructor(private readonly repository: QuizAttemptRepositoryInterface) {}
+export class SaveQuizAnswerUseCase extends BaseUseCase<
+  SaveQuizAnswerInput,
+  SaveQuizAnswerResponseDto
+> {
+  constructor(private readonly repository: QuizAttemptRepositoryInterface) {
+    super();
+  }
 
-  public async execute(
+  public async handle(
     input: SaveQuizAnswerInput,
   ): Promise<SaveQuizAnswerResponseDto> {
     const tenantId = authorizeAttemptOperation(

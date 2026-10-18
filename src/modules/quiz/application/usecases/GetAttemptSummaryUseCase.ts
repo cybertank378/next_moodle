@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import type { AuthorizationActor } from "@/core/rbac/AuthorizationContext";
 import { Permission } from "@/core/rbac/Permission";
 import { authorizeAttemptOperation } from "@/modules/quiz/application/services/QuizAttemptAuthorizationService";
@@ -10,10 +11,15 @@ export interface GetAttemptSummaryInput {
   attemptId: number;
 }
 
-export class GetAttemptSummaryUseCase {
-  constructor(private readonly repository: QuizAttemptRepositoryInterface) {}
+export class GetAttemptSummaryUseCase extends BaseUseCase<
+  GetAttemptSummaryInput,
+  QuizAttemptSummaryResponseDto
+> {
+  constructor(private readonly repository: QuizAttemptRepositoryInterface) {
+    super();
+  }
 
-  public async execute(
+  public async handle(
     input: GetAttemptSummaryInput,
   ): Promise<QuizAttemptSummaryResponseDto> {
     const tenantId = authorizeAttemptOperation(

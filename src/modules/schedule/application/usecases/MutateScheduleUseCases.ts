@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
@@ -13,10 +14,15 @@ import type { ScheduleSessionItemDTO } from "@/modules/schedule/domain/dto/Sched
 import type { ScheduleRepositoryInterface } from "@/modules/schedule/domain/interfaces/ScheduleRepositoryInterface";
 import { ScheduleMapper } from "@/modules/schedule/domain/mapper/ScheduleMapper";
 
-export class CreateScheduleUseCase {
-  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {}
+export class CreateScheduleUseCase extends BaseUseCase<
+  CreateScheduleInput,
+  Result<ScheduleSessionItemDTO, Error>
+> {
+  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: CreateScheduleInput,
   ): Promise<Result<ScheduleSessionItemDTO, Error>> {
     if (input.actor.role === AppRole.STUDENT) {
@@ -67,10 +73,15 @@ export class CreateScheduleUseCase {
   }
 }
 
-export class UpdateScheduleUseCase {
-  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {}
+export class UpdateScheduleUseCase extends BaseUseCase<
+  UpdateScheduleInput,
+  Result<ScheduleSessionItemDTO, Error>
+> {
+  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: UpdateScheduleInput,
   ): Promise<Result<ScheduleSessionItemDTO, Error>> {
     if (input.actor.role === AppRole.STUDENT) {
@@ -107,10 +118,15 @@ export class UpdateScheduleUseCase {
   }
 }
 
-export class PublishScheduleUseCase {
-  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {}
+export class PublishScheduleUseCase extends BaseUseCase<
+  PublishScheduleInput,
+  Result<ScheduleSessionItemDTO, Error>
+> {
+  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: PublishScheduleInput,
   ): Promise<Result<ScheduleSessionItemDTO, Error>> {
     if (input.actor.role === AppRole.STUDENT) {
@@ -148,10 +164,15 @@ export class PublishScheduleUseCase {
   }
 }
 
-export class CancelScheduleUseCase {
-  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {}
+export class CancelScheduleUseCase extends BaseUseCase<
+  CancelScheduleInput,
+  Result<ScheduleSessionItemDTO, Error>
+> {
+  constructor(private readonly scheduleRepo: ScheduleRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: CancelScheduleInput,
   ): Promise<Result<ScheduleSessionItemDTO, Error>> {
     if (input.actor.role === AppRole.STUDENT) {

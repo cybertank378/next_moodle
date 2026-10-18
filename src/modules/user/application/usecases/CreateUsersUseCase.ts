@@ -1,13 +1,22 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import type { CreateUserRequestDto } from "@/modules/user/domain/dto/UserRequestDto";
 import type { UserRepositoryInterface } from "@/modules/user/domain/interfaces/UserRepositoryInterface";
 
-export class CreateUsersUseCase {
-  constructor(private readonly userRepository: UserRepositoryInterface) {}
+export interface CreateUsersInput {
+  tenantId: string;
+  users: CreateUserRequestDto[];
+}
 
-  async execute(input: {
-    tenantId: string;
-    users: CreateUserRequestDto[];
-  }): Promise<Array<{ id: number; username: string }>> {
+export class CreateUsersUseCase extends BaseUseCase<
+  CreateUsersInput,
+  Array<{ id: number; username: string }>
+> {
+  constructor(private readonly userRepository: UserRepositoryInterface) {
+    super();
+  }
+
+  async handle(input: CreateUsersInput): Promise<Array<{ id: number; username: string }>> {
     return this.userRepository.createUsers(input);
   }
 }
+

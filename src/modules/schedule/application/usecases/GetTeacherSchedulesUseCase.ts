@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { ValidationError } from "@/core/errors/ValidationError";
@@ -8,13 +9,18 @@ import type { ScheduleResponseDTO } from "@/modules/schedule/domain/dto/Schedule
 import type { ScheduleRepositoryInterface } from "@/modules/schedule/domain/interfaces/ScheduleRepositoryInterface";
 import { ScheduleMapper } from "@/modules/schedule/domain/mapper/ScheduleMapper";
 
-export class GetTeacherSchedulesUseCase {
+export class GetTeacherSchedulesUseCase extends BaseUseCase<
+  GetTeacherSchedulesInput,
+  Result<ScheduleResponseDTO, Error>
+> {
   constructor(
     private readonly repository: ScheduleRepositoryInterface,
     private readonly clientFactory: MoodleClientFactory,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: GetTeacherSchedulesInput,
   ): Promise<Result<ScheduleResponseDTO, Error>> {
     const actor = input.actor;

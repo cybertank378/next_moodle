@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ForbiddenError } from "@/core/errors/ForbiddenError";
 import { UnauthorizedError } from "@/core/errors/UnauthorizedError";
@@ -16,13 +17,18 @@ import type {
 import type { AssignmentRepositoryInterface } from "@/modules/assignment/domain/interfaces/AssignmentRepositoryInterface";
 import { AssignmentMapper } from "@/modules/assignment/domain/mapper/AssignmentMapper";
 
-export class GetStudentAssignmentsUseCase {
+export class GetStudentAssignmentsUseCase extends BaseUseCase<
+  GetStudentAssignmentsInput,
+  Result<AssignmentListResponseDTO, Error>
+> {
   constructor(
     private readonly assignmentRepo: AssignmentRepositoryInterface,
     private readonly clientFactory: MoodleClientFactory,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: GetStudentAssignmentsInput,
   ): Promise<Result<AssignmentListResponseDTO, Error>> {
     const { actor, query, moodleToken } = input;
@@ -99,13 +105,18 @@ export class GetStudentAssignmentsUseCase {
   }
 }
 
-export class GetAssignmentDetailUseCase {
+export class GetAssignmentDetailUseCase extends BaseUseCase<
+  GetAssignmentDetailInput,
+  Result<AssignmentItemDTO | null, Error>
+> {
   constructor(
     private readonly assignmentRepo: AssignmentRepositoryInterface,
     private readonly clientFactory: MoodleClientFactory,
-  ) {}
+  ) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: GetAssignmentDetailInput,
   ): Promise<Result<AssignmentItemDTO | null, Error>> {
     const { actor, assignmentId, moodleToken } = input;
@@ -150,8 +161,15 @@ export class GetAssignmentDetailUseCase {
   }
 }
 
-export class SubmitAssignmentUseCase {
-  async execute(
+export class SubmitAssignmentUseCase extends BaseUseCase<
+  SubmitAssignmentInput,
+  Result<AssignmentItemDTO, Error>
+> {
+  constructor() {
+    super();
+  }
+
+  async handle(
     _input: SubmitAssignmentInput,
   ): Promise<Result<AssignmentItemDTO, Error>> {
     return Result.fail(

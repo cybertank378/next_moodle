@@ -1,3 +1,4 @@
+import { BaseUseCase } from "@/core/base/BaseUseCase";
 import { Result } from "@/core/base/Result";
 import { ValidationError } from "@/core/errors/ValidationError";
 import type { MoodleClient } from "@/core/moodle/types";
@@ -21,10 +22,15 @@ export interface GetQuestionsInput {
   client?: MoodleClient;
 }
 
-export class GetQuestionsUseCase {
-  constructor(private readonly repository: QuestionRepositoryInterface) {}
+export class GetQuestionsUseCase extends BaseUseCase<
+  GetQuestionsInput,
+  Result<GetQuestionsResultDto, Error>
+> {
+  constructor(private readonly repository: QuestionRepositoryInterface) {
+    super();
+  }
 
-  async execute(
+  async handle(
     input: GetQuestionsInput,
   ): Promise<Result<GetQuestionsResultDto, Error>> {
     const authError = authorizeQuestionOperation(
