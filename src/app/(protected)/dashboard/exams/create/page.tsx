@@ -1,12 +1,31 @@
 import { requireDashboardRoles } from "@/modules/auth/server/requireDashboardRoles";
-import DashboardRoutePlaceholder from "@/shared-ui/component/DashboardRoutePlaceholder";
+import type { ActivityType } from "@/sections/exam/molecules/ActivityTypeSelector";
+import CreateActivityPageView from "@/sections/exam/pages/CreateActivityPageView";
 
-export default async function CreateExamPage() {
-  await requireDashboardRoles(["TENANT", "TEACHER"]);
+interface CreateExamPageProps {
+  searchParams: Promise<{
+    courseId?: string;
+    type?: string;
+  }>;
+}
+
+export default async function CreateExamPage({
+  searchParams,
+}: CreateExamPageProps) {
+  await requireDashboardRoles(["TENANT", "TEACHER", "ADMIN"]);
+
+  const resolvedParams = await searchParams;
+  const courseId = resolvedParams.courseId
+    ? parseInt(resolvedParams.courseId, 10)
+    : 0;
+
+  const validTypes: ActivityType[] = ["quiz", "materi", "tugas"];
+  const initialType: ActivityType =
+    resolvedParams.type && validTypes.includes(resolvedParams.type as ActivityType)
+      ? (resolvedParams.type as ActivityType)
+      : "quiz";
+
   return (
-    <DashboardRoutePlaceholder
-      title="Buat Ujian"
-      description="Buat konfigurasi ujian tenant."
-    />
+    <CreateActivityPageView courseId={courseId} initialType={initialType} />
   );
 }

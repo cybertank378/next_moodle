@@ -20,6 +20,9 @@ describe("CreateQuestionUseCase", () => {
 
     const mockRepo: QuestionRepositoryInterface = {
       getQuestionsByCategory: vi.fn(),
+      getQuestions: vi.fn(),
+      getQuestionCategories: vi.fn(),
+      createQuestionCategory: vi.fn(),
       createQuestion: vi.fn().mockResolvedValue(mockEntity),
       deleteQuestion: vi.fn(),
       updateQuestion: vi.fn(),
@@ -43,6 +46,9 @@ describe("CreateQuestionUseCase", () => {
   it("should throw ValidationError if dto is invalid", async () => {
     const mockRepo: QuestionRepositoryInterface = {
       getQuestionsByCategory: vi.fn(),
+      getQuestions: vi.fn(),
+      getQuestionCategories: vi.fn(),
+      createQuestionCategory: vi.fn(),
       createQuestion: vi.fn(),
       deleteQuestion: vi.fn(),
       updateQuestion: vi.fn(),
